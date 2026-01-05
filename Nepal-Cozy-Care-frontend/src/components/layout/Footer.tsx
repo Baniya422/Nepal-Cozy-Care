@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube } from "lucide-react";
+import "./footer.css";
 
 export default function Footer() {
   return (
@@ -17,26 +18,26 @@ export default function Footer() {
         {/* SHOP Column */}
         <div className="footer-col">
           <div className="footer-col-title">SHOP</div>
-          <Link to="/plant-care" className="footer-link">Plant Care</Link>
-          <Link to="/care-tips" className="footer-link">Care Tips</Link>
-          <Link to="/watering-guide" className="footer-link">Watering Guide</Link>
-          <Link to="/sunlight-guide" className="footer-link">Sunlight Guide</Link>
+          <Link to="/care-tips" className="footer-link">Plant Care</Link>
+          <Link to="/plants" className="footer-link">Indoor Plants</Link>
+          <Link to="/pots" className="footer-link">Pots & Accessories</Link>
+          <Link to="/plant-finder" className="footer-link">Plant Finder Quiz</Link>
+          
+          <div className="footer-col-title" style={{marginTop: '1.5rem'}}>PLANT CARE</div>
+          <Link to="/care-tips" className="footer-link">Plant Care Library</Link>
           <Link to="/plant-health-checker" className="footer-link">Plant Health Checker</Link>
-          <Link to="/plant-disease-info" className="footer-link">Plant Disease Info</Link>
-          <Link to="/faqs" className="footer-link">FAQs</Link>
-          <Link to="/resources" className="footer-resource-link">
-            See All Resources →
-          </Link>
+          <Link to="/care-tips?category=watering" className="footer-link">Watering Guides</Link>
+          <Link to="/help-center" className="footer-link">FAQs</Link>
         </div>
 
         {/* COMPANY Column */}
         <div className="footer-col">
           <div className="footer-col-title">COMPANY</div>
           <Link to="/about" className="footer-link">About Us</Link>
-          <Link to="/how-it-works" className="footer-link">How it Works</Link>
+          <Link to="/my-garden" className="footer-link">My Garden</Link>
           <Link to="/mission" className="footer-link">Our Mission</Link>
           <Link to="/contact" className="footer-link">Contact Us</Link>
-          <Link to="/careers" className="footer-link">Careers</Link>
+          <Link to="/shipping" className="footer-link">Delivery Info</Link>
           <Link to="/blogs" className="footer-link">Blogs</Link>
         </div>
 
@@ -46,10 +47,9 @@ export default function Footer() {
           <Link to="/account" className="footer-link">My Account</Link>
           <Link to="/track-order" className="footer-link">Track Order</Link>
           <Link to="/shipping" className="footer-link">Shipping & Delivery</Link>
-          <Link to="/returns" className="footer-link">Return & Refund Policy</Link>
-          <Link to="/terms" className="footer-link">Terms & Conditions</Link>
-          <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-          <Link to="/help" className="footer-link">Help Center</Link>
+          <Link to="/contact" className="footer-link">Contact Support</Link>
+          <Link to="/care-tips" className="footer-link">Care Tips</Link>
+          <Link to="/help-center" className="footer-link">Help Center</Link>
         </div>
 
         {/* FOLLOW US & ABOUT Column */}
@@ -73,10 +73,10 @@ export default function Footer() {
               <span>Tik Tok</span>
             </Link>
           </div>
-          
+
           <div className="footer-col-title footer-col-title-spacing">ABOUT</div>
-          <Link to="/terms" className="footer-link">Terms & Conditions</Link>
-          <Link to="/privacy" className="footer-link">Privacy Policy</Link>
+          <Link to="/about" className="footer-link">About Cozy Care</Link>
+          <Link to="/mission" className="footer-link">Our Mission</Link>
         </div>
       </div>
 
@@ -89,9 +89,9 @@ export default function Footer() {
           © {new Date().getFullYear()} Cozy Care. All rights reserved.
         </div>
         <div className="footer-bottom-links">
-          <Link to="/privacy" className="footer-bottom-link">Privacy</Link>
-          <Link to="/terms" className="footer-bottom-link">Terms</Link>
-          <Link to="/cookies" className="footer-bottom-link">Cookies</Link>
+          <Link to="/contact" className="footer-bottom-link">Contact</Link>
+          <Link to="/help-center" className="footer-bottom-link">Help</Link>
+          <Link to="/my-garden" className="footer-bottom-link">My Garden</Link>
         </div>
       </div>
     </footer>
