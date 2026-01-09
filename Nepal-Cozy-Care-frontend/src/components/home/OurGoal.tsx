@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 // Our mission image
-const GOAL_IMAGE = "/images/our-goal.jpg";
+const GOAL_IMAGE = "/images/mission-hero.jpg";
 
 export default function OurGoal() {
   const navigate = useNavigate();

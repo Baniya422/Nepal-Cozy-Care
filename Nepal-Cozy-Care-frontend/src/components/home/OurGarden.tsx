@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 // Our greenhouse in Kathmandu
-const GARDEN_IMAGE = "/images/our-garden.jpg";
+const GARDEN_IMAGE = "/images/about-plants.jpg";
 
 export default function OurGarden() {
   const navigate = useNavigate();
