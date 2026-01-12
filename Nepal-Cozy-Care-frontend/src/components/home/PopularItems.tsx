@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Star } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const FALLBACK_PLANT_IMAGE = "/images/alovera.jpg";
 
 type Plant = {
   id: number;
@@ -69,11 +70,10 @@ export default function PopularItems() {
             <div className="product-image-wrapper">
               <img
                 className="product-image"
-                src={plant.image ? `${API}/storage/${plant.image}` : "/images/placeholder-plant.jpg"}
+                src={plant.image ? `${API}/storage/${plant.image}` : FALLBACK_PLANT_IMAGE}
                 alt={plant.name}
                 onError={(e) => {
-                  // Fallback if image doesn't exist
-                  (e.target as HTMLImageElement).src = "/images/placeholder-plant.jpg";
+                  (e.target as HTMLImageElement).src = FALLBACK_PLANT_IMAGE;
                 }}
               />
               <button className="wishlist-btn">
