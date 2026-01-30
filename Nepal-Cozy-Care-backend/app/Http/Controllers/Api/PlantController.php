@@ -3,82 +3,150 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePlantRequest;
+use App\Http\Requests\UpdatePlantRequest;
 use App\Models\Plant;
 use Illuminate\Http\Request;
 
 class PlantController extends Controller
 {
-    // List all active plants (for customers)
-    public function index()
+    // List all active plants (for customers) with advanced filters
+    public function index(Request $request)
     {
-        $plants = Plant::where('is_active', true)->latest()->get();
+        $query = Plant::query()
+            ->where('is_active', true)
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        // Basic attribute filters
+        if ($category = $request->query('category')) {
+            $query->where('category', $category);
+        }
+
+        if ($difficulty = $request->query('difficulty')) {
+            $query->where('difficulty', $difficulty);
+        }
+
+        if ($light = $request->query('light')) {
+            $query->where('light', $light);
+        }
+
+        if ($water = $request->query('water')) {
+            $query->where('water', $water);
+        }
+
+        // Price range filters
+        if ($minPrice = $request->query('min_price')) {
+            $query->where('price', '>=', (float) $minPrice);
+        }
+
+        if ($maxPrice = $request->query('max_price')) {
+            $query->where('price', '<=', (float) $maxPrice);
+        }
+
+        // Free-text search on name / scientific_name / description
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('scientific_name', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Sorting options
+        $sort = $request->query('sort', 'newest');
+        switch ($sort) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $perPage = (int) $request->query('per_page', 12);
+        $paginator = $query->paginate($perPage);
+
+        // Attach avg_rating and review_count, hide raw aggregates
+        $paginator->getCollection()->transform(function ($plant) {
+            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+            $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+            unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            return $plant;
+        });
 
         return response()->json([
-            'plants' => $plants
+            'message' => null,
+            'data' => [
+                'plants' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
         ]);
     }
 
     // Show single plant
     public function show($id)
     {
-        $plant = Plant::findOrFail($id);
+        $plant = Plant::withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->where('is_active', true)
+            ->findOrFail($id);
+
+        $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+        $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+        unset($plant->reviews_avg_rating, $plant->reviews_count);
 
         return response()->json([
-            'plant' => $plant
+            'message' => null,
+            'data' => [
+                'plant' => $plant,
+            ],
         ]);
     }
 
     // Admin: create plant
-    public function store(Request $request)
+    public function store(StorePlantRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'scientific_name' => ['nullable', 'string', 'max:255'],
-            'category' => ['nullable', 'string', 'max:255'],
-            'difficulty' => ['nullable', 'string', 'max:50'],
-            'light' => ['nullable', 'string', 'max:100'],
-            'water' => ['nullable', 'string', 'max:100'],
-            'soil' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'stock' => ['required', 'integer', 'min:0'],
-            'image' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['nullable', 'boolean'],
-        ]);
-
-        $plant = Plant::create($validated);
+        $plant = Plant::create($request->validated());
 
         return response()->json([
             'message' => 'Plant added successfully',
-            'plant' => $plant
+            'data' => [
+                'plant' => $plant,
+            ],
         ], 201);
     }
 
     // Admin: update plant
-    public function update(Request $request, $id)
+    public function update(UpdatePlantRequest $request, $id)
     {
         $plant = Plant::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'scientific_name' => ['nullable', 'string', 'max:255'],
-            'category' => ['nullable', 'string', 'max:255'],
-            'difficulty' => ['nullable', 'string', 'max:50'],
-            'light' => ['nullable', 'string', 'max:100'],
-            'water' => ['nullable', 'string', 'max:100'],
-            'soil' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'price' => ['sometimes', 'required', 'numeric', 'min:0'],
-            'stock' => ['sometimes', 'required', 'integer', 'min:0'],
-            'image' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['nullable', 'boolean'],
-        ]);
-
-        $plant->update($validated);
+        $plant->update($request->validated());
 
         return response()->json([
             'message' => 'Plant updated successfully',
-            'plant' => $plant
+            'data' => [
+                'plant' => $plant,
+            ],
         ]);
     }
 

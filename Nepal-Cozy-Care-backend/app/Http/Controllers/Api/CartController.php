@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCartRequest;
+use App\Http\Requests\UpdateCartRequest;
 use App\Models\Cart;
 use App\Models\Plant;
 use Illuminate\Http\Request;
@@ -22,25 +24,28 @@ class CartController extends Controller
         });
 
         return response()->json([
-            'cart' => $cartItems,
-            'total' => $total
+            'message' => null,
+            'data' => [
+                'cart' => $cartItems,
+                'total' => $total,
+            ],
         ]);
     }
 
     // Add to cart
-    public function store(Request $request)
+    public function store(StoreCartRequest $request)
     {
-        $request->validate([
-            'plant_id' => 'required|exists:plants,id',
-            'quantity' => 'nullable|integer|min:1'
-        ]);
-
         $qty = (int) ($request->quantity ?? 1);
         $plant = Plant::findOrFail($request->plant_id);
 
         // stock check for requested qty
         if ($plant->stock < $qty) {
-            return response()->json(['message' => 'Not enough stock'], 400);
+            return response()->json([
+                'message' => 'Not enough stock',
+                'errors' => [
+                    'quantity' => ['Not enough stock'],
+                ],
+            ], 400);
         }
 
         // already in cart?
@@ -53,7 +58,12 @@ class CartController extends Controller
 
             // stock check for new total qty
             if ($plant->stock < $newQty) {
-                return response()->json(['message' => 'Not enough stock for requested quantity'], 400);
+                return response()->json([
+                    'message' => 'Not enough stock for requested quantity',
+                    'errors' => [
+                        'quantity' => ['Not enough stock for requested quantity'],
+                    ],
+                ], 400);
             }
 
             $cartItem->quantity = $newQty;
@@ -68,17 +78,15 @@ class CartController extends Controller
 
         return response()->json([
             'message' => 'Added to cart',
-            'cart' => $cartItem->load('plant')
+            'data' => [
+                'cart' => $cartItem->load('plant'),
+            ],
         ], 201);
     }
 
     // Update quantity
-    public function update(Request $request, $id)
+    public function update(UpdateCartRequest $request, $id)
     {
-        $request->validate([
-            'quantity' => 'required|integer|min:1'
-        ]);
-
         $qty = (int) $request->quantity;
 
         $cartItem = Cart::with('plant')
@@ -88,7 +96,12 @@ class CartController extends Controller
 
         // stock check
         if ($cartItem->plant->stock < $qty) {
-            return response()->json(['message' => 'Not enough stock'], 400);
+            return response()->json([
+                'message' => 'Not enough stock',
+                'errors' => [
+                    'quantity' => ['Not enough stock'],
+                ],
+            ], 400);
         }
 
         $cartItem->quantity = $qty;
@@ -96,7 +109,9 @@ class CartController extends Controller
 
         return response()->json([
             'message' => 'Cart updated',
-            'cart' => $cartItem->load('plant')
+            'data' => [
+                'cart' => $cartItem->load('plant'),
+            ],
         ]);
     }
 
@@ -117,6 +132,9 @@ class CartController extends Controller
     {
         Cart::where('user_id', $request->user()->id)->delete();
 
-        return response()->json(['message' => 'Cart cleared']);
+        return response()->json([
+            'message' => 'Cart cleared',
+            'data' => null,
+        ]);
     }
 }

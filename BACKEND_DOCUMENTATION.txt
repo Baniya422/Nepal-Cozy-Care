@@ -124,6 +124,8 @@ Columns:
 - user_id             : Foreign key to users table (cascade on delete)
 - status              : Order status (default: 'pending')
                         Options: pending, processing, shipped, delivered, cancelled
+- payment_status      : Payment state (default: 'unpaid')
+                        Options: unpaid, paid, failed, refunded
 - subtotal            : Sum of all items before fees (decimal)
 - delivery_fee        : Delivery/shipping charge (decimal, default: 0)
 - tax                 : Tax amount (decimal, default: 0)
@@ -151,6 +153,56 @@ Columns:
 
 Note: Price is stored as a snapshot to preserve historical order data
       even if the plant price changes later.
+
+--------------------------------------------------------------------------------
+TABLE: wishlists
+--------------------------------------------------------------------------------
+Purpose: Store plants that users have saved for later.
+
+Columns:
+- id                  : Primary key (auto-increment)
+- user_id             : Foreign key to users table (cascade on delete)
+- plant_id            : Foreign key to plants table (cascade on delete)
+- created_at          : Record creation timestamp
+- updated_at          : Record update timestamp
+
+Constraints:
+- UNIQUE(user_id, plant_id) : One wishlist entry per user per plant
+
+--------------------------------------------------------------------------------
+TABLE: reviews
+--------------------------------------------------------------------------------
+Purpose: Store user reviews and ratings for plants.
+
+Columns:
+- id                  : Primary key (auto-increment)
+- user_id             : Foreign key to users table (cascade on delete)
+- plant_id            : Foreign key to plants table (cascade on delete)
+- rating              : Rating from 1 to 5 (integer)
+- comment             : Optional text feedback
+- created_at          : Record creation timestamp
+- updated_at          : Record update timestamp
+
+Constraints:
+- UNIQUE(user_id, plant_id) : One review per user per plant
+
+--------------------------------------------------------------------------------
+TABLE: blogs
+--------------------------------------------------------------------------------
+Purpose: Store gardening tips and blog articles.
+
+Columns:
+- id                  : Primary key (auto-increment)
+- user_id             : Optional author (admin user)
+- title               : Article title
+- slug                : URL-friendly unique identifier
+- excerpt             : Short summary (optional)
+- content             : Full article content
+- image               : Optional image URL/path
+- is_published        : Whether article is visible publicly
+- published_at        : When the article was published
+- created_at          : Record creation timestamp
+- updated_at          : Record update timestamp
 
 ================================================================================
                        3. AUTHENTICATION SYSTEM
@@ -252,45 +304,67 @@ Response (200 OK):
 
 File: app/Http/Controllers/Api/PlantController.php
 
-All plant routes require authentication (auth:sanctum middleware)
+Public plant listing and detail endpoints allow browsing without a token.
+Admin-only endpoints for creating and updating plants still require auth.
 
 --------------------------------------------------------------------------------
-LIST PLANTS - GET /api/plants (Requires Auth)
+LIST PLANTS - GET /api/plants
 --------------------------------------------------------------------------------
-Purpose: Get all active plants
+Purpose: Get all active plants with filters, sorting, pagination and rating info.
 
-Response (200 OK):
+Response (200 OK) example:
 {
-    "plants": [
-        {
-            "id": 1,
-            "name": "Aloe Vera",
-            "category": "Indoor",
-            "price": 300,
-            "stock": 15,
-            ...
-        },
-        ...
-    ]
+    "message": null,
+    "data": {
+        "plants": [
+            {
+                "id": 1,
+                "name": "Aloe Vera",
+                "category": "Indoor",
+                "price": 300,
+                "stock": 15,
+                "avg_rating": 4.5,
+                "review_count": 3,
+                ...
+            }
+        ],
+        "pagination": {
+            "current_page": 1,
+            "per_page": 12,
+            "total": 20,
+            "last_page": 2
+        }
+    }
 }
 
 Process:
-1. Query plants where is_active = true
-2. Order by latest (newest first)
-3. Return plant collection
+1. Query plants where is_active = true.
+2. Apply optional filters (category, difficulty, light, water, price range, search).
+3. Apply sorting (price, name, newest).
+4. Use withAvg and withCount to compute rating summary.
+5. Paginate results.
 
 --------------------------------------------------------------------------------
-SHOW PLANT - GET /api/plants/{id} (Requires Auth)
+SHOW PLANT - GET /api/plants/{id}
 --------------------------------------------------------------------------------
-Purpose: Get single plant details
+Purpose: Get single plant details with rating summary.
 
-Response (200 OK):
+Response (200 OK) example:
 {
-    "plant": { plant object }
+    "message": null,
+    "data": {
+        "plant": {
+            "id": 1,
+            "name": "Aloe Vera",
+            "avg_rating": 4.5,
+            "review_count": 3,
+            ...
+        }
+    }
 }
 
 Response (404 Not Found):
-If plant ID doesn't exist
+If plant ID doesn't exist or is inactive.
 
 --------------------------------------------------------------------------------
 CREATE PLANT - POST /api/plants (Requires Auth)
@@ -358,17 +432,19 @@ Purpose: Get current user's cart with all items and total
 
 Response (200 OK):
 {
-    "cart": [
-        {
-            "id": 1,
-            "user_id": 1,
-            "plant_id": 5,
-            "quantity": 2,
-            "plant": { plant object }
-        },
-        ...
-    ],
-    "total": 600
+    "message": null,
+    "data": {
+        "cart": [
+            {
+                "id": 1,
+                "user_id": 1,
+                "plant_id": 5,
+                "quantity": 2,
+                "plant": { plant object }
+            }
+        ],
+        "total": 600
+    }
 }
 
 Process:
@@ -391,12 +467,17 @@ Request Body:
 Response (201 Created):
 {
     "message": "Added to cart",
-    "cart": { cart item with plant }
+    "data": {
+        "cart": { cart item with plant }
+    }
 }
 
 Response (400 Bad Request):
 {
-    "message": "Not enough stock"
+    "message": "Not enough stock",
+    "errors": {
+        "quantity": ["Not enough stock"]
+    }
 }
 
 Process:
@@ -420,12 +501,17 @@ Request Body:
 Response (200 OK):
 {
     "message": "Cart updated",
-    "cart": { updated cart item }
+    "data": {
+        "cart": { updated cart item }
+    }
 }
 
 Response (400 Bad Request):
 {
-    "message": "Not enough stock"
+    "message": "Not enough stock",
+    "errors": {
+        "quantity": ["Not enough stock"]
+    }
 }
 
 Process:
@@ -441,7 +527,8 @@ Purpose: Remove a single item from cart
 
 Response (200 OK):
 {
-    "message": "Removed from cart"
+    "message": "Removed from cart",
+    "data": null
 }
 
 --------------------------------------------------------------------------------
@@ -451,7 +538,8 @@ Purpose: Remove all items from user's cart
 
 Response (200 OK):
 {
-    "message": "Cart cleared"
+    "message": "Cart cleared",
+    "data": null
 }
 
 ================================================================================
@@ -475,7 +563,8 @@ Request Body:
 Response (201 Created):
 {
     "message": "Order placed successfully",
-    "order": {
+    "data": {
+        "order": {
         "id": 1,
         "user_id": 1,
         "status": "pending",
@@ -501,7 +590,10 @@ Response (201 Created):
 
 Response (400 Bad Request):
 {
-    "message": "Cart is empty"
+    "message": "Cart is empty",
+    "errors": {
+        "cart": ["Cart is empty"]
+    }
 }
 OR
 {
@@ -523,42 +615,54 @@ Process (within database transaction):
 --------------------------------------------------------------------------------
 MY ORDERS - GET /api/orders (Requires Auth)
 --------------------------------------------------------------------------------
-Purpose: Get all orders for current user
+Purpose: Get all orders for current user (paginated).
 
-Response (200 OK):
+Response (200 OK) example:
 {
-    "orders": [
-        {
-            "id": 1,
-            "status": "delivered",
-            "total": 600,
-            "items": [...],
-            ...
-        },
-        ...
-    ]
+    "message": null,
+    "data": {
+        "orders": [
+            {
+                "id": 1,
+                "status": "delivered",
+                "payment_status": "paid",
+                "total": 600,
+                "items": [...]
+            }
+        ],
+        "pagination": {
+            "current_page": 1,
+            "per_page": 10,
+            "total": 5,
+            "last_page": 1
+        }
+    }
 }
 
 --------------------------------------------------------------------------------
 ORDER DETAILS - GET /api/orders/{id} (Requires Auth)
 --------------------------------------------------------------------------------
-Purpose: Get single order details (owner only)
+Purpose: Get single order details (owner only).
 
 Response (200 OK):
 {
-    "order": { order object with items }
+    "message": null,
+    "data": {
+        "order": { order object with items }
+    }
 }
 
 Response (403 Forbidden):
 {
-    "message": "Forbidden"
+    "message": "Forbidden",
+    "errors": {}
 }
 (If trying to view another user's order)
 
 --------------------------------------------------------------------------------
 UPDATE STATUS - PUT /api/orders/{id}/status (Admin Only)
 --------------------------------------------------------------------------------
-Purpose: Update order status (admin only)
+Purpose: Update order status (admin only).
 
 Request Body:
 {
@@ -569,7 +673,9 @@ Request Body:
 Response (200 OK):
 {
     "message": "Order status updated",
-    "order": { updated order }
+    "data": {
+        "order": { updated order }
+    }
 }
 
 Response (403 Forbidden):
@@ -577,6 +683,36 @@ Response (403 Forbidden):
     "message": "Forbidden. Admin access required."
 }
 (If user is not admin)
+
+--------------------------------------------------------------------------------
+CANCEL ORDER - POST /api/orders/{id}/cancel (Requires Auth)
+--------------------------------------------------------------------------------
+Purpose: Cancel a pending order and restore stock.
+
+Rules:
+- Only pending orders can be cancelled.
+- Customers can cancel only their own orders.
+- Admins can cancel any pending order.
+
+Response (200 OK):
+{
+    "message": "Order cancelled successfully",
+    "data": {
+        "order": { cancelled order with items }
+    }
+}
+
+Response (400 Bad Request):
+{
+    "message": "Only pending orders can be cancelled",
+    "errors": {}
+}
+
+Response (403 Forbidden):
+{
+    "message": "Forbidden",
+    "errors": {}
+}
 
 ================================================================================
                            7. MIDDLEWARE
@@ -628,36 +764,57 @@ BASE URL: http://127.0.0.1:8000/api
 --------------------------------------------------------------------------------
 PUBLIC ENDPOINTS (No Auth Required)
 --------------------------------------------------------------------------------
-GET    /ping              → Test API connection
-POST   /register          → Create new user account
-POST   /login             → Login and get token
+GET    /ping                      → Test API connection
+POST   /register                  → Create new user account
+POST   /login                     → Login and get token
+
+GET    /plants                    → List all active plants (filters + pagination)
+GET    /plants/{id}               → Get single plant with rating summary
+GET    /plants/{id}/reviews       → List reviews for an active plant
+
+GET    /blogs                     → List published blog articles
+GET    /blogs/{id}                → View single blog article
 
 --------------------------------------------------------------------------------
 AUTHENTICATED ENDPOINTS (Requires Bearer Token)
 --------------------------------------------------------------------------------
-POST   /logout            → Logout (invalidate token)
-GET    /me                → Get current user profile
+POST   /logout                    → Logout (invalidate token)
+GET    /me                        → Get current user profile
 
-GET    /plants            → List all active plants
-GET    /plants/{id}       → Get single plant
-POST   /plants            → Create new plant
-PUT    /plants/{id}       → Update plant
-DELETE /plants/{id}       → Delete plant
+// Plants (usually admin-managed)
+POST   /plants                    → Create new plant
+PUT    /plants/{id}               → Update plant
+DELETE /plants/{id}               → Delete plant
 
-GET    /cart              → View cart with total
-POST   /cart              → Add item to cart
-PUT    /cart/{id}         → Update cart item quantity
-DELETE /cart/{id}         → Remove item from cart
-DELETE /cart              → Clear entire cart
+// Cart
+GET    /cart                      → View cart with total
+POST   /cart                      → Add item to cart
+PUT    /cart/{id}                 → Update cart item quantity
+DELETE /cart/{id}                 → Remove item from cart
+DELETE /cart                      → Clear entire cart
 
-POST   /checkout          → Create order from cart
-GET    /orders            → List my orders
-GET    /orders/{id}       → View order details
+// Orders
+POST   /checkout                  → Create order from cart
+GET    /orders                    → List my orders (paginated)
+GET    /orders/{id}               → View order details
+POST   /orders/{id}/cancel        → Cancel my own pending order
+
+// Wishlist
+GET    /wishlist                  → List my wishlist
+POST   /wishlist                  → Add plant to wishlist
+DELETE /wishlist/{plantId}        → Remove plant from wishlist
+
+// Reviews
+POST   /reviews                   → Create or update a review
 
 --------------------------------------------------------------------------------
 ADMIN ONLY ENDPOINTS (Requires Admin Role)
 --------------------------------------------------------------------------------
-PUT    /orders/{id}/status → Update order status
+GET    /admin/orders              → List all orders with pagination
+PUT    /orders/{id}/status        → Update order status
+POST   /blogs                     → Create blog article
+PUT    /blogs/{id}                → Update blog article
+DELETE /blogs/{id}                → Delete blog article
 
 ================================================================================
                          AUTHENTICATION HEADER

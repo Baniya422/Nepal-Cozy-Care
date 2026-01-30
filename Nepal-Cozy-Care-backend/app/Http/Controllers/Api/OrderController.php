@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CheckoutRequest;
+use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -13,14 +15,8 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
     // ✅ Checkout: cart -> order
-    public function checkout(Request $request)
+    public function checkout(CheckoutRequest $request)
     {
-        $request->validate([
-            'shipping_name' => 'nullable|string|max:255',
-            'shipping_phone' => 'nullable|string|max:30',
-            'shipping_address' => 'nullable|string|max:255',
-        ]);
-
         $userId = $request->user()->id;
 
         $cartItems = Cart::with('plant')
@@ -28,7 +24,12 @@ class OrderController extends Controller
             ->get();
 
         if ($cartItems->isEmpty()) {
-            return response()->json(['message' => 'Cart is empty'], 400);
+            return response()->json([
+                'message' => 'Cart is empty',
+                'errors' => [
+                    'cart' => ['Cart is empty'],
+                ],
+            ], 400);
         }
 
         return DB::transaction(function () use ($cartItems, $request, $userId) {
@@ -62,6 +63,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'user_id' => $userId,
                 'status' => 'pending',
+                'payment_status' => 'unpaid',
                 'subtotal' => $subtotal,
                 'delivery_fee' => $deliveryFee,
                 'tax' => $tax,
@@ -96,20 +98,98 @@ class OrderController extends Controller
 
             return response()->json([
                 'message' => 'Order placed successfully',
-                'order' => $order->load('items.plant')
+                'data' => [
+                    'order' => $order->load('items.plant'),
+                ],
             ], 201);
         });
+    }
+
+    // ✅ Admin: list all orders with pagination
+    public function adminIndex(Request $request)
+    {
+        $query = Order::with(['items.plant', 'user'])
+            ->latest();
+
+        $perPage = (int) $request->query('per_page', 20);
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'orders' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    // ✅ Cancel order (user or admin, only when pending)
+    public function cancel(Request $request, $id)
+    {
+        $order = Order::with('items.plant')->findOrFail($id);
+
+        $user = $request->user();
+
+        if ($order->status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending orders can be cancelled',
+                'errors' => [],
+            ], 400);
+        }
+
+        if ($user->role !== 'admin' && $order->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Forbidden',
+                'errors' => [],
+            ], 403);
+        }
+
+        DB::transaction(function () use ($order) {
+            foreach ($order->items as $item) {
+                if ($item->plant) {
+                    $item->plant->increment('stock', $item->quantity);
+                }
+            }
+
+            $order->status = 'cancelled';
+            $order->save();
+        });
+
+        return response()->json([
+            'message' => 'Order cancelled successfully',
+            'data' => [
+                'order' => $order->fresh('items.plant'),
+            ],
+        ]);
     }
 
     // ✅ My Orders
     public function myOrders(Request $request)
     {
-        $orders = Order::with('items.plant')
+        $query = Order::with('items.plant')
             ->where('user_id', $request->user()->id)
-            ->latest()
-            ->get();
+            ->latest();
 
-        return response()->json(['orders' => $orders]);
+        $perPage = (int) $request->query('per_page', 10);
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'orders' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
     }
 
     // ✅ Order Detail (only owner)
@@ -118,26 +198,32 @@ class OrderController extends Controller
         $order = Order::with('items.plant')->findOrFail($id);
 
         if ($order->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return response()->json([
+                'message' => 'Forbidden',
+                'errors' => [],
+            ], 403);
         }
 
-        return response()->json(['order' => $order]);
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'order' => $order,
+            ],
+        ]);
     }
 
     // ✅ Admin: Update status
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(UpdateOrderStatusRequest $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled'
-        ]);
-
         $order = Order::findOrFail($id);
         $order->status = $request->status;
         $order->save();
 
         return response()->json([
             'message' => 'Order status updated',
-            'order' => $order
+            'data' => [
+                'order' => $order,
+            ],
         ]);
     }
 }
