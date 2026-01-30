@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import PotsHeader from "../components/pots/PotsHeader";
 import PotsSidebar from "../components/pots/PotsSidebar";
@@ -19,6 +20,7 @@ type Pot = {
 };
 
 export default function Pots() {
+  const navigate = useNavigate();
   const [pots, setPots] = useState<Pot[]>([]);
   const [filteredPots, setFilteredPots] = useState<Pot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,25 +128,39 @@ export default function Pots() {
     );
   };
 
-  const handleAddToCart = (pot: Pot) => {
-    const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existingItem = cartItems.find((item: any) => item.id === pot.id && item.type === "pot");
+  const handleAddToCart = async (pot: Pot) => {
+    const token = localStorage.getItem("token");
 
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      cartItems.push({
-        id: pot.id,
-        name: pot.name,
-        price: pot.price,
-        type: "pot",
-        quantity: 1,
-        image: pot.image,
-      });
+    if (!token) {
+      alert("Please login to add accessories to your cart.");
+      navigate("/login");
+      return;
     }
 
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-    alert(`${pot.name} added to cart!`);
+    try {
+      const response = await fetch(`${API}/api/cart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ plant_id: pot.id, quantity: 1 }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        alert(data.message || "Could not add this item to cart.");
+        return;
+      }
+
+      window.dispatchEvent(new Event("cozycare:cart-updated"));
+      alert(`${pot.name} added to cart!`);
+    } catch (error) {
+      console.error("Error adding accessory to cart:", error);
+      alert("Something went wrong while adding this item to cart.");
+    }
   };
 
   const toggleWishlist = (potId: number) => {
