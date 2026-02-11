@@ -2,13 +2,13 @@
 
 .plantfinder-page {
   width: 100%;
-  background-color: #F8F9E8;
+  background-color: #f4f6f0;
 }
 
 /* Quiz Section */
 .plantfinder-quiz {
   padding: 4rem 2rem;
-  background-color: #F8F9E8;
+  background-color: #f4f6f0;
 }
 
 .plantfinder-quiz-container {
@@ -27,17 +27,20 @@
 }
 
 .plantfinder-subtitle {
-  font-size: 0.875rem;
-  color: #4A5568;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #7b9460;
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
 .plantfinder-title {
-  font-size: 2.5rem;
-  font-weight: bold;
+  font-size: 3rem;
+  font-weight: 800;
   color: #1a1a1a;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.1;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .plantfinder-form {
@@ -47,37 +50,124 @@
 }
 
 .plantfinder-question {
-  font-size: 1rem;
-  line-height: 2;
-  color: #2C3E50;
+  font-size: 1.15rem;
+  line-height: 2.2;
+  color: #2b2b2b;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: 0.5rem;
 }
 
 .plantfinder-select {
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0 0.5rem;
   border: none;
-  border-bottom: 2px solid #2C3E50;
+  border-bottom: 2px solid #5d7446;
   background-color: transparent;
-  font-size: 1rem;
-  color: #2C3E50;
+  font-size: 1.15rem;
+  color: #333;
   font-weight: 500;
   cursor: pointer;
-  min-width: 120px;
+  min-width: 140px;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d7446' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 0.25rem center;
-  background-size: 1em;
-  padding-right: 1.5rem;
+  background-size: 1.2em;
+  padding-right: 2rem;
+  letter-spacing: 0.3px;
 }
 
 .plantfinder-select:focus {
   outline: none;
-  border-bottom-color: #90EE90;
+  border-bottom-color: #2b2b2b;
+}
+
+/* Plant Finder Page Styles */
+
+.plantfinder-page {
+  width: 100%;
+  background-color: #f4f6f0;
+}
+
+/* Quiz Section */
+.plantfinder-quiz {
+  padding: 4rem 2rem;
+  background-color: #f4f6f0;
+}
+
+.plantfinder-quiz-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.plantfinder-quiz-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.plantfinder-subtitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #7b9460;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.plantfinder-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.1;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.plantfinder-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.plantfinder-question {
+  font-size: 1.15rem;
+  line-height: 2.2;
+  color: #2b2b2b;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.plantfinder-select {
+  display: inline-block;
+  padding: 0 0.5rem;
+  border: none;
+  border-bottom: 2px solid #5d7446;
+  background-color: transparent;
+  font-size: 1.15rem;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 140px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d7446' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.25rem center;
+  background-size: 1.2em;
+  padding-right: 2rem;
+  letter-spacing: 0.3px;
+}
+
+.plantfinder-select:focus {
+  outline: none;
+  border-bottom-color: #2b2b2b;
 }
 
 .plantfinder-select option {
@@ -87,23 +177,23 @@
 }
 
 .plantfinder-submit-btn {
-  background-color: #90EE90;
-  color: #1a1a1a;
+  background-color: #1f2b17;
+  color: white;
   border: none;
-  padding: 1rem 2.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 1.1rem 2.5rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   transition: background-color 0.3s;
   align-self: flex-start;
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .plantfinder-submit-btn:hover {
-  background-color: #7FDD7F;
+  background-color: #2c3e20;
 }
 
 .plantfinder-startover {
@@ -121,22 +211,719 @@
   color: #2C3E50;
 }
 
+.plantfinder-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
 .plantfinder-quiz-image {
   width: 100%;
-  height: 400px;
+  height: 480px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.plantfinder-placeholder-image {
+.plantfinder-room-preview {
+  --preview-bg-start: #eef4e5;
+  --preview-bg-end: #bfd2a8;
+  --preview-accent: #617a49;
+  --preview-soft: #f8fbf3;
   width: 100%;
   height: 100%;
-  background-color: #D4E9D4;
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(97, 122, 73, 0.16);
+  background: linear-gradient(160deg, var(--preview-bg-start) 0%, var(--preview-bg-end) 100%);
+  box-shadow: 0 28px 50px rgba(70, 89, 50, 0.14);
+}
+
+.plantfinder-room-preview--default {
+  --preview-bg-start: #f1f5ea;
+  --preview-bg-end: #c6d6b2;
+  --preview-accent: #617a49;
+}
+
+.plantfinder-room-preview--living-room {
+  --preview-bg-start: #edf4e6;
+  --preview-bg-end: #b8cda0;
+  --preview-accent: #566d41;
+}
+
+.plantfinder-room-preview--bedroom {
+  --preview-bg-start: #eff2e8;
+  --preview-bg-end: #c5d1b0;
+  --preview-accent: #667b54;
+}
+
+.plantfinder-room-preview--kitchen {
+  --preview-bg-start: #f0f4df;
+  --preview-bg-end: #c8d79f;
+  --preview-accent: #62753d;
+}
+
+.plantfinder-room-preview--bathroom {
+  --preview-bg-start: #edf5ef;
+  --preview-bg-end: #bed8c0;
+  --preview-accent: #54735a;
+}
+
+.plantfinder-room-preview--office {
+  --preview-bg-start: #eff3e8;
+  --preview-bg-end: #b9c9ae;
+  --preview-accent: #4f6752;
+}
+
+.plantfinder-room-preview--balcony {
+  --preview-bg-start: #eef5de;
+  --preview-bg-end: #b6d098;
+  --preview-accent: #5c7640;
+}
+
+.plantfinder-room-preview-copy {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 3;
+  max-width: 230px;
+}
+
+.plantfinder-room-preview-eyebrow {
+  margin: 0 0 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(34, 45, 28, 0.62);
+}
+
+.plantfinder-room-preview-title {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.05;
+  font-weight: 800;
+  color: #1f2b17;
+}
+
+.plantfinder-room-preview-description {
+  margin: 0.85rem 0 0;
+  font-size: 0.96rem;
+  line-height: 1.6;
+  color: rgba(34, 45, 28, 0.78);
+}
+
+.plantfinder-room-scene {
+  position: absolute;
+  inset: 0;
+  animation: plantfinder-scene-enter 0.35s ease;
+}
+
+.plantfinder-3d-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.plantfinder-3d-asset {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.plantfinder-scene-object {
+  position: absolute;
+}
+
+.plantfinder-scene-plant {
+  position: absolute;
+  right: 3.1rem;
+  bottom: 3rem;
+  width: 96px;
+  height: 170px;
+  z-index: 2;
+}
+
+.plantfinder-scene-plant-leaf {
+  position: absolute;
+  bottom: 54px;
+  width: 44px;
+  height: 86px;
+  border-radius: 999px 999px 999px 999px;
+  background: linear-gradient(180deg, #6f9258 0%, #45643a 100%);
+  transform-origin: bottom center;
+}
+
+.plantfinder-scene-plant-leaf--one {
+  left: 6px;
+  transform: rotate(-24deg);
+}
+
+.plantfinder-scene-plant-leaf--two {
+  left: 26px;
+  width: 40px;
+  height: 102px;
+  transform: rotate(4deg);
+}
+
+.plantfinder-scene-plant-leaf--three {
+  right: 6px;
+  width: 42px;
+  height: 88px;
+  transform: rotate(22deg);
+}
+
+.plantfinder-scene-plant-pot {
+  position: absolute;
+  left: 18px;
+  bottom: 0;
+  width: 60px;
+  height: 58px;
+  border-radius: 0 0 16px 16px;
+  background: linear-gradient(180deg, #9d7357 0%, #7a543f 100%);
+  box-shadow: inset 0 8px 0 rgba(255, 255, 255, 0.15);
+}
+
+.plantfinder-room-card {
+  left: 3rem;
+  bottom: 3rem;
+  width: 220px;
+  padding: 1.2rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 18px 28px rgba(83, 102, 63, 0.12);
+}
+
+.plantfinder-room-card-line {
+  height: 12px;
+  margin-top: 0.7rem;
+  border-radius: 999px;
+  background: rgba(86, 110, 61, 0.22);
+}
+
+.plantfinder-room-card-line:first-child {
+  margin-top: 0;
+}
+
+.plantfinder-room-card-line--short {
+  width: 55%;
+}
+
+.plantfinder-sofa {
+  left: 2.8rem;
+  bottom: 3rem;
+  width: 250px;
+  height: 128px;
+}
+
+.plantfinder-sofa-back,
+.plantfinder-sofa-seat,
+.plantfinder-sofa-arm {
+  position: absolute;
+  background: var(--preview-soft);
+  border: 4px solid #263122;
+}
+
+.plantfinder-sofa-back {
+  inset: 0 28px 42px 28px;
+  border-radius: 26px 26px 14px 14px;
+}
+
+.plantfinder-sofa-seat {
+  left: 24px;
+  right: 24px;
+  bottom: 22px;
+  height: 44px;
+  border-radius: 10px 10px 16px 16px;
+}
+
+.plantfinder-sofa-arm {
+  bottom: 24px;
+  width: 42px;
+  height: 70px;
+  border-radius: 18px;
+}
+
+.plantfinder-sofa-arm--left {
+  left: 0;
+}
+
+.plantfinder-sofa-arm--right {
+  right: 0;
+}
+
+.plantfinder-sofa-leg {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 26px;
+  border-radius: 999px;
+  background: #263122;
+}
+
+.plantfinder-sofa-leg--left {
+  left: 42px;
+}
+
+.plantfinder-sofa-leg--right {
+  right: 42px;
+}
+
+.plantfinder-side-table {
+  left: 18rem;
+  bottom: 3.7rem;
+  width: 54px;
+  height: 72px;
+}
+
+.plantfinder-side-table-top {
+  width: 100%;
+  height: 14px;
+  border-radius: 10px;
+  background: #263122;
+}
+
+.plantfinder-side-table-leg {
+  position: absolute;
+  top: 14px;
+  width: 4px;
+  height: 58px;
+  border-radius: 999px;
+  background: #263122;
+}
+
+.plantfinder-side-table-leg--left {
+  left: 12px;
+}
+
+.plantfinder-side-table-leg--right {
+  right: 12px;
+}
+
+.plantfinder-floor-lamp {
+  left: 1.8rem;
+  bottom: 4.1rem;
+  width: 40px;
+  height: 152px;
+}
+
+.plantfinder-floor-lamp-shade {
+  width: 34px;
+  height: 28px;
+  margin: 0 auto;
+  border-radius: 12px 12px 8px 8px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 3px solid #263122;
+}
+
+.plantfinder-floor-lamp-pole {
+  width: 4px;
+  height: 94px;
+  margin: 0 auto;
+  background: #263122;
+}
+
+.plantfinder-floor-lamp-base {
+  width: 34px;
+  height: 8px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: #263122;
+}
+
+.plantfinder-bed {
+  left: 2.7rem;
+  bottom: 3.4rem;
+  width: 270px;
+  height: 132px;
+}
+
+.plantfinder-bed-headboard {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 0;
+  width: 34px;
+  border-radius: 18px;
+  background: #60754f;
+}
+
+.plantfinder-bed-pillows {
+  position: absolute;
+  left: 40px;
+  top: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.plantfinder-bed-pillows span {
+  width: 58px;
+  height: 34px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.plantfinder-bed-mattress {
+  position: absolute;
+  left: 28px;
+  right: 0;
+  top: 18px;
+  height: 78px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 3px solid rgba(90, 108, 68, 0.18);
+}
+
+.plantfinder-bed-blanket {
+  position: absolute;
+  left: 74px;
+  right: 16px;
+  bottom: 18px;
+  height: 54px;
+  border-radius: 24px 16px 20px 16px;
+  background: linear-gradient(135deg, #9fb589 0%, #dbe7cc 100%);
+}
+
+.plantfinder-nightstand {
+  left: 18.4rem;
+  bottom: 3.7rem;
+  width: 56px;
+  height: 68px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 3px solid rgba(90, 108, 68, 0.18);
+}
+
+.plantfinder-nightstand-drawer {
+  position: absolute;
+  top: 26px;
+  left: 10px;
+  right: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(90, 108, 68, 0.24);
+}
+
+.plantfinder-kitchen-counter {
+  left: 2.7rem;
+  bottom: 3.2rem;
+  width: 278px;
+  height: 154px;
+}
+
+.plantfinder-kitchen-counter-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 18px;
+  border-radius: 12px 12px 8px 8px;
+  background: #687f4f;
+}
+
+.plantfinder-kitchen-cabinet {
+  position: absolute;
+  top: 18px;
+  bottom: 0;
+  width: calc(50% - 6px);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 3px solid rgba(92, 111, 67, 0.18);
+}
+
+.plantfinder-kitchen-cabinet::after {
+  content: "";
+  position: absolute;
+  top: 48%;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(92, 111, 67, 0.34);
+}
+
+.plantfinder-kitchen-cabinet--left {
+  left: 0;
+}
+
+.plantfinder-kitchen-cabinet--right {
+  right: 0;
+}
+
+.plantfinder-kitchen-shelf {
+  left: 4rem;
+  top: 8.9rem;
+  width: 132px;
+  height: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(95, 116, 69, 0.2);
+}
+
+.plantfinder-kitchen-shelf span {
+  width: 18px;
+  height: 28px;
+  border-radius: 9px 9px 6px 6px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.plantfinder-bath-tub {
+  left: 4.2rem;
+  bottom: 3.7rem;
+  width: 250px;
+  height: 104px;
+}
+
+.plantfinder-bath-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px 28px 24px 24px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 4px solid #385241;
+}
+
+.plantfinder-bath-foot {
+  position: absolute;
+  bottom: -18px;
+  width: 14px;
+  height: 24px;
+  border-radius: 999px;
+  background: #385241;
+}
+
+.plantfinder-bath-foot--left {
+  left: 42px;
+}
+
+.plantfinder-bath-foot--right {
+  right: 42px;
+}
+
+.plantfinder-bath-mirror {
+  left: 14.5rem;
+  top: 6rem;
+  width: 90px;
+  height: 112px;
+  border-radius: 26px;
+  border: 4px solid #385241;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.plantfinder-bath-towel {
+  left: 3.1rem;
+  top: 10.2rem;
+  width: 84px;
+  height: 72px;
+}
+
+.plantfinder-bath-towel-rail {
+  width: 84px;
+  height: 8px;
+  border-radius: 999px;
+  background: #385241;
+}
+
+.plantfinder-bath-towel-cloth {
+  width: 54px;
+  height: 48px;
+  margin: 0.2rem auto 0;
+  border-radius: 10px 10px 18px 18px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.plantfinder-desk {
+  left: 3.8rem;
+  bottom: 4.2rem;
+  width: 258px;
+  height: 124px;
+}
+
+.plantfinder-desk-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 56px;
+  height: 16px;
+  border-radius: 10px;
+  background: #4f6752;
+}
+
+.plantfinder-desk-leg {
+  position: absolute;
+  top: 70px;
+  width: 6px;
+  height: 54px;
+  border-radius: 999px;
+  background: #4f6752;
+}
+
+.plantfinder-desk-leg--left {
+  left: 18px;
+}
+
+.plantfinder-desk-leg--right {
+  right: 18px;
+}
+
+.plantfinder-desk-monitor {
+  position: absolute;
+  left: 92px;
+  top: 0;
+  width: 74px;
+  height: 54px;
   border-radius: 12px;
-  background-image: url('/images/plantfinder-hero.jpg');
-  background-size: cover;
-  background-position: center;
+  background: rgba(255, 255, 255, 0.66);
+  border: 4px solid #4f6752;
+}
+
+.plantfinder-desk-monitor::after {
+  content: "";
+  position: absolute;
+  left: 30px;
+  bottom: -22px;
+  width: 8px;
+  height: 22px;
+  border-radius: 999px;
+  background: #4f6752;
+}
+
+.plantfinder-office-chair {
+  left: 3rem;
+  bottom: 3rem;
+  width: 86px;
+  height: 126px;
+}
+
+.plantfinder-office-chair-back {
+  width: 60px;
+  height: 58px;
+  margin-left: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 4px solid #4f6752;
+}
+
+.plantfinder-office-chair-seat {
+  width: 68px;
+  height: 18px;
+  margin-top: 8px;
+  border-radius: 12px;
+  background: #4f6752;
+}
+
+.plantfinder-office-chair-base {
+  width: 8px;
+  height: 38px;
+  margin: 0 auto;
+  background: #4f6752;
+  border-radius: 999px;
+}
+
+.plantfinder-office-chair-base::after {
+  content: "";
+  position: relative;
+  display: block;
+  top: 32px;
+  left: -26px;
+  width: 60px;
+  height: 8px;
+  border-radius: 999px;
+  background: #4f6752;
+}
+
+.plantfinder-balcony-rail {
+  left: 2.7rem;
+  right: 2.7rem;
+  bottom: 4.4rem;
+  height: 94px;
+  border-top: 8px solid #5c7640;
+}
+
+.plantfinder-balcony-rail span {
+  position: absolute;
+  top: 8px;
+  bottom: 0;
+  width: 8px;
+  border-radius: 999px;
+  background: rgba(92, 118, 64, 0.75);
+}
+
+.plantfinder-balcony-rail span:nth-child(1) {
+  left: 26px;
+}
+
+.plantfinder-balcony-rail span:nth-child(2) {
+  left: 92px;
+}
+
+.plantfinder-balcony-rail span:nth-child(3) {
+  right: 92px;
+}
+
+.plantfinder-balcony-rail span:nth-child(4) {
+  right: 26px;
+}
+
+.plantfinder-balcony-chair {
+  left: 4.4rem;
+  bottom: 4.8rem;
+  width: 88px;
+  height: 106px;
+}
+
+.plantfinder-balcony-chair-back {
+  width: 56px;
+  height: 52px;
+  border-radius: 16px 16px 10px 10px;
+  border: 4px solid #5c7640;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.plantfinder-balcony-chair-seat {
+  width: 64px;
+  height: 18px;
+  margin-top: 8px;
+  border-radius: 10px;
+  background: #5c7640;
+}
+
+.plantfinder-balcony-sun {
+  top: 3.3rem;
+  right: 2.8rem;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  background: rgba(255, 211, 97, 0.68);
+  box-shadow: 0 0 0 10px rgba(255, 226, 140, 0.18);
+}
+
+@keyframes plantfinder-scene-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Results Section */
@@ -203,7 +990,7 @@
 /* More Options Section */
 .plantfinder-more {
   padding: 4rem 2rem;
-  background-color: #F8F9E8;
+  background-color: #f4f6f0;
 }
 
 .plantfinder-more-title {
@@ -231,7 +1018,56 @@
   }
 
   .plantfinder-quiz-image {
-    height: 300px;
+    height: 360px;
+  }
+
+  .plantfinder-room-preview-copy {
+    max-width: 220px;
+  }
+
+  .plantfinder-room-preview-title {
+    font-size: 1.45rem;
+  }
+
+  .plantfinder-room-preview-description {
+    font-size: 0.9rem;
+  }
+
+  .plantfinder-room-scene-window {
+    top: 2.2rem;
+    right: 2.2rem;
+    width: 128px;
+    height: 128px;
+  }
+
+  .plantfinder-scene-plant {
+    right: 2.1rem;
+    width: 82px;
+    height: 150px;
+  }
+
+  .plantfinder-sofa,
+  .plantfinder-bed,
+  .plantfinder-kitchen-counter,
+  .plantfinder-bath-tub,
+  .plantfinder-desk {
+    transform: scale(0.85);
+    transform-origin: left bottom;
+  }
+
+  .plantfinder-side-table,
+  .plantfinder-floor-lamp,
+  .plantfinder-nightstand,
+  .plantfinder-kitchen-shelf,
+  .plantfinder-bath-mirror,
+  .plantfinder-bath-towel,
+  .plantfinder-office-chair,
+  .plantfinder-balcony-chair,
+  .plantfinder-balcony-rail,
+  .plantfinder-balcony-sun,
+  .plantfinder-room-card {
+    transform: scale(0.85);
+    transform-origin: left top;
   }
 }
 
@@ -264,5 +1100,83 @@
 
   .plantfinder-card-image {
     height: 250px;
+  }
+
+  .plantfinder-quiz-image {
+    height: 340px;
+  }
+
+  .plantfinder-room-preview {
+    border-radius: 22px;
+  }
+
+  .plantfinder-room-preview-copy {
+    top: 1.1rem;
+    left: 1.1rem;
+    right: 1.1rem;
+    max-width: none;
+  }
+
+  .plantfinder-room-preview-title {
+    font-size: 1.25rem;
+  }
+
+  .plantfinder-room-preview-description {
+    font-size: 0.86rem;
+    max-width: 200px;
+  }
+
+  .plantfinder-room-scene-window {
+    top: 1.2rem;
+    right: 1.2rem;
+    width: 92px;
+    height: 92px;
+    gap: 0.45rem;
+    padding: 0.65rem;
+  }
+
+  .plantfinder-room-card,
+  .plantfinder-sofa,
+  .plantfinder-bed,
+  .plantfinder-kitchen-counter,
+  .plantfinder-bath-tub,
+  .plantfinder-desk,
+  .plantfinder-balcony-rail {
+    transform: scale(0.62);
+    transform-origin: left bottom;
+  }
+
+  .plantfinder-room-card {
+    left: 1rem;
+    bottom: 1.25rem;
+  }
+
+  .plantfinder-sofa,
+  .plantfinder-bed,
+  .plantfinder-kitchen-counter,
+  .plantfinder-bath-tub,
+  .plantfinder-desk {
+    left: 1rem;
+    bottom: 1.5rem;
+  }
+
+  .plantfinder-side-table,
+  .plantfinder-floor-lamp,
+  .plantfinder-nightstand,
+  .plantfinder-kitchen-shelf,
+  .plantfinder-bath-mirror,
+  .plantfinder-bath-towel,
+  .plantfinder-office-chair,
+  .plantfinder-balcony-chair,
+  .plantfinder-balcony-sun {
+    transform: scale(0.62);
+    transform-origin: left top;
+  }
+
+  .plantfinder-scene-plant {
+    right: 0.75rem;
+    bottom: 1.35rem;
+    width: 70px;
+    height: 130px;
   }
 }
