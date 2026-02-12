@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\BlogController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\CareTipController;
+use App\Http\Controllers\Api\AdminController;
 
 // Test endpoint where ping testing is done to check if API is connected
 Route::get('/ping', function () {
@@ -62,12 +64,25 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public reviews (viewing)
 Route::get('/plants/{id}/reviews', [ReviewController::class, 'plantReviews']);
 
+// Public order tracking
+Route::post('/orders/track', [OrderController::class, 'track']);
+
 // Public blogs (learning)
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/blogs/{id}', [BlogController::class, 'show']);
 
+// Public care tips
+Route::get('/care-tips', [CareTipController::class, 'index']);
+Route::get('/care-tips/categories', [CareTipController::class, 'categories']);
+Route::get('/care-tips/{id}', [CareTipController::class, 'show']);
+
 // Admin-only status update for orders + blog CRUD
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    // Dashboard stats
+    Route::get('/admin/dashboard/stats', [AdminController::class, 'dashboardStats']);
+    Route::get('/admin/dashboard/recent-orders', [AdminController::class, 'recentOrders']);
+    Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);
+    
     Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
 
@@ -75,4 +90,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::put('/blogs/{id}', [BlogController::class, 'update']);
     Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
+
+    // Care tips admin CRUD
+    Route::post('/care-tips', [CareTipController::class, 'store']);
+    Route::put('/care-tips/{id}', [CareTipController::class, 'update']);
+    Route::delete('/care-tips/{id}', [CareTipController::class, 'destroy']);
 });

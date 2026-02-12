@@ -217,6 +217,29 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($id);
         $order->status = $request->status;
+        
+        // Update tracking timestamps based on status
+        switch ($request->status) {
+            case 'packed':
+                $order->packed_at = now();
+                break;
+            case 'shipped':
+                $order->shipped_at = now();
+                if ($request->has('tracking_number')) {
+                    $order->tracking_number = $request->tracking_number;
+                }
+                if ($request->has('courier_name')) {
+                    $order->courier_name = $request->courier_name;
+                }
+                break;
+            case 'out_for_delivery':
+                $order->out_for_delivery_at = now();
+                break;
+            case 'delivered':
+                $order->delivered_at = now();
+                break;
+        }
+        
         $order->save();
 
         return response()->json([
@@ -225,5 +248,98 @@ class OrderController extends Controller
                 'order' => $order,
             ],
         ]);
+    }
+
+    // ✅ Track Order (Public - no authentication required)
+    public function track(Request $request)
+    {
+        $validated = $request->validate([
+            'order_id' => 'required|string',
+            'email' => 'required|email',
+        ]);
+
+        // Find order by ID and verify email matches the user's email
+        $order = Order::with(['items.plant', 'user'])
+            ->where('id', $validated['order_id'])
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Order not found',
+                'errors' => [
+                    'order_id' => ['Order not found with the provided details'],
+                ],
+            ], 404);
+        }
+
+        // Verify email matches the order's user email
+        if ($order->user->email !== $validated['email']) {
+            return response()->json([
+                'message' => 'Invalid credentials',
+                'errors' => [
+                    'email' => ['Email does not match the order'],
+                ],
+            ], 403);
+        }
+
+        // Build timeline
+        $timeline = $this->buildTimeline($order);
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'order' => $order,
+                'timeline' => $timeline,
+                'current_status' => $order->status,
+            ],
+        ]);
+    }
+
+    /**
+     * Build order tracking timeline
+     */
+    private function buildTimeline(Order $order): array
+    {
+        $timeline = [
+            [
+                'status' => 'placed',
+                'label' => 'Order Placed',
+                'completed' => true,
+                'date' => $order->created_at,
+                'description' => 'Your order has been received',
+            ],
+            [
+                'status' => 'packed',
+                'label' => 'Packed',
+                'completed' => in_array($order->status, ['packed', 'shipped', 'out_for_delivery', 'delivered']),
+                'date' => $order->packed_at,
+                'description' => 'Your order has been packed and is ready for shipment',
+            ],
+            [
+                'status' => 'shipped',
+                'label' => 'Shipped',
+                'completed' => in_array($order->status, ['shipped', 'out_for_delivery', 'delivered']),
+                'date' => $order->shipped_at,
+                'description' => $order->courier_name 
+                    ? "Shipped via {$order->courier_name}" 
+                    : 'Your order is on the way',
+            ],
+            [
+                'status' => 'out_for_delivery',
+                'label' => 'Out for Delivery',
+                'completed' => in_array($order->status, ['out_for_delivery', 'delivered']),
+                'date' => $order->out_for_delivery_at,
+                'description' => 'Your order is out for delivery today',
+            ],
+            [
+                'status' => 'delivered',
+                'label' => 'Delivered',
+                'completed' => $order->status === 'delivered',
+                'date' => $order->delivered_at,
+                'description' => 'Your order has been delivered',
+            ],
+        ];
+
+        return $timeline;
     }
 }

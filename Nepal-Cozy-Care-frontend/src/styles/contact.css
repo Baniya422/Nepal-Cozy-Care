@@ -1,0 +1,243 @@
+/* Contact Page Styles */
+.contact-page {
+  width: 100%;
+  background-color: #a8d5a2;
+}
+
+/* Contact Section */
+.contact-section {
+  width: 100%;
+  padding: 60px 20px;
+  background-color: #a8d5a2;
+}
+
+.contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+/* Left Side - Info */
+.contact-info {
+  flex: 0 0 35%;
+  max-width: 350px;
+}
+
+.contact-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.contact-description {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.contact-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  background-color: #2d3e36;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.contact-detail-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-detail-label {
+  font-size: 12px;
+  color: #333;
+  font-weight: 500;
+}
+
+.contact-detail-value {
+  font-size: 13px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+/* Right Side - Form */
+.contact-form-wrapper {
+  flex: 1;
+  max-width: 550px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.contact-input,
+.contact-textarea {
+  flex: 1;
+  padding: 14px 16px;
+  border: 1px solid #7cb87a;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.contact-input::placeholder,
+.contact-textarea::placeholder {
+  color: #555;
+}
+
+.contact-input:focus,
+.contact-textarea:focus {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-color: #5a9e58;
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.contact-submit-btn {
+  align-self: flex-start;
+  padding: 14px 32px;
+  background-color: #e85a24;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.contact-submit-btn:hover {
+  background-color: #d14d1a;
+}
+
+.contact-submit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.contact-status {
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.contact-status.success {
+  color: #2d5a2d;
+}
+
+.contact-status.error {
+  color: #c53030;
+}
+
+/* Nepal Images Banner */
+.contact-banner {
+  width: 100%;
+  padding: 20px 20px 60px;
+  background-color: #a8d5a2;
+}
+
+.contact-banner-images {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.contact-banner-image-wrapper {
+  flex: 1;
+  height: 180px;
+  overflow: hidden;
+}
+
+.contact-banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.contact-banner-image-wrapper:hover .contact-banner-image {
+  transform: scale(1.05);
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .contact-container {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .contact-info {
+    flex: 1;
+    max-width: 100%;
+  }
+
+  .contact-form-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .contact-section {
+    padding: 40px 16px;
+  }
+
+  .contact-title {
+    font-size: 24px;
+  }
+
+  .contact-form-row {
+    flex-direction: column;
+  }
+
+  .contact-submit-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .contact-banner-images {
+    flex-wrap: wrap;
+  }
+
+  .contact-banner-image-wrapper {
+    flex: 0 0 50%;
+    height: 120px;
+  }
+}

@@ -1,95 +1,54 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Routes, Route } from 'react-router-dom'
 import './App.css'
-import apiService from './services/api'
+import Register from './pages/Register'
+import Login from './pages/Login'
+import { ProductDetail } from './pages/ProductDetail'
+import { PlantFinder } from './pages/PlantFinder'
+import Home from './pages/Home'
+import ShippingDelivery from './pages/ShippingDelivery'
+import Plants from './pages/Plants'
+import Blogs from './pages/Blogs'
+import Contact from './pages/Contact'
+import Cart from './pages/Cart'
+import About from './pages/About'
+import CareTips from './pages/CareTips'
+import CareTipDetail from './pages/CareTipDetail'
+import TrackOrder from './pages/TrackOrder'
+import PlantHealthChecker from './pages/PlantHealthChecker'
+import PopularItemsPage from './pages/PopularItemsPage'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminProtectedRoute from './components/admin/AdminProtectedRoute'
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [apiStatus, setApiStatus] = useState<{
-    connected: boolean;
-    message: string;
-    loading: boolean;
-    error: string | null;
-  }>({
-    connected: false,
-    message: '',
-    loading: true,
-    error: null,
-  })
-
-  useEffect(() => {
-    // Test API connection on component mount
-    testApiConnection()
-  }, [])
-
-  const testApiConnection = async () => {
-    try {
-      setApiStatus(prev => ({ ...prev, loading: true, error: null }))
-      const response = await apiService.ping()
-      setApiStatus({
-        connected: true,
-        message: response.message,
-        loading: false,
-        error: null,
-      })
-    } catch (error) {
-      setApiStatus({
-        connected: false,
-        message: '',
-        loading: false,
-        error: error instanceof Error ? error.message : 'Failed to connect to API',
-      })
-    }
-  }
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Nepal Cozy Care</h1>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/plants" element={<Plants />} />
+      <Route path="/plants/:id" element={<ProductDetail />} />
+      <Route path="/popular-items" element={<PopularItemsPage />} />
+      <Route path="/plant-finder" element={<PlantFinder />} />
+      <Route path="/shipping" element={<ShippingDelivery />} />
+      <Route path="/blogs" element={<Blogs />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/care-tips" element={<CareTips />} />
+      <Route path="/care-tips/:id" element={<CareTipDetail />} />
+      <Route path="/track-order" element={<TrackOrder />} />
+      <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
       
-      {/* API Connection Status */}
-      <div className="card">
-        <h2>Backend Connection Status</h2>
-        {apiStatus.loading ? (
-          <p>Connecting to backend...</p>
-        ) : apiStatus.connected ? (
-          <div style={{ color: 'green' }}>
-            <p>✅ {apiStatus.message}</p>
-            <p style={{ fontSize: '0.9em', color: '#666' }}>
-              Backend API is connected successfully!
-            </p>
-          </div>
-        ) : (
-          <div style={{ color: 'red' }}>
-            <p>❌ Connection Failed</p>
-            <p style={{ fontSize: '0.9em' }}>{apiStatus.error}</p>
-            <button onClick={testApiConnection} style={{ marginTop: '10px' }}>
-              Retry Connection
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      {/* Admin Routes */}
+      <Route 
+        path="/admin" 
+        element={
+          <AdminProtectedRoute>
+            <AdminDashboard />
+          </AdminProtectedRoute>
+        } 
+      />
+    </Routes>
   )
 }
 

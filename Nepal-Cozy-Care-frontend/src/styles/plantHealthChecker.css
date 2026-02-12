@@ -1,0 +1,588 @@
+/* Plant Health Checker Page Styles */
+.plant-health-page {
+  width: 100%;
+  min-height: calc(100vh - 200px);
+  background-color: #f8fdf6;
+}
+
+.plant-health-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Hero Section */
+.plant-health-hero {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  padding: 60px 20px;
+  text-align: center;
+  color: white;
+}
+
+.plant-health-hero-icon {
+  width: 80px;
+  height: 80px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.plant-health-hero-title {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.plant-health-hero-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Checker Section */
+.plant-health-checker {
+  padding: 40px 0;
+}
+
+/* Progress Bar */
+.plant-health-progress {
+  margin-bottom: 30px;
+}
+
+.plant-health-progress-bar {
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.plant-health-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.plant-health-progress-text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Layout */
+.plant-health-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 30px;
+}
+
+/* Categories Sidebar */
+.plant-health-categories {
+  background-color: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: fit-content;
+}
+
+.plant-health-categories-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plant-health-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plant-health-category-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: transparent;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.plant-health-category-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.plant-health-category-btn.active {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.plant-health-category-btn svg {
+  flex-shrink: 0;
+}
+
+/* Symptoms Section */
+.plant-health-symptoms {
+  background-color: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.plant-health-symptoms-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.plant-health-symptoms-title svg {
+  color: #22c55e;
+}
+
+.plant-health-symptoms-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.plant-health-symptoms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.plant-health-symptom-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.plant-health-symptom-card:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.plant-health-symptom-card.selected {
+  background-color: #dcfce7;
+  border-color: #22c55e;
+}
+
+.plant-health-symptom-checkbox {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 8px;
+}
+
+.plant-health-symptom-checkbox svg {
+  color: #22c55e;
+}
+
+.plant-health-symptom-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.plant-health-symptom-desc {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Selected Symptoms */
+.plant-health-selected {
+  padding: 20px;
+  background-color: #f8fdf6;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.plant-health-selected-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.plant-health-selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plant-health-selected-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background-color: #22c55e;
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.plant-health-selected-tag:hover {
+  background-color: #16a34a;
+}
+
+.plant-health-selected-tag .remove {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Actions */
+.plant-health-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.plant-health-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plant-health-btn-primary {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+}
+
+.plant-health-btn-primary:hover:not(:disabled) {
+  background-color: #16a34a;
+  transform: translateY(-2px);
+}
+
+.plant-health-btn-primary:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.plant-health-btn-secondary {
+  background-color: white;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.plant-health-btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+/* Results Section */
+.plant-health-results {
+  padding: 40px 0 60px;
+}
+
+.plant-health-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 10px 16px;
+  background-color: transparent;
+  border: none;
+  color: #22c55e;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.plant-health-back-btn:hover {
+  color: #16a34a;
+}
+
+/* Diagnosis Card */
+.plant-health-diagnosis-card {
+  background-color: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.plant-health-diagnosis-header {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.plant-health-diagnosis-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.plant-health-diagnosis-title svg {
+  color: #22c55e;
+}
+
+.plant-health-severity {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.severity-low {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.severity-medium {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.severity-high {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Sections */
+.plant-health-section {
+  margin-bottom: 30px;
+}
+
+.plant-health-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.plant-health-section-title svg {
+  color: #22c55e;
+}
+
+.plant-health-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plant-health-list li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.plant-health-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+}
+
+.plant-health-list-solutions li::before {
+  background-color: #22c55e;
+}
+
+/* Related Links */
+.plant-health-related {
+  padding-top: 30px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.plant-health-related-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.plant-health-related-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plant-health-related-link:hover {
+  background-color: #e5e7eb;
+}
+
+/* Start Over */
+.plant-health-start-over {
+  text-align: center;
+  padding: 30px;
+}
+
+.plant-health-start-over p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+/* Tips Section */
+.plant-health-tips {
+  padding: 60px 0;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+}
+
+.plant-health-tips-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.plant-health-tips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.plant-health-tip-card {
+  text-align: center;
+  padding: 30px;
+  background-color: #f8fdf6;
+  border-radius: 16px;
+  transition: transform 0.3s ease;
+}
+
+.plant-health-tip-card:hover {
+  transform: translateY(-4px);
+}
+
+.plant-health-tip-icon {
+  width: 60px;
+  height: 60px;
+  background-color: #dcfce7;
+  color: #22c55e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.plant-health-tip-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.plant-health-tip-card p {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .plant-health-hero {
+    padding: 40px 20px;
+  }
+
+  .plant-health-hero-title {
+    font-size: 28px;
+  }
+
+  .plant-health-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .plant-health-categories {
+    order: 2;
+  }
+
+  .plant-health-category-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .plant-health-category-btn {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  .plant-health-symptoms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plant-health-diagnosis-card {
+    padding: 24px;
+  }
+
+  .plant-health-diagnosis-title {
+    font-size: 22px;
+  }
+
+  .plant-health-tips-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plant-health-actions {
+    flex-direction: column;
+  }
+
+  .plant-health-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

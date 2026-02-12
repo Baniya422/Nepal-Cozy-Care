@@ -1,0 +1,249 @@
+/* Plant Finder Page Styles */
+
+.plantfinder-page {
+  width: 100%;
+  background-color: #F8F9E8;
+}
+
+/* Quiz Section */
+.plantfinder-quiz {
+  padding: 4rem 2rem;
+  background-color: #F8F9E8;
+}
+
+.plantfinder-quiz-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.plantfinder-quiz-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.plantfinder-subtitle {
+  font-size: 0.875rem;
+  color: #4A5568;
+  margin: 0;
+}
+
+.plantfinder-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.plantfinder-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.plantfinder-question {
+  font-size: 1rem;
+  line-height: 2;
+  color: #2C3E50;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plantfinder-select {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border-bottom: 2px solid #2C3E50;
+  background-color: transparent;
+  font-size: 1rem;
+  color: #2C3E50;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 120px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.25rem center;
+  background-size: 1em;
+  padding-right: 1.5rem;
+}
+
+.plantfinder-select:focus {
+  outline: none;
+  border-bottom-color: #90EE90;
+}
+
+.plantfinder-select option {
+  background-color: white;
+  color: #2C3E50;
+  padding: 0.5rem;
+}
+
+.plantfinder-submit-btn {
+  background-color: #90EE90;
+  color: #1a1a1a;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: background-color 0.3s;
+  align-self: flex-start;
+  margin-top: 1rem;
+}
+
+.plantfinder-submit-btn:hover {
+  background-color: #7FDD7F;
+}
+
+.plantfinder-startover {
+  background: none;
+  border: none;
+  color: #4A5568;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  align-self: flex-start;
+}
+
+.plantfinder-startover:hover {
+  color: #2C3E50;
+}
+
+.plantfinder-quiz-image {
+  width: 100%;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plantfinder-placeholder-image {
+  width: 100%;
+  height: 100%;
+  background-color: #D4E9D4;
+  border-radius: 12px;
+  background-image: url('/images/plantfinder-hero.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Results Section */
+.plantfinder-results {
+  padding: 4rem 2rem;
+  background-color: white;
+}
+
+.plantfinder-results-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0 0 3rem 0;
+}
+
+.plantfinder-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.plantfinder-card {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.plantfinder-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.plantfinder-card-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+/* More Options Section */
+.plantfinder-more {
+  padding: 4rem 2rem;
+  background-color: #F8F9E8;
+}
+
+.plantfinder-more-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0 0 3rem 0;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+  .plantfinder-quiz-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .plantfinder-title {
+    font-size: 2rem;
+  }
+
+  .plantfinder-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .plantfinder-quiz-image {
+    height: 300px;
+  }
+}
+
+@media (max-width: 640px) {
+  .plantfinder-quiz {
+    padding: 3rem 1.5rem;
+  }
+
+  .plantfinder-results,
+  .plantfinder-more {
+    padding: 3rem 1.5rem;
+  }
+
+  .plantfinder-title {
+    font-size: 1.75rem;
+  }
+
+  .plantfinder-question {
+    font-size: 0.95rem;
+  }
+
+  .plantfinder-select {
+    font-size: 0.95rem;
+    min-width: 100px;
+  }
+
+  .plantfinder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plantfinder-card-image {
+    height: 250px;
+  }
+}
