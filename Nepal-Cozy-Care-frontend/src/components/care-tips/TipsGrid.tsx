@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, TrendingUp, Clock } from "lucide-react";
+import { BookOpen, TrendingUp, Clock3, ArrowRight } from "lucide-react";
 import type { CareTip } from "../../types/careTip";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
 
 interface TipsGridProps {
   careTips: CareTip[];
@@ -37,6 +38,24 @@ export default function TipsGrid({
   setCurrentPage,
 }: TipsGridProps) {
   const navigate = useNavigate();
+
+  const getReadingMinutes = (content: string) => {
+    const wordCount = content
+      .replace(/<[^>]+>/g, " ")
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    return Math.max(2, Math.ceil(wordCount / 170));
+  };
+
+  const getPreviewText = (tip: CareTip) => {
+    if (tip.excerpt?.trim()) {
+      return tip.excerpt;
+    }
+
+    const plainContent = tip.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    return plainContent.length > 150 ? `${plainContent.slice(0, 150)}...` : plainContent;
+  };
 
   const getCategoryLabel = (category: string) => {
     return categoryLabels[category] || category;
@@ -119,32 +138,43 @@ export default function TipsGrid({
                   src={
                     tip.image
                       ? `${API}/storage/${tip.image}`
-                      : "/images/care-tip-placeholder.jpg"
+                      : FALLBACK_IMAGE
                   }
                   alt={tip.title}
                   className="care-tip-image"
                 />
+                <div className="care-tip-image-overlay"></div>
+                <span className="care-tip-top-badge">{getCategoryLabel(tip.category)}</span>
                 <span className={`care-tip-difficulty ${getDifficultyColor(tip.difficulty)}`}>
                   {getDifficultyLabel(tip.difficulty)}
                 </span>
               </div>
               <div className="care-tip-content">
-                <span className="care-tip-category">
-                  {getCategoryLabel(tip.category)}
-                </span>
+                <div className="care-tip-card-topline">
+                  <span className="care-tip-category">
+                    {getCategoryLabel(tip.category)}
+                  </span>
+                  <span className="care-tip-reading-time">
+                    <Clock3 size={14} />
+                    {getReadingMinutes(tip.content)} min read
+                  </span>
+                </div>
                 <h3 className="care-tip-title">{tip.title}</h3>
-                <p className="care-tip-excerpt">{tip.excerpt}</p>
+                <p className="care-tip-excerpt">{getPreviewText(tip)}</p>
                 <div className="care-tip-footer">
                   <span className="care-tip-views">
                     <TrendingUp size={14} />
                     {tip.views_count.toLocaleString()} views
                   </span>
                   <span className="care-tip-date">
-                    <Clock size={14} />
+                    <Clock3 size={14} />
                     {new Date(tip.published_at).toLocaleDateString()}
                   </span>
                 </div>
-                <button className="care-tip-read-more">Read More</button>
+                <button className="care-tip-read-more">
+                  Read Guide
+                  <ArrowRight size={15} />
+                </button>
               </div>
             </article>
           ))}
