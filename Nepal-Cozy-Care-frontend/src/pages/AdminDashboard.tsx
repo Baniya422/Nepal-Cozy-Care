@@ -42,14 +42,14 @@ interface TopProduct {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
-    totalPlants: 156,
-    totalOrders: 892,
-    totalUsers: 1234,
-    totalSales: 24567,
-    plantsChange: 12,
-    ordersChange: 8,
-    usersChange: 15,
-    salesChange: -3,
+    totalPlants: 0,
+    totalOrders: 0,
+    totalUsers: 0,
+    totalSales: 0,
+    plantsChange: 0,
+    ordersChange: 0,
+    usersChange: 0,
+    salesChange: 0,
   });
 
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
@@ -185,29 +185,45 @@ export default function AdminDashboard() {
 
         {/* Stats Cards */}
         <div className="admin-stats-grid">
-          {statCards.map((stat, index) => (
-            <div key={index} className={`admin-stat-card ${stat.color}`}>
-              <div className="admin-stat-icon">
-                <stat.icon size={24} />
+          {loading ? (
+            // Skeleton loading for stat cards
+            <>
+              {[1, 2, 3, 4].map((_, index) => (
+                <div key={index} className="admin-stat-card skeleton">
+                  <div className="admin-stat-icon skeleton-icon"></div>
+                  <div className="admin-stat-content">
+                    <div className="admin-stat-value skeleton-text"></div>
+                    <div className="admin-stat-title skeleton-text-small"></div>
+                  </div>
+                  <div className="admin-stat-change skeleton-badge"></div>
+                </div>
+              ))}
+            </>
+          ) : (
+            statCards.map((stat, index) => (
+              <div key={index} className={`admin-stat-card ${stat.color}`}>
+                <div className="admin-stat-icon">
+                  <stat.icon size={24} />
+                </div>
+                <div className="admin-stat-content">
+                  <div className="admin-stat-value">{stat.value}</div>
+                  <div className="admin-stat-title">{stat.title}</div>
+                </div>
+                <div
+                  className={`admin-stat-change ${
+                    stat.change >= 0 ? "positive" : "negative"
+                  }`}
+                >
+                  {stat.change >= 0 ? (
+                    <TrendingUp size={14} />
+                  ) : (
+                    <TrendingDown size={14} />
+                  )}
+                  <span>{stat.change >= 0 ? "+" : ""}{stat.change}%</span>
+                </div>
               </div>
-              <div className="admin-stat-content">
-                <div className="admin-stat-value">{stat.value}</div>
-                <div className="admin-stat-title">{stat.title}</div>
-              </div>
-              <div
-                className={`admin-stat-change ${
-                  stat.change >= 0 ? "positive" : "negative"
-                }`}
-              >
-                {stat.change >= 0 ? (
-                  <TrendingUp size={14} />
-                ) : (
-                  <TrendingDown size={14} />
-                )}
-                <span>{stat.change >= 0 ? "+" : ""}{stat.change}%</span>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Main Content Grid */}

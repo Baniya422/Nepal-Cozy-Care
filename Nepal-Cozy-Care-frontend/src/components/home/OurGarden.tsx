@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-// Update this path to your garden image
+// Our greenhouse in Kathmandu
 const GARDEN_IMAGE = "/images/our-garden.jpg";
 
 export default function OurGarden() {
@@ -10,20 +10,22 @@ export default function OurGarden() {
     <section className="info-section info-section-blue">
       <div className="info-content">
         <div className="info-text">
-          <h2 className="info-title">Our Garden</h2>
+          <h2 className="info-title">Visit Our Greenhouse</h2>
           <p className="info-description">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Step into our lush greenhouse in Kathmandu where we nurture over 200 varieties 
+            of plants. From rare succulents to flowering beauties, each plant gets 
+            personalized care before finding its forever home with you.
           </p>
           <button className="info-btn" onClick={() => navigate("/care-tips")}>
-            LEARN MORE
+            Plant Care Tips
           </button>
         </div>
         <div className="info-image">
           <img
             src={GARDEN_IMAGE}
-            alt="Our Garden"
+            alt="Our greenhouse in Kathmandu"
             onError={(e) => {
-              // Fallback if image doesn't exist
+              // Hide if image not found
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />

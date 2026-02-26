@@ -7,6 +7,7 @@ import { PlantFinder } from './pages/PlantFinder'
 import Home from './pages/Home'
 import ShippingDelivery from './pages/ShippingDelivery'
 import Plants from './pages/Plants'
+import Pots from './pages/Pots'
 import Blogs from './pages/Blogs'
 import Contact from './pages/Contact'
 import Cart from './pages/Cart'
@@ -17,6 +18,13 @@ import TrackOrder from './pages/TrackOrder'
 import PlantHealthChecker from './pages/PlantHealthChecker'
 import PopularItemsPage from './pages/PopularItemsPage'
 import AdminDashboard from './pages/AdminDashboard'
+import ManagePlants from './pages/admin/ManagePlants'
+import ManageAccessories from './pages/admin/ManageAccessories'
+import ManageBlogs from './pages/admin/ManageBlogs'
+import ManageCareTips from './pages/admin/ManageCareTips'
+import ManageOrders from './pages/admin/ManageOrders'
+import ManageUsers from './pages/admin/ManageUsers'
+import Reports from './pages/admin/Reports'
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute'
 
 function App() {
@@ -27,6 +35,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/plants" element={<Plants />} />
       <Route path="/plants/:id" element={<ProductDetail />} />
+      <Route path="/pots" element={<Pots />} />
       <Route path="/popular-items" element={<PopularItemsPage />} />
       <Route path="/plant-finder" element={<PlantFinder />} />
       <Route path="/shipping" element={<ShippingDelivery />} />
@@ -45,6 +54,62 @@ function App() {
         element={
           <AdminProtectedRoute>
             <AdminDashboard />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/plants" 
+        element={
+          <AdminProtectedRoute>
+            <ManagePlants />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/accessories" 
+        element={
+          <AdminProtectedRoute>
+            <ManageAccessories />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/blogs" 
+        element={
+          <AdminProtectedRoute>
+            <ManageBlogs />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/care-tips" 
+        element={
+          <AdminProtectedRoute>
+            <ManageCareTips />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/orders" 
+        element={
+          <AdminProtectedRoute>
+            <ManageOrders />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/users" 
+        element={
+          <AdminProtectedRoute>
+            <ManageUsers />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/reports" 
+        element={
+          <AdminProtectedRoute>
+            <Reports />
           </AdminProtectedRoute>
         } 
       />

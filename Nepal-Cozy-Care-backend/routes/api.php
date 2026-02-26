@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\BlogController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\CareTipController;
+use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AdminController;
 
 // Test endpoint where ping testing is done to check if API is connected
@@ -26,6 +27,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    
+    // File upload
+    Route::post('/upload', [UploadController::class, 'store']);
 });
 
 // Public plant routes (browsing and learning)
@@ -83,15 +87,20 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/dashboard/recent-orders', [AdminController::class, 'recentOrders']);
     Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);
     
+    // Admin plant management - list all plants including inactive
+    Route::get('/admin/plants', [PlantController::class, 'adminIndex']);
+    
     Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
 
     // Blog admin CRUD
+    Route::get('/admin/blogs', [BlogController::class, 'adminIndex']);  // get all blogs (published + unpublished)
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::put('/blogs/{id}', [BlogController::class, 'update']);
     Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
 
     // Care tips admin CRUD
+    Route::get('/admin/care-tips', [CareTipController::class, 'adminIndex']);  // get all care tips (published + unpublished)
     Route::post('/care-tips', [CareTipController::class, 'store']);
     Route::put('/care-tips/{id}', [CareTipController::class, 'update']);
     Route::delete('/care-tips/{id}', [CareTipController::class, 'destroy']);

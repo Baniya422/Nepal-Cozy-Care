@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-// Update this path to your goal image
+// Our mission image
 const GOAL_IMAGE = "/images/our-goal.jpg";
 
 export default function OurGoal() {
@@ -10,20 +10,21 @@ export default function OurGoal() {
     <section className="info-section info-section-green">
       <div className="info-content">
         <div className="info-text">
-          <h2 className="info-title">Our Goal</h2>
+          <h2 className="info-title">Our Mission</h2>
           <p className="info-description">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            We believe every Nepali home deserves a touch of green. Our goal is to make 
+            plant parenting accessible to everyone - whether you're a busy professional 
+            or a retired gardening enthusiast. Let's grow together!
           </p>
           <button className="info-btn" onClick={() => navigate("/blogs")}>
-            LEARN MORE
+            Read Our Blog
           </button>
         </div>
         <div className="info-image">
           <img
             src={GOAL_IMAGE}
-            alt="Our Goal"
+            alt="Our mission"
             onError={(e) => {
-              // Fallback if image doesn't exist
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />

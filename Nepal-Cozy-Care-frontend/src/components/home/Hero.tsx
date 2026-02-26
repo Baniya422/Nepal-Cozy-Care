@@ -1,25 +1,30 @@
 import { useNavigate } from "react-router-dom";
 
-// Update this path to your hero background image
-const HERO_BG_IMAGE = "/images/HomeBackground.png";
+// Nepal Cozy Care - bringing nature to Nepali homes since 2023
+const HERO_BG = "/images/HomeBackground.png";
 
 export default function Hero() {
   const navigate = useNavigate();
 
+  // Hand-picked plants from our greenhouse in Kathmandu
   return (
     <section 
       className="hero"
-      style={{ backgroundImage: `url(${HERO_BG_IMAGE})` }}
+      style={{ backgroundImage: `url(${HERO_BG})` }}
     >
       <div className="hero-overlay">
         <div className="hero-content">
-          <span className="hero-badge">New Arrival</span>
-          <h1 className="hero-title">Buy Our New Plants</h1>
+          <span className="hero-badge">🌿 Fresh from our greenhouse</span>
+          <h1 className="hero-title">
+            Bring Nature Home
+          </h1>
           <p className="hero-desc">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis.
+            Discover our collection of hand-picked indoor plants, perfect for Nepali homes. 
+            From low-maintenance succulents to air-purifying greens - we deliver healthy 
+            plants right to your doorstep in Kathmandu Valley.
           </p>
           <button className="hero-btn" onClick={() => navigate("/plants")}>
-            BUY NOW
+            Explore Plants
           </button>
         </div>
       </div>

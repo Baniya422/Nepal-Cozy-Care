@@ -222,13 +222,31 @@ export default function PopularItemsPage() {
 
           {/* Grid */}
           <div className="popular-grid">
-            {loading && <div className="popular-empty">Loading products...</div>}
+            {loading && (
+              <>
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <article key={index} className="popular-card skeleton-card">
+                    <div className="popular-card-image-wrapper skeleton-image">
+                      <div className="skeleton-shimmer"></div>
+                    </div>
+                    <div className="popular-card-body">
+                      <div className="skeleton-text skeleton-popular-name"></div>
+                      <div className="skeleton-text skeleton-popular-rating"></div>
+                      <div className="popular-card-footer">
+                        <div className="skeleton-text skeleton-popular-price"></div>
+                        <div className="skeleton-text skeleton-popular-button"></div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </>
+            )}
 
             {!loading && filteredPlants.length === 0 && (
               <div className="popular-empty">No products match your filters.</div>
             )}
 
-            {filteredPlants.map(plant => (
+            {!loading && filteredPlants.map(plant => (
               <article key={plant.id} className="popular-card">
                 <div className="popular-card-image-wrapper">
                   <img

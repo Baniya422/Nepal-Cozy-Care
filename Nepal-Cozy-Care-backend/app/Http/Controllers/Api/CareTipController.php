@@ -11,6 +11,50 @@ use Illuminate\Support\Str;
 class CareTipController extends Controller
 {
     /**
+     * Admin: Display a listing of all care tips (published and unpublished) for management.
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = CareTip::with('author');
+
+        // Search filter
+        if ($request->has('search') && $request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                    ->orWhere('content', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Category filter
+        if ($request->has('category') && $request->category) {
+            $query->where('category', $request->category);
+        }
+
+        // Difficulty filter
+        if ($request->has('difficulty') && $request->difficulty) {
+            $query->where('difficulty', $request->difficulty);
+        }
+
+        // Sorting
+        $query->orderBy('created_at', 'desc');
+
+        $careTips = $query->paginate($request->get('per_page', 12));
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'tips' => $careTips->items(),
+                'pagination' => [
+                    'current_page' => $careTips->currentPage(),
+                    'per_page' => $careTips->perPage(),
+                    'total' => $careTips->total(),
+                    'last_page' => $careTips->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Display a listing of care tips with filters.
      */
     public function index(Request $request)

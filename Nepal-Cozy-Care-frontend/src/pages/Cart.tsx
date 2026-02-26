@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Minus, Plus, X, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
+import CartItems from "../components/cart/CartItems";
+import CartSummary from "../components/cart/CartSummary";
+import EmptyCart from "../components/cart/EmptyCart";
+import RecommendedProducts from "../components/cart/RecommendedProducts";
 import "../styles/cart.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -145,9 +148,8 @@ export default function Cart() {
   };
 
   const subtotal = calculateSubtotal();
-  const delivery = subtotal > 0 ? 0 : 0; // FREE delivery
-  const vat = subtotal * 0.1; // 10% VAT
-  const total = subtotal + delivery + vat;
+  const vat = subtotal * 0.1;
+  const total = subtotal + vat;
 
   if (loading) {
     return (
@@ -166,156 +168,29 @@ export default function Cart() {
           <h1 className="cart-title">Your Cart</h1>
 
           {cartItems.length === 0 ? (
-            <div className="cart-empty">
-              <ShoppingBag size={64} className="cart-empty-icon" />
-              <h2>Your cart is empty</h2>
-              <p>Looks like you haven't added any plants yet.</p>
-              <button
-                className="cart-continue-btn"
-                onClick={() => navigate("/plants")}
-              >
-                Continue Shopping
-              </button>
-            </div>
+            <EmptyCart />
           ) : (
             <>
               <div className="cart-content">
-                {/* Cart Items Table */}
-                <div className="cart-items-section">
-                  <div className="cart-table-header">
-                    <span className="cart-header-item">Item</span>
-                    <span className="cart-header-price">Price</span>
-                    <span className="cart-header-quantity">Quantity</span>
-                    <span className="cart-header-total">Total</span>
-                  </div>
-
-                  <div className="cart-items-list">
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="cart-item">
-                        <div className="cart-item-info">
-                          <img
-                            src={
-                              item.plant.image
-                                ? `${API}/storage/${item.plant.image}`
-                                : "/images/plant-placeholder.jpg"
-                            }
-                            alt={item.plant.name}
-                            className="cart-item-image"
-                          />
-                          <div className="cart-item-details">
-                            <h3 className="cart-item-name">{item.plant.name}</h3>
-                            <button
-                              className="cart-remove-btn"
-                              onClick={() => removeItem(item.id)}
-                            >
-                              <X size={14} />
-                              Remove Item
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="cart-item-price">
-                          ${item.plant.price.toFixed(2)}
-                        </div>
-
-                        <div className="cart-item-quantity">
-                          <button
-                            className="cart-qty-btn"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            disabled={updating === item.id || item.quantity <= 1}
-                          >
-                            <Minus size={14} />
-                          </button>
-                          <span className="cart-qty-value">{item.quantity}</span>
-                          <button
-                            className="cart-qty-btn"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={updating === item.id}
-                          >
-                            <Plus size={14} />
-                          </button>
-                        </div>
-
-                        <div className="cart-item-total">
-                          ${(item.plant.price * item.quantity).toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Link to="/plants" className="cart-continue-link">
-                    ← Continue Shopping
-                  </Link>
-                </div>
-
-                {/* Order Summary */}
-                <div className="cart-summary">
-                  <h2 className="cart-summary-title">Summary / Items</h2>
-
-                  <div className="cart-summary-row">
-                    <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                  </div>
-
-                  <div className="cart-summary-row">
-                    <span>Delivery</span>
-                    <span className="cart-free">FREE</span>
-                  </div>
-
-                  <div className="cart-summary-row">
-                    <span>VAT / Taxes</span>
-                    <span>${vat.toFixed(1)}</span>
-                  </div>
-
-                  <div className="cart-summary-divider"></div>
-
-                  <div className="cart-summary-row cart-summary-total">
-                    <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-
-                  <button
-                    className="cart-checkout-btn"
-                    onClick={() => navigate("/checkout")}
-                  >
-                    Checkout
-                  </button>
-                </div>
+                <CartItems
+                  cartItems={cartItems}
+                  updating={updating}
+                  updateQuantity={updateQuantity}
+                  removeItem={removeItem}
+                />
+                <CartSummary
+                  subtotal={subtotal}
+                  vat={vat}
+                  total={total}
+                />
               </div>
             </>
           )}
 
-          {/* Recommended Products */}
-          {recommendedPlants.length > 0 && (
-            <section className="cart-recommended">
-              <h2 className="cart-recommended-title">You Might Also Like These!</h2>
-              <div className="cart-recommended-grid">
-                {recommendedPlants.map((plant) => (
-                  <div key={plant.id} className="cart-recommended-card">
-                    <div className="cart-recommended-image-wrapper">
-                      <img
-                        src={
-                          plant.image
-                            ? `${API}/storage/${plant.image}`
-                            : "/images/plant-placeholder.jpg"
-                        }
-                        alt={plant.name}
-                        className="cart-recommended-image"
-                      />
-                    </div>
-                    <h3 className="cart-recommended-name">{plant.name}</h3>
-                    <p className="cart-recommended-price">${plant.price}</p>
-                    <button
-                      className="cart-recommended-add-btn"
-                      onClick={() => addToCart(plant.id)}
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          <RecommendedProducts
+            recommendedPlants={recommendedPlants}
+            addToCart={addToCart}
+          />
         </div>
       </div>
     </Layout>

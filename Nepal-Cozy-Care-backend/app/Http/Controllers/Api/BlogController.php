@@ -11,6 +11,36 @@ use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
+    // Admin: list all blogs (published and unpublished) for management
+    public function adminIndex(Request $request)
+    {
+        $query = Blog::query()
+            ->orderByDesc('created_at');
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('content', 'like', '%' . $search . '%');
+            });
+        }
+
+        $perPage = (int) $request->query('per_page', 10);
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'blogs' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
     // Public: list published blogs, with optional search
     public function index(Request $request)
     {

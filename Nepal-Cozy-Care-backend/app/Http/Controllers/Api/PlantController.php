@@ -125,7 +125,24 @@ class PlantController extends Controller
     // Admin: create plant
     public function store(StorePlantRequest $request)
     {
-        $plant = Plant::create($request->validated());
+        $data = $request->validated();
+        
+        // Handle is_active - convert to boolean
+        if (isset($data['is_active'])) {
+            $data['is_active'] = filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $data['is_active'] = true;
+        }
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('plants', $filename, 'public');
+            $data['image'] = $path;
+        }
+        
+        $plant = Plant::create($data);
 
         return response()->json([
             'message' => 'Plant added successfully',
@@ -139,8 +156,23 @@ class PlantController extends Controller
     public function update(UpdatePlantRequest $request, $id)
     {
         $plant = Plant::findOrFail($id);
+        
+        $data = $request->validated();
+        
+        // Handle is_active - convert to boolean
+        if (isset($data['is_active'])) {
+            $data['is_active'] = filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN);
+        }
 
-        $plant->update($request->validated());
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('plants', $filename, 'public');
+            $data['image'] = $path;
+        }
+
+        $plant->update($data);
 
         return response()->json([
             'message' => 'Plant updated successfully',
@@ -158,6 +190,40 @@ class PlantController extends Controller
 
         return response()->json([
             'message' => 'Plant deleted successfully'
+        ]);
+    }
+
+    // Admin: list all plants (including inactive) without filters
+    public function adminIndex(Request $request)
+    {
+        $query = Plant::query()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        $perPage = (int) $request->query('per_page', 100);
+        $paginator = $query->paginate($perPage);
+
+        // Attach avg_rating and review_count, hide raw aggregates
+        $paginator->getCollection()->transform(function ($plant) {
+            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+            $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+            unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            return $plant;
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'plants' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
         ]);
     }
 }
