@@ -22,8 +22,10 @@ class IncrementPlantSales
     public function handle(OrderCreated $event): void
     {
         // Loop through all order items and increment total_sold for each plant
-        $event->order->items()->each(function ($item) {
-            $item->plant()->increment('total_sold', $item->quantity);
-        });
+        foreach ($event->order->items as $item) {
+            if ($item->plant) {
+                $item->plant->increment('total_sold', $item->quantity);
+            }
+        }
     }
 }

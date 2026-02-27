@@ -108,6 +108,8 @@ class BlogController extends Controller
             'excerpt' => $validated['excerpt'] ?? null,
             'content' => $validated['content'],
             'image' => $validated['image'] ?? null,
+            'author' => $validated['author'] ?? 'Cozy Care',
+            'category' => $validated['category'] ?? 'General',
             'is_published' => $isPublished,
             'published_at' => $isPublished ? now() : null,
         ]);

@@ -9,6 +9,8 @@ type Blog = {
   excerpt?: string;
   image?: string;
   author?: string;
+  category?: string;
+  created_at: string;
 };
 
 interface FeaturedBlogsProps {
@@ -21,6 +23,15 @@ export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
 
   const handleReadMore = (blogId: number) => {
     navigate(`/blogs/${blogId}`);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
   };
 
   if (loading) {
@@ -52,19 +63,24 @@ export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
         <article key={blog.id} className="blogs-card">
           <div className="blogs-card-image-wrapper">
             <img
-              src={blog.image ? `${API}/storage/${blog.image}` : "/images/blog-placeholder.jpg"}
+              src={blog.image ? `${API}/storage/${blog.image}` : "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=600&h=400&fit=crop"}
               alt={blog.title}
               className="blogs-card-image"
             />
           </div>
           <div className="blogs-card-content">
+            <p className="blogs-card-date">{formatDate(blog.created_at)}</p>
             <h2 className="blogs-card-title">{blog.title}</h2>
             <p className="blogs-card-excerpt">
-              {blog.excerpt || blog.content.substring(0, 150) + "..."}
+              {blog.excerpt || blog.content.substring(0, 120) + "..."}
             </p>
             <div className="blogs-card-footer">
               <div className="blogs-card-author">
-                <img src="/images/author-avatar.jpg" alt="Author" className="blogs-author-avatar" />
+                <img 
+                  src="https://ui-avatars.com/api/?name=${blog.author || 'Admin'}&background=4CAF50&color=fff" 
+                  alt={blog.author || "Author"} 
+                  className="blogs-author-avatar" 
+                />
                 <span className="blogs-author-name">{blog.author || "Cozy Care"}</span>
               </div>
               <button 

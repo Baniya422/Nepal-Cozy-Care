@@ -20,6 +20,7 @@ interface BlogFormData {
   title: string;
   author: string;
   category: string;
+  excerpt: string;
   content: string;
   status: "published" | "draft";
 }
@@ -34,6 +35,7 @@ export default function ManageBlogs() {
     title: "",
     author: "",
     category: "Care Guide",
+    excerpt: "",
     content: "",
     status: "draft",
   });
@@ -109,6 +111,7 @@ export default function ManageBlogs() {
 
       const requestBody: any = {
         title: formData.title,
+        excerpt: formData.excerpt,
         content: formData.content,
         category: formData.category,
         author: formData.author,
@@ -189,6 +192,7 @@ export default function ManageBlogs() {
       title: blog.title,
       author: blog.author,
       category: blog.category,
+      excerpt: "",
       content: "",
       status: blog.status,
     });
@@ -207,6 +211,7 @@ export default function ManageBlogs() {
       title: "",
       author: "",
       category: "Care Guide",
+      excerpt: "",
       content: "",
       status: "draft",
     });
@@ -397,6 +402,15 @@ export default function ManageBlogs() {
                       <option value="published">Published</option>
                     </select>
                   </div>
+                </div>
+                <div className="admin-form-group">
+                  <label>Excerpt (Short Description)</label>
+                  <textarea
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                    rows={3}
+                    placeholder="Brief summary of the blog (shown in preview)..."
+                  />
                 </div>
                 <div className="admin-form-group">
                   <label>Content *</label>
