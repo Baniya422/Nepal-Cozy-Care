@@ -167,8 +167,23 @@ class BlogController extends Controller
 
         $validated = $request->validated();
 
+        // Only regenerate slug if title has changed
         if (! empty($validated['title']) && empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
+            $newSlug = Str::slug($validated['title']);
+            // Only update slug if it's different from the current one
+            if ($newSlug !== $blog->slug) {
+                // Check if slug exists for a different blog
+                $slugExists = Blog::where('slug', $newSlug)
+                    ->where('id', '!=', $id)
+                    ->exists();
+                
+                if ($slugExists) {
+                    // Append timestamp to make it unique
+                    $validated['slug'] = $newSlug . '-' . time();
+                } else {
+                    $validated['slug'] = $newSlug;
+                }
+            }
         }
 
         if (array_key_exists('is_published', $validated)) {
