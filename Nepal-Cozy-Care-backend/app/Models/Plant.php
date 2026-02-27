@@ -31,6 +31,9 @@ class Plant extends Model
         'stock',
         'image',
         'is_active',
+        'views',
+        'last_viewed_at',
+        'total_sold',
     ];
 
     protected $casts = [
@@ -46,5 +49,28 @@ class Plant extends Model
     public function wishlists(): HasMany
     {
         return $this->hasMany(Wishlist::class);
+    }
+
+    // Increment view count for this plant
+    public function incrementViews()
+    {
+        $this->increment('views');
+        $this->update(['last_viewed_at' => now()]);
+    }
+
+    // Get popular items sorted by views
+    public function scopeMostViewed($query)
+    {
+        return $query->where('is_active', true)
+            ->orderBy('views', 'desc')
+            ->orderBy('created_at', 'desc');
+    }
+
+    // Get best sellers sorted by total_sold
+    public function scopeBestSellers($query)
+    {
+        return $query->where('is_active', true)
+            ->orderBy('total_sold', 'desc')
+            ->orderBy('created_at', 'desc');
     }
 }

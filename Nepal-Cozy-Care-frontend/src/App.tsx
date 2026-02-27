@@ -26,6 +26,7 @@ import ManageOrders from './pages/admin/ManageOrders'
 import ManageUsers from './pages/admin/ManageUsers'
 import Reports from './pages/admin/Reports'
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute'
+import BestSellersPage from './pages/BestSellersPage'
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
       <Route path="/care-tips/:id" element={<CareTipDetail />} />
       <Route path="/track-order" element={<TrackOrder />} />
       <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
+      <Route path="/best-sellers" element={<BestSellersPage />} />
       
       {/* Admin Routes */}
       <Route 

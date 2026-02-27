@@ -109,6 +109,9 @@ class PlantController extends Controller
             ->where('is_active', true)
             ->findOrFail($id);
 
+        // Increment views
+        $plant->incrementViews();
+
         $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
         $plant->review_count = (int) ($plant->reviews_count ?? 0);
 
@@ -217,6 +220,74 @@ class PlantController extends Controller
             'message' => null,
             'data' => [
                 'plants' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    // Public: get popular items (by views)
+    public function popular(Request $request)
+    {
+        $query = Plant::mostViewed()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        $perPage = (int) $request->query('per_page', 12);
+        $paginator = $query->paginate($perPage);
+
+        // Attach avg_rating and review_count, hide raw aggregates
+        $paginator->getCollection()->transform(function ($plant) {
+            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+            $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+            unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            return $plant;
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'data' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    // Public: get best sellers (by total_sold)
+    public function bestSellers(Request $request)
+    {
+        $query = Plant::bestSellers()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        $perPage = (int) $request->query('per_page', 12);
+        $paginator = $query->paginate($perPage);
+
+        // Attach avg_rating and review_count, hide raw aggregates
+        $paginator->getCollection()->transform(function ($plant) {
+            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+            $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+            unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            return $plant;
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'data' => $paginator->items(),
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
                     'per_page' => $paginator->perPage(),

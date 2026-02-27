@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\OrderCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
@@ -95,6 +96,9 @@ class OrderController extends Controller
 
             // 5) Clear cart
             Cart::where('user_id', $userId)->delete();
+
+            // 6) Dispatch OrderCreated event to increment plant sales
+            OrderCreated::dispatch($order->load('items.plant'));
 
             return response()->json([
                 'message' => 'Order placed successfully',

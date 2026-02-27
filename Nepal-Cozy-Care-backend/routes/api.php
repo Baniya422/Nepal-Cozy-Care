@@ -35,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public plant routes (browsing and learning)
 Route::get('/plants', [PlantController::class, 'index']);        // list all active plants with filters
 Route::get('/plants/{id}', [PlantController::class, 'show']);    // single plant detail
+Route::get('/popular-items', [PlantController::class, 'popular']); // popular items
+Route::get('/best-sellers', [PlantController::class, 'bestSellers']); // best sellers
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
