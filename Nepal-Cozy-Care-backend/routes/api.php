@@ -76,6 +76,8 @@ Route::post('/orders/track', [OrderController::class, 'track']);
 // Public blogs (learning)
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/blogs/{id}', [BlogController::class, 'show']);
+Route::get('/top-trends', [BlogController::class, 'topTrends']);
+Route::get('/top-stories', [BlogController::class, 'topStories']);
 
 // Public care tips
 Route::get('/care-tips', [CareTipController::class, 'index']);

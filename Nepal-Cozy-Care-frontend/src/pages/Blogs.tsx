@@ -34,21 +34,25 @@ export default function Blogs() {
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API}/api/blogs?per_page=20`);
-      const data = await response.json();
-      const allBlogs = data.data?.blogs || data.data || [];
+      // Fetch featured blogs
+      const blogsRes = await fetch(`${API}/api/blogs?per_page=3`);
+      const blogsData = await blogsRes.json();
+      setBlogs(blogsData.data?.blogs || blogsData.data || []);
       
-      // First 3 as featured blogs (main cards)
-      setBlogs(allBlogs.slice(0, 3));
+      // Fetch top trends
+      const trendsRes = await fetch(`${API}/api/top-trends?limit=5`);
+      const trendsData = await trendsRes.json();
+      setTopTrends(trendsData.data?.blogs || trendsData.data || []);
       
-      // Next 5 as top trends (sidebar with images)
-      setTopTrends(allBlogs.slice(3, 8));
+      // Fetch top stories
+      const storiesRes = await fetch(`${API}/api/top-stories?limit=5`);
+      const storiesData = await storiesRes.json();
+      setTopStories(storiesData.data?.blogs || storiesData.data || []);
       
-      // Next 5 as top stories (sidebar text only)
-      setTopStories(allBlogs.slice(8, 13));
-      
-      // Next 4 as editor picks (below welcome)
-      setEditorPicks(allBlogs.slice(13, 17));
+      // Fetch editor picks
+      const picksRes = await fetch(`${API}/api/blogs?per_page=20&page=2`);
+      const picksData = await picksRes.json();
+      setEditorPicks(picksData.data?.blogs?.slice(0, 4) || picksData.data?.slice(0, 4) || []);
     } catch (error) {
       console.error("Error fetching blogs:", error);
     } finally {

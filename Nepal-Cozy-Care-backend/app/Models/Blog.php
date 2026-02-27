@@ -21,11 +21,15 @@ class Blog extends Model
         'views',
         'is_published',
         'published_at',
+        'is_top_trend',
+        'is_top_story',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
         'published_at' => 'datetime',
+        'is_top_trend' => 'boolean',
+        'is_top_story' => 'boolean',
     ];
 
     public function author()

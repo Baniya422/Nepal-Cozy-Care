@@ -87,6 +87,44 @@ class BlogController extends Controller
         ]);
     }
 
+    // Public: get top trends (admin-marked + popular by views)
+    public function topTrends(Request $request)
+    {
+        $limit = (int) $request->query('limit', 5);
+
+        $blogs = Blog::where('is_published', true)
+            ->orderByRaw('is_top_trend DESC')
+            ->orderByDesc('views')
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'blogs' => $blogs,
+            ],
+        ]);
+    }
+
+    // Public: get top stories (admin-marked + popular)
+    public function topStories(Request $request)
+    {
+        $limit = (int) $request->query('limit', 5);
+
+        $blogs = Blog::where('is_published', true)
+            ->orderByRaw('is_top_story DESC')
+            ->orderByDesc('views')
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'blogs' => $blogs,
+            ],
+        ]);
+    }
+
     // Admin: create a blog article
     public function store(StoreBlogRequest $request)
     {
@@ -110,6 +148,8 @@ class BlogController extends Controller
             'image' => $validated['image'] ?? null,
             'author' => $validated['author'] ?? 'Cozy Care',
             'category' => $validated['category'] ?? 'General',
+            'is_top_trend' => (bool) ($validated['is_top_trend'] ?? false),
+            'is_top_story' => (bool) ($validated['is_top_story'] ?? false),
             'is_published' => $isPublished,
             'published_at' => $isPublished ? now() : null,
         ]);

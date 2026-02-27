@@ -23,6 +23,8 @@ interface BlogFormData {
   excerpt: string;
   content: string;
   status: "published" | "draft";
+  isTopTrend: boolean;
+  isTopStory: boolean;
 }
 
 export default function ManageBlogs() {
@@ -38,6 +40,8 @@ export default function ManageBlogs() {
     excerpt: "",
     content: "",
     status: "draft",
+    isTopTrend: false,
+    isTopStory: false,
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -116,6 +120,8 @@ export default function ManageBlogs() {
         category: formData.category,
         author: formData.author,
         is_published: formData.status === "published",
+        is_top_trend: formData.isTopTrend,
+        is_top_story: formData.isTopStory,
       };
 
       // Only add image if we have one
@@ -214,6 +220,8 @@ export default function ManageBlogs() {
       excerpt: "",
       content: "",
       status: "draft",
+      isTopTrend: false,
+      isTopStory: false,
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -401,6 +409,26 @@ export default function ManageBlogs() {
                       <option value="draft">Draft</option>
                       <option value="published">Published</option>
                     </select>
+                  </div>
+                  <div className="admin-form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={formData.isTopTrend}
+                        onChange={(e) => setFormData({ ...formData, isTopTrend: e.target.checked })}
+                      />
+                      <span style={{ marginLeft: '8px' }}>Mark as Top Trend 📶</span>
+                    </label>
+                  </div>
+                  <div className="admin-form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={formData.isTopStory}
+                        onChange={(e) => setFormData({ ...formData, isTopStory: e.target.checked })}
+                      />
+                      <span style={{ marginLeft: '8px' }}>Mark as Top Story ⭐</span>
+                    </label>
                   </div>
                 </div>
                 <div className="admin-form-group">
