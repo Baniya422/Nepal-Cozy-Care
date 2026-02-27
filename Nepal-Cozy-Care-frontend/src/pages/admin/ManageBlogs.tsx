@@ -104,8 +104,15 @@ export default function ManageBlogs() {
           const uploadData = await uploadRes.json();
           imagePath = uploadData.data?.path || uploadData.path;
         } else {
-          console.error("Image upload failed");
+          const errorData = await uploadRes.json();
+          alert(`Image upload failed: ${errorData.message || "Unknown error"}`);
+          return; // Stop if image upload fails
         }
+      }
+
+      // For editing, keep the existing image if no new one uploaded
+      if (editingBlog && !imagePath && editingBlog.image) {
+        imagePath = editingBlog.image;
       }
 
       const url = editingBlog
@@ -124,7 +131,7 @@ export default function ManageBlogs() {
         is_top_story: formData.isTopStory,
       };
 
-      // Only add image if we have one
+      // Add image if we have one
       if (imagePath) {
         requestBody.image = imagePath;
       }
@@ -139,16 +146,18 @@ export default function ManageBlogs() {
       });
 
       if (res.ok) {
+        alert(editingBlog ? "Blog updated successfully!" : "Blog created successfully!");
         setShowModal(false);
         resetForm();
         fetchBlogs();
       } else {
         const error = await res.json();
+        console.error("Save error:", error);
         alert(error.message || "Failed to save blog");
       }
     } catch (error) {
       console.error("Error saving blog:", error);
-      alert("Failed to save blog");
+      alert("Failed to save blog. Please check the console for details.");
     }
   };
 

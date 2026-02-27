@@ -23,8 +23,11 @@ class UploadController extends Controller
             $file = $request->file('file');
             $directory = $request->input('directory', 'uploads');
             
-            // Generate unique filename
-            $filename = Str::slug($file->getClientOriginalName(), '-') . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+            // Generate unique filename with timestamp
+            $extension = $file->getClientOriginalExtension();
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeName = preg_replace('/[^A-Za-z0-9\-]/', '_', $originalName);
+            $filename = $safeName . '_' . time() . '_' . uniqid() . '.' . $extension;
             
             // Store file in the specified directory
             $path = $file->storeAs($directory, $filename, 'public');
