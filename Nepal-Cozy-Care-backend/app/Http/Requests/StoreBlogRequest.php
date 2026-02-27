@@ -19,7 +19,11 @@ class StoreBlogRequest extends FormRequest
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'image' => ['nullable', 'string', 'max:255'],
+            'author' => ['nullable', 'string', 'max:100'],
+            'category' => ['nullable', 'string', 'max:50'],
             'is_published' => ['nullable', 'boolean'],
+            'is_top_trend' => ['nullable', 'boolean'],
+            'is_top_story' => ['nullable', 'boolean'],
         ];
     }
 }
