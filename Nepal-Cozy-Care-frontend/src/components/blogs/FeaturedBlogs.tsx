@@ -77,7 +77,7 @@ export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
             <div className="blogs-card-footer">
               <div className="blogs-card-author">
                 <img 
-                  src="https://ui-avatars.com/api/?name=${blog.author || 'Admin'}&background=4CAF50&color=fff" 
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author || "Admin")}&background=4CAF50&color=fff`} 
                   alt={blog.author || "Author"} 
                   className="blogs-author-avatar" 
                 />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -17,6 +18,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ topTrends, topStories, loading }: SidebarProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -35,7 +37,12 @@ export default function Sidebar({ topTrends, topStories, loading }: SidebarProps
             <div className="blogs-sidebar-loading">Loading...</div>
           ) : topTrends.length > 0 ? (
             topTrends.map((blog) => (
-              <div key={blog.id} className="blogs-trend-item">
+              <div
+                key={blog.id}
+                className="blogs-trend-item"
+                onClick={() => navigate(`/blogs/${blog.id}`)}
+                style={{ cursor: "pointer" }}
+              >
                 <img 
                   src={blog.image ? `${API}/storage/${blog.image}` : "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=100"} 
                   alt={blog.title} 
@@ -58,7 +65,14 @@ export default function Sidebar({ topTrends, topStories, loading }: SidebarProps
             <div className="blogs-sidebar-loading">Loading...</div>
           ) : topStories.length > 0 ? (
             topStories.map((blog) => (
-              <p key={blog.id} className="blogs-story-item">{blog.title}</p>
+              <p
+                key={blog.id}
+                className="blogs-story-item"
+                onClick={() => navigate(`/blogs/${blog.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                {blog.title}
+              </p>
             ))
           ) : (
             <p className="blogs-sidebar-empty">No stories available</p>
