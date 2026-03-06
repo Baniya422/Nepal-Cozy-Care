@@ -15,13 +15,50 @@ type Plant = {
 export default function BestSellers() {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<Plant[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${API}/api/homepage/best-sellers?per_page=4`)
       .then(res => res.json())
-      .then(json => setPlants(json.data.data || []))
-      .catch(() => setPlants([]));
+      .then(json => {
+        setPlants(json.data.data || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setPlants([]);
+        setLoading(false);
+      });
   }, []);
+
+  if (loading) {
+    return (
+      <section className="product-section">
+        <h2 className="section-title">Best Sellers</h2>
+        <div className="product-grid">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="product-card" style={{ opacity: 0.6 }}>
+              <div className="product-image-wrapper" style={{ background: "#e2e8f0", minHeight: "200px" }} />
+              <div className="product-info">
+                <div style={{ height: "1rem", background: "#e2e8f0", borderRadius: "4px", marginBottom: "0.5rem" }} />
+                <div style={{ height: "1rem", background: "#e2e8f0", borderRadius: "4px", width: "60%" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (plants.length === 0) {
+    return (
+      <section className="product-section">
+        <h2 className="section-title">Best Sellers</h2>
+        <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#64748b" }}>
+          <p>No best sellers available yet.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="product-section">
