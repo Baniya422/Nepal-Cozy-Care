@@ -36,7 +36,6 @@ class Plant extends Model
         'total_sold',
         'is_popular_item',
         'is_best_seller',
-        'is_shop_plant',
     ];
 
     protected $casts = [
@@ -85,10 +84,10 @@ class Plant extends Model
             ->orderBy('created_at', 'desc');
     }
 
+    // Shop Plants: all active plants (no special flag needed)
     public function scopeShopPlants($query)
     {
         return $query->where('is_active', true)
-            ->where('is_shop_plant', true)
             ->orderBy('created_at', 'desc');
     }
 

@@ -32,6 +32,8 @@ class StorePlantRequest extends FormRequest
             'stock' => ['required', 'integer', 'min:0'],
             'image' => ['nullable', 'file', 'image', 'max:2048'], // 2MB max
             'is_active' => ['nullable'],
+            'is_popular_item' => ['nullable', 'boolean'],
+            'is_best_seller' => ['nullable', 'boolean'],
         ];
     }
 }
