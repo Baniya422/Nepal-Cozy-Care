@@ -17,7 +17,7 @@ export default function PopularItems() {
   const [plants, setPlants] = useState<Plant[]>([]);
 
   useEffect(() => {
-    fetch(`${API}/api/plants?per_page=4`)
+    fetch(`${API}/api/homepage/popular-items?per_page=4`)
       .then(res => res.json())
       .then(json => setPlants(json.data.data || []))
       .catch(() => setPlants([]));

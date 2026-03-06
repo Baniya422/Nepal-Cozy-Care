@@ -17,7 +17,7 @@ export default function BestSellers() {
   const [plants, setPlants] = useState<Plant[]>([]);
 
   useEffect(() => {
-    fetch(`${API}/api/plants?per_page=4`)
+    fetch(`${API}/api/homepage/best-sellers?per_page=4`)
       .then(res => res.json())
       .then(json => setPlants(json.data.data || []))
       .catch(() => setPlants([]));
