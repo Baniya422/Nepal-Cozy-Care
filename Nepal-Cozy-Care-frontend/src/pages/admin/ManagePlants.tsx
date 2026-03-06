@@ -27,7 +27,6 @@ interface Plant {
   rooms?: string[] | null;
   is_popular_item?: boolean;
   is_best_seller?: boolean;
-  is_shop_plant?: boolean;
 }
 
 interface PlantFormData {
@@ -51,7 +50,6 @@ interface PlantFormData {
   rooms: string[];
   is_popular_item: boolean;
   is_best_seller: boolean;
-  is_shop_plant: boolean;
 }
 
 export default function ManagePlants() {
@@ -81,7 +79,6 @@ export default function ManagePlants() {
     rooms: [],
     is_popular_item: false,
     is_best_seller: false,
-    is_shop_plant: false,
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -176,7 +173,6 @@ export default function ManagePlants() {
     formDataToSend.append("is_active", formData.is_active ? "1" : "0");
     formDataToSend.append("is_popular_item", formData.is_popular_item ? "1" : "0");
     formDataToSend.append("is_best_seller", formData.is_best_seller ? "1" : "0");
-    formDataToSend.append("is_shop_plant", formData.is_shop_plant ? "1" : "0");
     
     if (selectedImage) {
       formDataToSend.append("image", selectedImage);
@@ -279,7 +275,6 @@ export default function ManagePlants() {
       rooms: plant.rooms || [],
       is_popular_item: plant.is_popular_item || false,
       is_best_seller: plant.is_best_seller || false,
-      is_shop_plant: plant.is_shop_plant || false,
     });
     setSelectedImage(null); // Reset selected image when editing
     setImagePreview(plant.image ? `${API}/storage/${plant.image}` : null);
@@ -314,7 +309,6 @@ export default function ManagePlants() {
       rooms: [],
       is_popular_item: false,
       is_best_seller: false,
-      is_shop_plant: false,
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -701,7 +695,10 @@ export default function ManagePlants() {
                 </div>
                 <div className="admin-form-group">
                   <label>Homepage Categories</label>
-                  <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                  <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "0.75rem" }}>
+                    Mark this product for specific homepage sections (all active products appear in Shop Plants)
+                  </p>
+                  <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
                     <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
                       <input
                         type="checkbox"
@@ -711,16 +708,6 @@ export default function ManagePlants() {
                         }
                       />
                       Popular Item
-                    </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
-                      <input
-                        type="checkbox"
-                        checked={formData.is_shop_plant}
-                        onChange={(e) =>
-                          setFormData({ ...formData, is_shop_plant: e.target.checked })
-                        }
-                      />
-                      Shop Plant
                     </label>
                     <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
                       <input
