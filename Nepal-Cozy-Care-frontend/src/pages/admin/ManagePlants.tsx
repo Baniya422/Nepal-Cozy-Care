@@ -25,6 +25,9 @@ interface Plant {
   humidity: string | null;
   fertilizer: string | null;
   rooms?: string[] | null;
+  is_popular_item?: boolean;
+  is_best_seller?: boolean;
+  is_shop_plant?: boolean;
 }
 
 interface PlantFormData {
@@ -46,6 +49,9 @@ interface PlantFormData {
   is_active: boolean;
   image: string;
   rooms: string[];
+  is_popular_item: boolean;
+  is_best_seller: boolean;
+  is_shop_plant: boolean;
 }
 
 export default function ManagePlants() {
@@ -73,6 +79,9 @@ export default function ManagePlants() {
     is_active: true,
     image: "",
     rooms: [],
+    is_popular_item: false,
+    is_best_seller: false,
+    is_shop_plant: false,
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -165,6 +174,9 @@ export default function ManagePlants() {
     formDataToSend.append("fertilizer", formData.fertilizer.trim() || "");
     formDataToSend.append("difficulty", formData.difficulty || "");
     formDataToSend.append("is_active", formData.is_active ? "1" : "0");
+    formDataToSend.append("is_popular_item", formData.is_popular_item ? "1" : "0");
+    formDataToSend.append("is_best_seller", formData.is_best_seller ? "1" : "0");
+    formDataToSend.append("is_shop_plant", formData.is_shop_plant ? "1" : "0");
     
     if (selectedImage) {
       formDataToSend.append("image", selectedImage);
@@ -265,6 +277,9 @@ export default function ManagePlants() {
       is_active: plant.is_active,
       image: plant.image || "",
       rooms: plant.rooms || [],
+      is_popular_item: plant.is_popular_item || false,
+      is_best_seller: plant.is_best_seller || false,
+      is_shop_plant: plant.is_shop_plant || false,
     });
     setSelectedImage(null); // Reset selected image when editing
     setImagePreview(plant.image ? `${API}/storage/${plant.image}` : null);
@@ -297,6 +312,9 @@ export default function ManagePlants() {
       is_active: true,
       image: "",
       rooms: [],
+      is_popular_item: false,
+      is_best_seller: false,
+      is_shop_plant: false,
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -680,6 +698,41 @@ export default function ManagePlants() {
                     />
                     Active
                   </label>
+                </div>
+                <div className="admin-form-group">
+                  <label>Homepage Categories</label>
+                  <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.is_popular_item}
+                        onChange={(e) =>
+                          setFormData({ ...formData, is_popular_item: e.target.checked })
+                        }
+                      />
+                      Popular Item
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.is_shop_plant}
+                        onChange={(e) =>
+                          setFormData({ ...formData, is_shop_plant: e.target.checked })
+                        }
+                      />
+                      Shop Plant
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.is_best_seller}
+                        onChange={(e) =>
+                          setFormData({ ...formData, is_best_seller: e.target.checked })
+                        }
+                      />
+                      Best Seller
+                    </label>
+                  </div>
                 </div>
                 <div className="admin-modal-footer">
                   <button
