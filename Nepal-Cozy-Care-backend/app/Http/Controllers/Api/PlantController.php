@@ -297,4 +297,106 @@ class PlantController extends Controller
             ],
         ]);
     }
+
+    // Public: get popular items (from homepage category flag)
+    public function popularItemsHomepage(Request $request)
+    {
+        $query = Plant::popularItems()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        $perPage = (int) $request->query('per_page', 4);
+        $paginator = $query->paginate($perPage);
+
+        // Attach avg_rating and review_count, hide raw aggregates
+        $paginator->getCollection()->transform(function ($plant) {
+            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+            $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+            unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            return $plant;
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'data' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    // Public: get shop plants (from homepage category flag)
+    public function shopPlantsHomepage(Request $request)
+    {
+        $query = Plant::shopPlants()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        $perPage = (int) $request->query('per_page', 4);
+        $paginator = $query->paginate($perPage);
+
+        // Attach avg_rating and review_count, hide raw aggregates
+        $paginator->getCollection()->transform(function ($plant) {
+            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+            $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+            unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            return $plant;
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'data' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    // Public: get best sellers (from homepage category flag)
+    public function bestSellersHomepage(Request $request)
+    {
+        $query = Plant::homepageBestSellers()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews');
+
+        $perPage = (int) $request->query('per_page', 4);
+        $paginator = $query->paginate($perPage);
+
+        // Attach avg_rating and review_count, hide raw aggregates
+        $paginator->getCollection()->transform(function ($plant) {
+            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+            $plant->review_count = (int) ($plant->reviews_count ?? 0);
+
+            unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            return $plant;
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'data' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
 }

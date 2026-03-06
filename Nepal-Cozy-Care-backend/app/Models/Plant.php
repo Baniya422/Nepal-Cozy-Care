@@ -34,6 +34,9 @@ class Plant extends Model
         'views',
         'last_viewed_at',
         'total_sold',
+        'is_popular_item',
+        'is_best_seller',
+        'is_shop_plant',
     ];
 
     protected $casts = [
@@ -71,6 +74,28 @@ class Plant extends Model
     {
         return $query->where('is_active', true)
             ->orderBy('total_sold', 'desc')
+            ->orderBy('created_at', 'desc');
+    }
+
+    // Homepage category scopes
+    public function scopePopularItems($query)
+    {
+        return $query->where('is_active', true)
+            ->where('is_popular_item', true)
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function scopeShopPlants($query)
+    {
+        return $query->where('is_active', true)
+            ->where('is_shop_plant', true)
+            ->orderBy('created_at', 'desc');
+    }
+
+    public function scopeHomepageBestSellers($query)
+    {
+        return $query->where('is_active', true)
+            ->where('is_best_seller', true)
             ->orderBy('created_at', 'desc');
     }
 }
