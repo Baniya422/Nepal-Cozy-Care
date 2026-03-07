@@ -29,7 +29,7 @@ export default function BestSellersPage() {
   const [ratingFilters, setRatingFilters] = useState<number[]>([]);
 
   useEffect(() => {
-    fetch(`${API}/api/best-sellers?per_page=100`)
+    fetch(`${API}/api/homepage/best-sellers?per_page=100`)
       .then(res => res.json())
       .then(json => setPlants(json.data?.data ?? json.data ?? []))
       .catch(() => setPlants([]))

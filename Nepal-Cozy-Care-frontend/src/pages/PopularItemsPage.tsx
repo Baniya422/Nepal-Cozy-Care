@@ -28,9 +28,12 @@ export default function PopularItemsPage() {
   const [ratingFilters, setRatingFilters] = useState<number[]>([]);
 
   useEffect(() => {
-    fetch(`${API}/api/plants?per_page=100`)
+    fetch(`${API}/api/homepage/popular-items?per_page=100`)
       .then(res => res.json())
-      .then(json => setPlants(json.data?.data ?? []))
+      .then(json => {
+        const items = json.data?.data ?? [];
+        setPlants(items);
+      })
       .catch(() => setPlants([]))
       .finally(() => setLoading(false));
   }, []);
@@ -290,7 +293,7 @@ export default function PopularItemsPage() {
                     </span>
                   </div>
                   <div className="popular-card-footer">
-                    <span className="popular-card-price">Rs {plant.price.toFixed(2)}</span>
+                    <span className="popular-card-price">Rs {Number(plant.price).toFixed(2)}</span>
                     <button
                       className="popular-add-btn"
                       type="button"

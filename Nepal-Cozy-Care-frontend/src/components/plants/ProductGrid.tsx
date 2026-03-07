@@ -96,7 +96,7 @@ export default function ProductGrid({ plants, loading, error, fetchPlants }: Pro
             <div className="plants-card-content">
               <h3 className="plants-card-name">{plant.name}</h3>
               <p className="plants-card-category">{plant.category || "Indoor Plant"}</p>
-              <p className="plants-card-price">RS {plant.price.toFixed(2)}</p>
+              <p className="plants-card-price">RS {Number(plant.price).toFixed(2)}</p>
               <div className="plants-card-rating">
                 {[...Array(5)].map((_, i) => (
                   <span

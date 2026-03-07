@@ -82,7 +82,7 @@ export default function BestSellers() {
             </div>
             <div className="product-info">
               <h3 className="product-name">{plant.name}</h3>
-              <p className="product-price">${plant.price.toFixed(2)}</p>
+              <p className="product-price">${Number(plant.price).toFixed(2)}</p>
               <div className="product-rating">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} size={16} className={i < Math.floor(plant.avg_rating || 5) ? "star-filled" : "star-empty"} fill="currentColor" />

@@ -244,7 +244,7 @@ export function PlantFinder() {
                       />
                       <div className="plantfinder-card-info">
                         <h3>{plant.name}</h3>
-                        <p>Rs {plant.price.toFixed(2)}</p>
+                        <p>Rs {Number(plant.price).toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
@@ -275,7 +275,7 @@ export function PlantFinder() {
                       />
                       <div className="plantfinder-card-info">
                         <h3>{plant.name}</h3>
-                        <p>Rs {plant.price.toFixed(2)}</p>
+                        <p>Rs {Number(plant.price).toFixed(2)}</p>
                       </div>
                     </div>
                   ))}

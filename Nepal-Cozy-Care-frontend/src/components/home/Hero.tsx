@@ -13,19 +13,19 @@ export default function Hero() {
       style={{ backgroundImage: `url(${HERO_BG})` }}
     >
       <div className="hero-overlay">
-        <div className="hero-content">
-          <span className="hero-badge">🌿 Fresh from our greenhouse</span>
-          <h1 className="hero-title">
-            Bring Nature Home
-          </h1>
-          <p className="hero-desc">
-            Discover our collection of hand-picked indoor plants, perfect for Nepali homes. 
-            From low-maintenance succulents to air-purifying greens - we deliver healthy 
-            plants right to your doorstep in Kathmandu Valley.
-          </p>
-          <button className="hero-btn" onClick={() => navigate("/plants")}>
-            Explore Plants
-          </button>
+        <div className="hero-container">
+          <div className="hero-content">
+            <span className="hero-badge">Fresh From Our Greenhouse</span>
+            <h1 className="hero-title">Bring Nature Home</h1>
+            <p className="hero-desc">
+              Discover hand-picked indoor plants, grown with care in Kathmandu and delivered
+              fresh to your doorstep. Create a calm, healthy, and beautiful space with plants
+              that thrive in Nepali homes.
+            </p>
+            <button className="hero-btn" onClick={() => navigate("/plants")}>
+              Explore Plants
+            </button>
+          </div>
         </div>
       </div>
     </section>

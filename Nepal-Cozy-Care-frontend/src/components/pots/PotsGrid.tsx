@@ -95,7 +95,7 @@ export default function PotsGrid({
                 </p>
 
                 <div className="pot-footer">
-                  <span className="pot-price">Rs. {pot.price.toFixed(2)}</span>
+                  <span className="pot-price">Rs. {Number(pot.price).toFixed(2)}</span>
                   <button
                     className="add-to-cart-btn"
                     onClick={() => handleAddToCart(pot)}
