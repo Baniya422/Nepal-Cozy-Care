@@ -72,7 +72,8 @@ export default function Cart() {
       const response = await fetch(`${API}/api/plants?limit=5`);
       if (response.ok) {
         const data = await response.json();
-        setRecommendedPlants(data.data || []);
+        const plantsArray = data.data?.plants || data.data?.data || data.data || [];
+        setRecommendedPlants(Array.isArray(plantsArray) ? plantsArray : []);
       }
     } catch (error) {
       console.error("Error fetching recommended plants:", error);

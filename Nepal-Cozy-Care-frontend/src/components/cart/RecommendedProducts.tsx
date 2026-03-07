@@ -13,7 +13,8 @@ interface RecommendedProductsProps {
 }
 
 export default function RecommendedProducts({ recommendedPlants, addToCart }: RecommendedProductsProps) {
-  if (recommendedPlants.length === 0) return null;
+  // Safety check: ensure recommendedPlants is an array
+  if (!Array.isArray(recommendedPlants) || recommendedPlants.length === 0) return null;
 
   return (
     <section className="cart-recommended">
