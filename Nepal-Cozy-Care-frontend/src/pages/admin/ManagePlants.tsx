@@ -498,6 +498,11 @@ export default function ManagePlants() {
                       <option value="Outdoor">Outdoor</option>
                       <option value="Succulent">Succulent</option>
                       <option value="Flowering">Flowering</option>
+                      <option value="Pots">Pots</option>
+                      <option value="Tools">Tools</option>
+                      <option value="Soil">Soil</option>
+                      <option value="Fertilizers">Fertilizers</option>
+                      <option value="Accessories">Accessories</option>
                     </select>
                   </div>
                   <div className="admin-form-group">

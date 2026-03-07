@@ -60,6 +60,16 @@ export default function Plants() {
         avg_rating: parseFloat(plant.avg_rating) || 0,
       }));
       
+      // Exclude pots, tools, soil, fertilizers, and accessories - those belong on Pots page
+      plantsData = plantsData.filter((plant: any) => {
+        const category = (plant.category || "").toLowerCase().trim();
+        return !category.includes("pot") && 
+               !category.includes("tool") && 
+               !category.includes("soil") && 
+               !category.includes("fertilizer") && 
+               !category.includes("accessory");
+      });
+      
       setPlants(plantsData);
       setFilteredPlants(plantsData);
       

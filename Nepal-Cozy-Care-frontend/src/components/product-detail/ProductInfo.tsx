@@ -1,20 +1,12 @@
 
 import { Star, ShoppingCart } from "lucide-react";
 
-const relatedPots = [
-  { id: 1, name: 'Ceramic Pot', price: 222, image: '/images/pot1.jpg' },
-  { id: 2, name: 'Terracotta Pot', price: 132, image: '/images/pot2.jpg' },
-  { id: 3, name: 'Modern Pot', price: 999, image: '/images/pot3.jpg' },
-];
-
 interface ProductInfoProps {
   name: string;
   price: number;
   size?: string;
   quantity: number;
   setQuantity: (q: number) => void;
-  selectedPot: number | null;
-  setSelectedPot: (id: number | null) => void;
   onAddToCart: () => void;
   onBuyNow: () => void;
 }
@@ -25,12 +17,10 @@ export default function ProductInfo({
   size,
   quantity,
   setQuantity,
-  selectedPot,
-  setSelectedPot,
   onAddToCart,
   onBuyNow,
 }: ProductInfoProps) {
-  const totalPrice = price * quantity + (selectedPot ? relatedPots.find(p => p.id === selectedPot)?.price || 0 : 0);
+  const totalPrice = price * quantity;
 
   return (
     <div className="product-info-section">
@@ -56,23 +46,6 @@ export default function ProductInfo({
           <button className={size === 'Small' ? 'active' : ''}>Small Rs 222</button>
           <button className={size === 'Medium' ? 'active' : ''}>Medium Rs 132</button>
           <button className={size === 'Large' ? 'active' : ''}>Large Rs 999</button>
-        </div>
-      </div>
-
-      {/* Select Pots */}
-      <div className="pot-selection">
-        <span className="option-label">Select Pots</span>
-        <div className="pot-options">
-          {relatedPots.map((pot) => (
-            <button
-              key={pot.id}
-              className={`pot-option ${selectedPot === pot.id ? 'selected' : ''}`}
-              onClick={() => setSelectedPot(selectedPot === pot.id ? null : pot.id)}
-            >
-              <img src={pot.image} alt={pot.name} />
-              <span>{pot.name}</span>
-            </button>
-          ))}
         </div>
       </div>
 

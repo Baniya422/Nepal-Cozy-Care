@@ -38,7 +38,6 @@ export function ProductDetail() {
   const [plant, setPlant] = useState<Plant | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [selectedPot, setSelectedPot] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPlant();
@@ -61,13 +60,47 @@ export function ProductDetail() {
     }
   };
 
-  const handleAddToCart = () => {
-    alert(`Added ${quantity} ${plant?.name} to cart!`);
+  const handleAddToCart = async () => {
+    if (!plant) return false;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to add items to cart.");
+      navigate('/login');
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API}/api/cart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ plant_id: plant.id, quantity }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || 'Failed to add item to cart.');
+        return false;
+      }
+
+      alert(`Added ${quantity} ${plant.name} to cart!`);
+      return true;
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Something went wrong while adding to cart.');
+      return false;
+    }
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    navigate('/cart');
+  const handleBuyNow = async () => {
+    const added = await handleAddToCart();
+    if (added) {
+      navigate('/cart');
+    }
   };
 
   if (loading) {
@@ -116,8 +149,6 @@ export function ProductDetail() {
               size={plant.size}
               quantity={quantity}
               setQuantity={setQuantity}
-              selectedPot={selectedPot}
-              setSelectedPot={setSelectedPot}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
             />

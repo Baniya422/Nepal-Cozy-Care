@@ -1,18 +1,6 @@
 import { Search } from "lucide-react";
 
-type Pot = {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-  image?: string;
-  description?: string;
-  is_active?: boolean;
-};
-
 interface PotsSidebarProps {
-  pots: Pot[];
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   selectedCategories: string[];
@@ -22,7 +10,6 @@ interface PotsSidebarProps {
 }
 
 export default function PotsSidebar({
-  pots,
   searchTerm,
   setSearchTerm,
   selectedCategories,
@@ -30,7 +17,8 @@ export default function PotsSidebar({
   selectedPrice,
   handlePriceChange,
 }: PotsSidebarProps) {
-  const categories = Array.from(new Set(pots.map((pot) => pot.category)));
+  // Fixed categories matching admin form options
+  const categories = ["Pots", "Tools", "Soil", "Fertilizers"];
 
   return (
     <aside className="pots-sidebar">
