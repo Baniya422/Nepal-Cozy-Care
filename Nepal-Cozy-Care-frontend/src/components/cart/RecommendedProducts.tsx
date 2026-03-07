@@ -33,7 +33,7 @@ export default function RecommendedProducts({ recommendedPlants, addToCart }: Re
               />
             </div>
             <h3 className="cart-recommended-name">{plant.name}</h3>
-            <p className="cart-recommended-price">${plant.price}</p>
+            <p className="cart-recommended-price">Rs {Number(plant.price).toFixed(2)}</p>
             <button
               className="cart-recommended-add-btn"
               onClick={() => addToCart(plant.id)}
