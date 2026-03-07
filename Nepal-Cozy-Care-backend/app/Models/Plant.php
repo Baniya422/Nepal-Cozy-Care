@@ -60,10 +60,24 @@ class Plant extends Model
         $this->update(['last_viewed_at' => now()]);
     }
 
+    // Exclude accessory categories (Pots, Tools, Soil, Fertilizers, Accessories)
+    public function scopeExcludeAccessories($query)
+    {
+        return $query->whereNotIn('category', ['Pots', 'Tools', 'Soil', 'Fertilizers', 'Accessories'])
+            ->where(function ($q) {
+                $q->where('category', 'not like', '%pot%')
+                  ->where('category', 'not like', '%tool%')
+                  ->where('category', 'not like', '%soil%')
+                  ->where('category', 'not like', '%fertilizer%')
+                  ->where('category', 'not like', '%accessory%');
+            });
+    }
+
     // Get popular items sorted by views
     public function scopeMostViewed($query)
     {
         return $query->where('is_active', true)
+            ->excludeAccessories()
             ->orderBy('views', 'desc')
             ->orderBy('created_at', 'desc');
     }
@@ -72,6 +86,7 @@ class Plant extends Model
     public function scopeBestSellers($query)
     {
         return $query->where('is_active', true)
+            ->excludeAccessories()
             ->orderBy('total_sold', 'desc')
             ->orderBy('created_at', 'desc');
     }
@@ -81,6 +96,7 @@ class Plant extends Model
     {
         return $query->where('is_active', true)
             ->where('is_popular_item', true)
+            ->excludeAccessories()
             ->orderBy('created_at', 'desc');
     }
 
@@ -88,6 +104,7 @@ class Plant extends Model
     public function scopeShopPlants($query)
     {
         return $query->where('is_active', true)
+            ->excludeAccessories()
             ->orderBy('created_at', 'desc');
     }
 
@@ -95,6 +112,7 @@ class Plant extends Model
     {
         return $query->where('is_active', true)
             ->where('is_best_seller', true)
+            ->excludeAccessories()
             ->orderBy('created_at', 'desc');
     }
 }

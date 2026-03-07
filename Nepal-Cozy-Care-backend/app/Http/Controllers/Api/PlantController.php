@@ -18,6 +18,11 @@ class PlantController extends Controller
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
 
+        $includeAccessories = filter_var($request->query('include_accessories', false), FILTER_VALIDATE_BOOLEAN);
+        if (!$includeAccessories) {
+            $query->excludeAccessories();
+        }
+
         // Basic attribute filters
         if ($category = $request->query('category')) {
             $query->where('category', $category);

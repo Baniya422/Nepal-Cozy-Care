@@ -22,13 +22,22 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // Create admin user
+        // Create admin user (required for admin access)
         $this->call(AdminUserSeeder::class);
         
-        // Create sample plants
-        $this->call(PlantSeeder::class);
+        // ======================================================================
+        // DEMO DATA SEEDERS (OPTIONAL - Comment out for production)
+        // ======================================================================
+        // Uncomment the lines below if you want to seed demo/sample data
         
-        // Create sample care tips
-        $this->call(CareTipSeeder::class);
+        // Create sample plants (9 demo plants)
+        // $this->call(PlantSeeder::class);
+        
+        // Create sample care tips (demo care tips)
+        // $this->call(CareTipSeeder::class);
+        
+        // ======================================================================
+        // For production: Add real data manually through the admin panel
+        // ======================================================================
     }
 }
