@@ -3,6 +3,8 @@ import { Plus, Search, Eye, Edit, Trash2, X, Upload } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 
+const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
 interface Accessory {
   id: number;
   name: string;
@@ -11,6 +13,7 @@ interface Accessory {
   stock: number;
   is_active: boolean;
   image: string | null;
+  description?: string | null;
 }
 
 interface AccessoryFormData {
@@ -39,50 +42,146 @@ export default function ManageAccessories() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  // Mock data since accessories API might not exist yet
   useEffect(() => {
-    // Simulating API call with mock data
-    setTimeout(() => {
-      setAccessories([
-        { id: 1, name: "Ceramic Pot - Small", category: "Pots", price: 12.99, stock: 67, is_active: true, image: null },
-        { id: 2, name: "Ceramic Pot - Medium", category: "Pots", price: 18.99, stock: 45, is_active: true, image: null },
-        { id: 3, name: "Watering Can", category: "Tools", price: 15.99, stock: 32, is_active: true, image: null },
-        { id: 4, name: "Plant Food", category: "Fertilizers", price: 8.99, stock: 89, is_active: true, image: null },
-        { id: 5, name: "Pruning Shears", category: "Tools", price: 14.99, stock: 23, is_active: true, image: null },
-        { id: 6, name: "Hanging Basket", category: "Pots", price: 22.99, stock: 0, is_active: false, image: null },
-        { id: 7, name: "Soil Mix - 5L", category: "Soil", price: 9.99, stock: 56, is_active: true, image: null },
-        { id: 8, name: "Plant Mister", category: "Tools", price: 6.99, stock: 41, is_active: true, image: null },
-      ]);
-      setLoading(false);
-    }, 500);
+    fetchAccessories();
   }, []);
+
+  const fetchAccessories = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/admin/plants?per_page=100`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        let plantsData = data.data?.plants || data.data?.data || data.plants || data.data || [];
+        
+        // Convert price to number and filter for accessory categories
+        plantsData = plantsData.map((item: any) => ({
+          ...item,
+          price: parseFloat(item.price) || 0,
+        }));
+        
+        // Filter for Pots, Tools, Soil, Fertilizers, Accessories categories
+        const accessories = plantsData.filter((item: any) => {
+          const category = (item.category || "").toLowerCase().trim();
+          return category.includes("pot") || 
+                 category.includes("tool") || 
+                 category.includes("soil") || 
+                 category.includes("fertilizer") || 
+                 category.includes("accessory");
+        });
+        
+        setAccessories(accessories);
+      } else {
+        console.error("Failed to fetch accessories:", res.status);
+      }
+    } catch (error) {
+      console.error("Error fetching accessories:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newAccessory: Accessory = {
-      id: editingAccessory?.id || Date.now(),
-      name: formData.name,
-      category: formData.category,
-      price: parseFloat(formData.price),
-      stock: parseInt(formData.stock),
-      is_active: formData.is_active,
-      image: imagePreview,
-    };
-
-    if (editingAccessory) {
-      setAccessories(accessories.map(a => a.id === editingAccessory.id ? newAccessory : a));
-    } else {
-      setAccessories([...accessories, newAccessory]);
+    // Validate required fields
+    if (!formData.name.trim()) {
+      alert("Accessory name is required");
+      return;
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      alert("Please enter a valid price");
+      return;
+    }
+    if (!formData.stock || parseInt(formData.stock) < 0) {
+      alert("Please enter a valid stock quantity");
+      return;
     }
 
-    setShowModal(false);
-    resetForm();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to add accessories");
+      return;
+    }
+
+    // Create FormData for file upload
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", formData.name.trim());
+    formDataToSend.append("description", formData.description.trim() || "");
+    formDataToSend.append("price", formData.price);
+    formDataToSend.append("stock", formData.stock);
+    formDataToSend.append("category", formData.category);
+    formDataToSend.append("is_active", formData.is_active ? "1" : "0");
+    
+    if (selectedImage) {
+      formDataToSend.append("image", selectedImage);
+    }
+
+    try {
+      const url = editingAccessory
+        ? `${API}/api/plants/${editingAccessory.id}`
+        : `${API}/api/plants`;
+      
+      // For file uploads, use POST with _method for PUT requests
+      if (editingAccessory) {
+        formDataToSend.append("_method", "PUT");
+      }
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataToSend,
+      });
+
+      if (res.ok) {
+        setShowModal(false);
+        resetForm();
+        fetchAccessories();
+        alert(editingAccessory ? "Accessory updated successfully!" : "Accessory added successfully!");
+      } else {
+        const errorText = await res.text();
+        console.error("Error response:", errorText);
+        let errorMessage = "Failed to save accessory";
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || JSON.stringify(errorJson.errors) || errorText;
+        } catch {
+          errorMessage = errorText || "Failed to save accessory";
+        }
+        alert(errorMessage);
+      }
+    } catch (error) {
+      console.error("Error saving accessory:", error);
+      alert("Network error - please check if the backend server is running");
+    }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this accessory?")) return;
-    setAccessories(accessories.filter(a => a.id !== id));
+
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${API}/api/plants/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        fetchAccessories();
+        alert("Accessory deleted successfully!");
+      } else {
+        alert("Failed to delete accessory");
+      }
+    } catch (error) {
+      console.error("Error deleting accessory:", error);
+      alert("Network error - please check if the backend server is running");
+    }
   };
 
   const handleEdit = (accessory: Accessory) => {
@@ -92,10 +191,20 @@ export default function ManageAccessories() {
       category: accessory.category,
       price: accessory.price.toString(),
       stock: accessory.stock.toString(),
-      description: "",
+      description: accessory.description || "",
       is_active: accessory.is_active,
     });
-    setImagePreview(accessory.image);
+    
+    // Set image preview if accessory has an image
+    if (accessory.image) {
+      const imageUrl = accessory.image.startsWith("http") 
+        ? accessory.image 
+        : `${API}/storage/${accessory.image}`;
+      setImagePreview(imageUrl);
+    } else {
+      setImagePreview(null);
+    }
+    
     setShowModal(true);
   };
 
@@ -133,14 +242,11 @@ export default function ManageAccessories() {
   );
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
+    return `$${price.toFixed(2)}`;
   };
 
   const formatId = (id: number) => {
-    return `#${String(id).padStart(3, '0')}`;
+    return `#${id}`;
   };
 
   return (
