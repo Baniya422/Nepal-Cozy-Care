@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
-import { Heart, Star, Search, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Heart, Star, Search, SlidersHorizontal } from "lucide-react";
 import "../styles/popular-items.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";

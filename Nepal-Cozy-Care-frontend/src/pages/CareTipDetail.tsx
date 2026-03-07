@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, Eye, User, BookOpen, Leaf } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import type { CareTip, CareTipDetailResponse } from "../types/careTip";

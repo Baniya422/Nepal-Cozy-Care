@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { Star, ShoppingCart } from "lucide-react";
 
 const relatedPots = [
@@ -11,7 +11,6 @@ interface ProductInfoProps {
   name: string;
   price: number;
   size?: string;
-  avgRating?: number;
   quantity: number;
   setQuantity: (q: number) => void;
   selectedPot: number | null;
@@ -24,7 +23,6 @@ export default function ProductInfo({
   name,
   price,
   size,
-  avgRating,
   quantity,
   setQuantity,
   selectedPot,

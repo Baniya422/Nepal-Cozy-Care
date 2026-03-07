@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import FilterSidebar from "../components/plants/FilterSidebar";
 import ProductGrid from "../components/plants/ProductGrid";
@@ -21,7 +20,6 @@ type Plant = {
 };
 
 export default function Plants() {
-  const navigate = useNavigate();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [filteredPlants, setFilteredPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);

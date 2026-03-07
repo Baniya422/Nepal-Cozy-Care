@@ -7,7 +7,6 @@ import {
   DollarSign,
   TrendingUp,
   TrendingDown,
-  ArrowUpRight,
 } from "lucide-react";
 import AdminLayout from "../components/admin/AdminLayout";
 import "../components/admin/admin.css";

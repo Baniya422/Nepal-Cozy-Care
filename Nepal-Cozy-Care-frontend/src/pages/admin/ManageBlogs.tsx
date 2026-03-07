@@ -210,6 +210,8 @@ export default function ManageBlogs() {
       excerpt: "",
       content: "",
       status: blog.status,
+      isTopTrend: false,
+      isTopStory: false,
     });
     setImagePreview(blog.image ? `${API}/storage/${blog.image}` : null);
     setShowModal(true);

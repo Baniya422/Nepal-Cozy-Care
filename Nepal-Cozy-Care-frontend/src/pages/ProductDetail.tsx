@@ -114,7 +114,6 @@ export function ProductDetail() {
               name={plant.name}
               price={plant.price}
               size={plant.size}
-              avgRating={plant.avg_rating}
               quantity={quantity}
               setQuantity={setQuantity}
               selectedPot={selectedPot}

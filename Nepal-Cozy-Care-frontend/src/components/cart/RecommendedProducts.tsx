@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 type RecommendedPlant = {
   id: number;
   name: string;

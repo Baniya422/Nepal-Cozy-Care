@@ -20,8 +20,6 @@ import {
 import Layout from "../components/layout/Layout";
 import "../styles/plantHealthChecker.css";
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 // Symptom categories and options
 const symptomCategories = [
   {

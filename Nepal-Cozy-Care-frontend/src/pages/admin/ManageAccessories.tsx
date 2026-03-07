@@ -3,8 +3,6 @@ import { Plus, Search, Eye, Edit, Trash2, X, Upload } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface Accessory {
   id: number;
   name: string;

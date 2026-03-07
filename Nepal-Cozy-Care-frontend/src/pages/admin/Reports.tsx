@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  BarChart3,
   TrendingUp,
   TrendingDown,
   DollarSign,
@@ -8,7 +7,6 @@ import {
   Users,
   Package,
   Download,
-  Calendar,
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
