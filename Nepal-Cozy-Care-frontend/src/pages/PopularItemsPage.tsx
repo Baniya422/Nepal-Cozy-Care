@@ -12,9 +12,11 @@ type Plant = {
   price: number;
   image?: string;
   avg_rating?: number;
+  category?: string;
 };
 
 type SortOption = "popular" | "price-asc" | "price-desc" | "name-asc";
+type CategoryFilter = "all" | "plants" | "pots" | "accessories" | "tools";
 
 export default function PopularItemsPage() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export default function PopularItemsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sort, setSort] = useState<SortOption>("popular");
+  const [category, setCategory] = useState<CategoryFilter>("all");
 
   // filters
   const [priceFilters, setPriceFilters] = useState<string[]>([]);
@@ -53,11 +56,21 @@ export default function PopularItemsPage() {
   const filteredPlants = useMemo(() => {
     let data = [...plants];
 
+    // Filter by category
+    if (category !== "all") {
+      data = data.filter(p => {
+        const itemCategory = (p.category || "plants").toLowerCase();
+        return itemCategory.includes(category);
+      });
+    }
+
+    // Filter by search term
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       data = data.filter(p => p.name.toLowerCase().includes(q));
     }
 
+    // Filter by price range
     if (priceFilters.length > 0) {
       data = data.filter(p =>
         priceFilters.some(range => {
@@ -70,6 +83,7 @@ export default function PopularItemsPage() {
       );
     }
 
+    // Filter by rating
     if (ratingFilters.length > 0) {
       data = data.filter(p => {
         const rating = p.avg_rating ?? 5;
@@ -77,6 +91,7 @@ export default function PopularItemsPage() {
       });
     }
 
+    // Sort data
     data.sort((a, b) => {
       if (sort === "price-asc") return a.price - b.price;
       if (sort === "price-desc") return b.price - a.price;
@@ -89,7 +104,7 @@ export default function PopularItemsPage() {
     });
 
     return data;
-  }, [plants, searchTerm, priceFilters, ratingFilters, sort]);
+  }, [plants, searchTerm, category, priceFilters, ratingFilters, sort]);
 
   return (
     <Layout>
@@ -188,37 +203,55 @@ export default function PopularItemsPage() {
 
               <div className="popular-sort">
                 <span>Sort by</span>
-                <button className="popular-sort-select" type="button">
-                  <select
-                    value={sort}
-                    onChange={e => setSort(e.target.value as SortOption)}
-                  >
-                    <option value="popular">Most Popular</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="name-asc">Name A-Z</option>
-                  </select>
-                  <ChevronDown size={14} />
-                </button>
+                <select
+                  value={sort}
+                  onChange={e => setSort(e.target.value as SortOption)}
+                  className="popular-sort-select"
+                >
+                  <option value="popular">Most Popular</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="name-asc">Name A-Z</option>
+                </select>
               </div>
             </div>
           </header>
 
-          {/* Filter chips row (static for now, visual only) */}
+          {/* Filter chips row */}
           <div className="popular-chips-row">
-            <button className="popular-chip popular-chip-active" type="button">
+            <button 
+              className={`popular-chip ${category === "all" ? "popular-chip-active" : ""}`}
+              type="button"
+              onClick={() => setCategory("all")}
+            >
               All
             </button>
-            <button className="popular-chip" type="button">
+            <button 
+              className={`popular-chip ${category === "plants" ? "popular-chip-active" : ""}`}
+              type="button"
+              onClick={() => setCategory("plants")}
+            >
               Plants
             </button>
-            <button className="popular-chip" type="button">
+            <button 
+              className={`popular-chip ${category === "pots" ? "popular-chip-active" : ""}`}
+              type="button"
+              onClick={() => setCategory("pots")}
+            >
               Pots
             </button>
-            <button className="popular-chip" type="button">
+            <button 
+              className={`popular-chip ${category === "accessories" ? "popular-chip-active" : ""}`}
+              type="button"
+              onClick={() => setCategory("accessories")}
+            >
               Accessories
             </button>
-            <button className="popular-chip" type="button">
+            <button 
+              className={`popular-chip ${category === "tools" ? "popular-chip-active" : ""}`}
+              type="button"
+              onClick={() => setCategory("tools")}
+            >
               Tools
             </button>
           </div>
