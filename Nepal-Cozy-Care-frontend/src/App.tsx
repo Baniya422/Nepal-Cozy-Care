@@ -27,6 +27,8 @@ import ManageUsers from './pages/admin/ManageUsers'
 import Reports from './pages/admin/Reports'
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute'
 import BestSellersPage from './pages/BestSellersPage'
+import HelpCenter from './pages/HelpCenter'
+import Checkout from './pages/Checkout'
 
 function App() {
   return (
@@ -43,10 +45,12 @@ function App() {
       <Route path="/blogs" element={<Blogs />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/about" element={<About />} />
       <Route path="/care-tips" element={<CareTips />} />
       <Route path="/care-tips/:id" element={<CareTipDetail />} />
       <Route path="/track-order" element={<TrackOrder />} />
+      <Route path="/help-center" element={<HelpCenter />} />
       <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
       <Route path="/best-sellers" element={<BestSellersPage />} />
       
