@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 
 class PlantController extends Controller
 {
-    // List all active plants (for customers) with advanced filters
     public function index(Request $request)
     {
         $query = Plant::query()
@@ -19,11 +18,11 @@ class PlantController extends Controller
             ->withCount('reviews');
 
         $includeAccessories = filter_var($request->query('include_accessories', false), FILTER_VALIDATE_BOOLEAN);
+        
         if (!$includeAccessories) {
             $query->excludeAccessories();
         }
 
-        // Basic attribute filters
         if ($category = $request->query('category')) {
             $query->where('category', $category);
         }
@@ -40,7 +39,6 @@ class PlantController extends Controller
             $query->where('water', $water);
         }
 
-        // Price range filters
         if ($minPrice = $request->query('min_price')) {
             $query->where('price', '>=', (float) $minPrice);
         }
@@ -49,7 +47,6 @@ class PlantController extends Controller
             $query->where('price', '<=', (float) $maxPrice);
         }
 
-        // Free-text search on name / scientific_name / description
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
