@@ -10,10 +10,14 @@ interface Blog {
   title: string;
   author: string;
   category: string;
+  excerpt: string;
+  content: string;
   publish_date: string;
   views: number;
   status: "published" | "draft";
   image: string | null;
+  isTopTrend: boolean;
+  isTopStory: boolean;
 }
 
 interface BlogFormData {
@@ -65,10 +69,14 @@ export default function ManageBlogs() {
           title: blog.title,
           author: blog.author || "Admin",
           category: blog.category || "General",
-          publish_date: blog.created_at,
+          excerpt: blog.excerpt || "",
+          content: blog.content || "",
+          publish_date: blog.published_at || blog.created_at,
           views: blog.views || Math.floor(Math.random() * 5000),
           status: blog.is_published ? "published" : "draft",
           image: blog.image,
+          isTopTrend: Boolean(blog.is_top_trend),
+          isTopStory: Boolean(blog.is_top_story),
         }));
         setBlogs(transformedBlogs);
       }
@@ -207,11 +215,11 @@ export default function ManageBlogs() {
       title: blog.title,
       author: blog.author,
       category: blog.category,
-      excerpt: "",
-      content: "",
+      excerpt: blog.excerpt,
+      content: blog.content,
       status: blog.status,
-      isTopTrend: false,
-      isTopStory: false,
+      isTopTrend: blog.isTopTrend,
+      isTopStory: blog.isTopStory,
     });
     setImagePreview(blog.image ? `${API}/storage/${blog.image}` : null);
     setShowModal(true);

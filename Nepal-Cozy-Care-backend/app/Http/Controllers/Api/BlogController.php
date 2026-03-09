@@ -79,10 +79,24 @@ class BlogController extends Controller
         $blog = Blog::where('is_published', true)
             ->findOrFail($id);
 
+        $blog->increment('views');
+
+        $relatedBlogs = Blog::where('is_published', true)
+            ->where('id', '!=', $blog->id)
+            ->where(function ($query) use ($blog) {
+                $query->where('category', $blog->category)
+                    ->orWhere('author', $blog->author);
+            })
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
+            ->limit(3)
+            ->get();
+
         return response()->json([
             'message' => null,
             'data' => [
-                'blog' => $blog,
+                'blog' => $blog->fresh(),
+                'related_blogs' => $relatedBlogs,
             ],
         ]);
     }
@@ -217,4 +231,3 @@ class BlogController extends Controller
         ]);
     }
 }
-
