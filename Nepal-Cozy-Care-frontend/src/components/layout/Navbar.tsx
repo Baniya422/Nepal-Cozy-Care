@@ -22,6 +22,7 @@ export default function Navbar() {
           <Link to="/hygiene" className="navlink">Hygiene</Link>
           <Link to="/care-tips" className="navlink">Care Tips</Link>
           <Link to="/about" className="navlink">About</Link>
+          <Link to="/mission" className="navlink">Mission</Link>
           <Link to="/plant-finder" className="navlink">Plant Finder</Link>
         </div>
 
