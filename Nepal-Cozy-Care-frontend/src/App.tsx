@@ -29,6 +29,7 @@ import AdminProtectedRoute from './components/admin/AdminProtectedRoute'
 import BestSellersPage from './pages/BestSellersPage'
 import HelpCenter from './pages/HelpCenter'
 import Checkout from './pages/Checkout'
+import OurMission from './pages/OurMission'
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/about" element={<About />} />
+      <Route path="/mission" element={<OurMission />} />
       <Route path="/care-tips" element={<CareTips />} />
       <Route path="/care-tips/:id" element={<CareTipDetail />} />
       <Route path="/track-order" element={<TrackOrder />} />
