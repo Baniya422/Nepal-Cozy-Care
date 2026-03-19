@@ -1,4 +1,5 @@
 import Layout from "../components/layout/Layout";
+import "../styles/my-account.css";
 
 export default function MyAccount() {
   return (

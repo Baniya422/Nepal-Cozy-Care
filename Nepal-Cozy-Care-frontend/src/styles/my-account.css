@@ -1,0 +1,31 @@
+:root {
+  --account-bg: #f6f4ef;
+  --account-surface: #fffef9;
+  --account-ink: #202a21;
+  --account-muted: #546455;
+  --account-border: #d9e1d4;
+  --account-accent: #2f6d44;
+}
+
+.account-page {
+  background: var(--account-bg);
+  min-height: calc(100vh - 120px);
+  padding: 38px 16px 72px;
+}
+
+.account-container {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.account-container h1 {
+  margin: 0 0 8px;
+  font-size: clamp(30px, 4vw, 48px);
+  color: var(--account-ink);
+}
+
+.account-container > p {
+  margin: 0;
+  color: var(--account-muted);
+  font-size: 16px;
+}
