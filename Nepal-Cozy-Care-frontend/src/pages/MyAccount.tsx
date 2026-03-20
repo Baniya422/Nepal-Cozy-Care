@@ -24,7 +24,27 @@ export default function MyAccount() {
             </aside>
 
             <div className="account-main">
-              <p>Select any section from the menu to manage your account.</p>
+              <section className="account-section">
+                <h2>Overview</h2>
+                <div className="account-stats-grid">
+                  <article>
+                    <h3>14</h3>
+                    <p>Total Orders</p>
+                  </article>
+                  <article>
+                    <h3>2</h3>
+                    <p>Active Deliveries</p>
+                  </article>
+                  <article>
+                    <h3>8</h3>
+                    <p>Wishlist Items</p>
+                  </article>
+                  <article>
+                    <h3>3 days</h3>
+                    <p>Next Watering Reminder</p>
+                  </article>
+                </div>
+              </section>
             </div>
           </div>
         </div>
