@@ -30,6 +30,7 @@ import BestSellersPage from './pages/BestSellersPage'
 import HelpCenter from './pages/HelpCenter'
 import Checkout from './pages/Checkout'
 import OurMission from './pages/OurMission'
+import MyAccount from './pages/MyAccount'
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
       <Route path="/blogs" element={<Blogs />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/account" element={<MyAccount />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/about" element={<About />} />
       <Route path="/mission" element={<OurMission />} />
