@@ -45,6 +45,25 @@ export default function MyAccount() {
                   </article>
                 </div>
               </section>
+
+              <section className="account-section account-profile-section">
+                <h2>Profile Snapshot</h2>
+                <div className="account-profile-card">
+                  <div>
+                    <p className="account-label">Full Name</p>
+                    <p className="account-value">Sanjana Baniya</p>
+                  </div>
+                  <div>
+                    <p className="account-label">Email</p>
+                    <p className="account-value">sanjana@example.com</p>
+                  </div>
+                  <div>
+                    <p className="account-label">Phone</p>
+                    <p className="account-value">+977 98XXXXXXXX</p>
+                  </div>
+                  <button className="account-action-btn">Edit Profile</button>
+                </div>
+              </section>
             </div>
           </div>
         </div>
