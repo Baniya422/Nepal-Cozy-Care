@@ -64,6 +64,20 @@ export default function MyAccount() {
                   <button className="account-action-btn">Edit Profile</button>
                 </div>
               </section>
+
+              <section className="account-section account-orders-section">
+                <h2>Recent Orders</h2>
+                <div className="account-order-list">
+                  <article>
+                    <p className="account-order-id">Order #CC-12031</p>
+                    <p className="account-order-meta">2 items • Rs. 4,200 • Delivered</p>
+                  </article>
+                  <article>
+                    <p className="account-order-id">Order #CC-12032</p>
+                    <p className="account-order-meta">1 item • Rs. 1,950 • In Transit</p>
+                  </article>
+                </div>
+              </section>
             </div>
           </div>
         </div>
