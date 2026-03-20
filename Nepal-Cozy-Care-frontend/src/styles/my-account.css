@@ -204,3 +204,37 @@
   padding: 12px;
   text-align: center;
 }
+
+.account-security-section {
+  margin-top: 20px;
+}
+
+.account-security-row {
+  border: 1px solid var(--account-border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.account-security-row p {
+  margin: 0;
+  color: var(--account-muted);
+}
+
+.account-security-row div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.account-outline-btn {
+  border: 1px solid var(--account-border);
+  background: #ffffff;
+  color: var(--account-ink);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}

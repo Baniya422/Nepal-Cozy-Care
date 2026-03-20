@@ -101,6 +101,17 @@ export default function MyAccount() {
                   <article>Ceramic Pot Set</article>
                 </div>
               </section>
+
+              <section className="account-section account-security-section">
+                <h2>Security</h2>
+                <div className="account-security-row">
+                  <p>Password last changed: 2 months ago</p>
+                  <div>
+                    <button className="account-outline-btn">Change Password</button>
+                    <button className="account-outline-btn">Logout All Devices</button>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
