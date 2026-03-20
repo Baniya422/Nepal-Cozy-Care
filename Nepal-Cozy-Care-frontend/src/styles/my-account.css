@@ -250,3 +250,26 @@
   display: grid;
   gap: 8px;
 }
+
+@media (max-width: 920px) {
+  .account-content {
+    grid-template-columns: 1fr;
+  }
+
+  .account-address-grid,
+  .account-wishlist-grid,
+  .account-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .account-page {
+    padding: 28px 12px 56px;
+  }
+
+  .account-main,
+  .account-sidebar {
+    padding: 14px;
+  }
+}
