@@ -92,6 +92,15 @@ export default function MyAccount() {
                   </article>
                 </div>
               </section>
+
+              <section className="account-section account-wishlist-section">
+                <h2>Wishlist Preview</h2>
+                <div className="account-wishlist-grid">
+                  <article>Snake Plant</article>
+                  <article>Rubber Plant</article>
+                  <article>Ceramic Pot Set</article>
+                </div>
+              </section>
             </div>
           </div>
         </div>

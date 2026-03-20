@@ -184,3 +184,23 @@
   background: #ffffff;
   padding: 12px;
 }
+
+.account-wishlist-section {
+  margin-top: 20px;
+}
+
+.account-wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account-wishlist-grid article {
+  border: 1px solid var(--account-border);
+  border-radius: 12px;
+  background: #f2f7ef;
+  color: var(--account-ink);
+  font-weight: 700;
+  padding: 12px;
+  text-align: center;
+}
