@@ -167,3 +167,20 @@
   margin: 6px 0 0;
   color: var(--account-muted);
 }
+
+.account-address-section {
+  margin-top: 20px;
+}
+
+.account-address-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account-address-grid article {
+  border: 1px solid var(--account-border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+}

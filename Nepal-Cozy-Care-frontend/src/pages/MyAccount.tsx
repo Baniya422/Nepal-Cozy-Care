@@ -78,6 +78,20 @@ export default function MyAccount() {
                   </article>
                 </div>
               </section>
+
+              <section className="account-section account-address-section">
+                <h2>Saved Addresses</h2>
+                <div className="account-address-grid">
+                  <article>
+                    <p className="account-order-id">Home</p>
+                    <p className="account-order-meta">Kathmandu, Nepal • Default shipping</p>
+                  </article>
+                  <article>
+                    <p className="account-order-id">Office</p>
+                    <p className="account-order-meta">Lalitpur, Nepal • Delivery 9am-5pm</p>
+                  </article>
+                </div>
+              </section>
             </div>
           </div>
         </div>
