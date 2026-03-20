@@ -238,3 +238,15 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+.account-preferences-section {
+  margin-top: 20px;
+}
+
+.account-pref-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--account-muted);
+  display: grid;
+  gap: 8px;
+}

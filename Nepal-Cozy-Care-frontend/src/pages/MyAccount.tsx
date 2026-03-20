@@ -112,6 +112,15 @@ export default function MyAccount() {
                   </div>
                 </div>
               </section>
+
+              <section className="account-section account-preferences-section">
+                <h2>Preferences</h2>
+                <ul className="account-pref-list">
+                  <li>Email updates: Enabled</li>
+                  <li>SMS alerts: Disabled</li>
+                  <li>Care reminders: Every 3 days</li>
+                </ul>
+              </section>
             </div>
           </div>
         </div>
