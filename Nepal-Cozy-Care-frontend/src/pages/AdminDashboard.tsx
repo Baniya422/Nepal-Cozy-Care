@@ -124,16 +124,25 @@ export default function AdminDashboard() {
         return "status-completed";
       case "pending":
         return "status-pending";
+      case "packed":
       case "processing":
-        return "status-processing";
+        return "status-packed";
       case "shipped":
         return "status-shipped";
+      case "out_for_delivery":
+        return "status-out_for_delivery";
       case "cancelled":
         return "status-cancelled";
       default:
         return "status-pending";
     }
   };
+
+  const formatStatusLabel = (status: string) =>
+    status
+      .split("_")
+      .join(" ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -258,7 +267,7 @@ export default function AdminDashboard() {
                         <td className="amount">{formatCurrency(order.amount)}</td>
                         <td>
                           <span className={`status-badge ${getStatusClass(order.status)}`}>
-                            {order.status}
+                            {formatStatusLabel(order.status)}
                           </span>
                         </td>
                       </tr>

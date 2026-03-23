@@ -28,6 +28,10 @@ class Order extends Model
     ];
 
     protected $casts = [
+        'subtotal' => 'float',
+        'delivery_fee' => 'float',
+        'tax' => 'float',
+        'total' => 'float',
         'packed_at' => 'datetime',
         'shipped_at' => 'datetime',
         'out_for_delivery_at' => 'datetime',

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
   Package,
@@ -62,18 +62,66 @@ type OrderData = {
   items: OrderItem[];
 };
 
+const toNumber = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const formatCurrency = (value: unknown) => `$${toNumber(value).toFixed(2)}`;
+
+const formatStatusLabel = (status: string) =>
+  status
+    .split("_")
+    .join(" ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const normalizeOrderData = (rawOrder: any): OrderData => ({
+  id: Number(rawOrder?.id ?? 0),
+  status: String(rawOrder?.status ?? "pending"),
+  tracking_number: rawOrder?.tracking_number ?? undefined,
+  courier_name: rawOrder?.courier_name ?? undefined,
+  courier_tracking_url: rawOrder?.courier_tracking_url ?? undefined,
+  estimated_delivery_date: rawOrder?.estimated_delivery_date ?? undefined,
+  created_at: String(rawOrder?.created_at ?? ""),
+  packed_at: rawOrder?.packed_at ?? undefined,
+  shipped_at: rawOrder?.shipped_at ?? undefined,
+  out_for_delivery_at: rawOrder?.out_for_delivery_at ?? undefined,
+  delivered_at: rawOrder?.delivered_at ?? undefined,
+  total: toNumber(rawOrder?.total),
+  subtotal: toNumber(rawOrder?.subtotal),
+  delivery_fee: toNumber(rawOrder?.delivery_fee),
+  tax: toNumber(rawOrder?.tax),
+  shipping_name: String(rawOrder?.shipping_name ?? ""),
+  shipping_phone: String(rawOrder?.shipping_phone ?? ""),
+  shipping_address: String(rawOrder?.shipping_address ?? ""),
+  items: Array.isArray(rawOrder?.items)
+    ? rawOrder.items.map((item: any) => ({
+        id: Number(item?.id ?? 0),
+        quantity: toNumber(item?.quantity),
+        price: toNumber(item?.price),
+        plant: {
+          id: Number(item?.plant?.id ?? 0),
+          name: String(item?.plant?.name ?? "Unknown Plant"),
+          image: item?.plant?.image ?? undefined,
+        },
+      }))
+    : [],
+});
+
 export default function TrackOrder() {
   const navigate = useNavigate();
-  const [orderId, setOrderId] = useState("");
-  const [email, setEmail] = useState("");
+  const [searchParams] = useSearchParams();
+  const queryOrderId = searchParams.get("orderId") ?? "";
+  const queryEmail = searchParams.get("email") ?? "";
+  const [orderId, setOrderId] = useState(() => queryOrderId);
+  const [email, setEmail] = useState(() => queryEmail);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<OrderData | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [showHelp, setShowHelp] = useState(false);
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const trackOrder = async (nextOrderId: string, nextEmail: string) => {
     setLoading(true);
     setError(null);
     setOrder(null);
@@ -84,14 +132,14 @@ export default function TrackOrder() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ order_id: orderId, email }),
+        body: JSON.stringify({ order_id: nextOrderId, email: nextEmail }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setOrder(data.data.order);
-        setTimeline(data.data.timeline);
+        setOrder(normalizeOrderData(data.data?.order));
+        setTimeline(Array.isArray(data.data?.timeline) ? data.data.timeline : []);
       } else {
         setError(data.message || "Failed to track order");
       }
@@ -101,6 +149,19 @@ export default function TrackOrder() {
       setLoading(false);
     }
   };
+
+  const handleTrack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await trackOrder(orderId, email);
+  };
+
+  useEffect(() => {
+    if (!queryOrderId || !queryEmail) return;
+
+    setOrderId(queryOrderId);
+    setEmail(queryEmail);
+    void trackOrder(queryOrderId, queryEmail);
+  }, [queryOrderId, queryEmail]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -300,8 +361,7 @@ export default function TrackOrder() {
                     ) : (
                       <>
                         <Package size={16} />
-                        {order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)}
+                        {formatStatusLabel(order.status)}
                       </>
                     )}
                   </div>
@@ -427,7 +487,7 @@ export default function TrackOrder() {
                         </p>
                       </div>
                       <span className="track-order-item-price">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatCurrency(item.price * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -435,23 +495,23 @@ export default function TrackOrder() {
                 <div className="track-order-totals">
                   <div className="track-order-total-row">
                     <span>Subtotal</span>
-                    <span>${order.subtotal.toFixed(2)}</span>
+                    <span>{formatCurrency(order.subtotal)}</span>
                   </div>
                   <div className="track-order-total-row">
                     <span>Delivery Fee</span>
                     <span>
                       {order.delivery_fee === 0
                         ? "FREE"
-                        : `$${order.delivery_fee.toFixed(2)}`}
+                        : formatCurrency(order.delivery_fee)}
                     </span>
                   </div>
                   <div className="track-order-total-row">
                     <span>Tax</span>
-                    <span>${order.tax.toFixed(2)}</span>
+                    <span>{formatCurrency(order.tax)}</span>
                   </div>
                   <div className="track-order-total-row track-order-grand-total">
                     <span>Total</span>
-                    <span>${order.total.toFixed(2)}</span>
+                    <span>{formatCurrency(order.total)}</span>
                   </div>
                 </div>
               </div>

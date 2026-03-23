@@ -25,6 +25,8 @@ export default function Plants() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [wishlistIds, setWishlistIds] = useState<number[]>([]);
+  const [wishlistBusyId, setWishlistBusyId] = useState<number | null>(null);
   
   // Filter states
   const [selectedLightTypes, setSelectedLightTypes] = useState<string[]>([]);
@@ -35,6 +37,7 @@ export default function Plants() {
 
   useEffect(() => {
     fetchPlants();
+    fetchWishlist();
   }, []);
 
   useEffect(() => {
@@ -80,6 +83,44 @@ export default function Plants() {
       setError("Failed to load plants. Please check if the backend server is running.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWishlist = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setWishlistIds([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API}/api/wishlist`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setWishlistIds([]);
+        return;
+      }
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = await response.json();
+      const wishlistItems = data.data?.wishlist ?? [];
+      const ids = wishlistItems
+        .map((item: any) => item.plant?.id ?? item.plant_id)
+        .filter((id: unknown): id is number => typeof id === "number");
+
+      setWishlistIds(ids);
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
     }
   };
 
@@ -147,6 +188,59 @@ export default function Plants() {
     }
   };
 
+  const handleToggleWishlist = async (plantId: number) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Please login to add items to your wishlist.");
+      return;
+    }
+
+    const isWishlisted = wishlistIds.includes(plantId);
+    setWishlistBusyId(plantId);
+
+    try {
+      const response = await fetch(
+        `${API}/api/wishlist${isWishlisted ? `/${plantId}` : ""}`,
+        {
+          method: isWishlisted ? "DELETE" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: isWishlisted ? undefined : JSON.stringify({ plant_id: plantId }),
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setWishlistIds([]);
+        alert("Your session expired. Please login again.");
+        return;
+      }
+
+      if (!response.ok) {
+        alert(data.message || "Could not update wishlist.");
+        return;
+      }
+
+      setWishlistIds((current) =>
+        isWishlisted
+          ? current.filter((id) => id !== plantId)
+          : [...current, plantId]
+      );
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      alert("Something went wrong while updating wishlist.");
+    } finally {
+      setWishlistBusyId(null);
+    }
+  };
+
   return (
     <Layout>
       <div className="plants-page">
@@ -179,6 +273,9 @@ export default function Plants() {
             loading={loading} 
             error={error}
             fetchPlants={fetchPlants}
+            wishlistIds={wishlistIds}
+            wishlistBusyId={wishlistBusyId}
+            onToggleWishlist={handleToggleWishlist}
           />
         </main>
       </div>

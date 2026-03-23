@@ -26,7 +26,10 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout-all', [AuthController::class, 'logoutAll']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/me', [AuthController::class, 'update']);
+    Route::put('/me/password', [AuthController::class, 'updatePassword']);
     
     // File upload
     Route::post('/upload', [UploadController::class, 'store']);
@@ -95,6 +98,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/dashboard/stats', [AdminController::class, 'dashboardStats']);
     Route::get('/admin/dashboard/recent-orders', [AdminController::class, 'recentOrders']);
     Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);
+    Route::get('/admin/reports', [AdminController::class, 'reports']);
+    Route::get('/admin/users', [AdminController::class, 'users']);
     
     // Admin plant management - list all plants including inactive
     Route::get('/admin/plants', [PlantController::class, 'adminIndex']);

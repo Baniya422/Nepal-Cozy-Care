@@ -185,6 +185,16 @@
   color: #EF4444;
 }
 
+.plants-wishlist-btn.active {
+  background-color: #FEE2E2;
+  color: #EF4444;
+}
+
+.plants-wishlist-btn:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
 .plants-card-content {
   padding: 1.25rem;
   display: flex;

@@ -1,9 +1,25 @@
 import { useEffect, useState } from "react";
-import { Search, Eye, Package, Truck, CheckCircle, XCircle } from "lucide-react";
+import {
+  Search,
+  Eye,
+  Package,
+  Truck,
+  CheckCircle,
+  XCircle,
+  MapPin,
+} from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+type OrderStatus =
+  | "pending"
+  | "packed"
+  | "shipped"
+  | "out_for_delivery"
+  | "delivered"
+  | "cancelled";
 
 interface OrderItem {
   id: number;
@@ -20,58 +36,123 @@ interface Order {
   items: number;
   total: number;
   date: string;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  order_items?: OrderItem[];
+  status: OrderStatus;
+  shipping_name: string;
+  shipping_phone: string;
+  shipping_address: string;
+  tracking_number?: string | null;
+  courier_name?: string | null;
+  order_items: OrderItem[];
 }
+
+const normalizeStatus = (status: string): OrderStatus => {
+  const normalized = status === "processing" ? "packed" : status;
+
+  switch (normalized) {
+    case "pending":
+    case "packed":
+    case "shipped":
+    case "out_for_delivery":
+    case "delivered":
+    case "cancelled":
+      return normalized;
+    default:
+      return "pending";
+  }
+};
+
+const formatStatusLabel = (status: string) =>
+  status
+    .split("_")
+    .join(" ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const transformOrder = (order: any): Order => ({
+  id: Number(order?.id ?? 0),
+  order_id: order?.order_id || `#ORD-${String(order?.id ?? 0).padStart(3, "0")}`,
+  customer: order?.user?.name || order?.shipping_name || "Unknown",
+  email: order?.user?.email || "-",
+  items: Array.isArray(order?.items) ? order.items.length : 0,
+  total: Number(order?.total ?? 0),
+  date: String(order?.created_at ?? ""),
+  status: normalizeStatus(String(order?.status ?? "pending")),
+  shipping_name: order?.shipping_name || order?.user?.name || "Unknown",
+  shipping_phone: order?.shipping_phone || "-",
+  shipping_address: order?.shipping_address || "-",
+  tracking_number: order?.tracking_number ?? null,
+  courier_name: order?.courier_name ?? null,
+  order_items: Array.isArray(order?.items)
+    ? order.items.map((item: any) => ({
+        id: Number(item?.id ?? 0),
+        plant_name: item?.plant?.name || "Unknown Plant",
+        quantity: Number(item?.quantity ?? 0),
+        price: Number(item?.price ?? 0),
+      }))
+    : [],
+});
+
+const statusFlow: Record<OrderStatus, OrderStatus | null> = {
+  pending: "packed",
+  packed: "shipped",
+  shipped: "out_for_delivery",
+  out_for_delivery: "delivered",
+  delivered: null,
+  cancelled: null,
+};
 
 export default function ManageOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingOrderId, setSavingOrderId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
-    fetchOrders();
+    void fetchOrders();
   }, []);
 
   const fetchOrders = async () => {
+    setError(null);
+
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Admin login required to view orders.");
+      }
+
       const res = await fetch(`${API}/api/admin/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        const ordersData = data.data?.orders || [];
-        const transformedOrders = ordersData.map((order: any) => ({
-          id: order.id,
-          order_id: order.order_id || `#ORD-${String(order.id).padStart(3, "0")}`,
-          customer: order.user?.name || "Unknown",
-          email: order.user?.email || "-",
-          items: order.items?.length || 0,
-          total: parseFloat(order.total),
-          date: order.created_at,
-          status: order.status,
-          order_items: order.items?.map((item: any) => ({
-            id: item.id,
-            plant_name: item.plant?.name || "Unknown Plant",
-            quantity: item.quantity,
-            price: parseFloat(item.price),
-          })),
-        }));
-        setOrders(transformedOrders);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to load orders.");
       }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
+
+      const ordersData = Array.isArray(data.data?.orders) ? data.data.orders : [];
+      setOrders(ordersData.map(transformOrder));
+    } catch (fetchError) {
+      console.error("Error fetching orders:", fetchError);
+      setError(
+        fetchError instanceof Error ? fetchError.message : "Failed to load orders."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateStatus = async (orderId: number, newStatus: string) => {
-    const token = localStorage.getItem("token");
+  const handleUpdateStatus = async (orderId: number, newStatus: OrderStatus) => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Admin login required to update orders.");
+      }
+
+      setSavingOrderId(orderId);
+      setError(null);
+
       const res = await fetch(`${API}/api/orders/${orderId}/status`, {
         method: "PUT",
         headers: {
@@ -80,15 +161,29 @@ export default function ManageOrders() {
         },
         body: JSON.stringify({ status: newStatus }),
       });
+      const data = await res.json();
 
-      if (res.ok) {
-        fetchOrders();
-        if (selectedOrder?.id === orderId) {
-          setSelectedOrder({ ...selectedOrder, status: newStatus as Order["status"] });
-        }
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update order status.");
       }
-    } catch (error) {
-      console.error("Error updating order status:", error);
+
+      const updatedOrder = transformOrder(data.data?.order);
+
+      setOrders((currentOrders) =>
+        currentOrders.map((order) => (order.id === orderId ? updatedOrder : order))
+      );
+      setSelectedOrder((currentOrder) =>
+        currentOrder?.id === orderId ? updatedOrder : currentOrder
+      );
+    } catch (updateError) {
+      console.error("Error updating order status:", updateError);
+      setError(
+        updateError instanceof Error
+          ? updateError.message
+          : "Failed to update order status."
+      );
+    } finally {
+      setSavingOrderId(null);
     }
   };
 
@@ -104,28 +199,28 @@ export default function ManageOrders() {
       order.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(price);
-  };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
       case "delivered":
         return <CheckCircle size={16} />;
+      case "out_for_delivery":
+        return <MapPin size={16} />;
       case "shipped":
         return <Truck size={16} />;
-      case "processing":
+      case "packed":
         return <Package size={16} />;
       case "cancelled":
         return <XCircle size={16} />;
@@ -134,13 +229,25 @@ export default function ManageOrders() {
     }
   };
 
-  const getNextStatus = (currentStatus: string): string | null => {
-    const flow = ["pending", "processing", "shipped", "delivered"];
-    const index = flow.indexOf(currentStatus);
-    if (index >= 0 && index < flow.length - 1) {
-      return flow[index + 1];
+  const getNextStatus = (currentStatus: OrderStatus): OrderStatus | null =>
+    statusFlow[currentStatus];
+
+  const canCancelOrder = (status: OrderStatus) =>
+    status === "pending" || status === "packed";
+
+  const getActionIcon = (status: OrderStatus) => {
+    switch (status) {
+      case "packed":
+        return <Package size={16} />;
+      case "shipped":
+        return <Truck size={16} />;
+      case "out_for_delivery":
+        return <MapPin size={16} />;
+      case "delivered":
+        return <CheckCircle size={16} />;
+      default:
+        return <Package size={16} />;
     }
-    return null;
   };
 
   return (
@@ -153,6 +260,17 @@ export default function ManageOrders() {
           </div>
         </div>
 
+        {error && (
+          <div className="admin-card" style={{ marginBottom: "1rem" }}>
+            <div
+              className="admin-card-body"
+              style={{ padding: "1rem 1.25rem", color: "#dc2626" }}
+            >
+              {error}
+            </div>
+          </div>
+        )}
+
         <div className="admin-filters">
           <div className="admin-search">
             <Search size={18} />
@@ -160,7 +278,7 @@ export default function ManageOrders() {
               type="text"
               placeholder="Search by order ID or customer name..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
             />
           </div>
         </div>
@@ -183,47 +301,48 @@ export default function ManageOrders() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td className="admin-order-id">{order.order_id}</td>
-                    <td>{order.customer}</td>
-                    <td className="admin-email">{order.email}</td>
-                    <td>{order.items}</td>
-                    <td className="admin-price">{formatPrice(order.total)}</td>
-                    <td>{formatDate(order.date)}</td>
-                    <td>
-                      <span className={`admin-status-badge status-${order.status}`}>
-                        {getStatusIcon(order.status)}
-                        {order.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="admin-actions">
-                        <button
-                          className="admin-action-btn admin-action-view"
-                          title="View Details"
-                          onClick={() => handleViewDetail(order)}
-                        >
-                          <Eye size={16} />
-                        </button>
-                        {getNextStatus(order.status) && (
+                {filteredOrders.map((order) => {
+                  const nextStatus = getNextStatus(order.status);
+
+                  return (
+                    <tr key={order.id}>
+                      <td className="admin-order-id">{order.order_id}</td>
+                      <td>{order.customer}</td>
+                      <td className="admin-email">{order.email}</td>
+                      <td>{order.items}</td>
+                      <td className="admin-price">{formatPrice(order.total)}</td>
+                      <td>{formatDate(order.date)}</td>
+                      <td>
+                        <span className={`admin-status-badge status-${order.status}`}>
+                          {getStatusIcon(order.status)}
+                          {formatStatusLabel(order.status)}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="admin-actions">
                           <button
-                            className="admin-action-btn"
-                            style={{ background: "#dbeafe", color: "#2563eb" }}
-                            title={`Mark as ${getNextStatus(order.status)}`}
-                            onClick={() => handleUpdateStatus(order.id, getNextStatus(order.status)!)}
+                            className="admin-action-btn admin-action-view"
+                            title="View Details"
+                            onClick={() => handleViewDetail(order)}
                           >
-                            {getNextStatus(order.status) === "delivered" ? (
-                              <CheckCircle size={16} />
-                            ) : (
-                              <Truck size={16} />
-                            )}
+                            <Eye size={16} />
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {nextStatus && (
+                            <button
+                              className="admin-action-btn"
+                              style={{ background: "#dbeafe", color: "#2563eb" }}
+                              title={`Mark as ${formatStatusLabel(nextStatus)}`}
+                              disabled={savingOrderId === order.id}
+                              onClick={() => handleUpdateStatus(order.id, nextStatus)}
+                            >
+                              {getActionIcon(nextStatus)}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -237,11 +356,14 @@ export default function ManageOrders() {
 
         {showDetailModal && selectedOrder && (
           <div className="admin-modal-overlay" onClick={() => setShowDetailModal(false)}>
-            <div className="admin-modal admin-modal-large" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="admin-modal admin-modal-large"
+              onClick={(event) => event.stopPropagation()}
+            >
               <div className="admin-modal-header">
                 <h3>Order Details - {selectedOrder.order_id}</h3>
                 <button className="admin-modal-close" onClick={() => setShowDetailModal(false)}>
-                  ×
+                  &times;
                 </button>
               </div>
               <div className="admin-order-detail">
@@ -254,15 +376,30 @@ export default function ManageOrders() {
                   <div className="admin-info-section">
                     <h4>Order Information</h4>
                     <p><strong>Date:</strong> {formatDate(selectedOrder.date)}</p>
-                    <p><strong>Status:</strong> 
+                    <p>
+                      <strong>Status:</strong>{" "}
                       <span className={`admin-status-badge status-${selectedOrder.status}`}>
-                        {selectedOrder.status}
+                        {formatStatusLabel(selectedOrder.status)}
                       </span>
                     </p>
                     <p><strong>Total:</strong> {formatPrice(selectedOrder.total)}</p>
+                    <p>
+                      <strong>Courier:</strong>{" "}
+                      {selectedOrder.courier_name || "Not assigned yet"}
+                    </p>
+                    <p>
+                      <strong>Tracking:</strong>{" "}
+                      {selectedOrder.tracking_number || "Not assigned yet"}
+                    </p>
+                  </div>
+                  <div className="admin-info-section">
+                    <h4>Shipping Information</h4>
+                    <p><strong>Name:</strong> {selectedOrder.shipping_name}</p>
+                    <p><strong>Phone:</strong> {selectedOrder.shipping_phone}</p>
+                    <p><strong>Address:</strong> {selectedOrder.shipping_address}</p>
                   </div>
                 </div>
-                
+
                 <div className="admin-order-items">
                   <h4>Order Items</h4>
                   <table className="admin-table">
@@ -275,7 +412,7 @@ export default function ManageOrders() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedOrder.order_items?.map((item) => (
+                      {selectedOrder.order_items.map((item) => (
                         <tr key={item.id}>
                           <td>{item.plant_name}</td>
                           <td>{item.quantity}</td>
@@ -291,21 +428,25 @@ export default function ManageOrders() {
                   {getNextStatus(selectedOrder.status) && (
                     <button
                       className="admin-btn admin-btn-primary"
-                      onClick={() => {
-                        handleUpdateStatus(selectedOrder.id, getNextStatus(selectedOrder.status)!);
-                        setShowDetailModal(false);
-                      }}
+                      disabled={savingOrderId === selectedOrder.id}
+                      onClick={() =>
+                        handleUpdateStatus(
+                          selectedOrder.id,
+                          getNextStatus(selectedOrder.status) as OrderStatus
+                        )
+                      }
                     >
-                      Mark as {getNextStatus(selectedOrder.status)}
+                      Mark as{" "}
+                      {formatStatusLabel(
+                        getNextStatus(selectedOrder.status) as OrderStatus
+                      )}
                     </button>
                   )}
-                  {selectedOrder.status !== "cancelled" && selectedOrder.status !== "delivered" && (
+                  {canCancelOrder(selectedOrder.status) && (
                     <button
                       className="admin-btn admin-btn-danger"
-                      onClick={() => {
-                        handleUpdateStatus(selectedOrder.id, "cancelled");
-                        setShowDetailModal(false);
-                      }}
+                      disabled={savingOrderId === selectedOrder.id}
+                      onClick={() => handleUpdateStatus(selectedOrder.id, "cancelled")}
                     >
                       Cancel Order
                     </button>

@@ -17,9 +17,20 @@ interface ProductGridProps {
   loading: boolean;
   error: string | null;
   fetchPlants: () => void;
+  wishlistIds: number[];
+  wishlistBusyId: number | null;
+  onToggleWishlist: (plantId: number) => void;
 }
 
-export default function ProductGrid({ plants, loading, error, fetchPlants }: ProductGridProps) {
+export default function ProductGrid({
+  plants,
+  loading,
+  error,
+  fetchPlants,
+  wishlistIds,
+  wishlistBusyId,
+  onToggleWishlist,
+}: ProductGridProps) {
   const navigate = useNavigate();
 
   if (error) {
@@ -89,8 +100,24 @@ export default function ProductGrid({ plants, loading, error, fetchPlants }: Pro
                 className="plants-card-image"
                 onClick={() => navigate(`/plants/${plant.id}`)}
               />
-              <button className="plants-wishlist-btn">
-                <Heart size={20} />
+              <button
+                type="button"
+                className={`plants-wishlist-btn ${
+                  wishlistIds.includes(plant.id) ? "active" : ""
+                }`}
+                onClick={() => onToggleWishlist(plant.id)}
+                aria-label={
+                  wishlistIds.includes(plant.id)
+                    ? "Remove from wishlist"
+                    : "Add to wishlist"
+                }
+                aria-pressed={wishlistIds.includes(plant.id)}
+                disabled={wishlistBusyId === plant.id}
+              >
+                <Heart
+                  size={20}
+                  fill={wishlistIds.includes(plant.id) ? "currentColor" : "none"}
+                />
               </button>
             </div>
             <div className="plants-card-content">

@@ -220,10 +220,36 @@ class OrderController extends Controller
     public function updateStatus(UpdateOrderStatusRequest $request, $id)
     {
         $order = Order::findOrFail($id);
-        $order->status = $request->status;
+        $status = $request->status === 'processing' ? 'packed' : $request->status;
+        $currentStatus = $order->status === 'processing' ? 'packed' : $order->status;
+
+        if (in_array($currentStatus, ['delivered', 'cancelled'])) {
+            return response()->json([
+                'message' => 'Delivered or cancelled orders cannot be updated',
+                'errors' => [],
+            ], 422);
+        }
+
+        $allowedTransitions = [
+            'pending' => ['packed', 'cancelled'],
+            'packed' => ['shipped', 'cancelled'],
+            'shipped' => ['out_for_delivery'],
+            'out_for_delivery' => ['delivered'],
+        ];
+
+        if ($status !== $currentStatus && !in_array($status, $allowedTransitions[$currentStatus] ?? [])) {
+            return response()->json([
+                'message' => 'Invalid order status transition',
+                'errors' => [
+                    'status' => ['This order cannot move to the requested status.'],
+                ],
+            ], 422);
+        }
+
+        $order->status = $status;
         
         // Update tracking timestamps based on status
-        switch ($request->status) {
+        switch ($status) {
             case 'packed':
                 $order->packed_at = now();
                 break;
@@ -315,7 +341,7 @@ class OrderController extends Controller
             [
                 'status' => 'packed',
                 'label' => 'Packed',
-                'completed' => in_array($order->status, ['packed', 'shipped', 'out_for_delivery', 'delivered']),
+                'completed' => in_array($order->status, ['processing', 'packed', 'shipped', 'out_for_delivery', 'delivered']),
                 'date' => $order->packed_at,
                 'description' => 'Your order has been packed and is ready for shipment',
             ],

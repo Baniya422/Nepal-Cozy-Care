@@ -14,6 +14,12 @@ class OrderItem extends Model
         'line_total',
     ];
 
+    protected $casts = [
+        'quantity' => 'integer',
+        'price' => 'float',
+        'line_total' => 'float',
+    ];
+
     public function plant()
     {
         return $this->belongsTo(Plant::class);

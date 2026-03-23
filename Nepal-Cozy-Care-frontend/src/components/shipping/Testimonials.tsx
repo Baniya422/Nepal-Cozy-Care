@@ -8,7 +8,7 @@ export default function Testimonials() {
           <div className="shipping-testimonial-card">
             <div className="shipping-testimonial-header">
               <img 
-                src="/images/customer1.jpg" 
+                src="/images/team-emily.jpg" 
                 alt="Customer" 
                 className="shipping-testimonial-avatar"
               />
@@ -30,7 +30,7 @@ export default function Testimonials() {
           <div className="shipping-testimonial-card shipping-testimonial-featured">
             <div className="shipping-testimonial-header">
               <img 
-                src="/images/customer2.jpg" 
+                src="/images/team-sarah.jpg" 
                 alt="Customer" 
                 className="shipping-testimonial-avatar"
               />

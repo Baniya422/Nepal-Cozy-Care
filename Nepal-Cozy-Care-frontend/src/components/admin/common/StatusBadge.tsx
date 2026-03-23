@@ -14,17 +14,20 @@ export default function StatusBadge({ status, type = 'active' }: StatusBadgeProp
         switch (String(status).toLowerCase()) {
           case 'completed':
           case 'delivered':
-            return 'admin-status-completed';
+            return 'status-completed';
           case 'pending':
-            return 'admin-status-pending';
+            return 'status-pending';
+          case 'packed':
           case 'processing':
-            return 'admin-status-processing';
+            return 'status-packed';
           case 'shipped':
-            return 'admin-status-shipped';
+            return 'status-shipped';
+          case 'out_for_delivery':
+            return 'status-out_for_delivery';
           case 'cancelled':
-            return 'admin-status-cancelled';
+            return 'status-cancelled';
           default:
-            return 'admin-status-pending';
+            return 'status-pending';
         }
       case 'payment':
         return status === 'paid' ? 'admin-status-paid' : 'admin-status-unpaid';
@@ -37,7 +40,10 @@ export default function StatusBadge({ status, type = 'active' }: StatusBadgeProp
     if (type === 'active') {
       return status === 'active' || status === '1' || status === true ? 'Active' : 'Inactive';
     }
-    return String(status).charAt(0).toUpperCase() + String(status).slice(1);
+    return String(status)
+      .split('_')
+      .join(' ')
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
   };
 
   return (

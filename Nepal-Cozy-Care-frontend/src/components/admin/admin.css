@@ -1044,7 +1044,7 @@
 /* Additional Admin Styles */
 .admin-stats-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -1197,6 +1197,12 @@
   color: #d97706;
 }
 
+.status-packed,
+.admin-status-packed {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
 .status-processing {
   background: #dbeafe;
   color: #2563eb;
@@ -1205,6 +1211,12 @@
 .status-shipped {
   background: #f3e8ff;
   color: #9333ea;
+}
+
+.status-out_for_delivery,
+.admin-status-out_for_delivery {
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
 .status-delivered {
