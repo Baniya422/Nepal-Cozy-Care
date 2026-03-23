@@ -47,4 +47,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
+
+    public function gardenEntries()
+    {
+        return $this->hasMany(GardenEntry::class);
+    }
 }

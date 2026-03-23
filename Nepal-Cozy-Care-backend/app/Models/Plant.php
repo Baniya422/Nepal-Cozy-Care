@@ -53,6 +53,11 @@ class Plant extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function gardenEntries(): HasMany
+    {
+        return $this->hasMany(GardenEntry::class);
+    }
+
     // Increment view count for this plant
     public function incrementViews()
     {
@@ -109,5 +114,16 @@ class Plant extends Model
             ->where('is_best_seller', true)
             ->excludeAccessories()
             ->orderBy('created_at', 'desc');
+    }
+
+    public function isAccessory(): bool
+    {
+        $category = strtolower(trim((string) $this->category));
+
+        return str_contains($category, 'pot')
+            || str_contains($category, 'tool')
+            || str_contains($category, 'soil')
+            || str_contains($category, 'fertilizer')
+            || str_contains($category, 'accessory');
     }
 }
