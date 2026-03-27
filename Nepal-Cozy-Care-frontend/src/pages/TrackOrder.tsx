@@ -58,7 +58,14 @@ type OrderData = {
   tax: number;
   shipping_name: string;
   shipping_phone: string;
+  shipping_city?: string;
   shipping_address: string;
+  location_notes?: string;
+  preferred_contact_method?: string;
+  confirmation_status?: string;
+  confirmation_notes?: string;
+  contacted_at?: string;
+  location_confirmed_at?: string;
   items: OrderItem[];
 };
 
@@ -93,7 +100,14 @@ const normalizeOrderData = (rawOrder: any): OrderData => ({
   tax: toNumber(rawOrder?.tax),
   shipping_name: String(rawOrder?.shipping_name ?? ""),
   shipping_phone: String(rawOrder?.shipping_phone ?? ""),
+  shipping_city: rawOrder?.shipping_city ?? undefined,
   shipping_address: String(rawOrder?.shipping_address ?? ""),
+  location_notes: rawOrder?.location_notes ?? undefined,
+  preferred_contact_method: rawOrder?.preferred_contact_method ?? undefined,
+  confirmation_status: rawOrder?.confirmation_status ?? undefined,
+  confirmation_notes: rawOrder?.confirmation_notes ?? undefined,
+  contacted_at: rawOrder?.contacted_at ?? undefined,
+  location_confirmed_at: rawOrder?.location_confirmed_at ?? undefined,
   items: Array.isArray(rawOrder?.items)
     ? rawOrder.items.map((item: any) => ({
         id: Number(item?.id ?? 0),
@@ -381,6 +395,46 @@ export default function TrackOrder() {
                 </div>
               </div>
 
+              <div className="track-order-shipment-card">
+                <h3 className="track-order-section-title">
+                  <Phone size={20} />
+                  Order Confirmation
+                </h3>
+                <div className="track-order-shipment-grid">
+                  <div className="track-order-shipment-item">
+                    <span className="track-order-shipment-label">Preferred Contact</span>
+                    <span className="track-order-shipment-value">
+                      {order.preferred_contact_method
+                        ? formatStatusLabel(order.preferred_contact_method)
+                        : "Phone"}
+                    </span>
+                  </div>
+                  <div className="track-order-shipment-item">
+                    <span className="track-order-shipment-label">Confirmation Status</span>
+                    <span className="track-order-shipment-value">
+                      {order.confirmation_status
+                        ? formatStatusLabel(order.confirmation_status)
+                        : "Pending"}
+                    </span>
+                  </div>
+                  <div className="track-order-shipment-item">
+                    <span className="track-order-shipment-label">Location Confirmed</span>
+                    <span className="track-order-shipment-value">
+                      {order.location_confirmed_at ? formatDate(order.location_confirmed_at) : "Not yet"}
+                    </span>
+                  </div>
+                </div>
+                <p className="track-order-support-text" style={{ marginTop: "1rem" }}>
+                  Our admin team may contact you on {order.shipping_phone} to confirm the exact
+                  delivery location before dispatch.
+                </p>
+                {order.confirmation_notes ? (
+                  <p className="track-order-support-text" style={{ marginTop: "0.5rem" }}>
+                    Admin note: {order.confirmation_notes}
+                  </p>
+                ) : null}
+              </div>
+
               {/* Timeline */}
               <div className="track-order-timeline-card">
                 <h3 className="track-order-section-title">Delivery Progress</h3>
@@ -527,8 +581,11 @@ export default function TrackOrder() {
                     {order.shipping_name}
                   </p>
                   <p className="track-order-address-text">
-                    {order.shipping_address}
+                    {[order.shipping_address, order.shipping_city].filter(Boolean).join(", ")}
                   </p>
+                  {order.location_notes ? (
+                    <p className="track-order-address-text">{order.location_notes}</p>
+                  ) : null}
                   <p className="track-order-address-phone">
                     <Phone size={14} />
                     {order.shipping_phone}

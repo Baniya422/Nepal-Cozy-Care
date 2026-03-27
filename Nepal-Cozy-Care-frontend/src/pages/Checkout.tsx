@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ChevronDown, CreditCard, MapPin, Truck } from "lucide-react";
 import Layout from "../components/layout/Layout";
-import { ChevronDown, Truck, CreditCard, MapPin } from "lucide-react";
 import "../styles/checkout.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -21,34 +21,39 @@ type CartItem = {
 type FormData = {
   shipping_name: string;
   shipping_phone: string;
+  shipping_city: string;
   shipping_address: string;
+  location_notes: string;
+  preferred_contact_method: "phone" | "whatsapp" | "email";
   payment_method: string;
 };
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
-
   const [formData, setFormData] = useState<FormData>({
     shipping_name: "",
     shipping_phone: "",
+    shipping_city: "",
     shipping_address: "",
+    location_notes: "",
+    preferred_contact_method: "phone",
     payment_method: "credit-card",
   });
-
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!token) {
       navigate("/login");
       return;
     }
-    fetchCart();
-  }, [token, navigate]);
+
+    void fetchCart();
+  }, [navigate, token]);
 
   const fetchCart = async () => {
     try {
@@ -66,42 +71,52 @@ export default function Checkout() {
       } else {
         setError("Failed to load cart items");
       }
-    } catch (error) {
-      console.error("Error fetching cart:", error);
+    } catch (fetchError) {
+      console.error("Error fetching cart:", fetchError);
       setError("Error loading cart. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }));
   };
 
   const handlePaymentChange = (method: string) => {
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((previous) => ({
+      ...previous,
       payment_method: method,
     }));
   };
 
-  const validateForm = (): boolean => {
+  const validateForm = () => {
     if (!formData.shipping_name.trim()) {
       setError("Please enter your name");
       return false;
     }
+
     if (!formData.shipping_phone.trim()) {
       setError("Please enter your phone number");
       return false;
     }
+
+    if (!formData.shipping_city.trim()) {
+      setError("Please enter your city or delivery area");
+      return false;
+    }
+
     if (!formData.shipping_address.trim()) {
       setError("Please enter your shipping address");
       return false;
     }
+
     return true;
   };
 
@@ -121,45 +136,48 @@ export default function Checkout() {
         body: JSON.stringify({
           shipping_name: formData.shipping_name,
           shipping_phone: formData.shipping_phone,
+          shipping_city: formData.shipping_city,
           shipping_address: formData.shipping_address,
+          location_notes: formData.location_notes,
+          preferred_contact_method: formData.preferred_contact_method,
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (response.ok) {
-        // Order placed successfully
-        navigate("/track-order", {
-          state: {
-            success: true,
-            orderNumber: data.data?.order?.id,
-            message: "Order placed successfully!",
-          },
-        });
-      } else {
+      if (!response.ok) {
         setError(data.message || "Failed to place order. Please try again.");
+        return;
       }
-    } catch (error) {
-      console.error("Error placing order:", error);
+
+      window.dispatchEvent(new Event("cozycare:cart-updated"));
+      navigate("/track-order", {
+        state: {
+          success: true,
+          orderNumber: data.data?.order?.id,
+          message: "Order placed successfully!",
+        },
+      });
+    } catch (placeOrderError) {
+      console.error("Error placing order:", placeOrderError);
       setError("Error placing order. Please check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const calculateSubtotal = () => {
-    return cartItems.reduce((sum, item) => sum + item.plant.price * item.quantity, 0);
-  };
-
-  const subtotal = calculateSubtotal();
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.plant.price * item.quantity,
+    0
+  );
   const deliveryFee = 0;
   const tax = subtotal * 0.1;
   const total = subtotal + deliveryFee + tax;
 
   const toggleItemExpansion = (itemId: number) => {
-    setExpandedItems((prev) => ({
-      ...prev,
-      [itemId]: !prev[itemId],
+    setExpandedItems((previous) => ({
+      ...previous,
+      [itemId]: !previous[itemId],
     }));
   };
 
@@ -195,15 +213,13 @@ export default function Checkout() {
         <div className="checkout-container">
           <h1 className="checkout-title">Checkout</h1>
 
-          {error && <div className="checkout-error">{error}</div>}
+          {error ? <div className="checkout-error">{error}</div> : null}
 
           <div className="checkout-content">
-            {/* Left Column: Review Items & Shipping */}
             <div className="checkout-left">
-              {/* Order Review */}
               <div className="checkout-section">
                 <h2 className="checkout-section-title">
-                  <span className="checkout-icon">📦</span>
+                  <span className="checkout-icon">Order</span>
                   Order Review
                 </h2>
                 <div className="checkout-items">
@@ -214,13 +230,13 @@ export default function Checkout() {
                         onClick={() => toggleItemExpansion(item.id)}
                       >
                         <div className="checkout-item-main">
-                          {item.plant.image && (
+                          {item.plant.image ? (
                             <img
                               src={`${API}/storage/${item.plant.image}`}
                               alt={item.plant.name}
                               className="checkout-item-image"
                             />
-                          )}
+                          ) : null}
                           <div className="checkout-item-details">
                             <h3>{item.plant.name}</h3>
                             <p className="checkout-item-qty">Qty: {item.quantity}</p>
@@ -239,7 +255,7 @@ export default function Checkout() {
                         </div>
                       </div>
 
-                      {expandedItems[item.id] && (
+                      {expandedItems[item.id] ? (
                         <div className="checkout-item-expanded">
                           <div className="checkout-item-row">
                             <span>Unit Price:</span>
@@ -254,13 +270,12 @@ export default function Checkout() {
                             <span>Rs {(item.plant.price * item.quantity).toFixed(2)}</span>
                           </div>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Shipping Details */}
               <div className="checkout-section">
                 <h2 className="checkout-section-title">
                   <MapPin size={20} />
@@ -294,6 +309,19 @@ export default function Checkout() {
                   </div>
 
                   <div className="checkout-form-group">
+                    <label htmlFor="shipping_city">City / Delivery Area *</label>
+                    <input
+                      type="text"
+                      id="shipping_city"
+                      name="shipping_city"
+                      value={formData.shipping_city}
+                      onChange={handleInputChange}
+                      placeholder="Kathmandu, Lalitpur, Bhaktapur..."
+                      className="checkout-input"
+                    />
+                  </div>
+
+                  <div className="checkout-form-group">
                     <label htmlFor="shipping_address">Shipping Address *</label>
                     <textarea
                       id="shipping_address"
@@ -305,10 +333,42 @@ export default function Checkout() {
                       rows={3}
                     />
                   </div>
+
+                  <div className="checkout-form-group">
+                    <label htmlFor="location_notes">Landmark / Delivery Notes</label>
+                    <textarea
+                      id="location_notes"
+                      name="location_notes"
+                      value={formData.location_notes}
+                      onChange={handleInputChange}
+                      placeholder="Nearby landmark, floor, gate color, or extra location details"
+                      className="checkout-textarea"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="checkout-form-group">
+                    <label htmlFor="preferred_contact_method">Preferred Contact Method *</label>
+                    <select
+                      id="preferred_contact_method"
+                      name="preferred_contact_method"
+                      value={formData.preferred_contact_method}
+                      onChange={handleInputChange}
+                      className="checkout-input"
+                    >
+                      <option value="phone">Call me</option>
+                      <option value="whatsapp">WhatsApp me</option>
+                      <option value="email">Email me</option>
+                    </select>
+                  </div>
+
+                  <p style={{ margin: "-0.25rem 0 0", color: "#4b5563", fontSize: "0.9rem" }}>
+                    Admin may use this method to confirm your order and exact delivery location
+                    before dispatch.
+                  </p>
                 </div>
               </div>
 
-              {/* Payment Method */}
               <div className="checkout-section">
                 <h2 className="checkout-section-title">
                   <CreditCard size={20} />
@@ -324,7 +384,7 @@ export default function Checkout() {
                       onChange={() => handlePaymentChange("credit-card")}
                     />
                     <span className="checkout-payment-label">
-                      <span className="checkout-payment-icon">💳</span>
+                      <span className="checkout-payment-icon">Card</span>
                       Credit / Debit Card
                     </span>
                   </label>
@@ -338,7 +398,7 @@ export default function Checkout() {
                       onChange={() => handlePaymentChange("esewa")}
                     />
                     <span className="checkout-payment-label">
-                      <span className="checkout-payment-icon">🏦</span>
+                      <span className="checkout-payment-icon">eSewa</span>
                       eSewa
                     </span>
                   </label>
@@ -352,7 +412,7 @@ export default function Checkout() {
                       onChange={() => handlePaymentChange("khalti")}
                     />
                     <span className="checkout-payment-label">
-                      <span className="checkout-payment-icon">📱</span>
+                      <span className="checkout-payment-icon">Khalti</span>
                       Khalti
                     </span>
                   </label>
@@ -366,7 +426,7 @@ export default function Checkout() {
                       onChange={() => handlePaymentChange("cod")}
                     />
                     <span className="checkout-payment-label">
-                      <span className="checkout-payment-icon">🚚</span>
+                      <span className="checkout-payment-icon">COD</span>
                       Cash on Delivery
                     </span>
                   </label>
@@ -374,7 +434,6 @@ export default function Checkout() {
               </div>
             </div>
 
-            {/* Right Column: Order Summary */}
             <div className="checkout-right">
               <div className="checkout-summary">
                 <h2 className="checkout-summary-title">Order Summary</h2>
@@ -395,7 +454,7 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                <div className="checkout-summary-divider"></div>
+                <div className="checkout-summary-divider" />
 
                 <div className="checkout-summary-row">
                   <span>Subtotal</span>
@@ -415,7 +474,7 @@ export default function Checkout() {
                   <span>Rs {tax.toFixed(2)}</span>
                 </div>
 
-                <div className="checkout-summary-divider"></div>
+                <div className="checkout-summary-divider" />
 
                 <div className="checkout-summary-row checkout-summary-total">
                   <span>Total Amount</span>
@@ -439,14 +498,13 @@ export default function Checkout() {
                 </button>
               </div>
 
-              {/* Delivery Info */}
               <div className="checkout-info-card">
-                <h3 className="checkout-info-title">📦 Delivery Information</h3>
+                <h3 className="checkout-info-title">Delivery Information</h3>
                 <ul className="checkout-info-list">
                   <li>Free delivery on all orders across Nepal</li>
                   <li>Delivery typically takes 3-5 business days</li>
+                  <li>Admin may call, email, or WhatsApp to confirm the location</li>
                   <li>Track your order after placement</li>
-                  <li>Secure and encrypted payment processing</li>
                 </ul>
               </div>
             </div>

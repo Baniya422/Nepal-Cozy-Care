@@ -14,9 +14,12 @@ class CheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'shipping_name' => ['nullable', 'string', 'max:255'],
-            'shipping_phone' => ['nullable', 'string', 'max:30'],
-            'shipping_address' => ['nullable', 'string', 'max:255'],
+            'shipping_name' => ['required', 'string', 'max:255'],
+            'shipping_phone' => ['required', 'string', 'max:30'],
+            'shipping_city' => ['required', 'string', 'max:120'],
+            'shipping_address' => ['required', 'string', 'max:255'],
+            'location_notes' => ['nullable', 'string', 'max:1000'],
+            'preferred_contact_method' => ['required', 'in:phone,whatsapp,email'],
         ];
     }
 }

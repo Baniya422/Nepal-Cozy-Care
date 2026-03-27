@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Events\OrderCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
+use App\Http\Requests\UpdateOrderConfirmationRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
 use App\Models\Cart;
+use App\Models\GardenEntry;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Plant;
@@ -56,8 +58,8 @@ class OrderController extends Controller
             }
 
             // 2) Fees (you can adjust later)
-            $deliveryFee = 0; // set later if needed
-            $tax = 0;         // set later if needed
+            $deliveryFee = 0;
+            $tax = round($subtotal * 0.10, 2);
             $total = $subtotal + $deliveryFee + $tax;
 
             // 3) Create order
@@ -71,7 +73,12 @@ class OrderController extends Controller
                 'total' => $total,
                 'shipping_name' => $request->shipping_name,
                 'shipping_phone' => $request->shipping_phone,
+                'shipping_city' => $request->shipping_city,
                 'shipping_address' => $request->shipping_address,
+                'location_notes' => $request->location_notes,
+                'preferred_contact_method' => $request->preferred_contact_method,
+                'confirmation_status' => 'pending',
+                'estimated_delivery_date' => now()->addDays(4),
             ]);
 
             // 4) Create items + reduce stock
@@ -92,6 +99,20 @@ class OrderController extends Controller
                 // reduce stock
                 $plant->stock = $plant->stock - $item->quantity;
                 $plant->save();
+
+                if (! $plant->isAccessory()) {
+                    GardenEntry::create([
+                        'user_id' => $userId,
+                        'plant_id' => $plant->id,
+                        'source_order_id' => $order->id,
+                        'nickname' => $plant->name,
+                        'notes' => 'Added automatically after checkout.',
+                        'quantity' => $item->quantity,
+                        'watering_frequency_days' => $this->guessWateringFrequency($plant),
+                        'fertilizing_frequency_days' => 30,
+                        'acquired_at' => now()->toDateString(),
+                    ]);
+                }
             }
 
             // 5) Clear cart
@@ -275,7 +296,39 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Order status updated',
             'data' => [
-                'order' => $order,
+                'order' => $order->fresh(['items.plant', 'user']),
+            ],
+        ]);
+    }
+
+    public function updateConfirmation(UpdateOrderConfirmationRequest $request, $id)
+    {
+        $order = Order::with(['items.plant', 'user'])->findOrFail($id);
+
+        if ($request->has('confirmation_status')) {
+            $order->confirmation_status = $request->confirmation_status ?? 'pending';
+
+            if (in_array($order->confirmation_status, ['contacted', 'location_confirmed']) && ! $order->contacted_at) {
+                $order->contacted_at = now();
+            }
+
+            if ($order->confirmation_status === 'location_confirmed' && ! $order->location_confirmed_at) {
+                $order->location_confirmed_at = now();
+            }
+        }
+
+        if ($request->has('confirmation_notes')) {
+            $order->confirmation_notes = $request->filled('confirmation_notes')
+                ? trim((string) $request->confirmation_notes)
+                : null;
+        }
+
+        $order->save();
+
+        return response()->json([
+            'message' => 'Order confirmation updated',
+            'data' => [
+                'order' => $order->fresh(['items.plant', 'user']),
             ],
         ]);
     }
@@ -371,5 +424,24 @@ class OrderController extends Controller
         ];
 
         return $timeline;
+    }
+
+    private function guessWateringFrequency(Plant $plant): int
+    {
+        $value = strtolower((string) $plant->water);
+
+        if (str_contains($value, 'daily')) {
+            return 2;
+        }
+
+        if (str_contains($value, 'bi') || str_contains($value, 'every two')) {
+            return 14;
+        }
+
+        if (str_contains($value, 'low') || str_contains($value, 'weekly')) {
+            return 7;
+        }
+
+        return 6;
     }
 }

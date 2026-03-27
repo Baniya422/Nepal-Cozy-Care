@@ -24,7 +24,14 @@ class Order extends Model
         'total',
         'shipping_name',
         'shipping_phone',
+        'shipping_city',
         'shipping_address',
+        'location_notes',
+        'preferred_contact_method',
+        'confirmation_status',
+        'confirmation_notes',
+        'contacted_at',
+        'location_confirmed_at',
     ];
 
     protected $casts = [
@@ -37,6 +44,8 @@ class Order extends Model
         'out_for_delivery_at' => 'datetime',
         'delivered_at' => 'datetime',
         'estimated_delivery_date' => 'datetime',
+        'contacted_at' => 'datetime',
+        'location_confirmed_at' => 'datetime',
     ];
 
     public function items()
