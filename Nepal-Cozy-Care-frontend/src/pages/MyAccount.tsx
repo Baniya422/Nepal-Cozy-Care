@@ -1688,6 +1688,10 @@ export default function MyAccount() {
                 <Package size={16} />
                 View Orders
               </button>
+              <button type="button" className="account-hero-btn secondary" onClick={() => navigate("/my-garden")}>
+                <Leaf size={16} />
+                My Garden
+              </button>
               <button type="button" className="account-hero-btn secondary" onClick={() => openTrackOrder()}>
                 <Truck size={16} />
                 Track Order

@@ -31,6 +31,11 @@ import HelpCenter from './pages/HelpCenter'
 import Checkout from './pages/Checkout'
 import OurMission from './pages/OurMission'
 import MyAccount from './pages/MyAccount'
+import MyGarden from './pages/MyGarden'
+import BlogDetail from './pages/BlogDetail'
+import ManageSeasonalReminders from './pages/admin/ManageSeasonalReminders'
+import ManageContactMessages from './pages/admin/ManageContactMessages'
+import ManageGardenEntries from './pages/admin/ManageGardenEntries'
 
 function App() {
   return (
@@ -45,9 +50,11 @@ function App() {
       <Route path="/plant-finder" element={<PlantFinder />} />
       <Route path="/shipping" element={<ShippingDelivery />} />
       <Route path="/blogs" element={<Blogs />} />
+      <Route path="/blogs/:id" element={<BlogDetail />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/account" element={<MyAccount />} />
+      <Route path="/my-garden" element={<MyGarden />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/about" element={<About />} />
       <Route path="/mission" element={<OurMission />} />
@@ -120,6 +127,30 @@ function App() {
         element={
           <AdminProtectedRoute>
             <Reports />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/seasonal-reminders" 
+        element={
+          <AdminProtectedRoute>
+            <ManageSeasonalReminders />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/contact-messages" 
+        element={
+          <AdminProtectedRoute>
+            <ManageContactMessages />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/garden-entries" 
+        element={
+          <AdminProtectedRoute>
+            <ManageGardenEntries />
           </AdminProtectedRoute>
         } 
       />

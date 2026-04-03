@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\CareTipController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\GardenEntryController;
+use App\Http\Controllers\Api\SeasonalReminderController;
 
 // Test endpoint where ping testing is done to check if API is connected
 Route::get('/ping', function () {
@@ -23,6 +26,7 @@ Route::get('/ping', function () {
 // Auth routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/contact', [ContactMessageController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -48,11 +52,6 @@ Route::get('/homepage/best-sellers', [PlantController::class, 'bestSellersHomepa
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
-    // Admin: plant management
-    Route::post('/plants', [PlantController::class, 'store']);
-    Route::put('/plants/{id}', [PlantController::class, 'update']);
-    Route::delete('/plants/{id}', [PlantController::class, 'destroy']);
-
     // Cart
     Route::get('/cart', [CartController::class, 'index']);        // view cart
     Route::post('/cart', [CartController::class, 'store']);       // add item
@@ -70,6 +69,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store']);
     Route::delete('/wishlist/{plantId}', [WishlistController::class, 'destroy']);
+
+    // My Garden
+    Route::get('/my-garden', [GardenEntryController::class, 'index']);
+    Route::post('/my-garden', [GardenEntryController::class, 'store']);
+    Route::put('/my-garden/{id}', [GardenEntryController::class, 'update']);
+    Route::delete('/my-garden/{id}', [GardenEntryController::class, 'destroy']);
+    Route::post('/my-garden/{id}/water', [GardenEntryController::class, 'markWatered']);
+    Route::post('/my-garden/{id}/fertilize', [GardenEntryController::class, 'markFertilized']);
 
     // Reviews (creating requires login)
     Route::post('/reviews', [ReviewController::class, 'store']);
@@ -91,6 +98,7 @@ Route::get('/top-stories', [BlogController::class, 'topStories']);
 Route::get('/care-tips', [CareTipController::class, 'index']);
 Route::get('/care-tips/categories', [CareTipController::class, 'categories']);
 Route::get('/care-tips/{id}', [CareTipController::class, 'show']);
+Route::get('/seasonal-reminders/current', [SeasonalReminderController::class, 'current']);
 
 // Admin-only status update for orders + blog CRUD
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
@@ -103,9 +111,14 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     
     // Admin plant management - list all plants including inactive
     Route::get('/admin/plants', [PlantController::class, 'adminIndex']);
+    Route::post('/plants', [PlantController::class, 'store']);
+    Route::put('/plants/{id}', [PlantController::class, 'update']);
+    Route::delete('/plants/{id}', [PlantController::class, 'destroy']);
     
     Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+    Route::put('/orders/{id}/confirmation', [OrderController::class, 'updateConfirmation']);
+    Route::get('/admin/garden-entries', [GardenEntryController::class, 'adminIndex']);
 
     // Blog admin CRUD
     Route::get('/admin/blogs', [BlogController::class, 'adminIndex']);  // get all blogs (published + unpublished)
@@ -118,4 +131,15 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/care-tips', [CareTipController::class, 'store']);
     Route::put('/care-tips/{id}', [CareTipController::class, 'update']);
     Route::delete('/care-tips/{id}', [CareTipController::class, 'destroy']);
+
+    // Seasonal reminders
+    Route::get('/admin/seasonal-reminders', [SeasonalReminderController::class, 'adminIndex']);
+    Route::post('/seasonal-reminders', [SeasonalReminderController::class, 'store']);
+    Route::put('/seasonal-reminders/{id}', [SeasonalReminderController::class, 'update']);
+    Route::delete('/seasonal-reminders/{id}', [SeasonalReminderController::class, 'destroy']);
+
+    // Contact inbox
+    Route::get('/admin/contact-messages', [ContactMessageController::class, 'adminIndex']);
+    Route::put('/contact-messages/{id}/status', [ContactMessageController::class, 'updateStatus']);
+    Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy']);
 });

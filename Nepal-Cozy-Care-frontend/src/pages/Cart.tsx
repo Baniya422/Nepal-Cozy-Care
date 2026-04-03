@@ -100,6 +100,7 @@ export default function Cart() {
             item.id === itemId ? { ...item, quantity: newQuantity } : item
           )
         );
+        window.dispatchEvent(new Event("cozycare:cart-updated"));
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
@@ -119,6 +120,7 @@ export default function Cart() {
 
       if (response.ok) {
         setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+        window.dispatchEvent(new Event("cozycare:cart-updated"));
       }
     } catch (error) {
       console.error("Error removing item:", error);
@@ -138,6 +140,7 @@ export default function Cart() {
 
       if (response.ok) {
         fetchCart();
+        window.dispatchEvent(new Event("cozycare:cart-updated"));
       }
     } catch (error) {
       console.error("Error adding to cart:", error);

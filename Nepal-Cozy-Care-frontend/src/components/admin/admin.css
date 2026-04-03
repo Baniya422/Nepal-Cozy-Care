@@ -1125,6 +1125,10 @@
   margin: 0 0 0.75rem 0;
 }
 
+.admin-info-section-wide {
+  grid-column: 1 / -1;
+}
+
 .admin-info-section p {
   margin: 0.5rem 0;
   font-size: 0.875rem;
@@ -1157,6 +1161,39 @@
 
 .admin-btn-danger:hover {
   background: #dc2626;
+}
+
+.admin-order-contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-order-confirmation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-order-confirmation-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem;
+}
+
+.admin-order-confirmation-card span {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.admin-order-confirmation-card strong {
+  color: #1e293b;
+  font-size: 0.875rem;
 }
 
 .admin-btn-sm {
@@ -1217,6 +1254,16 @@
 .admin-status-out_for_delivery {
   background: #e0f2fe;
   color: #0369a1;
+}
+
+.status-contacted {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.status-location_confirmed {
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .status-delivered {
@@ -1318,6 +1365,13 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .admin-order-info,
+  .admin-order-confirmation-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1024px) {

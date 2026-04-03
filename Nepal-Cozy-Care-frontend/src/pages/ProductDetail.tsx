@@ -87,6 +87,7 @@ export function ProductDetail() {
         return false;
       }
 
+      window.dispatchEvent(new Event("cozycare:cart-updated"));
       alert(`Added ${quantity} ${plant.name} to cart!`);
       return true;
     } catch (error) {
