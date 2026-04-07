@@ -1,24 +1,33 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  AlertCircle,
-  ChevronRight,
-  ExternalLink,
-  Heart,
-  LayoutDashboard,
-  Leaf,
-  LogOut,
-  MapPin,
-  Package,
-  Settings,
-  Shield,
-  ShoppingBag,
-  Trash2,
-  Truck,
-  User,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import AccountGuestPrompt from "../components/my-account/AccountGuestPrompt";
+import AccountHero from "../components/my-account/AccountHero";
+import AccountLoadingCard from "../components/my-account/AccountLoadingCard";
+import AccountMainHeader from "../components/my-account/AccountMainHeader";
+import AccountNotice from "../components/my-account/AccountNotice";
+import AccountSidebar from "../components/my-account/AccountSidebar";
+import { accountSections } from "../components/my-account/sectionConfig";
+import AccountAddressesSection from "../components/my-account/sections/AccountAddressesSection";
+import AccountOrdersSection from "../components/my-account/sections/AccountOrdersSection";
+import AccountOverviewSection from "../components/my-account/sections/AccountOverviewSection";
+import AccountPreferencesSection from "../components/my-account/sections/AccountPreferencesSection";
+import AccountProfileSection from "../components/my-account/sections/AccountProfileSection";
+import AccountSecuritySection from "../components/my-account/sections/AccountSecuritySection";
+import AccountWishlistSection from "../components/my-account/sections/AccountWishlistSection";
+import type {
+  AccountOrder,
+  AccountSection,
+  AccountUser,
+  AddressEntry,
+  AddressForm,
+  Notice,
+  PasswordForm,
+  Preferences,
+  ProfileExtras,
+  ProfileForm,
+  WishlistEntry,
+} from "../components/my-account/types";
 import Layout from "../components/layout/Layout";
 import "../styles/my-account.css";
 
@@ -28,140 +37,6 @@ const PROFILE_KEY = "account.profile";
 const ADDRESSES_KEY = "account.addresses";
 const PREFERENCES_KEY = "account.preferences";
 const PASSWORD_CHANGED_KEY = "account.passwordChangedAt";
-
-type AccountSection =
-  | "overview"
-  | "profile"
-  | "orders"
-  | "addresses"
-  | "wishlist"
-  | "security"
-  | "preferences";
-
-type AccountUser = {
-  id: number;
-  name: string;
-  email: string;
-  role?: string;
-  created_at?: string;
-};
-
-type OrderItem = {
-  id: number;
-  quantity: number;
-  price: number;
-  line_total?: number;
-  plant?: {
-    id: number;
-    name: string;
-    image?: string | null;
-  } | null;
-};
-
-type AccountOrder = {
-  id: number;
-  status: string;
-  payment_status?: string;
-  subtotal: number;
-  delivery_fee: number;
-  tax: number;
-  total: number;
-  shipping_name?: string | null;
-  shipping_phone?: string | null;
-  shipping_address?: string | null;
-  tracking_number?: string | null;
-  courier_name?: string | null;
-  created_at: string;
-  items: OrderItem[];
-};
-
-type WishlistEntry = {
-  id: number;
-  plant_id: number;
-  plant?: {
-    id: number;
-    name: string;
-    price: number;
-    image?: string | null;
-    room?: string | null;
-    size?: string | null;
-  } | null;
-};
-
-type AddressEntry = {
-  id: string;
-  label: string;
-  address: string;
-  note: string;
-  isDefault: boolean;
-};
-
-type Preferences = {
-  emailUpdates: boolean;
-  smsAlerts: boolean;
-  careReminderDays: number;
-};
-
-type ProfileExtras = {
-  phone: string;
-};
-
-type Notice = {
-  tone: "success" | "error";
-  text: string;
-};
-
-type SectionConfig = {
-  key: AccountSection;
-  label: string;
-  description: string;
-  icon: LucideIcon;
-};
-
-const accountSections: SectionConfig[] = [
-  {
-    key: "overview",
-    label: "Overview",
-    description: "See the parts of your account that need attention first.",
-    icon: LayoutDashboard,
-  },
-  {
-    key: "profile",
-    label: "Profile",
-    description: "Keep your contact details accurate for orders and support.",
-    icon: User,
-  },
-  {
-    key: "orders",
-    label: "Orders",
-    description: "Review recent purchases, expand details, and cancel pending orders.",
-    icon: Package,
-  },
-  {
-    key: "addresses",
-    label: "Addresses",
-    description: "Save common delivery locations so checkout is faster next time.",
-    icon: MapPin,
-  },
-  {
-    key: "wishlist",
-    label: "Wishlist",
-    description: "Manage plants you want to revisit later.",
-    icon: Heart,
-  },
-  {
-    key: "security",
-    label: "Security",
-    description: "Change your password and control active sessions.",
-    icon: Shield,
-  },
-  {
-    key: "preferences",
-    label: "Preferences",
-    description: "Choose how often you want updates and care reminders.",
-    icon: Settings,
-  },
-];
 
 function readStoredUser(): AccountUser | null {
   try {
@@ -235,13 +110,22 @@ function persistPreferences(nextPreferences: Preferences) {
   localStorage.setItem(PREFERENCES_KEY, JSON.stringify(nextPreferences));
 }
 
-function extractErrorMessage(data: any, fallback: string) {
-  const validationMessages = Object.values(data?.errors ?? {}).flat();
+type ErrorResponse = {
+  message?: string;
+  errors?: Record<string, string | string[]>;
+};
+
+function extractErrorMessage(data: unknown, fallback: string) {
+  const payload: ErrorResponse =
+    data && typeof data === "object" ? (data as ErrorResponse) : {};
+  const validationMessages = Object.values(payload.errors ?? {}).flatMap((value) =>
+    Array.isArray(value) ? value : [value]
+  );
   const firstValidationMessage = validationMessages.find(
     (message): message is string => typeof message === "string"
   );
 
-  return data?.message || firstValidationMessage || fallback;
+  return payload.message || firstValidationMessage || fallback;
 }
 
 function buildImageUrl(image?: string | null) {
@@ -345,7 +229,7 @@ export default function MyAccount() {
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [loadingNotice, setLoadingNotice] = useState<Notice | null>(null);
 
-  const [profileForm, setProfileForm] = useState({
+  const [profileForm, setProfileForm] = useState<ProfileForm>({
     name: storedUser?.name ?? "",
     email: storedUser?.email ?? "",
     phone: storedProfileExtras.phone,
@@ -353,7 +237,7 @@ export default function MyAccount() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileNotice, setProfileNotice] = useState<Notice | null>(null);
 
-  const [passwordForm, setPasswordForm] = useState({
+  const [passwordForm, setPasswordForm] = useState<PasswordForm>({
     current_password: "",
     password: "",
     password_confirmation: "",
@@ -364,7 +248,7 @@ export default function MyAccount() {
     localStorage.getItem(PASSWORD_CHANGED_KEY)
   );
 
-  const [addressForm, setAddressForm] = useState({
+  const [addressForm, setAddressForm] = useState<AddressForm>({
     label: "",
     address: "",
     note: "",
@@ -535,15 +419,25 @@ export default function MyAccount() {
     navigate(`/track-order${query}`);
   };
 
-  const renderNotice = (notice: Notice | null) => {
-    if (!notice) return null;
+  const updateProfileField = (field: keyof ProfileForm, value: string) => {
+    setProfileForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
 
-    return (
-      <div className={`account-inline-notice ${notice.tone}`}>
-        <AlertCircle size={16} />
-        <span>{notice.text}</span>
-      </div>
-    );
+  const updateAddressField = (field: keyof AddressForm, value: string) => {
+    setAddressForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const updatePasswordField = (field: keyof PasswordForm, value: string) => {
+    setPasswordForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
   };
 
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -937,674 +831,120 @@ export default function MyAccount() {
   };
 
   const renderOverview = () => (
-    <div className="account-section-stack">
-      <div className="account-stats-grid">
-        <article className="account-stat-card">
-          <span className="account-stat-label">Total Orders</span>
-          <strong>{totalOrders}</strong>
-          <p>Everything you have ordered so far.</p>
-        </article>
-        <article className="account-stat-card">
-          <span className="account-stat-label">Active Deliveries</span>
-          <strong>{activeDeliveries}</strong>
-          <p>Orders currently packed, shipped, or out for delivery.</p>
-        </article>
-        <article className="account-stat-card">
-          <span className="account-stat-label">Wishlist</span>
-          <strong>{wishlistCount}</strong>
-          <p>Plants saved for later decisions.</p>
-        </article>
-        <article className="account-stat-card">
-          <span className="account-stat-label">Next Reminder</span>
-          <strong>{reminderLabel}</strong>
-          <p>Based on your current care reminder preference.</p>
-        </article>
-      </div>
-
-      <div className="account-quick-grid">
-        <button type="button" className="account-quick-card" onClick={() => navigateToSection("profile")}>
-          <div>
-            <h3>Update Profile</h3>
-            <p>Keep your name, email, and phone ready for checkout and support.</p>
-          </div>
-          <ChevronRight size={18} />
-        </button>
-
-        <button type="button" className="account-quick-card" onClick={() => navigateToSection("orders")}>
-          <div>
-            <h3>Review Orders</h3>
-            <p>Open recent order details or cancel any pending purchase.</p>
-          </div>
-          <ChevronRight size={18} />
-        </button>
-
-        <button type="button" className="account-quick-card" onClick={() => navigateToSection("wishlist")}>
-          <div>
-            <h3>Manage Wishlist</h3>
-            <p>Jump back to your saved plants and remove anything outdated.</p>
-          </div>
-          <ChevronRight size={18} />
-        </button>
-
-        <button type="button" className="account-quick-card" onClick={() => openTrackOrder()}>
-          <div>
-            <h3>Track an Order</h3>
-            <p>Open the tracker with your current account email prefilled.</p>
-          </div>
-          <ExternalLink size={18} />
-        </button>
-      </div>
-
-      <div className="account-overview-grid">
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>Recent Orders</h3>
-            <button type="button" className="account-link-btn" onClick={() => navigateToSection("orders")}>
-              View all
-            </button>
-          </div>
-
-          {orders.length === 0 ? (
-            <div className="account-empty-state">
-              <ShoppingBag size={24} />
-              <p>No order history yet.</p>
-              <button type="button" className="account-primary-btn" onClick={() => navigate("/plants")}>
-                Browse Plants
-              </button>
-            </div>
-          ) : (
-            <div className="account-list-stack">
-              {orders.slice(0, 3).map((order) => (
-                <article key={order.id} className="account-list-card">
-                  <div className="account-list-main">
-                    <div>
-                      <p className="account-item-title">Order #{order.id}</p>
-                      <p className="account-item-meta">
-                        {order.items.length} item{order.items.length === 1 ? "" : "s"} | {formatCurrency(order.total)}
-                      </p>
-                    </div>
-                    <span className={`account-status-pill ${getOrderStatusTone(order.status)}`}>
-                      {getOrderStatusLabel(order.status)}
-                    </span>
-                  </div>
-                  <div className="account-list-footer">
-                    <span>{formatDate(order.created_at)}</span>
-                    <button type="button" className="account-link-btn" onClick={() => openTrackOrder(order.id)}>
-                      Track order
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>Default Delivery Address</h3>
-            <button type="button" className="account-link-btn" onClick={() => navigateToSection("addresses")}>
-              Manage
-            </button>
-          </div>
-
-          {defaultAddress ? (
-            <div className="account-address-preview">
-              <strong>{defaultAddress.label}</strong>
-              <p>{defaultAddress.address}</p>
-              <span>{defaultAddress.note || "Default checkout destination"}</span>
-            </div>
-          ) : (
-            <div className="account-empty-state">
-              <MapPin size={24} />
-              <p>No saved addresses yet.</p>
-              <button type="button" className="account-primary-btn" onClick={() => navigateToSection("addresses")}>
-                Add Address
-              </button>
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
+    <AccountOverviewSection
+      totalOrders={totalOrders}
+      activeDeliveries={activeDeliveries}
+      wishlistCount={wishlistCount}
+      reminderLabel={reminderLabel}
+      orders={orders}
+      defaultAddress={defaultAddress}
+      onNavigateToSection={navigateToSection}
+      onOpenTrackOrder={openTrackOrder}
+      onBrowsePlants={() => navigate("/plants")}
+      formatCurrency={formatCurrency}
+      formatDate={formatDate}
+      getOrderStatusTone={getOrderStatusTone}
+      getOrderStatusLabel={getOrderStatusLabel}
+    />
   );
 
   const renderProfile = () => (
-    <div className="account-section-stack">
-      {renderNotice(profileNotice)}
-
-      <div className="account-profile-grid">
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>Snapshot</h3>
-          </div>
-          <div className="account-profile-summary">
-            <div>
-              <p className="account-field-label">Full name</p>
-              <strong>{profileForm.name || "Not set"}</strong>
-            </div>
-            <div>
-              <p className="account-field-label">Email</p>
-              <strong>{profileForm.email || "Not set"}</strong>
-            </div>
-            <div>
-              <p className="account-field-label">Phone</p>
-              <strong>{profileForm.phone || "Add a phone number for delivery calls"}</strong>
-            </div>
-            <div>
-              <p className="account-field-label">Member since</p>
-              <strong>{formatDate(user?.created_at)}</strong>
-            </div>
-          </div>
-        </section>
-
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>Edit Profile</h3>
-          </div>
-
-          <form className="account-form" onSubmit={handleProfileSubmit}>
-            <label className="account-form-field">
-              <span>Full name</span>
-              <input
-                type="text"
-                value={profileForm.name}
-                onChange={(event) =>
-                  setProfileForm((current) => ({
-                    ...current,
-                    name: event.target.value,
-                  }))
-                }
-                placeholder="Your full name"
-              />
-            </label>
-
-            <label className="account-form-field">
-              <span>Email address</span>
-              <input
-                type="email"
-                value={profileForm.email}
-                onChange={(event) =>
-                  setProfileForm((current) => ({
-                    ...current,
-                    email: event.target.value,
-                  }))
-                }
-                placeholder="you@example.com"
-              />
-            </label>
-
-            <label className="account-form-field">
-              <span>Phone number</span>
-              <input
-                type="text"
-                value={profileForm.phone}
-                onChange={(event) =>
-                  setProfileForm((current) => ({
-                    ...current,
-                    phone: event.target.value,
-                  }))
-                }
-                placeholder="+977 98XXXXXXXX"
-              />
-            </label>
-
-            <p className="account-form-hint">
-              Phone number is saved locally for faster checkout and delivery communication.
-            </p>
-
-            <div className="account-form-actions">
-              <button type="submit" className="account-primary-btn" disabled={profileSaving}>
-                {profileSaving ? "Saving..." : "Save Profile"}
-              </button>
-            </div>
-          </form>
-        </section>
-      </div>
-    </div>
+    <AccountProfileSection
+      notice={profileNotice}
+      profileForm={profileForm}
+      memberSinceLabel={formatDate(user?.created_at)}
+      profileSaving={profileSaving}
+      onSubmit={handleProfileSubmit}
+      onChangeProfileField={updateProfileField}
+    />
   );
 
   const renderOrders = () => (
-    <div className="account-section-stack">
-      {orders.length === 0 ? (
-        <div className="account-empty-state account-card">
-          <Package size={28} />
-          <h3>No orders yet</h3>
-          <p>Your completed checkout history will appear here.</p>
-          <button type="button" className="account-primary-btn" onClick={() => navigate("/plants")}>
-            Start Shopping
-          </button>
-        </div>
-      ) : (
-        <div className="account-list-stack">
-          {orders.map((order) => {
-            const isExpanded = expandedOrderId === order.id;
-            const isPending = order.status === "pending";
-
-            return (
-              <section key={order.id} className="account-card">
-                <div className="account-order-head">
-                  <div>
-                    <h3>Order #{order.id}</h3>
-                    <p>
-                      Placed {formatDateTime(order.created_at)} | {order.items.length} item
-                      {order.items.length === 1 ? "" : "s"}
-                    </p>
-                  </div>
-                  <div className="account-order-head-side">
-                    <span className={`account-status-pill ${getOrderStatusTone(order.status)}`}>
-                      {getOrderStatusLabel(order.status)}
-                    </span>
-                    <strong>{formatCurrency(order.total)}</strong>
-                  </div>
-                </div>
-
-                <div className="account-order-actions">
-                  <button type="button" className="account-secondary-btn" onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}>
-                    {isExpanded ? "Hide Details" : "View Details"}
-                  </button>
-                  <button type="button" className="account-secondary-btn" onClick={() => openTrackOrder(order.id)}>
-                    Track Order
-                  </button>
-                  {isPending && (
-                    <button
-                      type="button"
-                      className="account-danger-btn"
-                      onClick={() => void handleCancelOrder(order.id)}
-                      disabled={cancelingOrderId === order.id}
-                    >
-                      {cancelingOrderId === order.id ? "Cancelling..." : "Cancel Order"}
-                    </button>
-                  )}
-                </div>
-
-                {isExpanded && (
-                  <div className="account-order-details">
-                    <div className="account-order-meta-grid">
-                      <article>
-                        <span>Shipping name</span>
-                        <strong>{order.shipping_name || "Not provided"}</strong>
-                      </article>
-                      <article>
-                        <span>Phone</span>
-                        <strong>{order.shipping_phone || "Not provided"}</strong>
-                      </article>
-                      <article>
-                        <span>Address</span>
-                        <strong>{order.shipping_address || "Not provided"}</strong>
-                      </article>
-                      <article>
-                        <span>Payment</span>
-                        <strong>{order.payment_status || "Pending"}</strong>
-                      </article>
-                    </div>
-
-                    <div className="account-order-items">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="account-order-item">
-                          <img
-                            src={buildImageUrl(item.plant?.image)}
-                            alt={item.plant?.name || "Plant"}
-                          />
-                          <div>
-                            <p className="account-item-title">{item.plant?.name || "Product"}</p>
-                            <p className="account-item-meta">
-                              Qty {item.quantity} | {formatCurrency(item.line_total ?? item.price * item.quantity)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </section>
-            );
-          })}
-        </div>
-      )}
-    </div>
+    <AccountOrdersSection
+      orders={orders}
+      expandedOrderId={expandedOrderId}
+      cancelingOrderId={cancelingOrderId}
+      onToggleOrderExpand={(orderId) =>
+        setExpandedOrderId((current) => (current === orderId ? null : orderId))
+      }
+      onOpenTrackOrder={(orderId) => openTrackOrder(orderId)}
+      onCancelOrder={(orderId) => void handleCancelOrder(orderId)}
+      onStartShopping={() => navigate("/plants")}
+      formatDateTime={formatDateTime}
+      formatCurrency={formatCurrency}
+      buildImageUrl={buildImageUrl}
+      getOrderStatusTone={getOrderStatusTone}
+      getOrderStatusLabel={getOrderStatusLabel}
+    />
   );
 
   const renderAddresses = () => (
-    <div className="account-section-stack">
-      {renderNotice(addressNotice)}
-
-      <div className="account-address-layout">
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>{editingAddressId ? "Edit Address" : "Add New Address"}</h3>
-          </div>
-
-          <form className="account-form" onSubmit={handleAddressSubmit}>
-            <label className="account-form-field">
-              <span>Label</span>
-              <input
-                type="text"
-                value={addressForm.label}
-                onChange={(event) =>
-                  setAddressForm((current) => ({
-                    ...current,
-                    label: event.target.value,
-                  }))
-                }
-                placeholder="Home, Office, Gift Delivery"
-              />
-            </label>
-
-            <label className="account-form-field">
-              <span>Full address</span>
-              <textarea
-                value={addressForm.address}
-                onChange={(event) =>
-                  setAddressForm((current) => ({
-                    ...current,
-                    address: event.target.value,
-                  }))
-                }
-                placeholder="Ward, street, city, landmark"
-                rows={4}
-              />
-            </label>
-
-            <label className="account-form-field">
-              <span>Delivery note</span>
-              <input
-                type="text"
-                value={addressForm.note}
-                onChange={(event) =>
-                  setAddressForm((current) => ({
-                    ...current,
-                    note: event.target.value,
-                  }))
-                }
-                placeholder="Gate code, office hours, recipient phone"
-              />
-            </label>
-
-            <div className="account-form-actions">
-              <button type="submit" className="account-primary-btn">
-                {editingAddressId ? "Update Address" : "Save Address"}
-              </button>
-              {editingAddressId && (
-                <button
-                  type="button"
-                  className="account-secondary-btn"
-                  onClick={() => {
-                    setEditingAddressId(null);
-                    setAddressForm({ label: "", address: "", note: "" });
-                  }}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
-        </section>
-
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>Saved Addresses</h3>
-          </div>
-
-          {addresses.length === 0 ? (
-            <div className="account-empty-state">
-              <MapPin size={24} />
-              <p>No saved addresses yet.</p>
-            </div>
-          ) : (
-            <div className="account-list-stack">
-              {addresses.map((address) => (
-                <article key={address.id} className="account-list-card">
-                  <div className="account-list-main">
-                    <div>
-                      <p className="account-item-title">
-                        {address.label}
-                        {address.isDefault ? " | Default" : ""}
-                      </p>
-                      <p className="account-item-meta">{address.address}</p>
-                    </div>
-                  </div>
-
-                  {address.note && <p className="account-item-note">{address.note}</p>}
-
-                  <div className="account-list-actions">
-                    {!address.isDefault && (
-                      <button type="button" className="account-link-btn" onClick={() => handleSetDefaultAddress(address.id)}>
-                        Set default
-                      </button>
-                    )}
-                    <button type="button" className="account-link-btn" onClick={() => handleEditAddress(address)}>
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="account-link-btn danger"
-                      onClick={() => handleDeleteAddress(address.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
+    <AccountAddressesSection
+      notice={addressNotice}
+      editingAddressId={editingAddressId}
+      addressForm={addressForm}
+      addresses={addresses}
+      onSubmit={handleAddressSubmit}
+      onChangeAddressField={updateAddressField}
+      onCancelEdit={() => {
+        setEditingAddressId(null);
+        setAddressForm({ label: "", address: "", note: "" });
+      }}
+      onSetDefaultAddress={handleSetDefaultAddress}
+      onEditAddress={handleEditAddress}
+      onDeleteAddress={handleDeleteAddress}
+    />
   );
 
   const renderWishlist = () => (
-    <div className="account-section-stack">
-      {wishlist.length === 0 ? (
-        <div className="account-empty-state account-card">
-          <Heart size={28} />
-          <h3>Your wishlist is empty</h3>
-          <p>Save plants while browsing to compare them later.</p>
-          <button type="button" className="account-primary-btn" onClick={() => navigate("/plants")}>
-            Explore Plants
-          </button>
-        </div>
-      ) : (
-        <div className="account-wishlist-grid">
-          {wishlist.map((entry) => {
-            const plant = entry.plant;
-            const plantId = plant?.id ?? entry.plant_id;
-
-            return (
-              <article key={entry.id} className="account-card account-wishlist-card">
-                <img src={buildImageUrl(plant?.image)} alt={plant?.name || "Plant"} />
-                <div className="account-wishlist-card-body">
-                  <h3>{plant?.name || "Saved plant"}</h3>
-                  <p>{formatCurrency(plant?.price)}</p>
-                  <span>
-                    {[plant?.room, plant?.size].filter(Boolean).join(" | ") || "Saved for later"}
-                  </span>
-                </div>
-                <div className="account-wishlist-actions">
-                  <button type="button" className="account-primary-btn" onClick={() => navigate(`/plants/${plantId}`)}>
-                    View Product
-                  </button>
-                  <button
-                    type="button"
-                    className="account-icon-btn"
-                    onClick={() => void handleRemoveWishlistItem(plantId)}
-                    disabled={wishlistBusyPlantId === plantId}
-                    title="Remove from wishlist"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
-    </div>
+    <AccountWishlistSection
+      wishlist={wishlist}
+      wishlistBusyPlantId={wishlistBusyPlantId}
+      onExplorePlants={() => navigate("/plants")}
+      onOpenProduct={(plantId) => navigate(`/plants/${plantId}`)}
+      onRemoveWishlistItem={(plantId) => void handleRemoveWishlistItem(plantId)}
+      buildImageUrl={buildImageUrl}
+      formatCurrency={formatCurrency}
+    />
   );
 
   const renderSecurity = () => (
-    <div className="account-section-stack">
-      {renderNotice(securityNotice)}
-
-      <div className="account-security-grid">
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>Password</h3>
-          </div>
-
-          <div className="account-security-summary">
-            <p>
-              Last updated: <strong>{passwordChangedAt ? formatDateTime(passwordChangedAt) : "Not recorded yet"}</strong>
-            </p>
-            <p>Updating your password signs out other devices and keeps this one active.</p>
-          </div>
-
-          <form className="account-form" onSubmit={handlePasswordSubmit}>
-            <label className="account-form-field">
-              <span>Current password</span>
-              <input
-                type="password"
-                value={passwordForm.current_password}
-                onChange={(event) =>
-                  setPasswordForm((current) => ({
-                    ...current,
-                    current_password: event.target.value,
-                  }))
-                }
-                placeholder="Enter current password"
-              />
-            </label>
-
-            <label className="account-form-field">
-              <span>New password</span>
-              <input
-                type="password"
-                value={passwordForm.password}
-                onChange={(event) =>
-                  setPasswordForm((current) => ({
-                    ...current,
-                    password: event.target.value,
-                  }))
-                }
-                placeholder="Minimum 6 characters"
-              />
-            </label>
-
-            <label className="account-form-field">
-              <span>Confirm new password</span>
-              <input
-                type="password"
-                value={passwordForm.password_confirmation}
-                onChange={(event) =>
-                  setPasswordForm((current) => ({
-                    ...current,
-                    password_confirmation: event.target.value,
-                  }))
-                }
-                placeholder="Repeat new password"
-              />
-            </label>
-
-            <div className="account-form-actions">
-              <button type="submit" className="account-primary-btn" disabled={passwordSaving}>
-                {passwordSaving ? "Updating..." : "Update Password"}
-              </button>
-            </div>
-          </form>
-        </section>
-
-        <section className="account-card">
-          <div className="account-card-head">
-            <h3>Session Controls</h3>
-          </div>
-
-          <div className="account-session-actions">
-            <button type="button" className="account-secondary-btn" onClick={() => void handleLogout(false)}>
-              <LogOut size={16} />
-              Logout This Device
-            </button>
-            <button type="button" className="account-danger-btn" onClick={() => void handleLogout(true)}>
-              <Shield size={16} />
-              Logout All Devices
-            </button>
-          </div>
-
-          <p className="account-form-hint">
-            Use logout all if you signed in on another laptop or shared browser and want to invalidate every active session.
-          </p>
-        </section>
-      </div>
-    </div>
+    <AccountSecuritySection
+      notice={securityNotice}
+      passwordForm={passwordForm}
+      passwordSaving={passwordSaving}
+      passwordChangedLabel={passwordChangedAt ? formatDateTime(passwordChangedAt) : "Not recorded yet"}
+      onSubmit={handlePasswordSubmit}
+      onChangePasswordField={updatePasswordField}
+      onLogoutThisDevice={() => void handleLogout(false)}
+      onLogoutAllDevices={() => void handleLogout(true)}
+    />
   );
 
   const renderPreferences = () => (
-    <div className="account-section-stack">
-      {renderNotice(preferencesNotice)}
-
-      <section className="account-card">
-        <div className="account-card-head">
-          <h3>Notification Preferences</h3>
-        </div>
-
-        <div className="account-toggle-list">
-          <label className="account-toggle-row">
-            <div>
-              <strong>Email updates</strong>
-              <span>Receive order updates, restocks, and care notes by email.</span>
-            </div>
-            <input
-              type="checkbox"
-              checked={preferences.emailUpdates}
-              onChange={(event) =>
-                setPreferences((current) => ({
-                  ...current,
-                  emailUpdates: event.target.checked,
-                }))
-              }
-            />
-          </label>
-
-          <label className="account-toggle-row">
-            <div>
-              <strong>SMS alerts</strong>
-              <span>Get delivery-sensitive notices by phone when timing matters.</span>
-            </div>
-            <input
-              type="checkbox"
-              checked={preferences.smsAlerts}
-              onChange={(event) =>
-                setPreferences((current) => ({
-                  ...current,
-                  smsAlerts: event.target.checked,
-                }))
-              }
-            />
-          </label>
-        </div>
-
-        <label className="account-form-field account-reminder-field">
-          <span>Care reminder frequency</span>
-          <select
-            value={preferences.careReminderDays}
-            onChange={(event) =>
-              setPreferences((current) => ({
-                ...current,
-                careReminderDays: Number(event.target.value),
-              }))
-            }
-          >
-            <option value={1}>Every day</option>
-            <option value={3}>Every 3 days</option>
-            <option value={5}>Every 5 days</option>
-            <option value={7}>Every week</option>
-          </select>
-        </label>
-
-        <div className="account-form-actions">
-          <button type="button" className="account-primary-btn" onClick={handleSavePreferences}>
-            Save Preferences
-          </button>
-        </div>
-      </section>
-    </div>
+    <AccountPreferencesSection
+      notice={preferencesNotice}
+      preferences={preferences}
+      onToggleEmailUpdates={(checked) =>
+        setPreferences((current) => ({
+          ...current,
+          emailUpdates: checked,
+        }))
+      }
+      onToggleSmsAlerts={(checked) =>
+        setPreferences((current) => ({
+          ...current,
+          smsAlerts: checked,
+        }))
+      }
+      onReminderChange={(days) =>
+        setPreferences((current) => ({
+          ...current,
+          careReminderDays: days,
+        }))
+      }
+      onSavePreferences={handleSavePreferences}
+    />
   );
 
   const renderActiveSection = () => {
@@ -1630,42 +970,7 @@ export default function MyAccount() {
   if (!sessionToken) {
     return (
       <Layout>
-        <div className="account-page">
-          <section className="account-hero">
-            <div className="account-container account-hero-inner">
-              <div>
-                <span className="account-eyebrow">Customer Dashboard</span>
-                <h1>My Account</h1>
-                <p>
-                  Track deliveries, review saved plants, and manage your checkout details from one place.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="account-shell">
-            <div className="account-container">
-              {renderNotice(loadingNotice)}
-              <div className="account-guest-card">
-                <div className="account-guest-icon">
-                  <Leaf size={26} />
-                </div>
-                <h2>Login required</h2>
-                <p>
-                  Sign in to view your orders, wishlist, saved addresses, and account security settings.
-                </p>
-                <div className="account-guest-actions">
-                  <Link to="/login" className="account-primary-link">
-                    Login
-                  </Link>
-                  <Link to="/register" className="account-secondary-link">
-                    Create Account
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
+        <AccountGuestPrompt loadingNotice={loadingNotice} />
       </Layout>
     );
   }
@@ -1673,88 +978,26 @@ export default function MyAccount() {
   return (
     <Layout>
       <div className="account-page">
-        <section className="account-hero">
-          <div className="account-container account-hero-inner">
-            <div>
-              <span className="account-eyebrow">Customer Dashboard</span>
-              <h1>My Account</h1>
-              <p>
-                Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}. Manage your profile, orders, saved addresses, and care preferences here.
-              </p>
-            </div>
-
-            <div className="account-hero-actions">
-              <button type="button" className="account-hero-btn primary" onClick={() => navigateToSection("orders")}>
-                <Package size={16} />
-                View Orders
-              </button>
-              <button type="button" className="account-hero-btn secondary" onClick={() => navigate("/my-garden")}>
-                <Leaf size={16} />
-                My Garden
-              </button>
-              <button type="button" className="account-hero-btn secondary" onClick={() => openTrackOrder()}>
-                <Truck size={16} />
-                Track Order
-              </button>
-            </div>
-          </div>
-        </section>
+        <AccountHero
+          userName={user?.name}
+          onViewOrders={() => navigateToSection("orders")}
+          onOpenMyGarden={() => navigate("/my-garden")}
+          onOpenTrackOrder={() => openTrackOrder()}
+        />
 
         <section className="account-shell">
           <div className="account-container account-content">
-            <aside className="account-sidebar">
-              <div className="account-sidebar-head">
-                <div className="account-avatar">
-                  {(user?.name || "A").charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <strong>{user?.name || "Account User"}</strong>
-                  <span>{user?.email || "No email available"}</span>
-                </div>
-              </div>
-
-              <div className="account-nav">
-                {accountSections.map((section) => {
-                  const Icon = section.icon;
-
-                  return (
-                    <button
-                      key={section.key}
-                      type="button"
-                      className={`account-nav-btn ${activeSection === section.key ? "active" : ""}`}
-                      onClick={() => navigateToSection(section.key)}
-                    >
-                      <span className="account-nav-btn-main">
-                        <Icon size={16} />
-                        {section.label}
-                      </span>
-                      <ChevronRight size={16} />
-                    </button>
-                  );
-                })}
-              </div>
-            </aside>
+            <AccountSidebar
+              user={user}
+              sections={accountSections}
+              activeSection={activeSection}
+              onNavigateToSection={navigateToSection}
+            />
 
             <main className="account-main">
-              {renderNotice(loadingNotice)}
-
-              <header className="account-main-header">
-                <div>
-                  <p className="account-main-kicker">{selectedSection.label}</p>
-                  <h2>{selectedSection.label}</h2>
-                  <p>{selectedSection.description}</p>
-                </div>
-              </header>
-
-              {loadingAccount ? (
-                <div className="account-loading-card">
-                  <Package size={26} />
-                  <h3>Loading your account</h3>
-                  <p>Fetching your latest profile, orders, and wishlist details.</p>
-                </div>
-              ) : (
-                renderActiveSection()
-              )}
+              <AccountNotice notice={loadingNotice} />
+              <AccountMainHeader section={selectedSection} />
+              {loadingAccount ? <AccountLoadingCard /> : renderActiveSection()}
             </main>
           </div>
         </section>
