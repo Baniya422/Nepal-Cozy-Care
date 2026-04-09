@@ -12,7 +12,11 @@ use App\Http\Controllers\Api\CareTipController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\ContentTemplateController;
 use App\Http\Controllers\Api\GardenEntryController;
+use App\Http\Controllers\Api\HelpCenterTemplateController;
+use App\Http\Controllers\Api\PlantFinderTemplateController;
+use App\Http\Controllers\Api\PlantHealthTemplateController;
 use App\Http\Controllers\Api\SeasonalReminderController;
 
 // Test endpoint where ping testing is done to check if API is connected
@@ -99,6 +103,10 @@ Route::get('/care-tips', [CareTipController::class, 'index']);
 Route::get('/care-tips/categories', [CareTipController::class, 'categories']);
 Route::get('/care-tips/{id}', [CareTipController::class, 'show']);
 Route::get('/seasonal-reminders/current', [SeasonalReminderController::class, 'current']);
+Route::get('/content-templates/{key}', [ContentTemplateController::class, 'show']);
+Route::get('/help-center/template', [HelpCenterTemplateController::class, 'show']);
+Route::get('/plant-finder/template', [PlantFinderTemplateController::class, 'show']);
+Route::get('/plant-health/template', [PlantHealthTemplateController::class, 'show']);
 
 // Admin-only status update for orders + blog CRUD
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
