@@ -55,3 +55,27 @@ export type PlantHealthHabit = {
   description: string;
   icon: LucideIcon;
 };
+
+export type PlantHealthTemplateSymptomCategory = {
+  id: string;
+  name: string;
+  icon?: string;
+  symptoms: SymptomOption[];
+};
+
+export type PlantHealthTemplateHabit = {
+  title: string;
+  description: string;
+  icon?: string;
+};
+
+export type PlantHealthTemplatePayload = {
+  symptom_categories?: PlantHealthTemplateSymptomCategory[];
+  plant_type_options?: SelectOption[];
+  environment_options?: SelectOption[];
+  soil_options?: SelectOption[];
+  season_options?: SelectOption[];
+  diagnosis_profiles?: DiagnosisProfile[];
+  default_diagnosis?: DiagnosisProfile;
+  healthy_plant_habits?: PlantHealthTemplateHabit[];
+};

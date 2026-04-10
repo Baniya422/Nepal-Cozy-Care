@@ -62,7 +62,17 @@ export const getCurrentPreview = (
   selections: PlantFinderSelections
 ): PreviewContent => {
   const currentSelection = getCurrentSelectionValue(activeField, selections);
-  return previewData[activeField][currentSelection] || previewData[activeField][""];
+  const fieldPreview = previewData[activeField] ?? {};
+
+  return (
+    fieldPreview[currentSelection] ??
+    fieldPreview[""] ?? {
+      eyebrow: "Plant Finder",
+      title: "Template Loaded",
+      description: "Choose an option to see contextual preview.",
+      image: "default.png",
+    }
+  );
 };
 
 export const getPlantFinderResults = (
@@ -75,25 +85,29 @@ export const getPlantFinderResults = (
     }
 
     if (selections.light && plant.light) {
-      if (plant.light !== lightMap[selections.light]) {
+      const expectedLight = lightMap[selections.light] ?? selections.light;
+      if (plant.light !== expectedLight) {
         return false;
       }
     }
 
     if (selections.experience && plant.difficulty) {
-      if (plant.difficulty !== difficultyMap[selections.experience]) {
+      const expectedDifficulty =
+        difficultyMap[selections.experience] ?? selections.experience;
+      if (plant.difficulty !== expectedDifficulty) {
         return false;
       }
     }
 
     if (selections.location && plant.humidity) {
-      if (plant.humidity !== humidityMap[selections.location]) {
+      const expectedHumidity = humidityMap[selections.location] ?? selections.location;
+      if (plant.humidity !== expectedHumidity) {
         return false;
       }
     }
 
     if (selections.room) {
-      const roomValue = roomMap[selections.room];
+      const roomValue = roomMap[selections.room] ?? selections.room;
       if (!roomMatches(plant.rooms, roomValue)) {
         return false;
       }

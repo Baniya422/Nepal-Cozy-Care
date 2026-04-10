@@ -1,95 +1,152 @@
+import { useEffect, useState } from "react";
 import Layout from "../components/layout/Layout";
 import { Link } from "react-router-dom";
+import {
+  applyOurMissionTemplate,
+  ourMissionTemplate,
+} from "../features/content/ourMissionTemplate";
+import type { OurMissionTemplatePayload } from "../features/content/types";
 import "../styles/our-mission.css";
 
-const heroHighlights = [
-  {
-    label: "Beginner-first guidance",
-    value: "Simple care advice",
-  },
-  {
-    label: "Thoughtful shopping",
-    value: "Plants that fit real homes",
-  },
-  {
-    label: "Long-term support",
-    value: "Tips that continue after checkout",
-  },
-];
-
-const missionPillars = [
-  {
-    eyebrow: "Learn",
-    title: "Care Education",
-    description:
-      "Teach practical plant care in simple language so beginners and enthusiasts can grow with confidence.",
-  },
-  {
-    eyebrow: "Live Better",
-    title: "Healthy Homes",
-    description:
-      "Help more families create greener, healthier spaces with the right plants, routines, and support.",
-  },
-  {
-    eyebrow: "Choose Wisely",
-    title: "Responsible Growth",
-    description:
-      "Promote mindful shopping and better long-term care so plants thrive instead of being replaced.",
-  },
-];
-
-const supportSteps = [
-  {
-    step: "01",
-    title: "Discover plants that fit your lifestyle",
-    description:
-      "We want customers to choose plants based on light, time, and space, not only appearance.",
-  },
-  {
-    step: "02",
-    title: "Get clear help before problems grow",
-    description:
-      "Care tips, product guidance, and practical advice should be easy to understand and easy to use.",
-  },
-  {
-    step: "03",
-    title: "Build routines that last",
-    description:
-      "Our goal is not one good delivery. It is helping people keep their plants healthy long after purchase.",
-  },
-];
-
-const impactGoals = [
-  "Guided care journeys for first-time plant parents",
-  "Reliable product recommendations based on lifestyle",
-  "Seasonal tips tailored for local conditions",
-  "A friendly support experience from browsing to delivery",
-];
+const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const TEMPLATE_CACHE_KEY = "our_mission_template_v1";
+const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? "5000");
 
 export default function OurMission() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [, setTemplateRevision] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    let hasCachedTemplate = false;
+
+    const readCachedTemplate = (): OurMissionTemplatePayload | null => {
+      try {
+        const cached = localStorage.getItem(TEMPLATE_CACHE_KEY);
+        if (!cached) return null;
+        return JSON.parse(cached) as OurMissionTemplatePayload;
+      } catch {
+        return null;
+      }
+    };
+
+    const cachedTemplate = readCachedTemplate();
+    if (cachedTemplate) {
+      applyOurMissionTemplate(cachedTemplate);
+      hasCachedTemplate = true;
+      setTemplateRevision((current) => current + 1);
+      setLoading(false);
+    }
+
+    const loadTemplate = async () => {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+      try {
+        const response = await fetch(`${API}/api/content-templates/our_mission`, {
+          signal: controller.signal,
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not load mission page content.");
+        }
+
+        const payload = await response.json().catch(() => ({}));
+        const template = (payload?.data?.payload ?? null) as OurMissionTemplatePayload | null;
+        applyOurMissionTemplate(template);
+        localStorage.setItem(TEMPLATE_CACHE_KEY, JSON.stringify(template ?? {}));
+
+        if (isMounted) {
+          setTemplateRevision((current) => current + 1);
+          setError(null);
+          setLoading(false);
+        }
+      } catch (templateError) {
+        if (isMounted) {
+          if (!hasCachedTemplate) {
+            setError(
+              templateError instanceof DOMException && templateError.name === "AbortError"
+                ? "Mission template request timed out. Check backend server."
+                : templateError instanceof Error
+                  ? templateError.message
+                  : "Could not load mission page content."
+            );
+            setLoading(false);
+          }
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    };
+
+    void loadTemplate();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="mission-page">
+          <section className="mission-hero">
+            <div className="mission-hero-copy">
+              <p className="mission-eyebrow">Loading...</p>
+              <h1>Loading mission content</h1>
+            </div>
+          </section>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="mission-page">
+          <section className="mission-story-section">
+            <div className="mission-story-card">
+              <p className="mission-section-kicker">Mission Page</p>
+              <h2>Template unavailable</h2>
+              <p>{error}</p>
+            </div>
+          </section>
+        </div>
+      </Layout>
+    );
+  }
+
+  const hero = ourMissionTemplate.hero;
+  const story = ourMissionTemplate.story;
+  const pillarsSection = ourMissionTemplate.pillars_section;
+  const supportSection = ourMissionTemplate.support_section;
+  const vision = ourMissionTemplate.vision;
+  const impact = ourMissionTemplate.impact;
+
   return (
     <Layout>
       <div className="mission-page">
         <section className="mission-hero">
           <div className="mission-hero-copy">
-            <p className="mission-eyebrow">Our Purpose</p>
-            <h1>Growing Better Plant Habits, One Home at a Time</h1>
-            <p className="mission-lead">
-              Cozy Care exists to make plant parenting simple, rewarding, and sustainable.
-              We combine care knowledge, thoughtful products, and everyday support so anyone
-              can build a thriving indoor garden without feeling overwhelmed.
-            </p>
+            <p className="mission-eyebrow">{hero.eyebrow}</p>
+            <h1>{hero.title}</h1>
+            <p className="mission-lead">{hero.lead}</p>
             <div className="mission-hero-actions">
-              <Link to="/plants" className="mission-btn mission-btn-primary">
-                Explore Plants
+              <Link to={hero.primary_cta.path} className="mission-btn mission-btn-primary">
+                {hero.primary_cta.label}
               </Link>
-              <Link to="/care-tips" className="mission-btn mission-btn-secondary">
-                Read Care Tips
+              <Link to={hero.secondary_cta.path} className="mission-btn mission-btn-secondary">
+                {hero.secondary_cta.label}
               </Link>
             </div>
 
             <div className="mission-highlight-grid">
-              {heroHighlights.map((item) => (
+              {hero.highlights.map((item) => (
                 <article className="mission-highlight-card" key={item.label}>
                   <span className="mission-highlight-label">{item.label}</span>
                   <strong className="mission-highlight-value">{item.value}</strong>
@@ -101,15 +158,15 @@ export default function OurMission() {
           <div className="mission-hero-visual">
             <div className="mission-image-frame">
               <img
-                src="/images/mission-hero.jpg"
-                alt="Indoor plants arranged in a calm, cozy home setting"
+                src={hero.image}
+                alt={hero.image_alt}
                 className="mission-hero-image"
               />
               <div className="mission-floating-note mission-floating-note-top">
-                Plant care should feel calm, not confusing.
+                {hero.floating_note_top}
               </div>
               <div className="mission-floating-note mission-floating-note-bottom">
-                Designed for real homes, real routines, and long-term care.
+                {hero.floating_note_bottom}
               </div>
             </div>
           </div>
@@ -117,37 +174,31 @@ export default function OurMission() {
 
         <section className="mission-story-section">
           <div className="mission-story-card">
-            <p className="mission-section-kicker">Why We Built Cozy Care</p>
-            <h2>We are designing a friendlier plant experience from the start.</h2>
-            <p>
-              Many people love the idea of plants but feel unsure once they bring one home.
-              Our mission is to remove that friction through better guidance, better product
-              choices, and a more supportive journey after someone buys.
-            </p>
+            <p className="mission-section-kicker">{story.kicker}</p>
+            <h2>{story.title}</h2>
+            <p>{story.description}</p>
             <ul className="mission-story-list">
-              <li>Less guesswork when choosing plants</li>
-              <li>More confidence in everyday care</li>
-              <li>Support that continues beyond checkout</li>
+              {story.bullets.map((bullet) => (
+                <li key={bullet}>{bullet}</li>
+              ))}
             </ul>
           </div>
 
           <aside className="mission-quote-card">
             <p className="mission-quote-mark">"</p>
-            <p className="mission-quote-text">
-              A plant should feel like a long-term companion, not a short-term risk.
-            </p>
-            <span className="mission-quote-caption">The Cozy Care approach</span>
+            <p className="mission-quote-text">{story.quote_text}</p>
+            <span className="mission-quote-caption">{story.quote_caption}</span>
           </aside>
         </section>
 
         <section className="mission-pillar-section">
           <div className="mission-section-heading">
-            <p className="mission-section-kicker">What Drives Us</p>
-            <h2>The principles behind every recommendation we make</h2>
+            <p className="mission-section-kicker">{pillarsSection.kicker}</p>
+            <h2>{pillarsSection.title}</h2>
           </div>
 
           <div className="mission-pillars-grid">
-            {missionPillars.map((pillar) => (
+            {pillarsSection.pillars.map((pillar) => (
               <article className="mission-pillar-card" key={pillar.title}>
                 <span className="mission-pillar-eyebrow">{pillar.eyebrow}</span>
                 <h3>{pillar.title}</h3>
@@ -159,12 +210,12 @@ export default function OurMission() {
 
         <section className="mission-support-section">
           <div className="mission-section-heading">
-            <p className="mission-section-kicker">How We Deliver It</p>
-            <h2>A clearer journey for plant parents at every stage</h2>
+            <p className="mission-section-kicker">{supportSection.kicker}</p>
+            <h2>{supportSection.title}</h2>
           </div>
 
           <div className="mission-support-grid">
-            {supportSteps.map((step) => (
+            {supportSection.steps.map((step) => (
               <article className="mission-support-card" key={step.step}>
                 <span className="mission-support-step">{step.step}</span>
                 <h3>{step.title}</h3>
@@ -176,20 +227,16 @@ export default function OurMission() {
 
         <section className="mission-vision-section">
           <div className="mission-vision-card">
-            <p className="mission-section-kicker">Our Vision</p>
-            <h2>Make greenery feel accessible, personal, and lasting.</h2>
-            <p>
-              We envision a future where caring for plants becomes part of daily wellness.
-              A home where greenery is accessible to everyone, and people feel confident
-              nurturing what they grow.
-            </p>
+            <p className="mission-section-kicker">{vision.kicker}</p>
+            <h2>{vision.title}</h2>
+            <p>{vision.description}</p>
           </div>
 
           <div className="mission-impact-card">
-            <p className="mission-section-kicker">How We Measure Impact</p>
-            <h2>We care about outcomes, not just orders.</h2>
+            <p className="mission-section-kicker">{impact.kicker}</p>
+            <h2>{impact.title}</h2>
             <ul>
-              {impactGoals.map((goal) => (
+              {impact.goals.map((goal) => (
                 <li key={goal}>{goal}</li>
               ))}
             </ul>

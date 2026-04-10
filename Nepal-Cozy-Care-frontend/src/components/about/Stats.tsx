@@ -1,13 +1,9 @@
 import PageSection from "../layout/PageSection";
-
-const stats = [
-  { value: "10,000+", label: "Happy Customers" },
-  { value: "500+", label: "Plant Varieties" },
-  { value: "15", label: "Years Experience" },
-  { value: "98%", label: "Satisfaction Rate" },
-];
+import { aboutPageTemplate } from "../../features/content/aboutTemplate";
 
 export default function Stats() {
+  const stats = aboutPageTemplate.stats;
+
   return (
     <PageSection background="cream" padding="small">
       <div className="about-stats-grid">

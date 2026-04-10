@@ -56,3 +56,18 @@ export type PlantFinderResults = {
   recommendedPlants: Plant[];
   morePlants: Plant[];
 };
+
+export type PlantFinderPreviewData = Record<ActiveField, Record<string, PreviewContent>>;
+
+export type PlantFinderTemplatePayload = {
+  room_options?: FinderOption<RoomKey>[];
+  light_options?: FinderOption<LightKey>[];
+  experience_options?: FinderOption<ExperienceKey>[];
+  location_options?: FinderOption<LocationKey>[];
+  light_map?: Record<string, string>;
+  difficulty_map?: Record<string, string>;
+  humidity_map?: Record<string, string>;
+  room_map?: Record<string, string>;
+  non_plant_categories?: string[];
+  preview_data?: PlantFinderPreviewData;
+};
