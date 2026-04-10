@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Star } from "lucide-react";
+import { useAddToCart } from "../../hooks/useAddToCart";
+import { useWishlist } from "../../hooks/useWishlist";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const FALLBACK_PLANT_IMAGE = "/images/alovera.jpg";
@@ -17,6 +19,8 @@ export default function BestSellers() {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
+  const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
+  const { cartBusyId, addToCart } = useAddToCart(API);
 
   useEffect(() => {
     fetch(`${API}/api/homepage/best-sellers?per_page=4`)
@@ -72,12 +76,27 @@ export default function BestSellers() {
                 className="product-image"
                 src={plant.image ? `${API}/storage/${plant.image}` : FALLBACK_PLANT_IMAGE}
                 alt={plant.name}
+                onClick={() => navigate(`/plants/${plant.id}`)}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = FALLBACK_PLANT_IMAGE;
                 }}
               />
-              <button className="wishlist-btn">
-                <Heart size={20} />
+              <button
+                type="button"
+                className={`wishlist-btn ${wishlistIds.includes(plant.id) ? "active" : ""}`}
+                onClick={() => void toggleWishlist(plant.id)}
+                aria-label={
+                  wishlistIds.includes(plant.id)
+                    ? "Remove from wishlist"
+                    : "Add to wishlist"
+                }
+                aria-pressed={wishlistIds.includes(plant.id)}
+                disabled={wishlistBusyId === plant.id}
+              >
+                <Heart
+                  size={20}
+                  fill={wishlistIds.includes(plant.id) ? "currentColor" : "none"}
+                />
               </button>
             </div>
             <div className="product-info">
@@ -88,15 +107,19 @@ export default function BestSellers() {
                   <Star key={i} size={16} className={i < Math.floor(plant.avg_rating || 5) ? "star-filled" : "star-empty"} fill="currentColor" />
                 ))}
               </div>
-              <button className="add-to-cart-btn" onClick={() => navigate(`/plants/${plant.id}`)}>
-                ADD TO CART
+              <button
+                className="add-to-cart-btn"
+                onClick={() => void addToCart({ id: plant.id, name: plant.name })}
+                disabled={cartBusyId === plant.id}
+              >
+                {cartBusyId === plant.id ? "ADDING..." : "ADD TO CART"}
               </button>
             </div>
           </div>
         ))}
       </div>
       <div className="section-action">
-        <button className="view-all-btn" onClick={() => navigate("/plants")}>
+        <button className="view-all-btn" onClick={() => navigate("/best-sellers")}>
           VIEW ALL
         </button>
       </div>

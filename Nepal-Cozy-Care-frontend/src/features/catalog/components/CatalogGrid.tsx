@@ -7,6 +7,9 @@ type CatalogGridProps = {
   loading: boolean;
   emptyMessage: string;
   onPlantClick: (id: number) => void;
+  onToggleWishlist?: (id: number) => void;
+  wishlistIds?: number[];
+  wishlistBusyId?: number | null;
   showWishlistButton?: boolean;
   showSalesBadge?: boolean;
   salesBadgeLabel?: (index: number, plant: CatalogPlant) => string;
@@ -18,6 +21,9 @@ export default function CatalogGrid({
   loading,
   emptyMessage,
   onPlantClick,
+  onToggleWishlist,
+  wishlistIds = [],
+  wishlistBusyId = null,
   showWishlistButton = false,
   showSalesBadge = false,
   salesBadgeLabel,
@@ -50,8 +56,15 @@ export default function CatalogGrid({
 
   return (
     <div className="popular-grid">
-      {plants.map((plant, index) => (
-        <article key={plant.id} className="popular-card">
+      {plants.map((plant, index) => {
+        const roundedRating = Math.max(
+          0,
+          Math.min(5, Math.round(plant.avg_rating ?? 5))
+        );
+        const isWishlisted = wishlistIds.includes(plant.id);
+
+        return (
+          <article key={plant.id} className="popular-card">
           <div className="popular-card-image-wrapper">
             {showSalesBadge && salesBadgeLabel ? (
               <div className="seller-badge">{salesBadgeLabel(index, plant)}</div>
@@ -74,32 +87,36 @@ export default function CatalogGrid({
 
             {showWishlistButton ? (
               <button
-                className="popular-heart-btn"
+                className={`popular-heart-btn ${isWishlisted ? "active" : ""}`}
                 type="button"
-                aria-label="Add to wishlist"
+                aria-label={
+                  isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+                }
+                aria-pressed={isWishlisted}
+                disabled={wishlistBusyId === plant.id}
+                onClick={() => onToggleWishlist?.(plant.id)}
               >
-                <Heart size={18} />
+                <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
               </button>
             ) : null}
           </div>
 
           <div className="popular-card-body">
             <h3 className="popular-card-name">{plant.name}</h3>
+            <p className="popular-card-category">{plant.category || "Indoor"}</p>
             <div className="popular-card-rating">
               {Array.from({ length: 5 }).map((_, starIndex) => (
                 <Star
                   key={starIndex}
                   size={14}
                   className={
-                    starIndex < Math.round(plant.avg_rating ?? 5)
+                    starIndex < roundedRating
                       ? "popular-star-filled"
                       : "popular-star-empty"
                   }
                 />
               ))}
-              <span className="popular-rating-text">
-                {plant.avg_rating?.toFixed(1) ?? "5.0"}
-              </span>
+              <span className="popular-rating-text">({roundedRating})</span>
             </div>
 
             {showSalesBadge ? (
@@ -119,12 +136,13 @@ export default function CatalogGrid({
                 type="button"
                 onClick={() => onPlantClick(plant.id)}
               >
-                {showSalesBadge ? "View plant" : "Add to cart"}
+                View all
               </button>
             </div>
           </div>
-        </article>
-      ))}
+          </article>
+        );
+      })}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import CatalogGrid from "../features/catalog/components/CatalogGrid";
 import CatalogHeader from "../features/catalog/components/CatalogHeader";
 import CatalogSidebar from "../features/catalog/components/CatalogSidebar";
 import { bestSellerSortOptions } from "../features/catalog/data";
+import { useWishlist } from "../hooks/useWishlist";
 import {
   extractCatalogPlants,
   filterCatalogPlants,
@@ -21,6 +22,7 @@ export default function BestSellersPage() {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<CatalogPlant[]>([]);
   const [loading, setLoading] = useState(true);
+  const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
   const [searchTerm, setSearchTerm] = useState("");
   const [sort, setSort] = useState<"sales" | "price-asc" | "price-desc" | "name-asc">(
     "sales"
@@ -81,6 +83,10 @@ export default function BestSellersPage() {
             loading={loading}
             emptyMessage="No plants found in this selection."
             onPlantClick={(id) => navigate(`/plants/${id}`)}
+            onToggleWishlist={(id) => void toggleWishlist(id)}
+            wishlistIds={wishlistIds}
+            wishlistBusyId={wishlistBusyId}
+            showWishlistButton
             showSalesBadge
             salesBadgeLabel={(index) => `${index + 1}. Bestseller`}
           />

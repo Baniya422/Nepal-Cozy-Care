@@ -6,6 +6,7 @@ import CatalogGrid from "../features/catalog/components/CatalogGrid";
 import CatalogHeader from "../features/catalog/components/CatalogHeader";
 import CatalogSidebar from "../features/catalog/components/CatalogSidebar";
 import { popularSortOptions } from "../features/catalog/data";
+import { useWishlist } from "../hooks/useWishlist";
 import {
   extractCatalogPlants,
   filterCatalogPlants,
@@ -26,6 +27,7 @@ export default function PopularItemsPage() {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<CatalogPlant[]>([]);
   const [loading, setLoading] = useState(true);
+  const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
   const [searchTerm, setSearchTerm] = useState("");
   const [sort, setSort] = useState<"popular" | "price-asc" | "price-desc" | "name-asc">(
     "popular"
@@ -90,6 +92,9 @@ export default function PopularItemsPage() {
             loading={loading}
             emptyMessage="No products match your filters."
             onPlantClick={(id) => navigate(`/plants/${id}`)}
+            onToggleWishlist={(id) => void toggleWishlist(id)}
+            wishlistIds={wishlistIds}
+            wishlistBusyId={wishlistBusyId}
             showWishlistButton
           />
         </section>

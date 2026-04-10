@@ -582,6 +582,7 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  cursor: pointer;
 }
 
 .wishlist-btn {
@@ -605,6 +606,16 @@
 .wishlist-btn:hover {
   background-color: #fef2f2;
   color: #ef4444;
+}
+
+.wishlist-btn.active {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.wishlist-btn:disabled {
+  cursor: wait;
+  opacity: 0.75;
 }
 
 .product-info {
@@ -660,6 +671,11 @@
 
 .add-to-cart-btn:hover {
   background-color: #134b61;
+}
+
+.add-to-cart-btn:disabled {
+  cursor: wait;
+  opacity: 0.75;
 }
 
 .section-action {
