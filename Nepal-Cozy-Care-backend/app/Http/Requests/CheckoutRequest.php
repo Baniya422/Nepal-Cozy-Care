@@ -20,6 +20,7 @@ class CheckoutRequest extends FormRequest
             'shipping_address' => ['required', 'string', 'max:255'],
             'location_notes' => ['nullable', 'string', 'max:1000'],
             'preferred_contact_method' => ['required', 'in:phone,whatsapp,email'],
+            'payment_method' => ['required', 'in:credit-card,esewa,khalti,cod'],
         ];
     }
 }

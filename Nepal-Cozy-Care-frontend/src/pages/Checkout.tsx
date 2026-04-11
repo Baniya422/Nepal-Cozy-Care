@@ -25,7 +25,7 @@ type FormData = {
   shipping_address: string;
   location_notes: string;
   preferred_contact_method: "phone" | "whatsapp" | "email";
-  payment_method: string;
+  payment_method: "credit-card" | "esewa" | "khalti" | "cod";
 };
 
 export default function Checkout() {
@@ -43,7 +43,7 @@ export default function Checkout() {
     shipping_address: "",
     location_notes: "",
     preferred_contact_method: "phone",
-    payment_method: "credit-card",
+    payment_method: "cod",
   });
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function Checkout() {
     }));
   };
 
-  const handlePaymentChange = (method: string) => {
+  const handlePaymentChange = (method: FormData["payment_method"]) => {
     setFormData((previous) => ({
       ...previous,
       payment_method: method,
@@ -122,6 +122,12 @@ export default function Checkout() {
 
   const placeOrder = async () => {
     if (!validateForm()) return;
+    if (formData.payment_method !== "cod") {
+      setError(
+        `${formData.payment_method.toUpperCase()} payment is not integrated yet. Please select Cash on Delivery for now.`
+      );
+      return;
+    }
 
     setSubmitting(true);
     setError("");
@@ -140,6 +146,7 @@ export default function Checkout() {
           shipping_address: formData.shipping_address,
           location_notes: formData.location_notes,
           preferred_contact_method: formData.preferred_contact_method,
+          payment_method: formData.payment_method,
         }),
       });
 
@@ -431,6 +438,10 @@ export default function Checkout() {
                     </span>
                   </label>
                 </div>
+                <p style={{ margin: "0.75rem 0 0", color: "#6b7280", fontSize: "0.9rem" }}>
+                  Currently only Cash on Delivery is enabled. eSewa, Khalti, and card payment
+                  will be added next.
+                </p>
               </div>
             </div>
 

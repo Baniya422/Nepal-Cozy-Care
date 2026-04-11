@@ -20,6 +20,15 @@ class OrderController extends Controller
     // ✅ Checkout: cart -> order
     public function checkout(CheckoutRequest $request)
     {
+        if ($request->payment_method !== 'cod') {
+            return response()->json([
+                'message' => 'Selected payment gateway is coming soon. Please use Cash on Delivery for now.',
+                'errors' => [
+                    'payment_method' => ['This payment method is not available yet.'],
+                ],
+            ], 422);
+        }
+
         $userId = $request->user()->id;
 
         $cartItems = Cart::with('plant')
