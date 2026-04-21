@@ -4,8 +4,8 @@ import "./auth.css";
 
 type RegisterResponse = {
   message?: string;
-  data?: any;
-  token?: string;
+  user?: any;
+  errors?: Record<string, string[]>;
 };
 
 // Use empty string to leverage Vite proxy, or fallback to direct URL
@@ -30,6 +30,20 @@ export default function Register() {
     if (password.length < 6) return "Password must be at least 6 characters.";
     if (password !== confirmPassword) return "Passwords do not match.";
     return "";
+  };
+
+  const parseApiError = (status: number, payload: any) => {
+    if (status >= 500) {
+      return "Server error. Please try again in a moment.";
+    }
+
+    return (
+      payload?.errors?.email?.[0] ||
+      payload?.errors?.password?.[0] ||
+      payload?.errors?.name?.[0] ||
+      payload?.message ||
+      "Registration failed."
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,36 +77,16 @@ export default function Register() {
       const data: RegisterResponse = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // Handle Laravel validation errors
-        const msg =
-          (data as any)?.message ||
-          (data as any)?.errors?.email?.[0] ||
-          (data as any)?.errors?.password?.[0] ||
-          "Registration failed.";
+        const msg = parseApiError(res.status, data);
         throw new Error(msg);
       }
 
-      setSuccess("Account created successfully.");
-
-      // 2) OPTIONAL: Auto-login to get token (recommended for smooth flow)
-      const loginRes = await fetch(`${API_BASE}/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+      navigate("/login", {
+        state: {
+          email,
+          message: data.message ?? "Account created successfully. You can now log in.",
         },
-        body: JSON.stringify({ email, password }),
       });
-
-      const loginData: any = await loginRes.json().catch(() => ({}));
-      if (loginRes.ok && loginData?.token) {
-        localStorage.setItem("token", loginData.token);
-        localStorage.setItem("user", JSON.stringify(loginData.user ?? null));
-        navigate("/plants"); // change to your next page route
-      } else {
-        // If auto-login fails, send user to login page
-        navigate("/login");
-      }
     } catch (err: any) {
       if (err?.message === "Failed to fetch") {
         setError("Cannot connect to server. Please make sure the backend is running on http://127.0.0.1:8000");

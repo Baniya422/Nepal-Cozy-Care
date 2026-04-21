@@ -74,7 +74,7 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const formatCurrency = (value: unknown) => `$${toNumber(value).toFixed(2)}`;
+const formatCurrency = (value: unknown) => `Rs ${toNumber(value).toFixed(2)}`;
 
 const formatStatusLabel = (status: string) =>
   status

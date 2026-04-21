@@ -170,6 +170,9 @@ export default function ManagePlants() {
     formDataToSend.append("humidity", formData.humidity.trim() || "");
     formDataToSend.append("fertilizer", formData.fertilizer.trim() || "");
     formDataToSend.append("difficulty", formData.difficulty || "");
+    formData.rooms.forEach((room) => {
+      formDataToSend.append("rooms[]", room);
+    });
     formDataToSend.append("is_active", formData.is_active ? "1" : "0");
     formDataToSend.append("is_popular_item", formData.is_popular_item ? "1" : "0");
     formDataToSend.append("is_best_seller", formData.is_best_seller ? "1" : "0");
@@ -329,10 +332,7 @@ export default function ManagePlants() {
   );
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
+    return `Rs ${price.toFixed(2)}`;
   };
 
   return (

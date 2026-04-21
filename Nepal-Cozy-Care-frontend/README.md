@@ -2,6 +2,13 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Frontend Testing
+
+- Run all unit tests: `npm run test:run`
+- Run in watch mode: `npm run test`
+- Full project verification report (frontend + backend + screenshots): `../Sprint-Artifacts/testing/full-project-testing-report.md`
+- Plant health focused report: `../Sprint-Artifacts/testing/plant-health-testing-report.md`
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh

@@ -15,7 +15,7 @@ export default function CartSummary({ subtotal, vat, total }: CartSummaryProps) 
 
       <div className="cart-summary-row">
         <span>Subtotal</span>
-        <span>${subtotal.toFixed(2)}</span>
+        <span>Rs {subtotal.toFixed(2)}</span>
       </div>
 
       <div className="cart-summary-row">
@@ -25,14 +25,14 @@ export default function CartSummary({ subtotal, vat, total }: CartSummaryProps) 
 
       <div className="cart-summary-row">
         <span>VAT / Taxes</span>
-        <span>${vat.toFixed(1)}</span>
+        <span>Rs {vat.toFixed(1)}</span>
       </div>
 
       <div className="cart-summary-divider"></div>
 
       <div className="cart-summary-row cart-summary-total">
         <span>Total</span>
-        <span>${total.toFixed(2)}</span>
+        <span>Rs {total.toFixed(2)}</span>
       </div>
 
       <button

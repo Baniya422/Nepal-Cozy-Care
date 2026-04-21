@@ -14,14 +14,17 @@ import type {
   PreviewContent,
 } from "./types";
 
+const normalizeValue = (value: unknown) => String(value ?? "").trim().toLowerCase();
+
 const roomMatches = (plantRooms: Plant["rooms"], roomValue: string) => {
   if (!plantRooms) return false;
+  const normalizedRoomValue = normalizeValue(roomValue);
 
   if (Array.isArray(plantRooms)) {
-    return plantRooms.includes(roomValue);
+    return plantRooms.some((room) => normalizeValue(room) === normalizedRoomValue);
   }
 
-  return plantRooms === roomValue;
+  return normalizeValue(plantRooms) === normalizedRoomValue;
 };
 
 export const normalizePlants = (plants: Plant[]): Plant[] =>
@@ -79,14 +82,18 @@ export const getPlantFinderResults = (
   allPlants: Plant[],
   selections: PlantFinderSelections
 ): PlantFinderResults => {
+  const normalizedNonPlantCategories = new Set(
+    nonPlantCategories.map((category) => normalizeValue(category))
+  );
+
   const filteredPlants = allPlants.filter((plant) => {
-    if (plant.category && nonPlantCategories.includes(plant.category)) {
+    if (plant.category && normalizedNonPlantCategories.has(normalizeValue(plant.category))) {
       return false;
     }
 
     if (selections.light && plant.light) {
       const expectedLight = lightMap[selections.light] ?? selections.light;
-      if (plant.light !== expectedLight) {
+      if (normalizeValue(plant.light) !== normalizeValue(expectedLight)) {
         return false;
       }
     }
@@ -94,14 +101,14 @@ export const getPlantFinderResults = (
     if (selections.experience && plant.difficulty) {
       const expectedDifficulty =
         difficultyMap[selections.experience] ?? selections.experience;
-      if (plant.difficulty !== expectedDifficulty) {
+      if (normalizeValue(plant.difficulty) !== normalizeValue(expectedDifficulty)) {
         return false;
       }
     }
 
     if (selections.location && plant.humidity) {
       const expectedHumidity = humidityMap[selections.location] ?? selections.location;
-      if (plant.humidity !== expectedHumidity) {
+      if (normalizeValue(plant.humidity) !== normalizeValue(expectedHumidity)) {
         return false;
       }
     }
@@ -117,7 +124,8 @@ export const getPlantFinderResults = (
   });
 
   const plantOnlyFallback = allPlants.filter(
-    (plant) => !plant.category || !nonPlantCategories.includes(plant.category)
+    (plant) =>
+      !plant.category || !normalizedNonPlantCategories.has(normalizeValue(plant.category))
   );
 
   if (filteredPlants.length === 0) {

@@ -36,6 +36,7 @@ import BlogDetail from './pages/BlogDetail'
 import ManageSeasonalReminders from './pages/admin/ManageSeasonalReminders'
 import ManageContactMessages from './pages/admin/ManageContactMessages'
 import ManageGardenEntries from './pages/admin/ManageGardenEntries'
+import ForgotPassword from './pages/ForgotPassword'
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/plants" element={<Plants />} />
       <Route path="/plants/:id" element={<ProductDetail />} />
       <Route path="/pots" element={<Pots />} />

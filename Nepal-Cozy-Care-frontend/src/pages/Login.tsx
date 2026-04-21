@@ -1,21 +1,49 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./auth.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+
+  useEffect(() => {
+    const state = location.state as { email?: string; message?: string } | null;
+
+    if (state?.email) {
+      setEmail(state.email);
+    }
+
+    if (state?.message) {
+      setSuccess(state.message);
+    }
+  }, [location.state]);
+
+  const parseApiError = (status: number, payload: any) => {
+    if (status >= 500) {
+      return "Server error. Please try again in a moment.";
+    }
+
+    return (
+      payload?.errors?.email?.[0] ||
+      payload?.errors?.password?.[0] ||
+      payload?.message ||
+      "Login failed."
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!email.trim()) return setError("Email is required.");
     if (!password) return setError("Password is required.");
@@ -34,11 +62,7 @@ export default function Login() {
       const data: any = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const msg =
-          data?.message ||
-          data?.errors?.email?.[0] ||
-          data?.errors?.password?.[0] ||
-          "Login failed.";
+        const msg = parseApiError(res.status, data);
         throw new Error(msg);
       }
 
@@ -82,6 +106,7 @@ export default function Login() {
         <p className="auth-subtitle">Login to continue your plant care journey</p>
 
         {error ? <div className="auth-alert auth-alert--error">{error}</div> : null}
+        {success ? <div className="auth-alert auth-alert--success">{success}</div> : null}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-label">
@@ -116,7 +141,13 @@ export default function Login() {
           <button
             type="button"
             className="auth-link-btn"
-            onClick={() => alert("Forgot password can be added later.")}
+            onClick={() =>
+              navigate("/forgot-password", {
+                state: {
+                  email,
+                },
+              })
+            }
           >
             Forgot your password?
           </button>

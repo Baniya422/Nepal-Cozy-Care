@@ -58,7 +58,7 @@ export default function CartItems({ cartItems, updating, updateQuantity, removeI
             </div>
 
             <div className="cart-item-price">
-              ${Number(item.plant.price).toFixed(2)}
+              Rs {Number(item.plant.price).toFixed(2)}
             </div>
 
             <div className="cart-item-quantity">
@@ -80,7 +80,7 @@ export default function CartItems({ cartItems, updating, updateQuantity, removeI
             </div>
 
             <div className="cart-item-total">
-              ${(item.plant.price * item.quantity).toFixed(2)}
+              Rs {(item.plant.price * item.quantity).toFixed(2)}
             </div>
           </div>
         ))}

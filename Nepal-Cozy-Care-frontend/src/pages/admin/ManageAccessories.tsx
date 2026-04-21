@@ -242,7 +242,7 @@ export default function ManageAccessories() {
   );
 
   const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+    return `Rs ${price.toFixed(2)}`;
   };
 
   const formatId = (id: number) => {

@@ -1,0 +1,14 @@
+{
+  "name": "nepal-cozy-care-workspace",
+  "private": true,
+  "scripts": {
+    "test": "cd Nepal-Cozy-Care-frontend && npm run test",
+    "test:run": "cd Nepal-Cozy-Care-frontend && npm run test:run",
+    "test:backend": "cd Nepal-Cozy-Care-backend && php artisan test",
+    "test:all": "npm run test:run && npm run test:backend",
+    "build": "cd Nepal-Cozy-Care-frontend && npm run build"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.4"
+  }
+}

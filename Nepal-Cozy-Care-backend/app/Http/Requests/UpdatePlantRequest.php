@@ -23,6 +23,8 @@ class UpdatePlantRequest extends FormRequest
             'water' => ['nullable', 'string', 'max:100'],
             'temperature' => ['nullable', 'string', 'max:50'],
             'humidity' => ['nullable', 'string', 'max:50'],
+            'rooms' => ['nullable', 'array'],
+            'rooms.*' => ['string', 'max:100'],
             'fertilizer' => ['nullable', 'string', 'max:100'],
             'soil' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -37,4 +39,3 @@ class UpdatePlantRequest extends FormRequest
         ];
     }
 }
-

@@ -1,0 +1,10 @@
+
+   PASS  Tests\Unit\ExampleTest
+  ? that true is true                                                                                            0.01s  
+
+   PASS  Tests\Feature\ExampleTest
+  ? the application returns a successful response                                                                0.36s  
+
+  Tests:    2 passed (2 assertions)
+  Duration: 2.54s
+

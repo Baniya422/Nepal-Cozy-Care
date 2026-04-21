@@ -30,6 +30,8 @@ Route::get('/ping', function () {
 // Auth routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/contact', [ContactMessageController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
