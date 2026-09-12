@@ -1,33 +1,22 @@
 import { Shield, Headphones, Truck } from "lucide-react";
-
-// Trust badges - why customers choose us
-export default function Features() {
+import type { TextCardContent } from "../../features/homepage/content";
+const icons = [Shield, Headphones, Truck];
+export default function Features({ items }: { items: TextCardContent[] }) {
   return (
     <section className="features">
       <div className="features-inner">
-        <div className="feature">
-          <Shield size={32} className="feature-icon" />
-          <div className="feature-text">
-            <strong>Healthy Guarantee</strong>
-            <p>Every plant checked before delivery</p>
-          </div>
-        </div>
-
-        <div className="feature">
-          <Headphones size={32} className="feature-icon" />
-          <div className="feature-text">
-            <strong>Plant Doctor</strong>
-            <p>Free care advice via WhatsApp</p>
-          </div>
-        </div>
-
-        <div className="feature">
-          <Truck size={32} className="feature-icon" />
-          <div className="feature-text">
-            <strong>Free Delivery</strong>
-            <p>All over Kathmandu Valley</p>
-          </div>
-        </div>
+        {items.map((item, index) => {
+          const Icon = icons[index] ?? Shield;
+          return (
+            <div className="feature" key={`${item.title}-${index}`}>
+              <Icon size={32} className="feature-icon" />
+              <div className="feature-text">
+                <strong>{item.title}</strong>
+                <p>{item.description}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

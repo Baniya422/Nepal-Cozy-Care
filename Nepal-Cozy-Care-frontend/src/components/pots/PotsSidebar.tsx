@@ -1,5 +1,4 @@
 import { Search } from "lucide-react";
-
 interface PotsSidebarProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
@@ -8,7 +7,6 @@ interface PotsSidebarProps {
   selectedPrice: string[];
   handlePriceChange: (range: string) => void;
 }
-
 export default function PotsSidebar({
   searchTerm,
   setSearchTerm,
@@ -17,12 +15,10 @@ export default function PotsSidebar({
   selectedPrice,
   handlePriceChange,
 }: PotsSidebarProps) {
-  // Fixed categories matching admin form options
   const categories = ["Pots", "Tools", "Soil", "Fertilizers"];
-
   return (
     <aside className="pots-sidebar">
-      {/* Search */}
+      {}
       <div className="sidebar-section">
         <h3>Search</h3>
         <div className="search-box">
@@ -35,8 +31,7 @@ export default function PotsSidebar({
           />
         </div>
       </div>
-
-      {/* Categories */}
+      {}
       <div className="sidebar-section">
         <h3>Categories</h3>
         <div className="filter-options">
@@ -52,8 +47,7 @@ export default function PotsSidebar({
           ))}
         </div>
       </div>
-
-      {/* Price Range */}
+      {}
       <div className="sidebar-section">
         <h3>Price Range</h3>
         <div className="filter-options">

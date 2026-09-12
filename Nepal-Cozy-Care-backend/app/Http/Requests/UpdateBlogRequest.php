@@ -17,7 +17,7 @@ class UpdateBlogRequest extends FormRequest
 
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:blogs,slug,' . $blogId],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:blogs,slug,'.$blogId],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['sometimes', 'required', 'string'],
             'image' => ['nullable', 'string', 'max:255'],
@@ -29,4 +29,3 @@ class UpdateBlogRequest extends FormRequest
         ];
     }
 }
-

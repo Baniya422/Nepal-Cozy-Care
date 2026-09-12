@@ -1,11 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { aboutPageTemplate } from "../../features/content/aboutTemplate";
-
-// About page hero - our story starts here
 export default function Hero() {
   const navigate = useNavigate();
   const hero = aboutPageTemplate.hero;
-
   return (
     <section className="about-hero">
       <div className="about-hero-overlay"></div>

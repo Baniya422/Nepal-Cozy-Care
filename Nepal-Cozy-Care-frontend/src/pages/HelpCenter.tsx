@@ -16,28 +16,23 @@ import {
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import "../styles/help-center.css";
-
 type HelpCategory = string;
-
 type HelpCategoryOption = {
   key: HelpCategory;
   label: string;
 };
-
 type FAQItem = {
   id: number;
   category: HelpCategory;
   question: string;
   answer: string;
 };
-
 type HelpTopicCard = {
   id: string;
   icon?: string;
   title: string;
   points: string[];
 };
-
 type HelpCenterTemplatePayload = {
   categories?: HelpCategoryOption[];
   faq_items?: FAQItem[];
@@ -46,17 +41,14 @@ type HelpCenterTemplatePayload = {
   contact_phone?: string | null;
   contact_email?: string | null;
 };
-
 const topicIconMap = {
   Package,
   RotateCcw,
   CreditCard,
   Truck,
 } as const;
-
 const getTopicIcon = (icon?: string) =>
   topicIconMap[icon as keyof typeof topicIconMap] ?? HelpCircle;
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const TEMPLATE_CACHE_KEY = "help_center_template_v1";
 const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? "5000");
@@ -64,35 +56,28 @@ const DEFAULT_SUPPORT_INTRO =
   "Still need help? Reach out to our support team and we will assist you quickly.";
 const DEFAULT_SUPPORT_PHONE = "+977-9800000000";
 const DEFAULT_SUPPORT_EMAIL = "support@nepalcozycare.com";
-
 export default function HelpCenter() {
   const navigate = useNavigate();
-
   const [templateLoading, setTemplateLoading] = useState(true);
   const [templateError, setTemplateError] = useState<string | null>(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<HelpCategory>("all");
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-
   const [helpCategories, setHelpCategories] = useState<HelpCategoryOption[]>([]);
   const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
   const [topicCards, setTopicCards] = useState<HelpTopicCard[]>([]);
   const [supportIntro, setSupportIntro] = useState(DEFAULT_SUPPORT_INTRO);
   const [supportPhone, setSupportPhone] = useState(DEFAULT_SUPPORT_PHONE);
   const [supportEmail, setSupportEmail] = useState(DEFAULT_SUPPORT_EMAIL);
-
   useEffect(() => {
     let isMounted = true;
     let hasCachedTemplate = false;
-
     const applyTemplate = (data: HelpCenterTemplatePayload) => {
       const fetchedCategories = Array.isArray(data.categories) ? data.categories : [];
       const categories =
         fetchedCategories.some((category) => category.key === "all")
           ? fetchedCategories
           : [{ key: "all", label: "All" }, ...fetchedCategories];
-
       setHelpCategories(categories);
       setFaqItems(Array.isArray(data.faq_items) ? data.faq_items : []);
       setTopicCards(Array.isArray(data.topic_cards) ? data.topic_cards : []);
@@ -102,7 +87,6 @@ export default function HelpCenter() {
       setActiveCategory("all");
       setOpenFAQ(null);
     };
-
     const readCachedTemplate = (): HelpCenterTemplatePayload | null => {
       try {
         const cached = localStorage.getItem(TEMPLATE_CACHE_KEY);
@@ -112,18 +96,15 @@ export default function HelpCenter() {
         return null;
       }
     };
-
     const cachedTemplate = readCachedTemplate();
     if (cachedTemplate && isMounted) {
       applyTemplate(cachedTemplate);
       hasCachedTemplate = true;
       setTemplateLoading(false);
     }
-
     const loadTemplate = async () => {
       const controller = new AbortController();
       const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
-
       try {
         const response = await fetch(`${API}/api/help-center/template`, {
           signal: controller.signal,
@@ -131,15 +112,12 @@ export default function HelpCenter() {
             Accept: "application/json",
           },
         });
-
         if (!response.ok) {
           throw new Error("Could not load help content.");
         }
-
         const payload = await response.json().catch(() => ({}));
         const data = (payload?.data ?? {}) as HelpCenterTemplatePayload;
         localStorage.setItem(TEMPLATE_CACHE_KEY, JSON.stringify(data));
-
         if (isMounted) {
           applyTemplate(data);
           setTemplateError(null);
@@ -162,32 +140,25 @@ export default function HelpCenter() {
         window.clearTimeout(timeoutId);
       }
     };
-
     void loadTemplate();
-
     return () => {
       isMounted = false;
     };
   }, []);
-
   const filteredFAQs = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-
     return faqItems.filter((item) => {
       const matchesCategory = activeCategory === "all" || item.category === activeCategory;
       const matchesSearch =
         query.length === 0 ||
         item.question.toLowerCase().includes(query) ||
         item.answer.toLowerCase().includes(query);
-
       return matchesCategory && matchesSearch;
     });
   }, [searchTerm, activeCategory, faqItems]);
-
   const toggleFAQ = (id: number) => {
     setOpenFAQ((previous) => (previous === id ? null : id));
   };
-
   return (
     <Layout>
       <div className="help-center-page">
@@ -199,7 +170,6 @@ export default function HelpCenter() {
             </p>
           </div>
         </section>
-
         <section className="help-center-content">
           <div className="help-center-container">
             {templateLoading ? (
@@ -217,7 +187,6 @@ export default function HelpCenter() {
                     onChange={(event) => setSearchTerm(event.target.value)}
                   />
                 </div>
-
                 <div className="help-category-chips">
                   {helpCategories.map((category) => (
                     <button
@@ -232,13 +201,11 @@ export default function HelpCenter() {
                     </button>
                   ))}
                 </div>
-
                 <section className="help-faq-section">
                   <div className="help-section-head">
                     <MessageSquare size={18} />
                     <h2>Frequently Asked Questions</h2>
                   </div>
-
                   {filteredFAQs.length === 0 ? (
                     <div className="help-empty">No FAQ items match your search.</div>
                   ) : (
@@ -255,7 +222,6 @@ export default function HelpCenter() {
                               <span>{item.question}</span>
                               {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                             </button>
-
                             {isOpen ? <p className="help-faq-answer">{item.answer}</p> : null}
                           </article>
                         );
@@ -263,11 +229,9 @@ export default function HelpCenter() {
                     </div>
                   )}
                 </section>
-
                 <section className="help-topic-grid">
                   {topicCards.map((topic) => {
                     const TopicIcon = getTopicIcon(topic.icon);
-
                     return (
                       <article key={topic.id} className="help-topic-card">
                         <div className="help-topic-title">
@@ -285,15 +249,12 @@ export default function HelpCenter() {
                 </section>
               </>
             )}
-
             <section className="help-contact-support">
               <div className="help-section-head">
                 <Headphones size={18} />
                 <h2>Contact Support</h2>
               </div>
-
               <p>{supportIntro}</p>
-
               <div className="help-support-actions">
                 <button type="button" onClick={() => navigate("/contact")}>
                   <Mail size={16} />
@@ -304,7 +265,6 @@ export default function HelpCenter() {
                   Track an Order
                 </button>
               </div>
-
               <div className="help-support-inline">
                 <span>
                   <Phone size={14} /> {supportPhone}

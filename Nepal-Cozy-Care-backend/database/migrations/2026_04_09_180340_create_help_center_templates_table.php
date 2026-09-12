@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('contact_email')->nullable();
             $table->timestamps();
         });
-
         DB::table('help_center_templates')->insert([
             'name' => 'Starter Help Center Template',
             'is_active' => true,

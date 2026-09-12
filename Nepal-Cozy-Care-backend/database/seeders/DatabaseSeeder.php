@@ -16,11 +16,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-
         $this->call(AdminUserSeeder::class);
-        
-        // Optional demo seeders - uncomment to use
-        // $this->call(PlantSeeder::class);
-        // $this->call(CareTipSeeder::class);
     }
 }

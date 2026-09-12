@@ -10,9 +10,7 @@ import {
 } from "lucide-react";
 import AdminLayout from "../components/admin/AdminLayout";
 import "../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface DashboardStats {
   totalPlants: number;
   totalOrders: number;
@@ -23,7 +21,6 @@ interface DashboardStats {
   usersChange: number;
   salesChange: number;
 }
-
 interface RecentOrder {
   id: number;
   order_id: string;
@@ -31,14 +28,12 @@ interface RecentOrder {
   amount: number;
   status: string;
 }
-
 interface TopProduct {
   id: number;
   name: string;
   sales: number;
   revenue: number;
 }
-
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalPlants: 0,
@@ -50,24 +45,18 @@ export default function AdminDashboard() {
     usersChange: 0,
     salesChange: 0,
   });
-
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchDashboardData();
   }, []);
-
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem("token");
-      
-      // Fetch dashboard stats
       const statsRes = await fetch(`${API}/api/admin/dashboard/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         const data = statsData.data;
@@ -82,22 +71,16 @@ export default function AdminDashboard() {
           salesChange: data.changes.sales,
         });
       }
-
-      // Fetch recent orders
       const ordersRes = await fetch(`${API}/api/admin/dashboard/recent-orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
       if (ordersRes.ok) {
         const ordersData = await ordersRes.json();
         setRecentOrders(ordersData.data || []);
       }
-
-      // Fetch top products
       const productsRes = await fetch(`${API}/api/admin/dashboard/top-products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
       if (productsRes.ok) {
         const productsData = await productsRes.json();
         const products = productsData.data || [];
@@ -109,14 +92,12 @@ export default function AdminDashboard() {
         }));
         setTopProducts(topProductsData);
       }
-
       setLoading(false);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       setLoading(false);
     }
   };
-
   const getStatusClass = (status: string) => {
     switch (status.toLowerCase()) {
       case "completed":
@@ -137,20 +118,15 @@ export default function AdminDashboard() {
         return "status-pending";
     }
   };
-
   const formatStatusLabel = (status: string) =>
     status
       .split("_")
       .join(" ")
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+    const num = Number(amount) || 0;
+    return `Rs. ${num.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
-
   const statCards = [
     {
       title: "Total Plants",
@@ -181,20 +157,17 @@ export default function AdminDashboard() {
       color: "orange",
     },
   ];
-
   return (
     <AdminLayout>
       <div className="admin-dashboard">
-        {/* Welcome Section */}
+        {}
         <div className="admin-welcome">
           <h2>Dashboard Overview</h2>
           <p>Welcome back! Here&apos;s what&apos;s happening with your store today.</p>
         </div>
-
-        {/* Stats Cards */}
+        {}
         <div className="admin-stats-grid">
           {loading ? (
-            // Skeleton loading for stat cards
             <>
               {[1, 2, 3, 4].map((_, index) => (
                 <div key={index} className="admin-stat-card skeleton">
@@ -233,10 +206,9 @@ export default function AdminDashboard() {
             ))
           )}
         </div>
-
-        {/* Main Content Grid */}
+        {}
         <div className="admin-dashboard-grid">
-          {/* Recent Orders */}
+          {}
           <div className="admin-card">
             <div className="admin-card-header">
               <h3>Recent Orders</h3>
@@ -277,8 +249,7 @@ export default function AdminDashboard() {
               )}
             </div>
           </div>
-
-          {/* Top Products */}
+          {}
           <div className="admin-card">
             <div className="admin-card-header">
               <h3>Top Products</h3>

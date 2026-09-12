@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Search, Eye, Shield } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface User {
   id: number;
   name: string;
@@ -15,14 +13,12 @@ interface User {
   total_spent: number;
   status: "active" | "inactive";
 }
-
 interface UserStats {
   total: number;
   active: number;
   avg_orders: number;
   new_this_month: number;
 }
-
 export default function ManageUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,29 +32,23 @@ export default function ManageUsers() {
     avg_orders: 0,
     new_this_month: 0,
   });
-
   useEffect(() => {
     void fetchUsers();
   }, []);
-
   const fetchUsers = async () => {
     setError(null);
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Admin login required to view users.");
       }
-
       const res = await fetch(`${API}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const payload = await res.json();
-
       if (!res.ok) {
         throw new Error(payload.message || "Failed to load users.");
       }
-
       setUsers(payload.data?.users ?? []);
       setStats(
         payload.data?.stats ?? {
@@ -77,31 +67,24 @@ export default function ManageUsers() {
       setLoading(false);
     }
   };
-
   const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-
+  const formatPrice = (price: number) => {
+    const num = Number(price) || 0;
+    return `Rs. ${num.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-
   const formatId = (id: number) => `#${String(id).padStart(3, "0")}`;
-
   const activePercentage =
     stats.total > 0 ? Math.round((stats.active / stats.total) * 100) : 0;
-
   return (
     <AdminLayout>
       <div className="admin-page">
@@ -111,7 +94,6 @@ export default function ManageUsers() {
             <p>View and manage registered users</p>
           </div>
         </div>
-
         {error && (
           <div className="admin-card" style={{ marginBottom: "1rem" }}>
             <div
@@ -122,7 +104,6 @@ export default function ManageUsers() {
             </div>
           </div>
         )}
-
         <div className="admin-stats-row">
           <div className="admin-stat-card">
             <div className="admin-stat-label">Total Users</div>
@@ -145,7 +126,6 @@ export default function ManageUsers() {
             <div className="admin-stat-change">No active session right now</div>
           </div>
         </div>
-
         <div className="admin-filters">
           <div className="admin-search">
             <Search size={18} />
@@ -157,7 +137,6 @@ export default function ManageUsers() {
             />
           </div>
         </div>
-
         <div className="admin-table-container">
           {loading ? (
             <div className="admin-loading">Loading users...</div>
@@ -223,14 +202,12 @@ export default function ManageUsers() {
               </tbody>
             </table>
           )}
-
           {!loading && filteredUsers.length === 0 && (
             <div className="admin-empty-state">
               <p>No users found.</p>
             </div>
           )}
         </div>
-
         {showDetailModal && selectedUser && (
           <div className="admin-modal-overlay" onClick={() => setShowDetailModal(false)}>
             <div className="admin-modal" onClick={(event) => event.stopPropagation()}>

@@ -11,7 +11,6 @@ class CareTipTest extends TestCase
     {
         $tip = new CareTip(['category' => 'watering']);
         $this->assertEquals('Watering', $tip->getCategoryLabel());
-        
         $tip2 = new CareTip(['category' => 'unknown']);
         $this->assertEquals('unknown', $tip2->getCategoryLabel());
     }

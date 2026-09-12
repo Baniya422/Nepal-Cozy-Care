@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Wishlist extends Model
 {
@@ -24,4 +24,3 @@ class Wishlist extends Model
         return $this->belongsTo(Plant::class);
     }
 }
-

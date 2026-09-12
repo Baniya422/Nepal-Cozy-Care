@@ -1,10 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { aboutPageTemplate } from "../../features/content/aboutTemplate";
-
 export default function CTA() {
   const navigate = useNavigate();
   const cta = aboutPageTemplate.cta;
-
   return (
     <section className="about-cta">
       <div className="about-cta-content">

@@ -1,29 +1,22 @@
 import { useNavigate } from "react-router-dom";
-
-// Our mission image
-const GOAL_IMAGE = "/images/mission-hero.jpg";
-
-export default function OurGoal() {
+import { resolveHomepageImage, type InfoSectionContent } from "../../features/homepage/content";
+const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+export default function OurGoal({ content }: { content: InfoSectionContent }) {
   const navigate = useNavigate();
-
   return (
     <section className="info-section info-section-green">
       <div className="info-content">
         <div className="info-text">
-          <h2 className="info-title">Our Mission</h2>
-          <p className="info-description">
-            We believe every Nepali home deserves a touch of green. Our goal is to make 
-            plant parenting accessible to everyone - whether you're a busy professional 
-            or a retired gardening enthusiast. Let's grow together!
-          </p>
-          <button className="info-btn" onClick={() => navigate("/blogs")}>
-            Read Our Blog
+          <h2 className="info-title">{content.title}</h2>
+          <p className="info-description">{content.description}</p>
+          <button className="info-btn" onClick={() => navigate(content.button_path)}>
+            {content.button_label}
           </button>
         </div>
         <div className="info-image">
           <img
-            src={GOAL_IMAGE}
-            alt="Our mission"
+            src={resolveHomepageImage(content.image, API)}
+            alt={content.image_alt}
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}

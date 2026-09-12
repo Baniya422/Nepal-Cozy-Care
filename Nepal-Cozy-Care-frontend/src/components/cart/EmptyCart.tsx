@@ -1,9 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
-
 export default function EmptyCart() {
   const navigate = useNavigate();
-
   return (
     <div className="cart-empty">
       <ShoppingBag size={64} className="cart-empty-icon" />

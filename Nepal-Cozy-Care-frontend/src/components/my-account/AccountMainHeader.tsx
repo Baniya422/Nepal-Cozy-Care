@@ -1,9 +1,7 @@
 import type { SectionConfig } from "./types";
-
 type AccountMainHeaderProps = {
   section: SectionConfig;
 };
-
 export default function AccountMainHeader({ section }: AccountMainHeaderProps) {
   return (
     <header className="account-main-header">

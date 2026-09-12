@@ -47,7 +47,6 @@ class SeasonalReminder extends Model
     public function scopeForCity($query, ?string $city)
     {
         $normalized = strtolower(trim((string) $city));
-
         if ($normalized === '') {
             return $query->whereNull('city');
         }

@@ -13,7 +13,6 @@ import {
   roomOptions,
 } from "./data";
 import type { PlantFinderTemplatePayload } from "./types";
-
 const templateFixture: PlantFinderTemplatePayload = {
   room_options: [{ value: "bedroom", label: "Bedroom" }],
   light_options: [{ value: "bright-light", label: "Bright Light" }],
@@ -52,16 +51,13 @@ const templateFixture: PlantFinderTemplatePayload = {
     location: {},
   },
 };
-
 describe("plant-finder/data", () => {
   it("applies template fields into runtime state", () => {
     applyPlantFinderTemplate(templateFixture);
-
     expect(roomOptions).toEqual([{ value: "bedroom", label: "Bedroom" }]);
     expect(lightOptions).toEqual([{ value: "bright-light", label: "Bright Light" }]);
     expect(experienceOptions).toEqual([{ value: "beginner", label: "Beginner" }]);
     expect(locationOptions).toEqual([{ value: "normal", label: "Normal Humidity" }]);
-
     expect(lightMap).toEqual({ "bright-light": "Bright indirect light" });
     expect(difficultyMap).toEqual({ beginner: "Easy" });
     expect(humidityMap).toEqual({ normal: "Normal humidity" });
@@ -69,11 +65,9 @@ describe("plant-finder/data", () => {
     expect(nonPlantCategories).toEqual(["pots", "accessories"]);
     expect(previewData.room.bedroom?.title).toBe("Calm bedroom plants");
   });
-
   it("resets state to defaults when template is missing", () => {
     applyPlantFinderTemplate(templateFixture);
     applyPlantFinderTemplate(null);
-
     expect(roomOptions).toEqual([]);
     expect(lightOptions).toEqual([]);
     expect(experienceOptions).toEqual([]);

@@ -1,5 +1,4 @@
 import type { AboutPageTemplatePayload } from "./types";
-
 const emptyTemplate: Required<AboutPageTemplatePayload> = {
   hero: {
     title: "",
@@ -46,9 +45,7 @@ const emptyTemplate: Required<AboutPageTemplatePayload> = {
     secondary_cta: { label: "", path: "/" },
   },
 };
-
 export let aboutPageTemplate = emptyTemplate;
-
 export const applyAboutPageTemplate = (payload?: AboutPageTemplatePayload | null) => {
   aboutPageTemplate = {
     ...emptyTemplate,
@@ -84,4 +81,3 @@ export const applyAboutPageTemplate = (payload?: AboutPageTemplatePayload | null
     stats: Array.isArray(payload?.stats) ? payload!.stats : [],
   };
 };
-

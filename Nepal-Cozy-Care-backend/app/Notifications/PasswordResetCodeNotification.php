@@ -13,8 +13,7 @@ class PasswordResetCodeNotification extends Notification
     public function __construct(
         public string $code,
         public int $expiresInMinutes
-    ) {
-    }
+    ) {}
 
     /**
      * Get the notification's delivery channels.

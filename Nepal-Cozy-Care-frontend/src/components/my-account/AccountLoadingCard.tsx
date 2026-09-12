@@ -1,5 +1,4 @@
 import { Package } from "lucide-react";
-
 export default function AccountLoadingCard() {
   return (
     <div className="account-loading-card">

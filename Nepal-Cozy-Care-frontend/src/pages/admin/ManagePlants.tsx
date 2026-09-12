@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Eye, Edit, Trash2, X, Upload } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface Plant {
   id: number;
   name: string;
@@ -28,7 +26,6 @@ interface Plant {
   is_popular_item?: boolean;
   is_best_seller?: boolean;
 }
-
 interface PlantFormData {
   name: string;
   scientific_name: string;
@@ -51,7 +48,6 @@ interface PlantFormData {
   is_popular_item: boolean;
   is_best_seller: boolean;
 }
-
 export default function ManagePlants() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,34 +78,26 @@ export default function ManagePlants() {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   useEffect(() => {
     fetchPlants();
   }, []);
-
   const fetchPlants = async () => {
     try {
       const token = localStorage.getItem("token");
-      // Use admin endpoint to get ALL plants including inactive
       const res = await fetch(`${API}/api/admin/plants?per_page=100`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
         console.log("Admin plants response:", data);
-        // Handle different API response structures
         let plantsData = data.data?.plants || data.data?.data || data.plants || data.data || [];
-        
-        // Convert price to number for each plant
         plantsData = plantsData.map((plant: any) => ({
           ...plant,
           price: parseFloat(plant.price) || 0,
         }));
-        
         setPlants(plantsData);
       } else {
         console.error("Failed to fetch plants:", res.status);
-        // Fallback to public endpoint if admin endpoint fails
         const publicRes = await fetch(`${API}/api/plants?per_page=100`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -129,11 +117,8 @@ export default function ManagePlants() {
       setLoading(false);
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate required fields
     if (!formData.name.trim()) {
       alert("Plant name is required");
       return;
@@ -146,14 +131,11 @@ export default function ManagePlants() {
       alert("Please enter a valid stock quantity");
       return;
     }
-
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You must be logged in to add plants");
       return;
     }
-
-    // Create FormData for file upload
     const formDataToSend = new FormData();
     formDataToSend.append("name", formData.name.trim());
     formDataToSend.append("scientific_name", formData.scientific_name.trim() || "");
@@ -176,40 +158,30 @@ export default function ManagePlants() {
     formDataToSend.append("is_active", formData.is_active ? "1" : "0");
     formDataToSend.append("is_popular_item", formData.is_popular_item ? "1" : "0");
     formDataToSend.append("is_best_seller", formData.is_best_seller ? "1" : "0");
-    
     if (selectedImage) {
       formDataToSend.append("image", selectedImage);
     }
-
     console.log("Submitting plant data with image:", selectedImage?.name);
     console.log("API URL:", API);
-
     try {
       const url = editingPlant
         ? `${API}/api/plants/${editingPlant.id}`
         : `${API}/api/plants`;
-      const method = editingPlant ? "POST" : "POST"; // Use POST for both, with _method for PUT
-
+      const method = editingPlant ? "POST" : "POST";
       console.log("Request URL:", url);
       console.log("Request method:", method);
-
-      // For file uploads, we need to use FormData
-      // Laravel requires POST with _method=PUT for file uploads on PUT requests
       if (editingPlant) {
         formDataToSend.append("_method", "PUT");
       }
-
       const res = await fetch(url, {
-        method: "POST", // Always POST for file uploads
+        method: "POST",
         headers: {
           "Accept": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: formDataToSend,
       });
-
       console.log("Response status:", res.status);
-
       if (res.ok) {
         const data = await res.json();
         console.log("Success response:", data);
@@ -234,17 +206,14 @@ export default function ManagePlants() {
       alert("Network error - please check if the backend server is running");
     }
   };
-
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this plant?")) return;
-
     const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${API}/api/plants/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) {
         fetchPlants();
       } else {
@@ -254,7 +223,6 @@ export default function ManagePlants() {
       console.error("Error deleting plant:", error);
     }
   };
-
   const handleEdit = (plant: Plant) => {
     setEditingPlant(plant);
     setFormData({
@@ -279,17 +247,15 @@ export default function ManagePlants() {
       is_popular_item: plant.is_popular_item || false,
       is_best_seller: plant.is_best_seller || false,
     });
-    setSelectedImage(null); // Reset selected image when editing
+    setSelectedImage(null);
     setImagePreview(plant.image ? `${API}/storage/${plant.image}` : null);
     setShowModal(true);
   };
-
   const handleAddNew = () => {
     setEditingPlant(null);
     resetForm();
     setShowModal(true);
   };
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -316,7 +282,6 @@ export default function ManagePlants() {
     setSelectedImage(null);
     setImagePreview(null);
   };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -324,17 +289,14 @@ export default function ManagePlants() {
       setImagePreview(URL.createObjectURL(file));
     }
   };
-
   const filteredPlants = plants.filter(
     (plant) =>
       plant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       plant.category?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const formatPrice = (price: number) => {
     return `Rs ${price.toFixed(2)}`;
   };
-
   return (
     <AdminLayout>
       <div className="admin-page">
@@ -348,7 +310,6 @@ export default function ManagePlants() {
             Add New Plant
           </button>
         </div>
-
         <div className="admin-filters">
           <div className="admin-search">
             <Search size={18} />
@@ -360,7 +321,6 @@ export default function ManagePlants() {
             />
           </div>
         </div>
-
         <div className="admin-table-container">
           {loading ? (
             <div className="admin-loading">Loading plants...</div>
@@ -450,14 +410,12 @@ export default function ManagePlants() {
               </tbody>
             </table>
           )}
-
           {!loading && filteredPlants.length === 0 && (
             <div className="admin-empty-state">
               <p>No plants found. Add your first plant!</p>
             </div>
           )}
         </div>
-
         {showModal && (
           <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
             <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
@@ -606,7 +564,6 @@ export default function ManagePlants() {
                     />
                   </div>
                 </div>
-                
                 <div className="admin-form-group">
                   <label>Suitable Rooms (Multi-select)</label>
                   <div className="admin-checkbox-group">
@@ -634,7 +591,6 @@ export default function ManagePlants() {
                     ))}
                   </div>
                 </div>
-
                 <div className="admin-form-group">
                   <label>Description</label>
                   <textarea
@@ -672,9 +628,9 @@ export default function ManagePlants() {
                     <label className="admin-file-input">
                       <Upload size={18} />
                       <span>{selectedImage ? "Change Image" : "Upload Image"}</span>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
+                      <input
+                        type="file"
+                        accept="image/*"
                         onChange={handleImageChange}
                         style={{ display: 'none' }}
                       />

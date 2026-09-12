@@ -18,7 +18,6 @@ export interface CareTip {
     name: string;
   };
 }
-
 export interface CareTipFilters {
   search?: string;
   category?: string;
@@ -26,11 +25,9 @@ export interface CareTipFilters {
   plant_id?: number;
   sort_by?: 'newest' | 'oldest' | 'popular';
 }
-
 export interface CareTipCategories {
   [key: string]: string;
 }
-
 export interface CareTipResponse {
   message: string | null;
   data: {
@@ -48,7 +45,6 @@ export interface CareTipResponse {
     total: number;
   };
 }
-
 export interface CareTipDetailResponse {
   message: string | null;
   data: {

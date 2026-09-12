@@ -3,9 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, CreditCard, MapPin, Truck } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import "../styles/checkout.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type CartItem = {
   id: number;
   plant_id: number;
@@ -17,7 +15,6 @@ type CartItem = {
     image?: string;
   };
 };
-
 type FormData = {
   shipping_name: string;
   shipping_phone: string;
@@ -27,7 +24,6 @@ type FormData = {
   preferred_contact_method: "phone" | "whatsapp" | "email";
   payment_method: "credit-card" | "esewa" | "khalti" | "cod";
 };
-
 export default function Checkout() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -45,16 +41,13 @@ export default function Checkout() {
     preferred_contact_method: "phone",
     payment_method: "cod",
   });
-
   useEffect(() => {
     if (!token) {
       navigate("/login");
       return;
     }
-
     void fetchCart();
   }, [navigate, token]);
-
   const fetchCart = async () => {
     try {
       const response = await fetch(`${API}/api/cart`, {
@@ -62,7 +55,6 @@ export default function Checkout() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.ok) {
         const data = await response.json();
         setCartItems(data.data?.cart || []);
@@ -78,7 +70,6 @@ export default function Checkout() {
       setLoading(false);
     }
   };
-
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -88,38 +79,31 @@ export default function Checkout() {
       [name]: value,
     }));
   };
-
   const handlePaymentChange = (method: FormData["payment_method"]) => {
     setFormData((previous) => ({
       ...previous,
       payment_method: method,
     }));
   };
-
   const validateForm = () => {
     if (!formData.shipping_name.trim()) {
       setError("Please enter your name");
       return false;
     }
-
     if (!formData.shipping_phone.trim()) {
       setError("Please enter your phone number");
       return false;
     }
-
     if (!formData.shipping_city.trim()) {
       setError("Please enter your city or delivery area");
       return false;
     }
-
     if (!formData.shipping_address.trim()) {
       setError("Please enter your shipping address");
       return false;
     }
-
     return true;
   };
-
   const placeOrder = async () => {
     if (!validateForm()) return;
     if (formData.payment_method !== "cod") {
@@ -128,10 +112,8 @@ export default function Checkout() {
       );
       return;
     }
-
     setSubmitting(true);
     setError("");
-
     try {
       const response = await fetch(`${API}/api/checkout`, {
         method: "POST",
@@ -149,14 +131,11 @@ export default function Checkout() {
           payment_method: formData.payment_method,
         }),
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (!response.ok) {
         setError(data.message || "Failed to place order. Please try again.");
         return;
       }
-
       window.dispatchEvent(new Event("cozycare:cart-updated"));
       navigate("/track-order", {
         state: {
@@ -172,7 +151,6 @@ export default function Checkout() {
       setSubmitting(false);
     }
   };
-
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.plant.price * item.quantity,
     0
@@ -180,14 +158,12 @@ export default function Checkout() {
   const deliveryFee = 0;
   const tax = subtotal * 0.1;
   const total = subtotal + deliveryFee + tax;
-
   const toggleItemExpansion = (itemId: number) => {
     setExpandedItems((previous) => ({
       ...previous,
       [itemId]: !previous[itemId],
     }));
   };
-
   if (loading) {
     return (
       <Layout>
@@ -197,7 +173,6 @@ export default function Checkout() {
       </Layout>
     );
   }
-
   if (cartItems.length === 0) {
     return (
       <Layout>
@@ -213,15 +188,12 @@ export default function Checkout() {
       </Layout>
     );
   }
-
   return (
     <Layout>
       <div className="checkout-page">
         <div className="checkout-container">
           <h1 className="checkout-title">Checkout</h1>
-
           {error ? <div className="checkout-error">{error}</div> : null}
-
           <div className="checkout-content">
             <div className="checkout-left">
               <div className="checkout-section">
@@ -261,7 +233,6 @@ export default function Checkout() {
                           />
                         </div>
                       </div>
-
                       {expandedItems[item.id] ? (
                         <div className="checkout-item-expanded">
                           <div className="checkout-item-row">
@@ -282,7 +253,6 @@ export default function Checkout() {
                   ))}
                 </div>
               </div>
-
               <div className="checkout-section">
                 <h2 className="checkout-section-title">
                   <MapPin size={20} />
@@ -301,7 +271,6 @@ export default function Checkout() {
                       className="checkout-input"
                     />
                   </div>
-
                   <div className="checkout-form-group">
                     <label htmlFor="shipping_phone">Phone Number *</label>
                     <input
@@ -314,7 +283,6 @@ export default function Checkout() {
                       className="checkout-input"
                     />
                   </div>
-
                   <div className="checkout-form-group">
                     <label htmlFor="shipping_city">City / Delivery Area *</label>
                     <input
@@ -327,7 +295,6 @@ export default function Checkout() {
                       className="checkout-input"
                     />
                   </div>
-
                   <div className="checkout-form-group">
                     <label htmlFor="shipping_address">Shipping Address *</label>
                     <textarea
@@ -340,7 +307,6 @@ export default function Checkout() {
                       rows={3}
                     />
                   </div>
-
                   <div className="checkout-form-group">
                     <label htmlFor="location_notes">Landmark / Delivery Notes</label>
                     <textarea
@@ -353,7 +319,6 @@ export default function Checkout() {
                       rows={3}
                     />
                   </div>
-
                   <div className="checkout-form-group">
                     <label htmlFor="preferred_contact_method">Preferred Contact Method *</label>
                     <select
@@ -368,14 +333,12 @@ export default function Checkout() {
                       <option value="email">Email me</option>
                     </select>
                   </div>
-
                   <p style={{ margin: "-0.25rem 0 0", color: "#4b5563", fontSize: "0.9rem" }}>
                     Admin may use this method to confirm your order and exact delivery location
                     before dispatch.
                   </p>
                 </div>
               </div>
-
               <div className="checkout-section">
                 <h2 className="checkout-section-title">
                   <CreditCard size={20} />
@@ -395,7 +358,6 @@ export default function Checkout() {
                       Credit / Debit Card
                     </span>
                   </label>
-
                   <label className="checkout-payment-option">
                     <input
                       type="radio"
@@ -409,7 +371,6 @@ export default function Checkout() {
                       eSewa
                     </span>
                   </label>
-
                   <label className="checkout-payment-option">
                     <input
                       type="radio"
@@ -423,7 +384,6 @@ export default function Checkout() {
                       Khalti
                     </span>
                   </label>
-
                   <label className="checkout-payment-option">
                     <input
                       type="radio"
@@ -444,11 +404,9 @@ export default function Checkout() {
                 </p>
               </div>
             </div>
-
             <div className="checkout-right">
               <div className="checkout-summary">
                 <h2 className="checkout-summary-title">Order Summary</h2>
-
                 <div className="checkout-summary-section">
                   <h3 className="checkout-summary-subtitle">Items ({cartItems.length})</h3>
                   <div className="checkout-summary-items">
@@ -464,14 +422,11 @@ export default function Checkout() {
                     ))}
                   </div>
                 </div>
-
                 <div className="checkout-summary-divider" />
-
                 <div className="checkout-summary-row">
                   <span>Subtotal</span>
                   <span>Rs {subtotal.toFixed(2)}</span>
                 </div>
-
                 <div className="checkout-summary-row">
                   <span>
                     <Truck size={16} />
@@ -479,19 +434,15 @@ export default function Checkout() {
                   </span>
                   <span className="checkout-free">FREE</span>
                 </div>
-
                 <div className="checkout-summary-row">
                   <span>Tax (10%)</span>
                   <span>Rs {tax.toFixed(2)}</span>
                 </div>
-
                 <div className="checkout-summary-divider" />
-
                 <div className="checkout-summary-row checkout-summary-total">
                   <span>Total Amount</span>
                   <span>Rs {total.toFixed(2)}</span>
                 </div>
-
                 <button
                   className="checkout-place-order-btn"
                   onClick={placeOrder}
@@ -499,7 +450,6 @@ export default function Checkout() {
                 >
                   {submitting ? "Placing Order..." : "Place Order"}
                 </button>
-
                 <button
                   className="checkout-continue-shopping-btn"
                   onClick={() => navigate("/cart")}
@@ -508,7 +458,6 @@ export default function Checkout() {
                   Back to Cart
                 </button>
               </div>
-
               <div className="checkout-info-card">
                 <h3 className="checkout-info-title">Delivery Information</h3>
                 <ul className="checkout-info-list">

@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::table('orders', function (Blueprint $table) {
             $table->string('payment_status')
                 ->default('unpaid')
-                ->after('status'); // unpaid, paid, failed, refunded
+                ->after('status');
         });
     }
 
@@ -22,4 +22,3 @@ return new class extends Migration
         });
     }
 };
-

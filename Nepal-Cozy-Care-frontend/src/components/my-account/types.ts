@@ -1,5 +1,4 @@
 import type { LucideIcon } from "lucide-react";
-
 export type AccountSection =
   | "overview"
   | "profile"
@@ -8,7 +7,6 @@ export type AccountSection =
   | "wishlist"
   | "security"
   | "preferences";
-
 export type AccountUser = {
   id: number;
   name: string;
@@ -16,7 +14,6 @@ export type AccountUser = {
   role?: string;
   created_at?: string;
 };
-
 export type OrderItem = {
   id: number;
   quantity: number;
@@ -28,7 +25,6 @@ export type OrderItem = {
     image?: string | null;
   } | null;
 };
-
 export type AccountOrder = {
   id: number;
   status: string;
@@ -45,7 +41,6 @@ export type AccountOrder = {
   created_at: string;
   items: OrderItem[];
 };
-
 export type WishlistEntry = {
   id: number;
   plant_id: number;
@@ -58,7 +53,6 @@ export type WishlistEntry = {
     size?: string | null;
   } | null;
 };
-
 export type AddressEntry = {
   id: string;
   label: string;
@@ -66,41 +60,34 @@ export type AddressEntry = {
   note: string;
   isDefault: boolean;
 };
-
 export type Preferences = {
   emailUpdates: boolean;
   smsAlerts: boolean;
   careReminderDays: number;
 };
-
 export type ProfileExtras = {
   phone: string;
 };
-
 export type Notice = {
   tone: "success" | "error";
   text: string;
 };
-
 export type SectionConfig = {
   key: AccountSection;
   label: string;
   description: string;
   icon: LucideIcon;
 };
-
 export type ProfileForm = {
   name: string;
   email: string;
   phone: string;
 };
-
 export type PasswordForm = {
   current_password: string;
   password: string;
   password_confirmation: string;
 };
-
 export type AddressForm = {
   label: string;
   address: string;

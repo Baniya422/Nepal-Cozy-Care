@@ -26,4 +26,3 @@ class Review extends Model
         return $this->belongsTo(Plant::class);
     }
 }
-

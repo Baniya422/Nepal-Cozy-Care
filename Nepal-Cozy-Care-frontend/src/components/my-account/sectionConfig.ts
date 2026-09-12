@@ -8,7 +8,6 @@ import {
   User,
 } from "lucide-react";
 import type { SectionConfig } from "./types";
-
 export const accountSections: SectionConfig[] = [
   {
     key: "overview",

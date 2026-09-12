@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('plants', function (Blueprint $table) {
-            $table->json('rooms')->nullable()->after('humidity'); // JSON to store suitable rooms: Bedroom, Living Room, Kitchen, etc.
-            $table->json('quantity_categories')->nullable()->after('rooms'); // JSON to store quantity options: One, 2-3, 4-5, More than 5
+            $table->json('rooms')->nullable()->after('humidity');
+            $table->json('quantity_categories')->nullable()->after('rooms');
         });
     }
 

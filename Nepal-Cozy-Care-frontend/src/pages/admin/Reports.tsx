@@ -11,38 +11,31 @@ import {
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type DateRange = "today" | "last7days" | "last30days" | "last90days" | "thisYear";
-
 interface SalesData {
   total: number;
   change: number;
   orders: number;
   avg_order_value: number;
 }
-
 interface ProductSales {
   id: number;
   name: string;
   sales: number;
   revenue: number;
 }
-
 interface LowStockProduct {
   id: number;
   name: string;
   stock: number;
 }
-
 interface CustomerData {
   new: number;
   returning: number;
   total: number;
   retention: number;
 }
-
 interface ReportsData {
   sales: SalesData;
   products: {
@@ -52,7 +45,6 @@ interface ReportsData {
   customers: CustomerData;
   orders_by_status: Record<string, number>;
 }
-
 const ORDER_STATUS_SEQUENCE = [
   "pending",
   "packed",
@@ -61,43 +53,35 @@ const ORDER_STATUS_SEQUENCE = [
   "delivered",
   "cancelled",
 ];
-
 const formatStatusLabel = (status: string) =>
   status
     .split("_")
     .join(" ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
 export default function Reports() {
   const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<DateRange>("last30days");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reportData, setReportData] = useState<ReportsData | null>(null);
-
   useEffect(() => {
     void fetchReports(dateRange);
   }, [dateRange]);
-
   const fetchReports = async (range: DateRange) => {
     setLoading(true);
     setError(null);
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Admin login required to view reports.");
       }
-
       const res = await fetch(`${API}/api/admin/reports?range=${range}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const payload = await res.json();
-
       if (!res.ok) {
         throw new Error(payload.message || "Failed to load reports.");
       }
-
       setReportData(payload.data);
     } catch (fetchError) {
       console.error("Error fetching reports:", fetchError);
@@ -108,21 +92,16 @@ export default function Reports() {
       setLoading(false);
     }
   };
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-
+  const formatPrice = (price: number) => {
+    const num = Number(price) || 0;
+    return `Rs. ${num.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
   const totalOrders = ORDER_STATUS_SEQUENCE.reduce(
     (sum, status) => sum + (reportData?.orders_by_status?.[status] ?? 0),
     0
   );
-
   const handleExport = () => {
     if (!reportData) return;
-
     const reportBlob = new Blob([JSON.stringify(reportData, null, 2)], {
       type: "application/json",
     });
@@ -133,7 +112,6 @@ export default function Reports() {
     anchor.click();
     window.URL.revokeObjectURL(downloadUrl);
   };
-
   return (
     <AdminLayout>
       <div className="admin-page">
@@ -164,7 +142,6 @@ export default function Reports() {
             </button>
           </div>
         </div>
-
         {error && (
           <div className="admin-card" style={{ marginBottom: "1rem" }}>
             <div
@@ -175,7 +152,6 @@ export default function Reports() {
             </div>
           </div>
         )}
-
         {loading && !reportData ? (
           <div className="admin-table-container">
             <div className="admin-loading">Loading report data...</div>
@@ -209,7 +185,6 @@ export default function Reports() {
                   </span>
                 </div>
               </div>
-
               <div className="admin-stat-card green">
                 <div className="admin-stat-icon">
                   <ShoppingCart size={24} />
@@ -222,7 +197,6 @@ export default function Reports() {
                   <span>Selected range</span>
                 </div>
               </div>
-
               <div className="admin-stat-card purple">
                 <div className="admin-stat-icon">
                   <Users size={24} />
@@ -235,7 +209,6 @@ export default function Reports() {
                   <span>{reportData.customers.total} total customers</span>
                 </div>
               </div>
-
               <div className="admin-stat-card orange">
                 <div className="admin-stat-icon">
                   <Package size={24} />
@@ -251,7 +224,6 @@ export default function Reports() {
                 </div>
               </div>
             </div>
-
             <div className="admin-dashboard-grid">
               <div className="admin-card">
                 <div className="admin-card-header">
@@ -282,7 +254,6 @@ export default function Reports() {
                   </div>
                 </div>
               </div>
-
               <div className="admin-card">
                 <div className="admin-card-header">
                   <h3>Orders by Status</h3>
@@ -292,7 +263,6 @@ export default function Reports() {
                     {ORDER_STATUS_SEQUENCE.map((status) => {
                       const count = reportData.orders_by_status?.[status] ?? 0;
                       const percentage = totalOrders > 0 ? (count / totalOrders) * 100 : 0;
-
                       return (
                         <div key={status} className="admin-status-bar-item">
                           <div className="admin-status-bar-header">
@@ -314,7 +284,6 @@ export default function Reports() {
                 </div>
               </div>
             </div>
-
             <div className="admin-card admin-alert-card">
               <div className="admin-card-header">
                 <h3>
@@ -364,7 +333,6 @@ export default function Reports() {
                 </table>
               </div>
             </div>
-
             <div className="admin-card">
               <div className="admin-card-header">
                 <h3>Customer Insights</h3>

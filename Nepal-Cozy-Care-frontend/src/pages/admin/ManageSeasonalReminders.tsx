@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Edit, Plus, Search, Trash2, Upload, X } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type Reminder = {
   id: number;
   title: string;
@@ -18,13 +16,11 @@ type Reminder = {
   care_tip_id?: number | null;
   care_tip_title?: string | null;
 };
-
 type CareTipOption = {
   id: number;
   title: string;
   category: string;
 };
-
 type FormState = {
   title: string;
   excerpt: string;
@@ -35,7 +31,6 @@ type FormState = {
   care_tip_id: string;
   status: "published" | "draft";
 };
-
 const seasonOptions = [
   { value: "all", label: "All Year" },
   { value: "spring", label: "Spring" },
@@ -44,7 +39,6 @@ const seasonOptions = [
   { value: "autumn", label: "Autumn" },
   { value: "winter", label: "Winter" },
 ];
-
 const emptyForm: FormState = {
   title: "",
   excerpt: "",
@@ -55,16 +49,13 @@ const emptyForm: FormState = {
   care_tip_id: "",
   status: "draft",
 };
-
 const extractErrorMessage = (data: any, fallback: string) => {
   const validationMessages = Object.values(data?.errors ?? {}).flat();
   const firstValidationMessage = validationMessages.find(
     (message): message is string => typeof message === "string"
   );
-
   return data?.message || firstValidationMessage || fallback;
 };
-
 export default function ManageSeasonalReminders() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [careTips, setCareTips] = useState<CareTipOption[]>([]);
@@ -76,15 +67,12 @@ export default function ManageSeasonalReminders() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     void Promise.all([fetchReminders(), fetchCareTips()]);
   }, []);
-
   const authHeader = () => ({
     Authorization: `Bearer ${localStorage.getItem("token")}`,
   });
-
   const fetchReminders = async () => {
     setLoading(true);
     try {
@@ -92,11 +80,9 @@ export default function ManageSeasonalReminders() {
         headers: authHeader(),
       });
       const data = await response.json().catch(() => ({}));
-
       if (!response.ok) {
         throw new Error(data.message || "Could not load seasonal reminders.");
       }
-
       const items = (data.data?.reminders ?? []) as any[];
       setReminders(
         items.map((item) => ({
@@ -119,23 +105,19 @@ export default function ManageSeasonalReminders() {
       setLoading(false);
     }
   };
-
   const fetchCareTips = async () => {
     try {
       const response = await fetch(`${API}/api/admin/care-tips?per_page=100`, {
         headers: authHeader(),
       });
       const data = await response.json().catch(() => ({}));
-
       if (!response.ok) return;
-
       const items = (data.data?.tips ?? []) as CareTipOption[];
       setCareTips(Array.isArray(items) ? items : []);
     } catch (error) {
       console.error("Error loading care tips:", error);
     }
   };
-
   const resetForm = () => {
     setFormData(emptyForm);
     setSelectedImage(null);
@@ -143,12 +125,10 @@ export default function ManageSeasonalReminders() {
     setEditingReminder(null);
     setError(null);
   };
-
   const openAdd = () => {
     resetForm();
     setShowModal(true);
   };
-
   const openEdit = (reminder: Reminder) => {
     setEditingReminder(reminder);
     setFormData({
@@ -165,41 +145,32 @@ export default function ManageSeasonalReminders() {
     setImagePreview(reminder.image ? `${API}/storage/${reminder.image}` : null);
     setShowModal(true);
   };
-
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     setSelectedImage(file);
     setImagePreview(URL.createObjectURL(file));
   };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
-
     try {
       let imagePath = editingReminder?.image ?? null;
-
       if (selectedImage) {
         const uploadData = new FormData();
         uploadData.append("file", selectedImage);
         uploadData.append("directory", "seasonal-reminders");
-
         const uploadResponse = await fetch(`${API}/api/upload`, {
           method: "POST",
           headers: authHeader(),
           body: uploadData,
         });
-
         const uploadJson = await uploadResponse.json().catch(() => ({}));
-
         if (!uploadResponse.ok) {
           throw new Error(uploadJson.message || "Could not upload image.");
         }
-
         imagePath = uploadJson.data?.path || null;
       }
-
       const response = await fetch(
         editingReminder
           ? `${API}/api/seasonal-reminders/${editingReminder.id}`
@@ -223,13 +194,10 @@ export default function ManageSeasonalReminders() {
           }),
         }
       );
-
       const data = await response.json().catch(() => ({}));
-
       if (!response.ok) {
         throw new Error(extractErrorMessage(data, "Could not save seasonal reminder."));
       }
-
       setShowModal(false);
       resetForm();
       await fetchReminders();
@@ -237,31 +205,25 @@ export default function ManageSeasonalReminders() {
       setError(error instanceof Error ? error.message : "Could not save seasonal reminder.");
     }
   };
-
   const handleDelete = async (reminderId: number) => {
     if (!window.confirm("Delete this seasonal reminder?")) return;
-
     try {
       const response = await fetch(`${API}/api/seasonal-reminders/${reminderId}`, {
         method: "DELETE",
         headers: authHeader(),
       });
-
       if (!response.ok) {
         throw new Error("Could not delete seasonal reminder.");
       }
-
       await fetchReminders();
     } catch (error) {
       setError(error instanceof Error ? error.message : "Could not delete seasonal reminder.");
     }
   };
-
   const filteredReminders = reminders.filter((reminder) => {
     const haystack = `${reminder.title} ${reminder.city ?? ""} ${reminder.season_key} ${reminder.care_tip_title ?? ""}`;
     return haystack.toLowerCase().includes(searchQuery.toLowerCase());
   });
-
   return (
     <AdminLayout>
       <div className="admin-page">
@@ -275,7 +237,6 @@ export default function ManageSeasonalReminders() {
             New Reminder
           </button>
         </div>
-
         <div className="admin-filters">
           <div className="admin-search">
             <Search size={18} />
@@ -287,9 +248,7 @@ export default function ManageSeasonalReminders() {
             />
           </div>
         </div>
-
         {error ? <div className="admin-error">{error}</div> : null}
-
         <div className="admin-table-container">
           {loading ? (
             <div className="admin-loading">Loading reminders...</div>
@@ -350,14 +309,12 @@ export default function ManageSeasonalReminders() {
               </tbody>
             </table>
           )}
-
           {!loading && filteredReminders.length === 0 ? (
             <div className="admin-empty-state">
               <p>No reminders found yet.</p>
             </div>
           ) : null}
         </div>
-
         {showModal ? (
           <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
             <div className="admin-modal admin-modal-large" onClick={(event) => event.stopPropagation()}>
@@ -367,10 +324,8 @@ export default function ManageSeasonalReminders() {
                   <X size={20} />
                 </button>
               </div>
-
               <form onSubmit={handleSubmit} className="admin-form">
                 {error ? <div className="admin-error">{error}</div> : null}
-
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
                     <label>Title *</label>
@@ -443,7 +398,6 @@ export default function ManageSeasonalReminders() {
                     </select>
                   </div>
                 </div>
-
                 <div className="admin-form-group">
                   <label>Short Summary</label>
                   <textarea
@@ -453,7 +407,6 @@ export default function ManageSeasonalReminders() {
                     placeholder="Small summary shown on user dashboard"
                   />
                 </div>
-
                 <div className="admin-form-group">
                   <label>Detailed Content *</label>
                   <textarea
@@ -463,7 +416,6 @@ export default function ManageSeasonalReminders() {
                     required
                   />
                 </div>
-
                 <div className="admin-form-group">
                   <label>Reminder Image</label>
                   <div className="admin-image-upload">
@@ -479,7 +431,6 @@ export default function ManageSeasonalReminders() {
                     </label>
                   </div>
                 </div>
-
                 <div className="admin-modal-footer">
                   <button
                     type="button"

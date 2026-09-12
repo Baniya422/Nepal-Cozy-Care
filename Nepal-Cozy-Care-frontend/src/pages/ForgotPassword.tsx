@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./auth.css";
-
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -18,19 +15,16 @@ export default function ForgotPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [previewCode, setPreviewCode] = useState("");
-
   useEffect(() => {
     const state = location.state as { email?: string } | null;
     if (state?.email) {
       setEmail(state.email);
     }
   }, [location.state]);
-
   const parseApiError = (status: number, payload: any, fallback: string) => {
     if (status >= 500) {
       return "Server error. Please try again in a moment.";
     }
-
     return (
       payload?.errors?.email?.[0] ||
       payload?.errors?.code?.[0] ||
@@ -39,16 +33,13 @@ export default function ForgotPassword() {
       fallback
     );
   };
-
   const handleSendCode = async () => {
     setError("");
     setSuccess("");
-
     if (!email.trim()) {
       setError("Email is required.");
       return;
     }
-
     setSendingCode(true);
     try {
       const res = await fetch(`${API_BASE}/api/forgot-password`, {
@@ -59,15 +50,12 @@ export default function ForgotPassword() {
         },
         body: JSON.stringify({ email: email.trim() }),
       });
-
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok) {
         throw new Error(
           parseApiError(res.status, data, "Could not send password reset code.")
         );
       }
-
       setCodeSent(true);
       setSuccess(data?.message || "If an account exists for that email, a reset code has been sent.");
       setPreviewCode(data?.development_code ?? "");
@@ -80,12 +68,10 @@ export default function ForgotPassword() {
       setSendingCode(false);
     }
   };
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
     if (!email.trim()) {
       setError("Email is required.");
       return;
@@ -110,7 +96,6 @@ export default function ForgotPassword() {
       setError("Passwords do not match.");
       return;
     }
-
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/reset-password`, {
@@ -126,13 +111,10 @@ export default function ForgotPassword() {
           password_confirmation: confirmPassword,
         }),
       });
-
       const data = await res.json().catch(() => ({}));
-
       if (!res.ok) {
         throw new Error(parseApiError(res.status, data, "Password reset failed."));
       }
-
       navigate("/login", {
         state: {
           email: email.trim(),
@@ -145,7 +127,6 @@ export default function ForgotPassword() {
       setLoading(false);
     }
   };
-
   return (
     <div className="auth-wrap">
       <div className="auth-card">
@@ -167,10 +148,8 @@ export default function ForgotPassword() {
             />
           </svg>
         </div>
-
         <h1 className="auth-title">Forgot Password</h1>
         <p className="auth-subtitle">Request a reset code, then choose a new password.</p>
-
         {error ? <div className="auth-alert auth-alert--error">{error}</div> : null}
         {success ? <div className="auth-alert auth-alert--success">{success}</div> : null}
         {previewCode ? (
@@ -182,7 +161,6 @@ export default function ForgotPassword() {
             </p>
           </div>
         ) : null}
-
         <form className="auth-form" onSubmit={handleResetPassword}>
           <label className="auth-label">
             Email Address
@@ -195,7 +173,6 @@ export default function ForgotPassword() {
               autoComplete="email"
             />
           </label>
-
           <button
             className="auth-btn auth-btn--secondary"
             disabled={sendingCode}
@@ -204,7 +181,6 @@ export default function ForgotPassword() {
           >
             {sendingCode ? "Sending code..." : codeSent ? "Resend Code" : "Send Reset Code"}
           </button>
-
           <label className="auth-label">
             Reset Code
             <input
@@ -217,7 +193,6 @@ export default function ForgotPassword() {
               autoComplete="one-time-code"
             />
           </label>
-
           <label className="auth-label">
             New Password
             <input
@@ -229,7 +204,6 @@ export default function ForgotPassword() {
               autoComplete="new-password"
             />
           </label>
-
           <label className="auth-label">
             Confirm New Password
             <input
@@ -241,11 +215,9 @@ export default function ForgotPassword() {
               autoComplete="new-password"
             />
           </label>
-
           <button className="auth-btn" disabled={loading} type="submit">
             {loading ? "Resetting..." : "Reset Password"}
           </button>
-
           <div className="auth-footer">
             <span>Back to login?</span>
             <Link className="auth-link" to="/login">

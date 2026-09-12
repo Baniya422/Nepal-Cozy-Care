@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Eye, Edit, Trash2, X, Upload } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface Accessory {
   id: number;
   name: string;
@@ -15,7 +13,6 @@ interface Accessory {
   image: string | null;
   description?: string | null;
 }
-
 interface AccessoryFormData {
   name: string;
   category: string;
@@ -24,7 +21,6 @@ interface AccessoryFormData {
   description: string;
   is_active: boolean;
 }
-
 export default function ManageAccessories() {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,38 +37,30 @@ export default function ManageAccessories() {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   useEffect(() => {
     fetchAccessories();
   }, []);
-
   const fetchAccessories = async () => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API}/api/admin/plants?per_page=100`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
       if (res.ok) {
         const data = await res.json();
         let plantsData = data.data?.plants || data.data?.data || data.plants || data.data || [];
-        
-        // Convert price to number and filter for accessory categories
         plantsData = plantsData.map((item: any) => ({
           ...item,
           price: parseFloat(item.price) || 0,
         }));
-        
-        // Filter for Pots, Tools, Soil, Fertilizers, Accessories categories
         const accessories = plantsData.filter((item: any) => {
           const category = (item.category || "").toLowerCase().trim();
-          return category.includes("pot") || 
-                 category.includes("tool") || 
-                 category.includes("soil") || 
-                 category.includes("fertilizer") || 
+          return category.includes("pot") ||
+                 category.includes("tool") ||
+                 category.includes("soil") ||
+                 category.includes("fertilizer") ||
                  category.includes("accessory");
         });
-        
         setAccessories(accessories);
       } else {
         console.error("Failed to fetch accessories:", res.status);
@@ -83,11 +71,8 @@ export default function ManageAccessories() {
       setLoading(false);
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate required fields
     if (!formData.name.trim()) {
       alert("Accessory name is required");
       return;
@@ -100,14 +85,11 @@ export default function ManageAccessories() {
       alert("Please enter a valid stock quantity");
       return;
     }
-
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You must be logged in to add accessories");
       return;
     }
-
-    // Create FormData for file upload
     const formDataToSend = new FormData();
     formDataToSend.append("name", formData.name.trim());
     formDataToSend.append("description", formData.description.trim() || "");
@@ -115,21 +97,16 @@ export default function ManageAccessories() {
     formDataToSend.append("stock", formData.stock);
     formDataToSend.append("category", formData.category);
     formDataToSend.append("is_active", formData.is_active ? "1" : "0");
-    
     if (selectedImage) {
       formDataToSend.append("image", selectedImage);
     }
-
     try {
       const url = editingAccessory
         ? `${API}/api/plants/${editingAccessory.id}`
         : `${API}/api/plants`;
-      
-      // For file uploads, use POST with _method for PUT requests
       if (editingAccessory) {
         formDataToSend.append("_method", "PUT");
       }
-
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -138,7 +115,6 @@ export default function ManageAccessories() {
         },
         body: formDataToSend,
       });
-
       if (res.ok) {
         setShowModal(false);
         resetForm();
@@ -161,17 +137,14 @@ export default function ManageAccessories() {
       alert("Network error - please check if the backend server is running");
     }
   };
-
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this accessory?")) return;
-
     const token = localStorage.getItem("token");
     try {
       const res = await fetch(`${API}/api/plants/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) {
         fetchAccessories();
         alert("Accessory deleted successfully!");
@@ -183,7 +156,6 @@ export default function ManageAccessories() {
       alert("Network error - please check if the backend server is running");
     }
   };
-
   const handleEdit = (accessory: Accessory) => {
     setEditingAccessory(accessory);
     setFormData({
@@ -194,26 +166,21 @@ export default function ManageAccessories() {
       description: accessory.description || "",
       is_active: accessory.is_active,
     });
-    
-    // Set image preview if accessory has an image
     if (accessory.image) {
-      const imageUrl = accessory.image.startsWith("http") 
-        ? accessory.image 
+      const imageUrl = accessory.image.startsWith("http")
+        ? accessory.image
         : `${API}/storage/${accessory.image}`;
       setImagePreview(imageUrl);
     } else {
       setImagePreview(null);
     }
-    
     setShowModal(true);
   };
-
   const handleAddNew = () => {
     setEditingAccessory(null);
     resetForm();
     setShowModal(true);
   };
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -226,7 +193,6 @@ export default function ManageAccessories() {
     setSelectedImage(null);
     setImagePreview(null);
   };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -234,21 +200,17 @@ export default function ManageAccessories() {
       setImagePreview(URL.createObjectURL(file));
     }
   };
-
   const filteredAccessories = accessories.filter(
     (accessory) =>
       accessory.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       accessory.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const formatPrice = (price: number) => {
     return `Rs ${price.toFixed(2)}`;
   };
-
   const formatId = (id: number) => {
     return `#${id}`;
   };
-
   return (
     <AdminLayout>
       <div className="admin-page">
@@ -262,7 +224,6 @@ export default function ManageAccessories() {
             Add New Accessory
           </button>
         </div>
-
         <div className="admin-filters">
           <div className="admin-search">
             <Search size={18} />
@@ -274,7 +235,6 @@ export default function ManageAccessories() {
             />
           </div>
         </div>
-
         <div className="admin-table-container">
           {loading ? (
             <div className="admin-loading">Loading accessories...</div>
@@ -343,14 +303,12 @@ export default function ManageAccessories() {
               </tbody>
             </table>
           )}
-
           {!loading && filteredAccessories.length === 0 && (
             <div className="admin-empty-state">
               <p>No accessories found. Add your first accessory!</p>
             </div>
           )}
         </div>
-
         {showModal && (
           <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
             <div className="admin-modal" onClick={(e) => e.stopPropagation()}>

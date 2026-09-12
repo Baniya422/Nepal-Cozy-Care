@@ -1,28 +1,21 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./auth.css";
-
 type RegisterResponse = {
   message?: string;
   user?: any;
   errors?: Record<string, string[]>;
 };
-
-// Use empty string to leverage Vite proxy, or fallback to direct URL
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
-
 export default function Register() {
   const navigate = useNavigate();
-
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-
   const validate = () => {
     if (!fullName.trim()) return "Full name is required.";
     if (!email.trim()) return "Email is required.";
@@ -31,12 +24,10 @@ export default function Register() {
     if (password !== confirmPassword) return "Passwords do not match.";
     return "";
   };
-
   const parseApiError = (status: number, payload: any) => {
     if (status >= 500) {
       return "Server error. Please try again in a moment.";
     }
-
     return (
       payload?.errors?.email?.[0] ||
       payload?.errors?.password?.[0] ||
@@ -45,21 +36,17 @@ export default function Register() {
       "Registration failed."
     );
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
     const v = validate();
     if (v) {
       setError(v);
       return;
     }
-
     setLoading(true);
     try {
-      // 1) Register
       const res = await fetch(`${API_BASE}/api/register`, {
         method: "POST",
         headers: {
@@ -70,17 +57,14 @@ export default function Register() {
           name: fullName,
           email,
           password,
-          password_confirmation: confirmPassword, // Laravel default
+          password_confirmation: confirmPassword,
         }),
       });
-
       const data: RegisterResponse = await res.json().catch(() => ({}));
-
       if (!res.ok) {
         const msg = parseApiError(res.status, data);
         throw new Error(msg);
       }
-
       navigate("/login", {
         state: {
           email,
@@ -97,12 +81,11 @@ export default function Register() {
       setLoading(false);
     }
   };
-
   return (
     <div className="auth-wrap">
       <div className="auth-card">
         <div className="auth-logo">
-          {/* Leaf icon */}
+          {}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path
               d="M20 4c-6.5 0-12 2.5-15 7.5C2.5 16.5 4 20 8.5 20c5 0 9.5-4.5 10.5-11.5z"
@@ -120,13 +103,10 @@ export default function Register() {
             />
           </svg>
         </div>
-
         <h1 className="auth-title">Create Account</h1>
         <p className="auth-subtitle">Start your plant care journey today</p>
-
         {error ? <div className="auth-alert auth-alert--error">{error}</div> : null}
         {success ? <div className="auth-alert auth-alert--success">{success}</div> : null}
-
         <form className="auth-form" onSubmit={handleSubmit} autoComplete="off">
           <label className="auth-label">
             Full Name
@@ -139,7 +119,6 @@ export default function Register() {
               type="text"
             />
           </label>
-
           <label className="auth-label">
             Email Address
             <input
@@ -151,7 +130,6 @@ export default function Register() {
               autoComplete="off"
             />
           </label>
-
           <label className="auth-label">
             Password
             <input
@@ -163,7 +141,6 @@ export default function Register() {
               autoComplete="off"
             />
           </label>
-
           <label className="auth-label">
             Confirm Password
             <input
@@ -175,11 +152,9 @@ export default function Register() {
               autoComplete="off"
             />
           </label>
-
           <button className="auth-btn" disabled={loading} type="submit">
             {loading ? "Creating..." : "Create Account"}
           </button>
-
           <div className="auth-footer">
             <span>Already have an account?</span>
             <Link className="auth-link" to="/login">

@@ -1,5 +1,4 @@
 import type { OurMissionTemplatePayload } from "./types";
-
 const emptyTemplate: Required<OurMissionTemplatePayload> = {
   hero: {
     eyebrow: "",
@@ -42,9 +41,7 @@ const emptyTemplate: Required<OurMissionTemplatePayload> = {
     goals: [],
   },
 };
-
 export let ourMissionTemplate = emptyTemplate;
-
 export const applyOurMissionTemplate = (payload?: OurMissionTemplatePayload | null) => {
   ourMissionTemplate = {
     ...emptyTemplate,
@@ -75,4 +72,3 @@ export const applyOurMissionTemplate = (payload?: OurMissionTemplatePayload | nu
     },
   };
 };
-

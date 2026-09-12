@@ -1,7 +1,5 @@
 import { Heart, ShoppingCart } from "lucide-react";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type Pot = {
   id: number;
   name: string;
@@ -12,7 +10,6 @@ type Pot = {
   description?: string;
   is_active?: boolean;
 };
-
 interface PotsGridProps {
   filteredPots: Pot[];
   pots: Pot[];
@@ -21,7 +18,6 @@ interface PotsGridProps {
   toggleWishlist: (potId: number) => void;
   handleAddToCart: (pot: Pot) => void;
 }
-
 export default function PotsGrid({
   filteredPots,
   pots,
@@ -37,7 +33,6 @@ export default function PotsGrid({
       </main>
     );
   }
-
   return (
     <main className="pots-main">
       <div className="pots-info">
@@ -45,7 +40,6 @@ export default function PotsGrid({
           Showing {filteredPots.length} of {pots.length} pots
         </p>
       </div>
-
       {filteredPots.length === 0 ? (
         <div className="pots-empty">
           <p>No pots found matching your criteria.</p>
@@ -86,14 +80,12 @@ export default function PotsGrid({
                 )}
                 {pot.stock === 0 && <div className="out-of-stock">Out of Stock</div>}
               </div>
-
               <div className="pot-info">
                 <h3 className="pot-name">{pot.name}</h3>
                 <p className="pot-category">{pot.category}</p>
                 <p className="pot-stock">
                   {pot.stock > 0 ? `In stock: ${pot.stock}` : "Out of stock"}
                 </p>
-
                 <div className="pot-footer">
                   <span className="pot-price">Rs. {Number(pot.price).toFixed(2)}</span>
                   <button

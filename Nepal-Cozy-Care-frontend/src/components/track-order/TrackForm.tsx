@@ -1,5 +1,4 @@
 import { Search, Package, Mail, AlertCircle, HelpCircle } from "lucide-react";
-
 interface TrackFormProps {
   orderId: string;
   setOrderId: (value: string) => void;
@@ -10,7 +9,6 @@ interface TrackFormProps {
   setShowHelp: (value: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
-
 export default function TrackForm({
   orderId,
   setOrderId,
@@ -41,7 +39,6 @@ export default function TrackForm({
                   required
                 />
               </div>
-
               <div className="track-order-input-group">
                 <label className="track-order-label">
                   <Mail size={16} />
@@ -57,7 +54,6 @@ export default function TrackForm({
                 />
               </div>
             </div>
-
             <button
               type="submit"
               className="track-order-submit-btn"
@@ -72,14 +68,12 @@ export default function TrackForm({
                 </>
               )}
             </button>
-
             <p className="track-order-privacy">
               <AlertCircle size={14} />
               Your information is secure and only used to verify your order
             </p>
           </form>
-
-          {/* Help Section */}
+          {}
           <div className="track-order-help">
             <button
               className="track-order-help-toggle"

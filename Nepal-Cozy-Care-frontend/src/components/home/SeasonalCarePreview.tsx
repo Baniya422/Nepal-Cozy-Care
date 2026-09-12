@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, CalendarHeart, CloudSun, MapPin } from "lucide-react";
-
+import type { HomepageContent } from "../../features/homepage/content";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const FALLBACK_IMAGE = "/images/winter-garden.png";
-
 type SeasonalReminder = {
   id: number;
   title: string;
@@ -19,26 +18,21 @@ type SeasonalReminder = {
     category: string;
   } | null;
 };
-
-export default function SeasonalCarePreview() {
+export default function SeasonalCarePreview({ content }: { content: HomepageContent["seasonal"] }) {
   const navigate = useNavigate();
   const [seasonLabel, setSeasonLabel] = useState("Seasonal Care");
   const [reminders, setReminders] = useState<SeasonalReminder[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     void fetchSeasonalPreview();
   }, []);
-
   const fetchSeasonalPreview = async () => {
     try {
       const response = await fetch(`${API}/api/seasonal-reminders/current`);
       const data = await response.json().catch(() => ({}));
-
       if (!response.ok) {
         throw new Error(data.message || "Could not load seasonal reminders.");
       }
-
       setSeasonLabel(data.data?.season_label || "Seasonal Care");
       setReminders((data.data?.reminders ?? []) as SeasonalReminder[]);
     } catch (error) {
@@ -48,39 +42,31 @@ export default function SeasonalCarePreview() {
       setLoading(false);
     }
   };
-
   const visibleReminders = reminders.slice(0, 2);
-
   return (
     <section className="seasonal-home-section">
       <div className="seasonal-home-container">
         <div className="seasonal-home-copy">
-          <span className="seasonal-home-kicker">Seasonal Reminder Preview</span>
-          <h2>Homepage care advice that updates with the season.</h2>
-          <p>
-            Your admin seasonal reminders can appear here to show users that the system
-            gives timely plant-care guidance, not just product listings.
-          </p>
-
+          <span className="seasonal-home-kicker">{content.kicker}</span>
+          <h2>{content.title}</h2>
+          <p>{content.description}</p>
           <div className="seasonal-home-badge">
             <CalendarHeart size={18} />
-            <span>{seasonLabel} guidance is active now</span>
+            <span>{seasonLabel} {content.badge_suffix}</span>
           </div>
-
           <div className="seasonal-home-actions">
-            <button type="button" className="seasonal-home-btn" onClick={() => navigate("/care-tips")}>
-              Explore Care Tips
+            <button type="button" className="seasonal-home-btn" onClick={() => navigate(content.primary_cta.path)}>
+              {content.primary_cta.label}
             </button>
             <button
               type="button"
               className="seasonal-home-btn seasonal-home-btn-secondary"
-              onClick={() => navigate("/my-garden")}
+              onClick={() => navigate(content.secondary_cta.path)}
             >
-              Open My Garden
+              {content.secondary_cta.label}
             </button>
           </div>
         </div>
-
         <div className="seasonal-home-cards">
           {loading ? (
             <div className="seasonal-home-empty">Loading seasonal reminders...</div>
@@ -89,17 +75,14 @@ export default function SeasonalCarePreview() {
               <div className="seasonal-home-card-icon">
                 <CloudSun size={20} />
               </div>
-              <h3>{seasonLabel} preview</h3>
-              <p>
-                Add reminder cards from the admin panel and they will show here as fresh,
-                seasonal guidance for users.
-              </p>
+              <h3>{seasonLabel} {content.empty_title_suffix}</h3>
+              <p>{content.empty_description}</p>
               <button
                 type="button"
                 className="seasonal-home-inline-link"
-                onClick={() => navigate("/care-tips?category=seasonal")}
+                onClick={() => navigate(content.empty_action.path)}
               >
-                Open seasonal care tips
+                {content.empty_action.label}
                 <ArrowRight size={15} />
               </button>
             </article>
@@ -126,7 +109,6 @@ export default function SeasonalCarePreview() {
                   </div>
                   <h3>{reminder.title}</h3>
                   <p>{reminder.excerpt || reminder.content}</p>
-
                   <button
                     type="button"
                     className="seasonal-home-inline-link"

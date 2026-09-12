@@ -1,11 +1,9 @@
 import { getCurrentPreview } from "../utils";
 import type { ActiveField, PlantFinderSelections } from "../types";
-
 type PlantFinderPreviewProps = {
   activeField: ActiveField;
   selections: PlantFinderSelections;
 };
-
 export default function PlantFinderPreview({
   activeField,
   selections,
@@ -19,7 +17,6 @@ export default function PlantFinderPreview({
         : activeField === "experience"
           ? selections.experience
           : selections.location;
-
   return (
     <div className="plantfinder-quiz-image">
       <div
@@ -36,13 +33,11 @@ export default function PlantFinderPreview({
             {currentPreview.description}
           </p>
         </div>
-
         <div
           key={currentPreview.image}
           className="plantfinder-room-scene plantfinder-room-scene--image-based"
         >
           <div className="plantfinder-room-scene-glow" />
-
           <div className="plantfinder-3d-wrapper">
             <img
               src={`/images/plantfinder/${currentPreview.image}`}

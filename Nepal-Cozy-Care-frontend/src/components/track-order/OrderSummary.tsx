@@ -1,5 +1,4 @@
 import { Package, Truck, CheckCircle, Calendar } from "lucide-react";
-
 type OrderData = {
   id: number;
   status: string;
@@ -7,13 +6,11 @@ type OrderData = {
   created_at: string;
   delivered_at?: string;
 };
-
 interface OrderSummaryProps {
   order: OrderData;
   formatDateTime: (date: string | null) => string;
   getEstimatedDelivery: () => string;
 }
-
 export default function OrderSummary({ order, formatDateTime, getEstimatedDelivery }: OrderSummaryProps) {
   return (
     <div className="track-order-summary-card">
@@ -46,8 +43,7 @@ export default function OrderSummary({ order, formatDateTime, getEstimatedDelive
           )}
         </div>
       </div>
-
-      {/* Estimated Delivery */}
+      {}
       <div className="track-order-estimated">
         <Calendar size={20} />
         <div>

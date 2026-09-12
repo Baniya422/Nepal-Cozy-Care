@@ -10,7 +10,7 @@ class CartItem extends Model
         'cart_id',
         'plant_id',
         'quantity',
-        'price'
+        'price',
     ];
 
     public function plant()

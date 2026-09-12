@@ -46,9 +46,7 @@ class GardenEntryController extends Controller
             'last_watered_at' => 'nullable|date',
             'last_fertilized_at' => 'nullable|date',
         ]);
-
         $plant = Plant::findOrFail($validated['plant_id']);
-
         $entry = GardenEntry::create([
             'user_id' => $request->user()->id,
             'plant_id' => $plant->id,
@@ -77,7 +75,6 @@ class GardenEntryController extends Controller
         $entry = GardenEntry::with(['plant', 'sourceOrder'])
             ->where('user_id', $request->user()->id)
             ->findOrFail($id);
-
         $validated = $request->validate([
             'plant_id' => 'sometimes|exists:plants,id',
             'nickname' => 'nullable|string|max:120',
@@ -91,7 +88,6 @@ class GardenEntryController extends Controller
             'last_watered_at' => 'nullable|date',
             'last_fertilized_at' => 'nullable|date',
         ]);
-
         $entry->update($validated);
 
         return response()->json([
@@ -106,7 +102,6 @@ class GardenEntryController extends Controller
     {
         $entry = GardenEntry::where('user_id', $request->user()->id)
             ->findOrFail($id);
-
         $entry->delete();
 
         return response()->json([
@@ -119,7 +114,6 @@ class GardenEntryController extends Controller
         $entry = GardenEntry::with(['plant', 'sourceOrder'])
             ->where('user_id', $request->user()->id)
             ->findOrFail($id);
-
         $entry->update([
             'last_watered_at' => now(),
         ]);
@@ -137,7 +131,6 @@ class GardenEntryController extends Controller
         $entry = GardenEntry::with(['plant', 'sourceOrder'])
             ->where('user_id', $request->user()->id)
             ->findOrFail($id);
-
         $entry->update([
             'last_fertilized_at' => now(),
         ]);
@@ -154,19 +147,17 @@ class GardenEntryController extends Controller
     {
         $query = GardenEntry::with(['user', 'plant', 'sourceOrder'])
             ->latest();
-
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
                 $q->whereHas('user', function ($userQuery) use ($search) {
-                    $userQuery->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%');
+                    $userQuery->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%');
                 })->orWhereHas('plant', function ($plantQuery) use ($search) {
-                    $plantQuery->where('name', 'like', '%' . $search . '%');
-                })->orWhere('nickname', 'like', '%' . $search . '%')
-                    ->orWhere('city', 'like', '%' . $search . '%');
+                    $plantQuery->where('name', 'like', '%'.$search.'%');
+                })->orWhere('nickname', 'like', '%'.$search.'%')
+                    ->orWhere('city', 'like', '%'.$search.'%');
             });
         }
-
         $entries = $query->paginate((int) $request->query('per_page', 20));
 
         return response()->json([
@@ -186,7 +177,6 @@ class GardenEntryController extends Controller
     private function transformEntry(GardenEntry $entry): array
     {
         $recommendedTips = collect();
-
         if ($entry->plant_id) {
             $recommendedTips = CareTip::published()
                 ->select('id', 'title', 'excerpt', 'image', 'category')
@@ -194,7 +184,6 @@ class GardenEntryController extends Controller
                 ->limit(2)
                 ->get();
         }
-
         $nextWateringDate = $this->nextDueDate($entry->last_watered_at, $entry->watering_frequency_days);
         $nextFertilizerDate = $this->nextDueDate($entry->last_fertilized_at, $entry->fertilizing_frequency_days);
 
@@ -246,15 +235,12 @@ class GardenEntryController extends Controller
     private function guessWateringFrequency(Plant $plant): int
     {
         $value = strtolower((string) $plant->water);
-
         if (str_contains($value, 'daily')) {
             return 2;
         }
-
         if (str_contains($value, 'bi') || str_contains($value, 'every two')) {
             return 14;
         }
-
         if (str_contains($value, 'low') || str_contains($value, 'weekly')) {
             return 7;
         }

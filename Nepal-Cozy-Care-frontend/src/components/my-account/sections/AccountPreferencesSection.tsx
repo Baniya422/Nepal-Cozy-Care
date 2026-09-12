@@ -1,6 +1,5 @@
 import AccountNotice from "../AccountNotice";
 import type { Notice, Preferences } from "../types";
-
 type AccountPreferencesSectionProps = {
   notice: Notice | null;
   preferences: Preferences;
@@ -9,7 +8,6 @@ type AccountPreferencesSectionProps = {
   onReminderChange: (days: number) => void;
   onSavePreferences: () => void;
 };
-
 export default function AccountPreferencesSection({
   notice,
   preferences,
@@ -21,12 +19,10 @@ export default function AccountPreferencesSection({
   return (
     <div className="account-section-stack">
       <AccountNotice notice={notice} />
-
       <section className="account-card">
         <div className="account-card-head">
           <h3>Notification Preferences</h3>
         </div>
-
         <div className="account-toggle-list">
           <label className="account-toggle-row">
             <div>
@@ -39,7 +35,6 @@ export default function AccountPreferencesSection({
               onChange={(event) => onToggleEmailUpdates(event.target.checked)}
             />
           </label>
-
           <label className="account-toggle-row">
             <div>
               <strong>SMS alerts</strong>
@@ -52,7 +47,6 @@ export default function AccountPreferencesSection({
             />
           </label>
         </div>
-
         <label className="account-form-field account-reminder-field">
           <span>Care reminder frequency</span>
           <select
@@ -65,7 +59,6 @@ export default function AccountPreferencesSection({
             <option value={7}>Every week</option>
           </select>
         </label>
-
         <div className="account-form-actions">
           <button type="button" className="account-primary-btn" onClick={onSavePreferences}>
             Save Preferences

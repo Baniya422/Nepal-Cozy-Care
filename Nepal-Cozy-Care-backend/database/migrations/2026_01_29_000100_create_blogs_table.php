@@ -10,19 +10,14 @@ return new class extends Migration
     {
         Schema::create('blogs', function (Blueprint $table) {
             $table->id();
-
-            // optional author (admin user)
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-
             $table->string('title');
             $table->string('slug')->unique();
             $table->string('excerpt')->nullable();
             $table->text('content');
             $table->string('image')->nullable();
-
             $table->boolean('is_published')->default(false);
             $table->timestamp('published_at')->nullable();
-
             $table->timestamps();
         });
     }
@@ -32,4 +27,3 @@ return new class extends Migration
         Schema::dropIfExists('blogs');
     }
 };
-

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Plant;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -21,28 +20,22 @@ class AdminController extends Controller
         $totalOrders = Order::count();
         $totalUsers = User::count();
         $totalSales = Order::where('status', '!=', 'cancelled')->sum('total');
-
         $lastMonth = now()->subMonth();
-
         $plantsLastMonth = Plant::where('created_at', '<', $lastMonth)->count();
         $ordersLastMonth = Order::where('created_at', '<', $lastMonth)->count();
         $usersLastMonth = User::where('created_at', '<', $lastMonth)->count();
         $salesLastMonth = Order::where('created_at', '<', $lastMonth)
             ->where('status', '!=', 'cancelled')
             ->sum('total');
-
         $plantsChange = $plantsLastMonth > 0
             ? round((($totalPlants - $plantsLastMonth) / $plantsLastMonth) * 100, 1)
             : 0;
-
         $ordersChange = $ordersLastMonth > 0
             ? round((($totalOrders - $ordersLastMonth) / $ordersLastMonth) * 100, 1)
             : 0;
-
         $usersChange = $usersLastMonth > 0
             ? round((($totalUsers - $usersLastMonth) / $usersLastMonth) * 100, 1)
             : 0;
-
         $salesChange = $salesLastMonth > 0
             ? round((($totalSales - $salesLastMonth) / $salesLastMonth) * 100, 1)
             : 0;
@@ -76,7 +69,7 @@ class AdminController extends Controller
             ->map(function ($order) {
                 return [
                     'id' => $order->id,
-                    'order_id' => '#ORD-' . str_pad($order->id, 3, '0', STR_PAD_LEFT),
+                    'order_id' => '#ORD-'.str_pad($order->id, 3, '0', STR_PAD_LEFT),
                     'customer' => $order->user ? $order->user->name : 'Unknown',
                     'amount' => $order->total,
                     'status' => $this->normalizeOrderStatus($order->status),
@@ -124,12 +117,10 @@ class AdminController extends Controller
         [$start, $end, $previousStart, $previousEnd] = $this->resolveDateRange(
             $request->query('range', 'last30days')
         );
-
         $salesQuery = Order::whereBetween('created_at', [$start, $end])
             ->where('status', '!=', 'cancelled');
         $previousSalesQuery = Order::whereBetween('created_at', [$previousStart, $previousEnd])
             ->where('status', '!=', 'cancelled');
-
         $totalSales = (float) $salesQuery->sum('total');
         $previousSales = (float) $previousSalesQuery->sum('total');
         $ordersCount = (int) $salesQuery->count();
@@ -137,7 +128,6 @@ class AdminController extends Controller
         $salesChange = $previousSales > 0
             ? round((($totalSales - $previousSales) / $previousSales) * 100, 1)
             : 0;
-
         $topSelling = DB::table('order_items')
             ->join('plants', 'order_items.plant_id', '=', 'plants.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -153,12 +143,10 @@ class AdminController extends Controller
             ->orderByDesc('sales')
             ->take(5)
             ->get();
-
         $lowStock = Plant::where('stock', '<=', 10)
             ->orderBy('stock')
             ->take(5)
             ->get(['id', 'name', 'stock']);
-
         $statusCounts = Order::whereBetween('created_at', [$start, $end])
             ->select('status', DB::raw('COUNT(*) as total'))
             ->groupBy('status')
@@ -166,6 +154,7 @@ class AdminController extends Controller
             ->reduce(function ($carry, $item) {
                 $normalizedStatus = $this->normalizeOrderStatus($item->status);
                 $carry[$normalizedStatus] = ($carry[$normalizedStatus] ?? 0) + (int) $item->total;
+
                 return $carry;
             }, [
                 'pending' => 0,
@@ -175,7 +164,6 @@ class AdminController extends Controller
                 'delivered' => 0,
                 'cancelled' => 0,
             ]);
-
         $totalCustomers = User::where('role', 'customer')->count();
         $newCustomers = User::where('role', 'customer')
             ->whereBetween('created_at', [$start, $end])
@@ -236,7 +224,6 @@ class AdminController extends Controller
                     'status' => $user->tokens_count > 0 ? 'active' : 'inactive',
                 ];
             });
-
         $totalUsers = $users->count();
         $activeUsers = $users->where('status', 'active')->count();
 
@@ -265,7 +252,6 @@ class AdminController extends Controller
     private function resolveDateRange(string $range): array
     {
         $end = now();
-
         switch ($range) {
             case 'today':
                 $start = now()->startOfDay();
@@ -284,7 +270,6 @@ class AdminController extends Controller
                 $start = now()->copy()->subDays(29)->startOfDay();
                 break;
         }
-
         $durationInSeconds = max(1, $start->diffInSeconds($end));
         $previousEnd = $start->copy()->subSecond();
         $previousStart = $previousEnd->copy()->subSeconds($durationInSeconds);

@@ -2,7 +2,6 @@ import type { FormEvent } from "react";
 import { MapPin } from "lucide-react";
 import AccountNotice from "../AccountNotice";
 import type { AddressEntry, AddressForm, Notice } from "../types";
-
 type AccountAddressesSectionProps = {
   notice: Notice | null;
   editingAddressId: string | null;
@@ -15,7 +14,6 @@ type AccountAddressesSectionProps = {
   onEditAddress: (address: AddressEntry) => void;
   onDeleteAddress: (addressId: string) => void;
 };
-
 export default function AccountAddressesSection({
   notice,
   editingAddressId,
@@ -31,13 +29,11 @@ export default function AccountAddressesSection({
   return (
     <div className="account-section-stack">
       <AccountNotice notice={notice} />
-
       <div className="account-address-layout">
         <section className="account-card">
           <div className="account-card-head">
             <h3>{editingAddressId ? "Edit Address" : "Add New Address"}</h3>
           </div>
-
           <form className="account-form" onSubmit={onSubmit}>
             <label className="account-form-field">
               <span>Label</span>
@@ -48,7 +44,6 @@ export default function AccountAddressesSection({
                 placeholder="Home, Office, Gift Delivery"
               />
             </label>
-
             <label className="account-form-field">
               <span>Full address</span>
               <textarea
@@ -58,7 +53,6 @@ export default function AccountAddressesSection({
                 rows={4}
               />
             </label>
-
             <label className="account-form-field">
               <span>Delivery note</span>
               <input
@@ -68,7 +62,6 @@ export default function AccountAddressesSection({
                 placeholder="Gate code, office hours, recipient phone"
               />
             </label>
-
             <div className="account-form-actions">
               <button type="submit" className="account-primary-btn">
                 {editingAddressId ? "Update Address" : "Save Address"}
@@ -81,12 +74,10 @@ export default function AccountAddressesSection({
             </div>
           </form>
         </section>
-
         <section className="account-card">
           <div className="account-card-head">
             <h3>Saved Addresses</h3>
           </div>
-
           {addresses.length === 0 ? (
             <div className="account-empty-state">
               <MapPin size={24} />
@@ -105,9 +96,7 @@ export default function AccountAddressesSection({
                       <p className="account-item-meta">{address.address}</p>
                     </div>
                   </div>
-
                   {address.note && <p className="account-item-note">{address.note}</p>}
-
                   <div className="account-list-actions">
                     {!address.isDefault && (
                       <button

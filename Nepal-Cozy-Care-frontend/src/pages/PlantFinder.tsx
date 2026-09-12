@@ -17,11 +17,9 @@ import type {
   RoomKey,
 } from "../features/plant-finder/types";
 import "../styles/plantfinder.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const TEMPLATE_CACHE_KEY = "plant_finder_template_v1";
 const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? "5000");
-
 export function PlantFinder() {
   const navigate = useNavigate();
   const [templateLoading, setTemplateLoading] = useState(true);
@@ -37,11 +35,9 @@ export function PlantFinder() {
   const [showResults, setShowResults] = useState(false);
   const [recommendedPlants, setRecommendedPlants] = useState<Plant[]>([]);
   const [morePlants, setMorePlants] = useState<Plant[]>([]);
-
   useEffect(() => {
     let isMounted = true;
     let hasCachedTemplate = false;
-
     const readCachedTemplate = (): PlantFinderTemplatePayload | null => {
       try {
         const cached = localStorage.getItem(TEMPLATE_CACHE_KEY);
@@ -51,7 +47,6 @@ export function PlantFinder() {
         return null;
       }
     };
-
     const cachedTemplate = readCachedTemplate();
     if (cachedTemplate) {
       applyPlantFinderTemplate(cachedTemplate);
@@ -59,11 +54,9 @@ export function PlantFinder() {
       setTemplateRevision((current) => current + 1);
       setTemplateLoading(false);
     }
-
     const loadTemplate = async () => {
       const controller = new AbortController();
       const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
-
       try {
         const response = await fetch(`${API}/api/plant-finder/template`, {
           signal: controller.signal,
@@ -71,16 +64,13 @@ export function PlantFinder() {
             Accept: "application/json",
           },
         });
-
         if (!response.ok) {
           throw new Error("Could not load plant finder template.");
         }
-
         const payload = await response.json().catch(() => ({}));
         const template = (payload?.data ?? null) as PlantFinderTemplatePayload | null;
         applyPlantFinderTemplate(template);
         localStorage.setItem(TEMPLATE_CACHE_KEY, JSON.stringify(template ?? {}));
-
         if (isMounted) {
           setTemplateError(null);
           setTemplateRevision((current) => current + 1);
@@ -103,14 +93,11 @@ export function PlantFinder() {
         window.clearTimeout(timeoutId);
       }
     };
-
     void loadTemplate();
-
     return () => {
       isMounted = false;
     };
   }, []);
-
   const updateSelection = <K extends keyof PlantFinderSelections>(
     field: K,
     value: PlantFinderSelections[K]
@@ -120,16 +107,13 @@ export function PlantFinder() {
       [field]: value,
     }));
   };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     try {
       const response = await fetch(`${API}/api/plants?per_page=100`);
       const data = await response.json();
       const allPlants = extractPlantsFromResponse(data);
       const results = getPlantFinderResults(allPlants, selections);
-
       setRecommendedPlants(results.recommendedPlants);
       setMorePlants(results.morePlants);
       setShowResults(true);
@@ -140,7 +124,6 @@ export function PlantFinder() {
       setShowResults(true);
     }
   };
-
   const handleStartOver = () => {
     setSelections({
       room: "",
@@ -153,7 +136,6 @@ export function PlantFinder() {
     setRecommendedPlants([]);
     setMorePlants([]);
   };
-
   return (
     <Layout>
       <div className="plantfinder-page">
@@ -178,7 +160,6 @@ export function PlantFinder() {
           <section className="plantfinder-quiz">
             <div className="plantfinder-quiz-container">
               <PlantFinderPreview activeField={activeField} selections={selections} />
-
               <PlantFinderQuizForm
                 selections={selections}
                 activeField={activeField}
@@ -198,7 +179,6 @@ export function PlantFinder() {
             </div>
           </section>
         )}
-
         {showResults ? (
           <PlantFinderResults
             apiBaseUrl={API}
@@ -211,5 +191,4 @@ export function PlantFinder() {
     </Layout>
   );
 }
-
 export default PlantFinder;

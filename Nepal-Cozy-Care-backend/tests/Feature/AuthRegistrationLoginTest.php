@@ -18,10 +18,8 @@ class AuthRegistrationLoginTest extends TestCase
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
-
         $response->assertStatus(201)
             ->assertJsonPath('message', 'Account created successfully. You can now log in.');
-
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'name' => 'Test User',
@@ -34,12 +32,10 @@ class AuthRegistrationLoginTest extends TestCase
             'email' => 'login@example.com',
             'password' => 'password123',
         ]);
-
         $response = $this->postJson('/api/login', [
             'email' => 'login@example.com',
             'password' => 'password123',
         ]);
-
         $response->assertOk()
             ->assertJsonPath('message', 'Login successful')
             ->assertJsonStructure([
@@ -47,7 +43,6 @@ class AuthRegistrationLoginTest extends TestCase
                 'user',
                 'token',
             ]);
-
         $this->assertNotEmpty($user->fresh()->tokens);
     }
 
@@ -57,7 +52,6 @@ class AuthRegistrationLoginTest extends TestCase
             'email' => 'login@example.com',
             'password' => 'password123',
         ]);
-
         $this->postJson('/api/login', [
             'email' => 'login@example.com',
             'password' => 'wrong-password',
@@ -68,14 +62,12 @@ class AuthRegistrationLoginTest extends TestCase
     public function test_register_rejects_existing_email(): void
     {
         User::factory()->create(['email' => 'twice@example.com']);
-
         $response = $this->postJson('/api/register', [
             'name' => 'Dupe',
             'email' => 'twice@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
-
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
     }
@@ -84,13 +76,10 @@ class AuthRegistrationLoginTest extends TestCase
     {
         $user = User::factory()->create();
         $token = $user->createToken('test-token')->plainTextToken;
-
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/logout');
-
         $response->assertOk()
             ->assertJsonPath('message', 'Logout successful');
-
         $this->assertEmpty($user->fresh()->tokens);
     }
 }

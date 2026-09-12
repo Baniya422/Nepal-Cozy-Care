@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Star } from "lucide-react";
 import { useAddToCart } from "../../hooks/useAddToCart";
 import { useWishlist } from "../../hooks/useWishlist";
-
+import type { ProductSectionContent } from "../../features/homepage/content";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const FALLBACK_PLANT_IMAGE = "/images/alovera.jpg";
-
 type Plant = {
   id: number;
   name: string;
@@ -14,14 +13,12 @@ type Plant = {
   image?: string;
   avg_rating?: number;
 };
-
-export default function BestSellers() {
+export default function BestSellers({ content }: { content: ProductSectionContent }) {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
   const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
   const { cartBusyId, addToCart } = useAddToCart(API);
-
   useEffect(() => {
     fetch(`${API}/api/homepage/best-sellers?per_page=4`)
       .then(res => res.json())
@@ -34,11 +31,10 @@ export default function BestSellers() {
         setLoading(false);
       });
   }, []);
-
   if (loading) {
     return (
       <section className="product-section">
-        <h2 className="section-title">Best Sellers</h2>
+        <h2 className="section-title">{content.title}</h2>
         <div className="product-grid">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="product-card" style={{ opacity: 0.6 }}>
@@ -53,21 +49,19 @@ export default function BestSellers() {
       </section>
     );
   }
-
   if (plants.length === 0) {
     return (
       <section className="product-section">
-        <h2 className="section-title">Best Sellers</h2>
+        <h2 className="section-title">{content.title}</h2>
         <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#64748b" }}>
-          <p>No best sellers available yet.</p>
+          <p>{content.empty_message}</p>
         </div>
       </section>
     );
   }
-
   return (
     <section className="product-section">
-      <h2 className="section-title">Best Sellers</h2>
+      <h2 className="section-title">{content.title}</h2>
       <div className="product-grid">
         {plants.map(plant => (
           <div className="product-card" key={plant.id}>
@@ -119,8 +113,8 @@ export default function BestSellers() {
         ))}
       </div>
       <div className="section-action">
-        <button className="view-all-btn" onClick={() => navigate("/best-sellers")}>
-          VIEW ALL
+        <button className="view-all-btn" onClick={() => navigate(content.button_path)}>
+          {content.button_label}
         </button>
       </div>
     </section>

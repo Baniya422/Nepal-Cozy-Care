@@ -13,7 +13,6 @@ class PlantHealthTemplateController extends Controller
             ->where('is_active', true)
             ->latest('id')
             ->first();
-
         if (! $template) {
             return response()->json([
                 'message' => 'No active plant health template found.',

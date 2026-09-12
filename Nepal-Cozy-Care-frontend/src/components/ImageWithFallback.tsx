@@ -1,12 +1,10 @@
 import { useState } from "react";
-
 interface ImageWithFallbackProps {
   src: string;
   alt: string;
   className?: string;
   fallbackSrc?: string;
 }
-
 export function ImageWithFallback({
   src,
   alt,
@@ -15,14 +13,12 @@ export function ImageWithFallback({
 }: ImageWithFallbackProps) {
   const [imgSrc, setImgSrc] = useState(src || fallbackSrc);
   const [hasError, setHasError] = useState(!src);
-
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
       setImgSrc(fallbackSrc);
     }
   };
-
   return (
     <img
       src={imgSrc}

@@ -22,9 +22,7 @@ import {
   getProgressValue,
 } from "../features/plant-health/utils";
 import "../styles/plantHealthChecker.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 export default function PlantHealthChecker() {
   const navigate = useNavigate();
   const [templateLoading, setTemplateLoading] = useState(true);
@@ -36,10 +34,8 @@ export default function PlantHealthChecker() {
   const [season, setSeason] = useState(getCurrentSeason());
   const [soilState, setSoilState] = useState("");
   const [analysis, setAnalysis] = useState<HealthAnalysis | null>(null);
-
   useEffect(() => {
     let isMounted = true;
-
     const loadTemplate = async () => {
       try {
         const response = await fetch(`${API}/api/plant-health/template`, {
@@ -47,14 +43,10 @@ export default function PlantHealthChecker() {
             Accept: "application/json",
           },
         });
-
         if (!response.ok) return;
-
         const payload = await response.json().catch(() => ({}));
         const template = (payload?.data ?? null) as PlantHealthTemplatePayload | null;
-
         applyPlantHealthTemplate(template);
-
         if (isMounted) {
           setActiveCategory(symptomCategories[0]?.id ?? "");
           setPlantType(plantTypeOptions[0]?.id ?? "");
@@ -77,14 +69,11 @@ export default function PlantHealthChecker() {
         }
       }
     };
-
     void loadTemplate();
-
     return () => {
       isMounted = false;
     };
   }, []);
-
   const toggleSymptom = (symptomId: string) => {
     setSelectedSymptoms((previous) =>
       previous.includes(symptomId)
@@ -92,10 +81,8 @@ export default function PlantHealthChecker() {
         : [...previous, symptomId]
     );
   };
-
   const handleAnalyze = () => {
     if (selectedSymptoms.length === 0 || diagnosisProfiles.length === 0) return;
-
     setAnalysis(
       analyzePlantHealth({
         selectedSymptoms,
@@ -106,7 +93,6 @@ export default function PlantHealthChecker() {
       })
     );
   };
-
   const resetChecker = () => {
     setSelectedSymptoms([]);
     setAnalysis(null);
@@ -120,14 +106,11 @@ export default function PlantHealthChecker() {
       : (seasonOptions[0]?.id ?? "");
     setSeason(selectedSeason);
   };
-
   const progressValue = getProgressValue(selectedSymptoms, soilState);
-
   return (
     <Layout>
       <div className="plant-health-page">
         <PlantHealthHero />
-
         {templateLoading ? (
           <section className="plant-health-checker">
             <div className="plant-health-container">
@@ -159,7 +142,6 @@ export default function PlantHealthChecker() {
                 onSeasonChange={setSeason}
                 onSoilStateChange={setSoilState}
               />
-
               <PlantHealthSymptomSelector
                 selectedSymptoms={selectedSymptoms}
                 activeCategory={activeCategory}
@@ -184,7 +166,6 @@ export default function PlantHealthChecker() {
             onOpenCareTip={(tip) => navigate(`/care-tips?category=${tip}`)}
           />
         )}
-
         {!templateLoading && !templateError ? <PlantHealthTips /> : null}
       </div>
     </Layout>

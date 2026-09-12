@@ -4,13 +4,11 @@
   min-height: calc(100vh - 200px);
   background-color: #f8fdf6;
 }
-
 .care-tips-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
 }
-
 /* Hero Section */
 .care-tips-hero {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
@@ -18,24 +16,20 @@
   text-align: center;
   color: white;
 }
-
 .care-tips-hero-content {
   max-width: 700px;
   margin: 0 auto;
 }
-
 .care-tips-hero-title {
   font-size: 36px;
   font-weight: 700;
   margin-bottom: 12px;
 }
-
 .care-tips-hero-subtitle {
   font-size: 16px;
   opacity: 0.9;
   margin-bottom: 30px;
 }
-
 /* Search Bar */
 .care-tips-search {
   display: flex;
@@ -43,12 +37,10 @@
   max-width: 600px;
   margin: 0 auto 16px;
 }
-
 .care-tips-search-input-wrapper {
   flex: 1;
   position: relative;
 }
-
 .care-tips-search-icon {
   position: absolute;
   left: 16px;
@@ -56,7 +48,6 @@
   transform: translateY(-50%);
   color: #6b7280;
 }
-
 .care-tips-search-input {
   width: 100%;
   padding: 16px 16px 16px 48px;
@@ -67,11 +58,9 @@
   color: #1a1a1a;
   outline: none;
 }
-
 .care-tips-search-input::placeholder {
   color: #9ca3af;
 }
-
 .care-tips-search-btn {
   padding: 16px 28px;
   background-color: #1a1a1a;
@@ -83,23 +72,19 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .care-tips-search-btn:hover {
   background-color: #374151;
 }
-
 .care-tips-search-hint {
   font-size: 14px;
   opacity: 0.8;
 }
-
 /* Filters Section */
 .care-tips-filters-section {
   background-color: white;
   padding: 20px 0;
   border-bottom: 1px solid #e5e7eb;
 }
-
 .care-tips-filters-section .care-tips-container {
   display: flex;
   justify-content: space-between;
@@ -107,14 +92,12 @@
   flex-wrap: wrap;
   gap: 16px;
 }
-
 .care-tips-filters {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
-
 .care-tips-filter-group {
   display: flex;
   align-items: center;
@@ -122,11 +105,9 @@
   color: #6b7280;
   font-size: 14px;
 }
-
 .care-tips-filter-label {
   font-weight: 500;
 }
-
 .care-tips-filter-select {
   padding: 10px 36px 10px 14px;
   border: 1px solid #e5e7eb;
@@ -140,12 +121,10 @@
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
-
 .care-tips-filter-select:focus {
   outline: none;
   border-color: #22c55e;
 }
-
 .care-tips-clear-filters {
   padding: 10px 16px;
   background-color: transparent;
@@ -157,44 +136,36 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .care-tips-clear-filters:hover {
   background-color: #ef4444;
   color: white;
 }
-
 .care-tips-results-count {
   font-size: 14px;
   color: #6b7280;
 }
-
 /* Grid Section */
 .care-tips-grid-section {
   padding: 40px 0 60px;
 }
-
 .care-tips-loading,
 .care-tips-empty {
   text-align: center;
   padding: 80px 20px;
 }
-
 .care-tips-empty-icon {
   color: #a8d5a2;
   margin-bottom: 20px;
 }
-
 .care-tips-empty h3 {
   font-size: 20px;
   color: #1a1a1a;
   margin-bottom: 8px;
 }
-
 .care-tips-empty p {
   color: #6b7280;
   margin-bottom: 20px;
 }
-
 .care-tips-clear-btn {
   padding: 12px 24px;
   background-color: #22c55e;
@@ -206,18 +177,15 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .care-tips-clear-btn:hover {
   background-color: #16a34a;
 }
-
 /* Tips Grid */
 .care-tips-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
-
 .care-tip-card {
   background-color: white;
   border-radius: 16px;
@@ -226,29 +194,24 @@
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .care-tip-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
-
 .care-tip-image-wrapper {
   position: relative;
   height: 200px;
   overflow: hidden;
 }
-
 .care-tip-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
-
 .care-tip-card:hover .care-tip-image {
   transform: scale(1.05);
 }
-
 .care-tip-difficulty {
   position: absolute;
   top: 12px;
@@ -259,26 +222,21 @@
   font-weight: 600;
   text-transform: uppercase;
 }
-
 .difficulty-beginner {
   background-color: #dcfce7;
   color: #166534;
 }
-
 .difficulty-intermediate {
   background-color: #fef3c7;
   color: #92400e;
 }
-
 .difficulty-advanced {
   background-color: #fee2e2;
   color: #991b1b;
 }
-
 .care-tip-content {
   padding: 20px;
 }
-
 .care-tip-category {
   display: inline-block;
   padding: 4px 10px;
@@ -289,7 +247,6 @@
   font-weight: 500;
   margin-bottom: 12px;
 }
-
 .care-tip-title {
   font-size: 18px;
   font-weight: 700;
@@ -301,7 +258,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .care-tip-excerpt {
   font-size: 14px;
   color: #6b7280;
@@ -312,13 +268,11 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .care-tip-footer {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
 }
-
 .care-tip-views,
 .care-tip-date {
   display: flex;
@@ -327,7 +281,6 @@
   font-size: 12px;
   color: #9ca3af;
 }
-
 .care-tip-read-more {
   width: 100%;
   padding: 12px;
@@ -340,11 +293,9 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .care-tip-read-more:hover {
   background-color: #16a34a;
 }
-
 /* Pagination */
 .care-tips-pagination {
   display: flex;
@@ -353,7 +304,6 @@
   gap: 20px;
   margin-top: 40px;
 }
-
 .care-tips-pagination-btn {
   padding: 12px 24px;
   background-color: white;
@@ -365,29 +315,24 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .care-tips-pagination-btn:hover:not(:disabled) {
   background-color: #f3f4f6;
   border-color: #d1d5db;
 }
-
 .care-tips-pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .care-tips-pagination-info {
   font-size: 14px;
   color: #6b7280;
 }
-
 /* Detail Page Styles */
 .care-tip-detail-page {
   width: 100%;
   min-height: calc(100vh - 200px);
   background-color: #f8fdf6;
 }
-
 .care-tip-detail-back {
   display: flex;
   align-items: center;
@@ -401,31 +346,26 @@
   cursor: pointer;
   transition: color 0.3s ease;
 }
-
 .care-tip-detail-back:hover {
   color: #16a34a;
 }
-
 .care-tip-detail-hero {
   background-color: white;
   padding: 40px 0;
   border-bottom: 1px solid #e5e7eb;
 }
-
 .care-tip-detail-hero-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
   text-align: center;
 }
-
 .care-tip-detail-badges {
   display: flex;
   gap: 12px;
   justify-content: center;
   margin-bottom: 20px;
 }
-
 .care-tip-detail-category {
   padding: 8px 16px;
   background-color: #dcfce7;
@@ -434,14 +374,12 @@
   font-size: 14px;
   font-weight: 600;
 }
-
 .care-tip-detail-difficulty {
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
 }
-
 .care-tip-detail-title {
   font-size: 36px;
   font-weight: 700;
@@ -449,14 +387,12 @@
   margin-bottom: 20px;
   line-height: 1.3;
 }
-
 .care-tip-detail-meta {
   display: flex;
   gap: 24px;
   justify-content: center;
   flex-wrap: wrap;
 }
-
 .care-tip-detail-meta-item {
   display: flex;
   align-items: center;
@@ -464,90 +400,75 @@
   font-size: 14px;
   color: #6b7280;
 }
-
 .care-tip-detail-hero-image {
   max-width: 800px;
   margin: 30px auto 0;
   border-radius: 16px;
   overflow: hidden;
 }
-
 .care-tip-detail-image {
   width: 100%;
   height: 400px;
   object-fit: cover;
 }
-
 /* Content Section */
 .care-tip-detail-content-section {
   padding: 40px 0;
 }
-
 .care-tip-detail-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 40px;
 }
-
 .care-tip-detail-main {
   background-color: white;
   padding: 40px;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-
 .care-tip-detail-content {
   font-size: 16px;
   line-height: 1.8;
   color: #374151;
 }
-
 .care-tip-detail-content h2 {
   font-size: 24px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 30px 0 16px;
 }
-
 .care-tip-detail-content h3 {
   font-size: 20px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 24px 0 12px;
 }
-
 .care-tip-detail-content p {
   margin-bottom: 16px;
 }
-
 .care-tip-detail-content ul,
 .care-tip-detail-content ol {
   margin-bottom: 16px;
   padding-left: 24px;
 }
-
 .care-tip-detail-content li {
   margin-bottom: 8px;
 }
-
 .care-tip-detail-content strong {
   color: #1a1a1a;
 }
-
 /* Sidebar */
 .care-tip-detail-sidebar {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
 .care-tip-detail-info-card {
   background-color: white;
   padding: 24px;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-
 .care-tip-detail-info-title {
   display: flex;
   align-items: center;
@@ -557,29 +478,24 @@
   color: #1a1a1a;
   margin-bottom: 16px;
 }
-
 .care-tip-detail-info-item {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
   border-bottom: 1px solid #f3f4f6;
 }
-
 .care-tip-detail-info-item:last-child {
   border-bottom: none;
 }
-
 .care-tip-detail-info-label {
   font-size: 14px;
   color: #6b7280;
 }
-
 .care-tip-detail-info-value {
   font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
 }
-
 .care-tip-detail-share-btn {
   width: 100%;
   padding: 12px;
@@ -592,18 +508,15 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .care-tip-detail-share-btn:hover {
   background-color: #e5e7eb;
 }
 
-/* Related Tips */
 .care-tip-detail-related {
   padding: 60px 0;
   background-color: white;
   border-top: 1px solid #e5e7eb;
 }
-
 .care-tip-detail-related-title {
   display: flex;
   align-items: center;
@@ -613,13 +526,11 @@
   color: #1a1a1a;
   margin-bottom: 30px;
 }
-
 .care-tip-detail-related-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
-
 .care-tip-related-card {
   background-color: #f8fdf6;
   border-radius: 12px;
@@ -627,27 +538,22 @@
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .care-tip-related-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
-
 .care-tip-related-image-wrapper {
   height: 150px;
   overflow: hidden;
 }
-
 .care-tip-related-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .care-tip-related-content {
   padding: 16px;
 }
-
 .care-tip-related-category {
   display: inline-block;
   padding: 4px 8px;
@@ -658,7 +564,6 @@
   font-weight: 600;
   margin-bottom: 8px;
 }
-
 .care-tip-related-title {
   font-size: 15px;
   font-weight: 700;
@@ -670,7 +575,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .care-tip-related-excerpt {
   font-size: 13px;
   color: #6b7280;
@@ -680,24 +584,20 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 /* Error State */
 .care-tip-detail-error {
   text-align: center;
   padding: 80px 20px;
 }
-
 .care-tip-detail-error svg {
   color: #a8d5a2;
   margin-bottom: 20px;
 }
-
 .care-tip-detail-error h2 {
   font-size: 24px;
   color: #1a1a1a;
   margin-bottom: 20px;
 }
-
 .care-tip-detail-back-btn {
   padding: 14px 28px;
   background-color: #22c55e;
@@ -709,70 +609,55 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 .care-tip-detail-back-btn:hover {
   background-color: #16a34a;
 }
-
 /* Responsive Styles */
 @media (max-width: 1024px) {
   .care-tips-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .care-tip-detail-related-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .care-tip-detail-grid {
     grid-template-columns: 1fr;
   }
-
   .care-tip-detail-sidebar {
     flex-direction: row;
     flex-wrap: wrap;
   }
-
   .care-tip-detail-info-card {
     flex: 1;
     min-width: 250px;
   }
 }
-
 @media (max-width: 768px) {
   .care-tips-hero {
     padding: 40px 20px;
   }
-
   .care-tips-hero-title {
     font-size: 28px;
   }
-
   .care-tips-search {
     flex-direction: column;
   }
-
   .care-tips-filters-section .care-tips-container {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .care-tips-grid {
     grid-template-columns: 1fr;
   }
-
   .care-tip-detail-title {
     font-size: 24px;
   }
-
   .care-tip-detail-image {
     height: 250px;
   }
-
   .care-tip-detail-main {
     padding: 24px;
   }
-
   .care-tip-detail-related-grid {
     grid-template-columns: 1fr;
   }
@@ -782,7 +667,6 @@
   pointer-events: none;
   animation: pulse 1.5s ease-in-out infinite;
 }
-
 .skeleton-image {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
@@ -790,7 +674,6 @@
   position: relative;
   overflow: hidden;
 }
-
 .skeleton-shimmer {
   position: absolute;
   top: 0;
@@ -805,7 +688,6 @@
   );
   animation: shimmer-slide 1.5s infinite;
 }
-
 .skeleton-text {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
@@ -814,41 +696,34 @@
   margin-bottom: 0.75rem;
   height: 20px;
 }
-
 .skeleton-tip-category {
   height: 18px;
   width: 120px;
   margin-bottom: 0.5rem;
 }
-
 .skeleton-tip-title {
   height: 28px;
   width: 90%;
   margin-bottom: 0.75rem;
 }
-
 .skeleton-tip-excerpt {
   height: 18px;
   width: 100%;
 }
-
 .skeleton-tip-excerpt.short {
   width: 70%;
 }
-
 .skeleton-tip-meta {
   height: 16px;
   width: 80px;
   display: inline-block;
   margin-right: 1rem;
 }
-
 .skeleton-tip-button {
   height: 40px;
   width: 100%;
   margin-top: 0.5rem;
 }
-
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -857,7 +732,6 @@
     background-position: -200% 0;
   }
 }
-
 @keyframes shimmer-slide {
   0% {
     left: -100%;
@@ -866,7 +740,6 @@
     left: 100%;
   }
 }
-
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -875,11 +748,9 @@
     opacity: 0.8;
   }
 }
-
 /* =========================================================
    ECOSYSTEM NEW STYLES (HOSPITAL, HERO, WIDGETS)
    ========================================================= */
-
 .ct-eco-hero {
   position: relative;
   background: linear-gradient(135deg, #1f5041 0%, #17372c 100%);
@@ -887,10 +758,9 @@
   text-align: center;
   color: #fff4dc;
   overflow: hidden;
-  margin-bottom: -40px; /* pull body up slightly */
+  margin-bottom: -40px; 
   padding-bottom: 120px;
 }
-
 .ct-eco-hero-bg {
   position: absolute;
   top: 0;
@@ -900,32 +770,27 @@
   background-image: radial-gradient(circle at top right, rgba(255, 255, 255, 0.08) 0%, transparent 40%),
                     radial-gradient(circle at bottom left, rgba(140, 200, 160, 0.1) 0%, transparent 40%);
 }
-
 .ct-eco-hero-content {
   position: relative;
   z-index: 2;
   max-width: 800px;
   margin: 0 auto;
 }
-
 .ct-eco-hero-content h1 {
   font-size: 3rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   margin-bottom: 1rem;
 }
-
 .ct-eco-hero-content p {
   font-size: 1.15rem;
   color: rgba(255, 244, 220, 0.8);
 }
-
 .ct-ecosystem-body {
   position: relative;
   z-index: 10;
   margin-top: -60px;
 }
-
 /* Hospital Banner */
 .ct-hospital-banner {
   background: white;
@@ -939,13 +804,11 @@
   flex-wrap: wrap;
   gap: 1.5rem;
 }
-
 .ct-hospital-visual {
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
-
 .ct-hospital-icon-wrap {
   background: linear-gradient(135deg, #fcebcf 0%, #facda1 100%);
   color: #c96226;
@@ -956,19 +819,16 @@
   align-items: center;
   justify-content: center;
 }
-
 .ct-hospital-text h3 {
   font-size: 1.4rem;
   font-weight: 800;
   color: #17372c;
   margin-bottom: 0.25rem;
 }
-
 .ct-hospital-text p {
   color: #637b71;
   font-size: 0.95rem;
 }
-
 .ct-hospital-btn {
   background: linear-gradient(135deg, #cf5a23 0%, #a84212 100%);
   color: white;
@@ -984,31 +844,26 @@
   box-shadow: 0 8px 16px rgba(207, 90, 35, 0.25);
   transition: all 0.3s;
 }
-
 .ct-hospital-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(207, 90, 35, 0.35);
 }
-
 /* Grid Layout */
 .ct-grid-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 2rem;
 }
-
 @media (max-width: 968px) {
   .ct-grid-layout {
     grid-template-columns: 1fr;
   }
 }
-
 .ct-sidebar {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-
 /* Seasonal Widget */
 .ct-seasonal-widget {
   background: linear-gradient(135deg, #eaf2e8 0%, #d4e6cf 100%);
@@ -1016,7 +871,6 @@
   padding: 1.5rem;
   box-shadow: 0 12px 24px rgba(20, 50, 40, 0.05);
 }
-
 .ct-seasonal-header {
   display: inline-flex;
   align-items: center;
@@ -1030,20 +884,17 @@
   text-transform: uppercase;
   margin-bottom: 1.25rem;
 }
-
 .ct-seasonal-widget h4 {
   font-size: 1.25rem;
   font-weight: 800;
   color: #17372c;
   margin-bottom: 0.5rem;
 }
-
 .ct-seasonal-widget p {
   color: #4a685e;
   font-size: 0.95rem;
   line-height: 1.5;
 }
-
 /* Quick Categories */
 .ct-quick-categories {
   background: white;
@@ -1054,14 +905,12 @@
   flex-direction: column;
   gap: 0.75rem;
 }
-
 .ct-quick-categories h3 {
   font-size: 1.15rem;
   font-weight: 800;
   color: #17372c;
   margin-bottom: 0.5rem;
 }
-
 .ct-quick-pill {
   display: flex;
   align-items: center;
@@ -1077,34 +926,28 @@
   transition: all 0.25s;
   text-align: left;
 }
-
 .ct-quick-pill:hover {
   background: #e6ece0;
   color: #17372c;
 }
-
 .ct-quick-pill.active {
   background: #1f5041;
   color: #fff4dc;
   box-shadow: 0 8px 16px rgba(31, 80, 65, 0.25);
 }
-
 /* =========================================================
    PREMIUM CARE TIPS EXPERIENCE
    ========================================================= */
-
 .care-tips-page,
 .care-tip-detail-page {
   background:
     radial-gradient(circle at top left, rgba(214, 238, 222, 0.55), transparent 26%),
     linear-gradient(180deg, #f5fbf4 0%, #edf6ef 100%);
 }
-
 .ct-eco-hero {
   margin-bottom: 0;
   padding: 5.75rem 0 7.5rem;
 }
-
 .ct-hero-shell {
   align-items: stretch;
   display: grid;
@@ -1113,7 +956,6 @@
   position: relative;
   z-index: 2;
 }
-
 .ct-hero-kicker {
   align-items: center;
   background: rgba(255, 244, 220, 0.16);
@@ -1129,31 +971,26 @@
   padding: 0.5rem 0.9rem;
   text-transform: uppercase;
 }
-
 .ct-eco-hero-content {
   text-align: left;
 }
-
 .ct-eco-hero-content h1 {
   font-size: clamp(2.5rem, 5vw, 4.35rem);
   line-height: 0.98;
   margin: 0;
   max-width: 11ch;
 }
-
 .ct-eco-hero-content p {
   font-size: 1.08rem;
   line-height: 1.75;
   margin: 1.25rem 0 0;
   max-width: 60ch;
 }
-
 .ct-hero-search-form {
   display: flex;
   gap: 0.9rem;
   margin-top: 1.75rem;
 }
-
 .ct-hero-search-input {
   align-items: center;
   background: rgba(255, 255, 255, 0.96);
@@ -1167,7 +1004,6 @@
   min-height: 3.65rem;
   padding: 0 1rem;
 }
-
 .ct-hero-search-input input {
   background: transparent;
   border: 0;
@@ -1176,11 +1012,9 @@
   font-size: 1rem;
   outline: none;
 }
-
 .ct-hero-search-input input::placeholder {
   color: #6a8378;
 }
-
 .ct-hero-search-btn,
 .ct-hero-spotlight-btn {
   align-items: center;
@@ -1199,7 +1033,6 @@
   padding: 0 1.35rem;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-
 .ct-hero-search-btn:hover,
 .ct-hero-spotlight-btn:hover,
 .ct-library-reset-btn:hover,
@@ -1208,14 +1041,12 @@
   box-shadow: 0 22px 38px rgba(23, 55, 44, 0.18);
   transform: translateY(-2px);
 }
-
 .ct-hero-library-stats {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.35rem;
 }
-
 .ct-hero-library-pill {
   align-items: center;
   background: rgba(255, 255, 255, 0.09);
@@ -1227,7 +1058,6 @@
   gap: 0.45rem;
   padding: 0.65rem 0.9rem;
 }
-
 .ct-hero-spotlight {
   align-self: end;
   background:
@@ -1244,7 +1074,6 @@
   min-height: 100%;
   padding: 1.7rem;
 }
-
 .ct-hero-spotlight-label,
 .ct-library-bar-kicker,
 .care-tip-detail-intro-label {
@@ -1254,27 +1083,23 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-
 .ct-hero-spotlight h2 {
   color: #fff7e3;
   font-size: 1.95rem;
   line-height: 1.08;
   margin: 0;
 }
-
 .ct-hero-spotlight p {
   color: rgba(255, 247, 227, 0.8);
   line-height: 1.7;
   margin: 0;
 }
-
 .ct-hero-spotlight-meta {
   color: rgba(255, 247, 227, 0.8);
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem;
 }
-
 .ct-hero-spotlight-meta span {
   align-items: center;
   background: rgba(255, 255, 255, 0.08);
@@ -1284,11 +1109,9 @@
   font-weight: 700;
   padding: 0.5rem 0.8rem;
 }
-
 .ct-ecosystem-body {
   margin-top: -4.5rem;
 }
-
 .ct-hospital-banner,
 .ct-seasonal-widget,
 .ct-quick-categories,
@@ -1300,24 +1123,20 @@
   border: 1px solid rgba(23, 55, 44, 0.08);
   box-shadow: 0 18px 45px rgba(22, 44, 34, 0.07);
 }
-
 .ct-grid-layout {
   align-items: start;
   gap: 1.5rem;
   grid-template-columns: 290px minmax(0, 1fr);
 }
-
 .ct-sidebar {
   position: sticky;
   top: 6.4rem;
 }
-
 .ct-main-content {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
-
 .ct-library-bar {
   align-items: center;
   background: rgba(255, 255, 255, 0.86);
@@ -1327,19 +1146,16 @@
   justify-content: space-between;
   padding: 1.4rem 1.5rem;
 }
-
 .ct-library-bar-copy h2 {
   color: #16372d;
   font-size: 1.45rem;
   margin: 0.35rem 0 0.4rem;
 }
-
 .ct-library-bar-copy p {
   color: #5d776d;
   line-height: 1.65;
   margin: 0;
 }
-
 .ct-library-reset-btn {
   background: rgba(23, 55, 44, 0.08);
   border: 0;
@@ -1350,15 +1166,12 @@
   padding: 0.85rem 1.1rem;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-
 .care-tips-grid-section {
   padding: 0 0 3rem;
 }
-
 .care-tips-grid {
   gap: 1.25rem;
 }
-
 .care-tip-card {
   background: rgba(255, 255, 255, 0.94);
   border-radius: 1.35rem;
@@ -1368,22 +1181,18 @@
   overflow: hidden;
   transform: translateY(0);
 }
-
 .care-tip-card:hover {
   box-shadow: 0 28px 55px rgba(17, 41, 31, 0.12);
   transform: translateY(-6px);
 }
-
 .care-tip-image-wrapper {
   height: 220px;
 }
-
 .care-tip-image-overlay {
   background: linear-gradient(180deg, rgba(10, 25, 20, 0.08), rgba(10, 25, 20, 0.45));
   inset: 0;
   position: absolute;
 }
-
 .care-tip-top-badge {
   background: rgba(255, 255, 255, 0.94);
   border-radius: 999px;
@@ -1395,11 +1204,9 @@
   position: absolute;
   top: 1rem;
 }
-
 .care-tip-difficulty {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
-
 .care-tip-content {
   display: flex;
   flex: 1;
@@ -1407,14 +1214,12 @@
   gap: 0.95rem;
   padding: 1.15rem 1.15rem 1.25rem;
 }
-
 .care-tip-card-topline {
   align-items: center;
   display: flex;
   gap: 0.75rem;
   justify-content: space-between;
 }
-
 .care-tip-category {
   background: rgba(23, 55, 44, 0.07);
   border-radius: 999px;
@@ -1422,7 +1227,6 @@
   margin-bottom: 0;
   padding: 0.38rem 0.72rem;
 }
-
 .care-tip-reading-time {
   align-items: center;
   color: #60796f;
@@ -1431,27 +1235,23 @@
   font-weight: 700;
   gap: 0.35rem;
 }
-
 .care-tip-title {
   color: #16372d;
   font-size: 1.15rem;
   line-height: 1.35;
   margin-bottom: 0;
 }
-
 .care-tip-excerpt {
   color: #60796f;
   flex: 1;
   line-height: 1.7;
   margin-bottom: 0;
 }
-
 .care-tip-footer {
   border-top: 1px solid rgba(23, 55, 44, 0.08);
   margin-bottom: 0;
   padding-top: 0.9rem;
 }
-
 .care-tip-read-more {
   align-items: center;
   background: linear-gradient(135deg, #17372c 0%, #2d654f 100%);
@@ -1468,17 +1268,14 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   width: 100%;
 }
-
 .care-tip-detail-back {
   padding: 1.25rem 0 0.9rem;
 }
-
 .care-tip-detail-hero {
   background: transparent;
   border-bottom: 0;
   padding: 0 0 2rem;
 }
-
 .care-tip-detail-hero-shell {
   align-items: start;
   background:
@@ -1492,25 +1289,21 @@
   grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.9fr);
   padding: 1.8rem;
 }
-
 .care-tip-detail-hero-copy {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .care-tip-detail-badges {
   justify-content: flex-start;
   margin-bottom: 0;
 }
-
 .care-tip-detail-title {
   color: #17372c;
   font-size: clamp(2rem, 4vw, 3.5rem);
   line-height: 1.02;
   margin-bottom: 0;
 }
-
 .care-tip-detail-lead {
   color: #5b756a;
   font-size: 1.05rem;
@@ -1518,17 +1311,14 @@
   margin: 0;
   max-width: 62ch;
 }
-
 .care-tip-detail-meta {
   justify-content: flex-start;
 }
-
 .care-tip-detail-stat-strip {
   display: grid;
   gap: 0.95rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-
 .care-tip-detail-stat-card {
   background: rgba(247, 250, 244, 0.92);
   border: 1px solid rgba(23, 55, 44, 0.08);
@@ -1538,36 +1328,30 @@
   gap: 0.3rem;
   padding: 1rem;
 }
-
 .care-tip-detail-stat-card span {
   color: #6a8378;
   font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
 }
-
 .care-tip-detail-stat-card strong {
   color: #17372c;
   font-size: 1.1rem;
 }
-
 .care-tip-detail-hero-visual {
   display: grid;
   gap: 1rem;
 }
-
 .care-tip-detail-hero-image-frame {
   border-radius: 1.6rem;
   min-height: 320px;
   overflow: hidden;
   position: relative;
 }
-
 .care-tip-detail-image {
   height: 100%;
   object-fit: cover;
 }
-
 .care-tip-detail-hero-note {
   background: linear-gradient(135deg, #17372c 0%, #214d3d 100%);
   border-radius: 1.4rem;
@@ -1577,7 +1361,6 @@
   gap: 0.45rem;
   padding: 1.2rem 1.25rem;
 }
-
 .care-tip-detail-hero-note span {
   color: #8bd6a9;
   font-size: 0.78rem;
@@ -1585,37 +1368,30 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-
 .care-tip-detail-hero-note strong {
   font-size: 1.15rem;
   line-height: 1.4;
 }
-
 .care-tip-detail-hero-note p {
   color: rgba(238, 246, 233, 0.82);
   line-height: 1.65;
   margin: 0;
 }
-
 .care-tip-detail-content-section {
   padding: 0 0 3.5rem;
 }
-
 .care-tip-detail-grid {
   align-items: start;
   gap: 1.5rem;
 }
-
 .care-tip-detail-main,
 .care-tip-detail-info-card {
   background: rgba(255, 255, 255, 0.93);
   border-radius: 1.5rem;
 }
-
 .care-tip-detail-main {
   padding: 1.5rem;
 }
-
 .care-tip-detail-intro-card {
   background: linear-gradient(135deg, rgba(237, 248, 237, 0.95), rgba(255, 248, 235, 0.92));
   border: 1px solid rgba(23, 55, 44, 0.08);
@@ -1623,65 +1399,53 @@
   margin-bottom: 1.25rem;
   padding: 1rem 1.1rem;
 }
-
 .care-tip-detail-intro-card p {
   color: #345548;
   line-height: 1.75;
   margin: 0.45rem 0 0;
 }
-
 .care-tip-detail-content {
   color: #40594f;
   font-size: 1rem;
   line-height: 1.88;
 }
-
 .care-tip-detail-content h2,
 .care-tip-detail-content h3 {
   color: #17372c;
   line-height: 1.25;
 }
-
 .care-tip-detail-content h2 {
   font-size: 1.6rem;
   margin-top: 2rem;
 }
-
 .care-tip-detail-content h3 {
   font-size: 1.18rem;
 }
-
 .care-tip-detail-content p,
 .care-tip-detail-content ul,
 .care-tip-detail-content ol {
   margin-bottom: 1rem;
 }
-
 .care-tip-detail-sidebar {
   gap: 1rem;
   position: sticky;
   top: 6.2rem;
 }
-
 .care-tip-detail-info-card {
   padding: 1.2rem;
 }
-
 .care-tip-detail-info-title {
   color: #17372c;
 }
-
 .care-tip-detail-info-item {
   border-bottom-color: rgba(23, 55, 44, 0.08);
 }
-
 .care-tip-detail-action-card p,
 .care-tip-detail-cta-card p {
   color: #5d776d;
   line-height: 1.7;
   margin: 0 0 1rem;
 }
-
 .care-tip-detail-share-btn,
 .care-tip-detail-cta-btn {
   align-items: center;
@@ -1696,142 +1460,115 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   width: 100%;
 }
-
 .care-tip-detail-share-btn {
   background: rgba(23, 55, 44, 0.08);
   color: #17372c;
 }
-
 .care-tip-detail-cta-btn {
   background: linear-gradient(135deg, #17372c 0%, #2d654f 100%);
   box-shadow: 0 18px 35px rgba(23, 55, 44, 0.16);
   color: #f7f5ec;
 }
-
 .care-tip-detail-related {
   background: rgba(255, 255, 255, 0.68);
   border-top: 0;
   padding: 0 0 4rem;
 }
-
 .care-tip-detail-related-head {
   align-items: end;
   display: flex;
   justify-content: space-between;
   margin-bottom: 1.5rem;
 }
-
 .care-tip-detail-related-head p {
   color: #60796f;
   line-height: 1.7;
   margin: 0;
   max-width: 38ch;
 }
-
 .care-tip-detail-related-title {
   margin-bottom: 0;
 }
-
 .care-tip-detail-related-grid {
   gap: 1.2rem;
 }
-
 .care-tip-related-card {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 1.3rem;
 }
-
 .care-tip-related-card:hover {
   box-shadow: 0 22px 40px rgba(18, 41, 31, 0.11);
 }
-
 .care-tip-related-image-wrapper {
   height: 170px;
 }
-
 .care-tip-related-content {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 }
-
 .care-tip-related-category {
   border-radius: 999px;
   font-size: 0.74rem;
   width: fit-content;
 }
-
 .care-tip-related-title,
 .care-tip-related-excerpt {
   margin: 0;
 }
-
 .care-tip-detail-loading,
 .care-tip-detail-error {
   padding: 5rem 1rem;
 }
-
 @media (max-width: 1120px) {
   .ct-hero-shell,
   .care-tip-detail-hero-shell {
     grid-template-columns: 1fr;
   }
-
   .ct-sidebar,
   .care-tip-detail-sidebar {
     position: static;
   }
 }
-
 @media (max-width: 968px) {
   .ct-grid-layout {
     grid-template-columns: 1fr;
   }
-
   .ct-hero-search-form,
   .ct-library-bar,
   .care-tip-detail-related-head {
     flex-direction: column;
   }
-
   .ct-hero-search-btn,
   .ct-library-reset-btn {
     width: 100%;
   }
-
   .care-tip-detail-stat-strip {
     grid-template-columns: 1fr;
   }
 }
-
 @media (max-width: 768px) {
   .ct-eco-hero {
     padding: 4.5rem 0 6.4rem;
   }
-
   .ct-hero-shell,
   .care-tip-detail-hero-shell {
     padding: 1.2rem;
   }
-
   .ct-hospital-banner,
   .ct-library-bar,
   .care-tip-detail-main {
     padding: 1.15rem;
   }
-
   .care-tip-image-wrapper {
     height: 205px;
   }
-
   .care-tip-detail-main {
     padding: 1rem;
   }
-
   .care-tip-detail-back {
     padding-top: 1rem;
   }
-
   .care-tip-detail-title {
     font-size: 2rem;
   }

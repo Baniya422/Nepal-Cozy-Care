@@ -1,52 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Search, Shield, Sprout } from "lucide-react";
-
-const tools = [
-  {
-    title: "Plant Finder",
-    description:
-      "Match plants to sunlight, room type, and care confidence before you buy.",
-    action: "Find My Plant",
-    path: "/plant-finder",
-    icon: Search,
-  },
-  {
-    title: "Plant Health Checker",
-    description:
-      "Check symptoms like yellow leaves or pests and get quick care guidance.",
-    action: "Diagnose Issues",
-    path: "/plant-health-checker",
-    icon: Shield,
-  },
-  {
-    title: "My Garden Dashboard",
-    description:
-      "Track watering, fertilizer routines, and personal notes after purchase.",
-    action: "Open My Garden",
-    path: "/my-garden",
-    icon: Sprout,
-  },
-];
-
-export default function SmartCareTools() {
+import type { HomepageContent } from "../../features/homepage/content";
+const icons = [Search, Shield, Sprout];
+export default function SmartCareTools({ content }: { content: HomepageContent["smart_tools"] }) {
   const navigate = useNavigate();
-
   return (
     <section className="smart-tools-section">
       <div className="smart-tools-container">
         <div className="smart-tools-head">
-          <span className="smart-tools-kicker">Smart Plant Care</span>
-          <h2 className="smart-tools-title">More than shopping. A complete plant care system.</h2>
-          <p className="smart-tools-description">
-            These tools make your project stand out because users can discover, diagnose,
-            and care for plants in one place.
-          </p>
+          <span className="smart-tools-kicker">{content.kicker}</span>
+          <h2 className="smart-tools-title">{content.title}</h2>
+          <p className="smart-tools-description">{content.description}</p>
         </div>
-
         <div className="smart-tools-grid">
-          {tools.map((tool) => {
-            const Icon = tool.icon;
-
+          {content.items.map((tool, index) => {
+            const Icon = icons[index] ?? Sprout;
             return (
               <article key={tool.title} className="smart-tool-card">
                 <div className="smart-tool-icon">

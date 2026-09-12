@@ -18,9 +18,7 @@ import {
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import "../styles/trackOrder.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type OrderItem = {
   id: number;
   plant: {
@@ -31,7 +29,6 @@ type OrderItem = {
   quantity: number;
   price: number;
 };
-
 type TimelineEvent = {
   status: string;
   label: string;
@@ -39,7 +36,6 @@ type TimelineEvent = {
   date: string | null;
   description: string;
 };
-
 type OrderData = {
   id: number;
   status: string;
@@ -68,20 +64,16 @@ type OrderData = {
   location_confirmed_at?: string;
   items: OrderItem[];
 };
-
 const toNumber = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 };
-
 const formatCurrency = (value: unknown) => `Rs ${toNumber(value).toFixed(2)}`;
-
 const formatStatusLabel = (status: string) =>
   status
     .split("_")
     .join(" ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
 const normalizeOrderData = (rawOrder: any): OrderData => ({
   id: Number(rawOrder?.id ?? 0),
   status: String(rawOrder?.status ?? "pending"),
@@ -121,7 +113,6 @@ const normalizeOrderData = (rawOrder: any): OrderData => ({
       }))
     : [],
 });
-
 export default function TrackOrder() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -134,12 +125,10 @@ export default function TrackOrder() {
   const [order, setOrder] = useState<OrderData | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [showHelp, setShowHelp] = useState(false);
-
   const trackOrder = async (nextOrderId: string, nextEmail: string) => {
     setLoading(true);
     setError(null);
     setOrder(null);
-
     try {
       const response = await fetch(`${API}/api/orders/track`, {
         method: "POST",
@@ -148,9 +137,7 @@ export default function TrackOrder() {
         },
         body: JSON.stringify({ order_id: nextOrderId, email: nextEmail }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
         setOrder(normalizeOrderData(data.data?.order));
         setTimeline(Array.isArray(data.data?.timeline) ? data.data.timeline : []);
@@ -163,20 +150,16 @@ export default function TrackOrder() {
       setLoading(false);
     }
   };
-
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
     await trackOrder(orderId, email);
   };
-
   useEffect(() => {
     if (!queryOrderId || !queryEmail) return;
-
     setOrderId(queryOrderId);
     setEmail(queryEmail);
     void trackOrder(queryOrderId, queryEmail);
   }, [queryOrderId, queryEmail]);
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "placed":
@@ -193,7 +176,6 @@ export default function TrackOrder() {
         return <Clock size={24} />;
     }
   };
-
   const getStatusColor = (status: string, completed: boolean) => {
     if (!completed) return "status-pending";
     switch (status) {
@@ -205,7 +187,6 @@ export default function TrackOrder() {
         return "status-completed";
     }
   };
-
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Pending";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -214,7 +195,6 @@ export default function TrackOrder() {
       year: "numeric",
     });
   };
-
   const formatDateTime = (dateString: string | null) => {
     if (!dateString) return "Pending";
     return new Date(dateString).toLocaleString("en-US", {
@@ -225,7 +205,6 @@ export default function TrackOrder() {
       minute: "2-digit",
     });
   };
-
   const getEstimatedDelivery = () => {
     if (order?.estimated_delivery_date) {
       return formatDate(order.estimated_delivery_date);
@@ -235,11 +214,10 @@ export default function TrackOrder() {
     }
     return "Calculating...";
   };
-
   return (
     <Layout>
       <div className="track-order-page">
-        {/* Hero Section */}
+        {}
         <section className="track-order-hero">
           <div className="track-order-hero-content">
             <h1 className="track-order-hero-title">Track Your Order</h1>
@@ -248,8 +226,7 @@ export default function TrackOrder() {
             </p>
           </div>
         </section>
-
-        {/* Track Form Section */}
+        {}
         <section className="track-order-form-section">
           <div className="track-order-container">
             <div className="track-order-form-wrapper">
@@ -269,7 +246,6 @@ export default function TrackOrder() {
                       required
                     />
                   </div>
-
                   <div className="track-order-input-group">
                     <label className="track-order-label">
                       <Mail size={16} />
@@ -285,7 +261,6 @@ export default function TrackOrder() {
                     />
                   </div>
                 </div>
-
                 <button
                   type="submit"
                   className="track-order-submit-btn"
@@ -300,14 +275,12 @@ export default function TrackOrder() {
                     </>
                   )}
                 </button>
-
                 <p className="track-order-privacy">
                   <AlertCircle size={14} />
                   Your information is secure and only used to verify your order
                 </p>
               </form>
-
-              {/* Help Section */}
+              {}
               <div className="track-order-help">
                 <button
                   className="track-order-help-toggle"
@@ -332,8 +305,7 @@ export default function TrackOrder() {
             </div>
           </div>
         </section>
-
-        {/* Error Message */}
+        {}
         {error && (
           <section className="track-order-error-section">
             <div className="track-order-container">
@@ -345,12 +317,11 @@ export default function TrackOrder() {
             </div>
           </section>
         )}
-
-        {/* Order Details */}
+        {}
         {order && (
           <section className="track-order-details-section">
             <div className="track-order-container">
-              {/* Order Summary Card */}
+              {}
               <div className="track-order-summary-card">
                 <div className="track-order-summary-header">
                   <div>
@@ -380,8 +351,7 @@ export default function TrackOrder() {
                     )}
                   </div>
                 </div>
-
-                {/* Estimated Delivery */}
+                {}
                 <div className="track-order-estimated">
                   <Calendar size={20} />
                   <div>
@@ -394,7 +364,6 @@ export default function TrackOrder() {
                   </div>
                 </div>
               </div>
-
               <div className="track-order-shipment-card">
                 <h3 className="track-order-section-title">
                   <Phone size={20} />
@@ -434,8 +403,7 @@ export default function TrackOrder() {
                   </p>
                 ) : null}
               </div>
-
-              {/* Timeline */}
+              {}
               <div className="track-order-timeline-card">
                 <h3 className="track-order-section-title">Delivery Progress</h3>
                 <div className="track-order-timeline">
@@ -470,8 +438,7 @@ export default function TrackOrder() {
                   ))}
                 </div>
               </div>
-
-              {/* Shipment Details */}
+              {}
               {(order.courier_name || order.tracking_number) && (
                 <div className="track-order-shipment-card">
                   <h3 className="track-order-section-title">
@@ -513,8 +480,7 @@ export default function TrackOrder() {
                   )}
                 </div>
               )}
-
-              {/* Order Items */}
+              {}
               <div className="track-order-items-card">
                 <h3 className="track-order-section-title">
                   <Box size={20} />
@@ -569,8 +535,7 @@ export default function TrackOrder() {
                   </div>
                 </div>
               </div>
-
-              {/* Delivery Address */}
+              {}
               <div className="track-order-address-card">
                 <h3 className="track-order-section-title">
                   <MapPin size={20} />
@@ -592,8 +557,7 @@ export default function TrackOrder() {
                   </p>
                 </div>
               </div>
-
-              {/* Support Section */}
+              {}
               <div className="track-order-support">
                 <h3 className="track-order-section-title">
                   <HelpCircle size={20} />

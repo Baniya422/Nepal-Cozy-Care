@@ -18,10 +18,13 @@ class ContactMessage extends Model
         'message',
         'status',
         'resolved_at',
+        'email_sent_at',
+        'email_error',
     ];
 
     protected $casts = [
         'resolved_at' => 'datetime',
+        'email_sent_at' => 'datetime',
     ];
 
     public function user()

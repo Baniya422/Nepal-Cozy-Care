@@ -1,7 +1,6 @@
 import type { FormEvent } from "react";
 import AccountNotice from "../AccountNotice";
 import type { Notice, ProfileForm } from "../types";
-
 type AccountProfileSectionProps = {
   notice: Notice | null;
   profileForm: ProfileForm;
@@ -10,7 +9,6 @@ type AccountProfileSectionProps = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onChangeProfileField: (field: keyof ProfileForm, value: string) => void;
 };
-
 export default function AccountProfileSection({
   notice,
   profileForm,
@@ -22,7 +20,6 @@ export default function AccountProfileSection({
   return (
     <div className="account-section-stack">
       <AccountNotice notice={notice} />
-
       <div className="account-profile-grid">
         <section className="account-card">
           <div className="account-card-head">
@@ -47,12 +44,10 @@ export default function AccountProfileSection({
             </div>
           </div>
         </section>
-
         <section className="account-card">
           <div className="account-card-head">
             <h3>Edit Profile</h3>
           </div>
-
           <form className="account-form" onSubmit={onSubmit}>
             <label className="account-form-field">
               <span>Full name</span>
@@ -63,7 +58,6 @@ export default function AccountProfileSection({
                 placeholder="Your full name"
               />
             </label>
-
             <label className="account-form-field">
               <span>Email address</span>
               <input
@@ -73,7 +67,6 @@ export default function AccountProfileSection({
                 placeholder="you@example.com"
               />
             </label>
-
             <label className="account-form-field">
               <span>Phone number</span>
               <input
@@ -83,11 +76,9 @@ export default function AccountProfileSection({
                 placeholder="+977 98XXXXXXXX"
               />
             </label>
-
             <p className="account-form-hint">
               Phone number is saved locally for faster checkout and delivery communication.
             </p>
-
             <div className="account-form-actions">
               <button type="submit" className="account-primary-btn" disabled={profileSaving}>
                 {profileSaving ? "Saving..." : "Save Profile"}

@@ -21,12 +21,11 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->enum('category', ['watering', 'fertilizing', 'pest_control', 'indoor', 'outdoor', 'seasonal']);
             $table->enum('difficulty', ['beginner', 'intermediate', 'advanced'])->default('beginner');
-            $table->json('plant_ids')->nullable(); // Array of related plant IDs
+            $table->json('plant_ids')->nullable();
             $table->unsignedInteger('views_count')->default(0);
             $table->boolean('is_published')->default(true);
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
-            
             $table->index('category');
             $table->index('difficulty');
             $table->index('is_published');

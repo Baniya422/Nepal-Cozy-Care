@@ -1,13 +1,11 @@
 import { ChevronRight } from "lucide-react";
 import type { AccountSection, AccountUser, SectionConfig } from "./types";
-
 type AccountSidebarProps = {
   user: AccountUser | null;
   sections: SectionConfig[];
   activeSection: AccountSection;
   onNavigateToSection: (section: AccountSection) => void;
 };
-
 export default function AccountSidebar({
   user,
   sections,
@@ -23,11 +21,9 @@ export default function AccountSidebar({
           <span>{user?.email || "No email available"}</span>
         </div>
       </div>
-
       <div className="account-nav">
         {sections.map((section) => {
           const Icon = section.icon;
-
           return (
             <button
               key={section.key}

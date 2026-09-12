@@ -18,11 +18,9 @@ return new class extends Migration
                 ? 'email_verification_code_expires_at'
                 : null,
         ]));
-
         if ($columns === []) {
             return;
         }
-
         Schema::table('users', function (Blueprint $table) use ($columns) {
             $table->dropColumn($columns);
         });
@@ -37,11 +35,9 @@ return new class extends Migration
             if (! Schema::hasColumn('users', 'email_verified_at')) {
                 $table->timestamp('email_verified_at')->nullable();
             }
-
             if (! Schema::hasColumn('users', 'email_verification_code')) {
                 $table->string('email_verification_code')->nullable();
             }
-
             if (! Schema::hasColumn('users', 'email_verification_code_expires_at')) {
                 $table->timestamp('email_verification_code_expires_at')->nullable();
             }

@@ -1,14 +1,12 @@
 import { Star } from "lucide-react";
 import { priceFilterOptions, ratingFilterOptions } from "../data";
 import type { PriceFilterKey } from "../types";
-
 type CatalogSidebarProps = {
   priceFilters: PriceFilterKey[];
   ratingFilters: number[];
   onTogglePrice: (value: PriceFilterKey) => void;
   onToggleRating: (value: number) => void;
 };
-
 export default function CatalogSidebar({
   priceFilters,
   ratingFilters,
@@ -32,7 +30,6 @@ export default function CatalogSidebar({
           ))}
         </div>
       </div>
-
       <div className="popular-sidebar-section">
         <h2 className="popular-sidebar-title">Rating</h2>
         <div className="popular-sidebar-options">

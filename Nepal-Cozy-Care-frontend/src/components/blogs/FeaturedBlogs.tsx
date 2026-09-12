@@ -1,7 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type Blog = {
   id: number;
   title: string;
@@ -12,19 +10,15 @@ type Blog = {
   category?: string;
   created_at: string;
 };
-
 interface FeaturedBlogsProps {
   blogs: Blog[];
   loading: boolean;
 }
-
 export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
   const navigate = useNavigate();
-
   const handleReadMore = (blogId: number) => {
     navigate(`/blogs/${blogId}`);
   };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -33,7 +27,6 @@ export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
       year: "numeric",
     });
   };
-
   if (loading) {
     return (
       <div className="blogs-featured-grid">
@@ -56,7 +49,6 @@ export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
       </div>
     );
   }
-
   return (
     <div className="blogs-featured-grid">
       {blogs.map((blog) => (
@@ -76,14 +68,14 @@ export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
             </p>
             <div className="blogs-card-footer">
               <div className="blogs-card-author">
-                <img 
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author || "Admin")}&background=4CAF50&color=fff`} 
-                  alt={blog.author || "Author"} 
-                  className="blogs-author-avatar" 
+                <img
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(blog.author || "Admin")}&background=4CAF50&color=fff`}
+                  alt={blog.author || "Author"}
+                  className="blogs-author-avatar"
                 />
                 <span className="blogs-author-name">{blog.author || "Cozy Care"}</span>
               </div>
-              <button 
+              <button
                 className="blogs-read-more-btn"
                 onClick={() => handleReadMore(blog.id)}
               >

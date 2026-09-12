@@ -1,7 +1,6 @@
 import { ArrowRight, CheckCircle2, RefreshCw, Search } from "lucide-react";
 import { symptomCategories } from "../data";
 import { getSymptomName } from "../utils";
-
 type PlantHealthSymptomSelectorProps = {
   selectedSymptoms: string[];
   activeCategory: string;
@@ -11,7 +10,6 @@ type PlantHealthSymptomSelectorProps = {
   onReset: () => void;
   onAnalyze: () => void;
 };
-
 export default function PlantHealthSymptomSelector({
   selectedSymptoms,
   activeCategory,
@@ -23,7 +21,6 @@ export default function PlantHealthSymptomSelector({
 }: PlantHealthSymptomSelectorProps) {
   const activeCategoryData = symptomCategories.find((category) => category.id === activeCategory);
   const ActiveCategoryIcon = activeCategoryData?.icon ?? null;
-
   return (
     <>
       <div className="plant-health-progress">
@@ -35,7 +32,6 @@ export default function PlantHealthSymptomSelector({
           with context-aware analysis ready
         </span>
       </div>
-
       <div className="plant-health-layout">
         <aside className="plant-health-categories">
           <h3 className="plant-health-categories-title">
@@ -48,7 +44,6 @@ export default function PlantHealthSymptomSelector({
               const selectedCount = category.symptoms.filter((symptom) =>
                 selectedSymptoms.includes(symptom.id)
               ).length;
-
               return (
                 <button
                   key={category.id}
@@ -70,7 +65,6 @@ export default function PlantHealthSymptomSelector({
             })}
           </div>
         </aside>
-
         <div className="plant-health-symptoms">
           <h3 className="plant-health-symptoms-title">
             {ActiveCategoryIcon ? <ActiveCategoryIcon size={22} /> : null}
@@ -79,7 +73,6 @@ export default function PlantHealthSymptomSelector({
           <p className="plant-health-symptoms-subtitle">
             Choose every symptom that matches what you can actually see on the plant.
           </p>
-
           <div className="plant-health-symptoms-grid">
             {activeCategoryData?.symptoms.map((symptom) => (
               <button
@@ -98,7 +91,6 @@ export default function PlantHealthSymptomSelector({
               </button>
             ))}
           </div>
-
           {selectedSymptoms.length > 0 ? (
             <div className="plant-health-selected">
               <h4 className="plant-health-selected-title">Selected Symptoms</h4>
@@ -117,7 +109,6 @@ export default function PlantHealthSymptomSelector({
               </div>
             </div>
           ) : null}
-
           <div className="plant-health-actions">
             <button
               type="button"

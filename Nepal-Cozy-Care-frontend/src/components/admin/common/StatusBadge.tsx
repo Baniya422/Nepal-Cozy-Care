@@ -2,7 +2,6 @@ interface StatusBadgeProps {
   status: string | boolean;
   type?: 'active' | 'order' | 'payment';
 }
-
 export default function StatusBadge({ status, type = 'active' }: StatusBadgeProps) {
   const getStatusClass = () => {
     switch (type) {
@@ -35,7 +34,6 @@ export default function StatusBadge({ status, type = 'active' }: StatusBadgeProp
         return 'admin-status-active';
     }
   };
-
   const getStatusLabel = () => {
     if (type === 'active') {
       return status === 'active' || status === '1' || status === true ? 'Active' : 'Inactive';
@@ -45,7 +43,6 @@ export default function StatusBadge({ status, type = 'active' }: StatusBadgeProp
       .join(' ')
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
   };
-
   return (
     <span className={`admin-status-badge ${getStatusClass()}`}>
       {getStatusLabel()}

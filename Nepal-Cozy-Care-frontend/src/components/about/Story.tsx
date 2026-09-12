@@ -2,11 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { Leaf } from "lucide-react";
 import PageSection from "../layout/PageSection";
 import { aboutPageTemplate } from "../../features/content/aboutTemplate";
-
+import { resolvePageImage } from "../../features/page-content/templates";
 export default function Story() {
   const navigate = useNavigate();
   const story = aboutPageTemplate.story;
-
   return (
     <PageSection background="white" padding="large">
       <div className="about-story-grid">
@@ -30,7 +29,7 @@ export default function Story() {
         </div>
         <div className="about-story-image-wrapper">
           <img
-            src={story.image}
+            src={resolvePageImage(story.image)}
             alt={story.image_alt}
             className="about-story-image"
           />

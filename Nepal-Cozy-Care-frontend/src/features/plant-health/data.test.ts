@@ -12,7 +12,6 @@ import {
   symptomCategories,
 } from "./data";
 import type { PlantHealthTemplatePayload } from "./types";
-
 const templateFixture: PlantHealthTemplatePayload = {
   symptom_categories: [
     {
@@ -83,38 +82,30 @@ const templateFixture: PlantHealthTemplatePayload = {
     },
   ],
 };
-
 describe("plant-health/data", () => {
   beforeEach(() => {
     applyPlantHealthTemplate(null);
   });
-
   afterEach(() => {
     vi.useRealTimers();
   });
-
   it("maps template fields and icon fallbacks into runtime data", () => {
     applyPlantHealthTemplate(templateFixture);
-
     expect(symptomCategories).toHaveLength(2);
     expect(symptomCategories[0].icon).toBe(Bug);
     expect(symptomCategories[1].icon).toBe(Leaf);
-
     expect(plantTypeOptions).toEqual([{ id: "indoor", label: "Indoor Plant" }]);
     expect(environmentOptions).toEqual([{ id: "living_room", label: "Living Room" }]);
     expect(seasonOptions).toEqual([{ id: "spring", label: "Spring" }]);
     expect(soilOptions).toEqual([{ id: "wet", label: "Wet Soil" }]);
     expect(diagnosisProfiles).toHaveLength(1);
-
     expect(healthyPlantHabits).toHaveLength(2);
     expect(healthyPlantHabits[0].icon).toBe(Sun);
     expect(healthyPlantHabits[1].icon).toBe(Leaf);
   });
-
   it("clears runtime collections when no template is provided", () => {
     applyPlantHealthTemplate(templateFixture);
     applyPlantHealthTemplate(undefined);
-
     expect(symptomCategories).toEqual([]);
     expect(plantTypeOptions).toEqual([]);
     expect(environmentOptions).toEqual([]);
@@ -123,22 +114,16 @@ describe("plant-health/data", () => {
     expect(diagnosisProfiles).toEqual([]);
     expect(healthyPlantHabits).toEqual([]);
   });
-
   it("returns season ids based on month boundaries", () => {
     vi.useFakeTimers();
-
     vi.setSystemTime(new Date("2026-04-15T08:00:00.000Z"));
     expect(getCurrentSeason()).toBe("spring");
-
     vi.setSystemTime(new Date("2026-06-15T08:00:00.000Z"));
     expect(getCurrentSeason()).toBe("summer");
-
     vi.setSystemTime(new Date("2026-08-15T08:00:00.000Z"));
     expect(getCurrentSeason()).toBe("monsoon");
-
     vi.setSystemTime(new Date("2026-10-15T08:00:00.000Z"));
     expect(getCurrentSeason()).toBe("autumn");
-
     vi.setSystemTime(new Date("2026-12-15T08:00:00.000Z"));
     expect(getCurrentSeason()).toBe("winter");
   });

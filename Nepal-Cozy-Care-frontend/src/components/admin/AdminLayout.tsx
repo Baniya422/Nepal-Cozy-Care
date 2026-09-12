@@ -18,15 +18,18 @@ import {
   Menu,
   X,
   ChevronRight,
+  House,
+  Globe,
+  Settings,
 } from "lucide-react";
 import "./admin.css";
-
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
-
 const menuItems = [
   { path: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+  { path: "/admin/homepage", icon: House, label: "Homepage Content" },
+  { path: "/admin/page-content", icon: Globe, label: "Page Content (CMS)" },
   { path: "/admin/plants", icon: Leaf, label: "Manage Plants" },
   { path: "/admin/accessories", icon: Package, label: "Manage Accessories" },
   { path: "/admin/blogs", icon: BookOpen, label: "Manage Care Blogs" },
@@ -37,30 +40,34 @@ const menuItems = [
   { path: "/admin/contact-messages", icon: Mail, label: "Contact Inbox" },
   { path: "/admin/users", icon: Users, label: "Users" },
   { path: "/admin/reports", icon: BarChart3, label: "Reports" },
+  { path: "/admin/settings", icon: Settings, label: "Settings" },
 ];
-
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifications] = useState(3);
-
+  let adminName = "Admin User";
+  try {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "null") as { name?: string } | null;
+    adminName = storedUser?.name || adminName;
+  } catch {
+    // Use the safe fallback when local storage contains invalid JSON.
+  }
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
   };
-
   const isActive = (path: string) => {
     if (path === "/admin") {
       return location.pathname === "/admin";
     }
     return location.pathname.startsWith(path);
   };
-
   return (
     <div className="admin-layout">
-      {/* Sidebar */}
+      {}
       <aside className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="admin-sidebar-header">
           <Link to="/admin" className="admin-logo">
@@ -74,7 +81,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
-
         <nav className="admin-sidebar-nav">
           {menuItems.map((item) => (
             <Link
@@ -89,10 +95,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           ))}
         </nav>
       </aside>
-
-      {/* Main Content */}
+      {}
       <div className={`admin-main ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
-        {/* Header */}
+        {}
         <header className="admin-header">
           <div className="admin-header-left">
             <button
@@ -105,7 +110,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               {menuItems.find((item) => isActive(item.path))?.label || "Dashboard"}
             </h1>
           </div>
-
           <div className="admin-header-right">
             <button className="admin-header-btn">
               <Bell size={20} />
@@ -113,13 +117,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <span className="admin-notification-badge">{notifications}</span>
               )}
             </button>
-
             <div className="admin-user-menu">
               <div className="admin-user-avatar">
                 <User size={20} />
               </div>
               <div className="admin-user-info">
-                <span className="admin-user-name">Admin User</span>
+                <span className="admin-user-name">{adminName}</span>
                 <span className="admin-user-role">Administrator</span>
               </div>
               <button className="admin-logout-btn" onClick={handleLogout}>
@@ -128,8 +131,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
         </header>
-
-        {/* Page Content */}
+        {}
         <main className="admin-content">{children}</main>
       </div>
     </div>

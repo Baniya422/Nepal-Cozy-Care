@@ -30,7 +30,6 @@ class CareTip extends Model
         'plant_ids' => 'array',
     ];
 
-    // Relationships
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -41,7 +40,6 @@ class CareTip extends Model
         return $this->belongsToMany(Plant::class);
     }
 
-    // Scopes
     public function scopePublished($query)
     {
         return $query->where('is_published', true);
@@ -66,12 +64,11 @@ class CareTip extends Model
     {
         return $query->where(function ($q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
-              ->orWhere('excerpt', 'like', "%{$search}%")
-              ->orWhere('content', 'like', "%{$search}%");
+                ->orWhere('excerpt', 'like', "%{$search}%")
+                ->orWhere('content', 'like', "%{$search}%");
         });
     }
 
-    // Category labels
     public static function getCategories(): array
     {
         return [
@@ -84,7 +81,6 @@ class CareTip extends Model
         ];
     }
 
-    // Difficulty labels
     public static function getDifficulties(): array
     {
         return [
@@ -94,13 +90,11 @@ class CareTip extends Model
         ];
     }
 
-    // Get category label
     public function getCategoryLabel(): string
     {
         return self::getCategories()[$this->category] ?? $this->category;
     }
 
-    // Get difficulty label
     public function getDifficultyLabel(): string
     {
         return self::getDifficulties()[$this->difficulty] ?? $this->difficulty;

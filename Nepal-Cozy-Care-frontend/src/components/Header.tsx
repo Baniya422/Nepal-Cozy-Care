@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-
 export function Header() {
   return (
     <header className="bg-white shadow-sm">
@@ -10,7 +9,6 @@ export function Header() {
               Nepal Cozy Care
             </Link>
           </div>
-          
           <div className="hidden md:flex space-x-8">
             <Link to="/" className="text-gray-700 hover:text-green-600">
               Home
@@ -25,7 +23,6 @@ export function Header() {
               About
             </Link>
           </div>
-
           <div className="flex space-x-4">
             <Link
               to="/login"

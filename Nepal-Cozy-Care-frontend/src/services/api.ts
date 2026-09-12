@@ -1,6 +1,4 @@
-// API Base URL - using proxy configured in vite.config.ts
 const API_BASE_URL = '/api';
-
 /**
  * API Service for making HTTP requests to the Laravel backend
  */
@@ -13,7 +11,6 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
-    
     const defaultOptions: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -22,14 +19,11 @@ class ApiService {
       },
       ...options,
     };
-
     try {
       const response = await fetch(url, defaultOptions);
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
       const data = await response.json();
       return data as T;
     } catch (error) {
@@ -37,14 +31,12 @@ class ApiService {
       throw error;
     }
   }
-
   /**
    * GET request
    */
   async get<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET' });
   }
-
   /**
    * POST request
    */
@@ -54,7 +46,6 @@ class ApiService {
       body: data ? JSON.stringify(data) : undefined,
     });
   }
-
   /**
    * PUT request
    */
@@ -64,14 +55,12 @@ class ApiService {
       body: data ? JSON.stringify(data) : undefined,
     });
   }
-
   /**
    * DELETE request
    */
   async delete<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'DELETE' });
   }
-
   /**
    * Test API connection
    */
@@ -79,7 +68,5 @@ class ApiService {
     return this.get<{ status: string; message: string }>('/ping');
   }
 }
-
-// Export singleton instance
 export const apiService = new ApiService();
 export default apiService;

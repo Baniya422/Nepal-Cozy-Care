@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type GardenEntry = {
   id: number;
   nickname?: string | null;
@@ -24,7 +22,6 @@ type GardenEntry = {
     name: string;
   } | null;
 };
-
 const formatDate = (value?: string | null) => {
   if (!value) return "Not set";
   return new Date(value).toLocaleDateString("en-NP", {
@@ -33,17 +30,14 @@ const formatDate = (value?: string | null) => {
     day: "numeric",
   });
 };
-
 export default function ManageGardenEntries() {
   const [entries, setEntries] = useState<GardenEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     void fetchEntries();
   }, []);
-
   const fetchEntries = async () => {
     setLoading(true);
     try {
@@ -52,13 +46,10 @@ export default function ManageGardenEntries() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (!response.ok) {
         throw new Error(data.message || "Could not load garden entries.");
       }
-
       setEntries((data.data?.entries ?? []) as GardenEntry[]);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Could not load garden entries.");
@@ -66,12 +57,10 @@ export default function ManageGardenEntries() {
       setLoading(false);
     }
   };
-
   const filteredEntries = entries.filter((entry) => {
     const haystack = `${entry.user?.name ?? ""} ${entry.user?.email ?? ""} ${entry.plant?.name ?? ""} ${entry.nickname ?? ""} ${entry.city ?? ""} ${entry.room ?? ""}`;
     return haystack.toLowerCase().includes(searchQuery.toLowerCase());
   });
-
   return (
     <AdminLayout>
       <div className="admin-page">
@@ -81,7 +70,6 @@ export default function ManageGardenEntries() {
             <p>See which plants customers are tracking in their personal My Garden dashboards.</p>
           </div>
         </div>
-
         <div className="admin-filters">
           <div className="admin-search">
             <Search size={18} />
@@ -93,9 +81,7 @@ export default function ManageGardenEntries() {
             />
           </div>
         </div>
-
         {error ? <div className="admin-error">{error}</div> : null}
-
         <div className="admin-table-container">
           {loading ? (
             <div className="admin-loading">Loading garden entries...</div>
@@ -135,7 +121,6 @@ export default function ManageGardenEntries() {
               </tbody>
             </table>
           )}
-
           {!loading && filteredEntries.length === 0 ? (
             <div className="admin-empty-state">
               <p>No garden entries found.</p>

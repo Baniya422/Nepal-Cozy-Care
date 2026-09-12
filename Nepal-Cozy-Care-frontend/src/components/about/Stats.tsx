@@ -1,9 +1,7 @@
 import PageSection from "../layout/PageSection";
 import { aboutPageTemplate } from "../../features/content/aboutTemplate";
-
 export default function Stats() {
   const stats = aboutPageTemplate.stats;
-
   return (
     <PageSection background="cream" padding="small">
       <div className="about-stats-grid">

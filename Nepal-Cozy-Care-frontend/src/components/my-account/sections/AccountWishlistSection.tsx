@@ -1,6 +1,5 @@
 import { Heart, Trash2 } from "lucide-react";
 import type { WishlistEntry } from "../types";
-
 type AccountWishlistSectionProps = {
   wishlist: WishlistEntry[];
   wishlistBusyPlantId: number | null;
@@ -10,7 +9,6 @@ type AccountWishlistSectionProps = {
   buildImageUrl: (image?: string | null) => string;
   formatCurrency: (amount?: number | null) => string;
 };
-
 export default function AccountWishlistSection({
   wishlist,
   wishlistBusyPlantId,
@@ -36,7 +34,6 @@ export default function AccountWishlistSection({
           {wishlist.map((entry) => {
             const plant = entry.plant;
             const plantId = plant?.id ?? entry.plant_id;
-
             return (
               <article key={entry.id} className="account-card account-wishlist-card">
                 <img src={buildImageUrl(plant?.image)} alt={plant?.name || "Plant"} />

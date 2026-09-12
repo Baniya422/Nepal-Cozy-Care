@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type Plant = {
   id: number;
   name: string;
@@ -11,7 +9,6 @@ type Plant = {
   avg_rating?: number;
   category?: string;
 };
-
 interface ProductGridProps {
   plants: Plant[];
   loading: boolean;
@@ -21,7 +18,6 @@ interface ProductGridProps {
   wishlistBusyId: number | null;
   onToggleWishlist: (plantId: number) => void;
 }
-
 export default function ProductGrid({
   plants,
   loading,
@@ -32,18 +28,17 @@ export default function ProductGrid({
   onToggleWishlist,
 }: ProductGridProps) {
   const navigate = useNavigate();
-
   if (error) {
     return (
-      <div className="plants-error" style={{ 
-        padding: '2rem', 
-        textAlign: 'center', 
-        background: '#fee2e2', 
+      <div className="plants-error" style={{
+        padding: '2rem',
+        textAlign: 'center',
+        background: '#fee2e2',
         borderRadius: '8px',
         margin: '2rem 0'
       }}>
         <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{error}</p>
-        <button 
+        <button
           onClick={fetchPlants}
           style={{
             padding: '0.5rem 1rem',
@@ -59,11 +54,10 @@ export default function ProductGrid({
       </div>
     );
   }
-
   if (plants.length === 0 && !loading) {
     return (
-      <div className="plants-no-results" style={{ 
-        padding: '2rem', 
+      <div className="plants-no-results" style={{
+        padding: '2rem',
         textAlign: 'center',
         color: '#6b7280'
       }}>
@@ -71,11 +65,9 @@ export default function ProductGrid({
       </div>
     );
   }
-
   return (
     <div className="plants-grid">
       {loading ? (
-        // Loading skeleton
         Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="plants-card skeleton-card">
             <div className="plants-card-image-wrapper skeleton-image">
@@ -135,7 +127,7 @@ export default function ProductGrid({
                 ))}
                 <span className="plants-rating-count">({plant.avg_rating || 5})</span>
               </div>
-              <button 
+              <button
                 className="plants-view-btn"
                 onClick={() => navigate(`/plants/${plant.id}`)}
               >

@@ -22,7 +22,6 @@ import {
   getSymptomName,
   titleCase,
 } from "../utils";
-
 type PlantHealthResultsProps = {
   analysis: HealthAnalysis;
   plantType: string;
@@ -34,7 +33,6 @@ type PlantHealthResultsProps = {
   onOpenMyGarden: () => void;
   onOpenCareTip: (tip: string) => void;
 };
-
 export default function PlantHealthResults({
   analysis,
   plantType,
@@ -47,7 +45,6 @@ export default function PlantHealthResults({
   onOpenCareTip,
 }: PlantHealthResultsProps) {
   const primaryDiagnosis = analysis.primary;
-
   return (
     <section className="plant-health-results">
       <div className="plant-health-container">
@@ -55,7 +52,6 @@ export default function PlantHealthResults({
           <ArrowLeft size={18} />
           Back to Symptom Selection
         </button>
-
         <div className="plant-health-results-grid">
           <div className="plant-health-diagnosis-card">
             <div className="plant-health-diagnosis-header">
@@ -78,7 +74,6 @@ export default function PlantHealthResults({
                   </span>
                 </div>
               </div>
-
               <div className="plant-health-meta-grid">
                 <div className="plant-health-meta-card">
                   <span>Time To Act</span>
@@ -90,7 +85,6 @@ export default function PlantHealthResults({
                 </div>
               </div>
             </div>
-
             <div className="plant-health-urgent-actions">
               <h3 className="plant-health-section-title">
                 <Clock3 size={20} />
@@ -105,7 +99,6 @@ export default function PlantHealthResults({
                 ))}
               </div>
             </div>
-
             <div className="plant-health-section">
               <h3 className="plant-health-section-title">
                 <HelpCircle size={20} />
@@ -119,7 +112,6 @@ export default function PlantHealthResults({
                 ))}
               </div>
             </div>
-
             <div className="plant-health-section">
               <h3 className="plant-health-section-title">
                 <AlertCircle size={20} />
@@ -131,7 +123,6 @@ export default function PlantHealthResults({
                 ))}
               </ul>
             </div>
-
             <div className="plant-health-section">
               <h3 className="plant-health-section-title">
                 <Sprout size={20} />
@@ -143,7 +134,6 @@ export default function PlantHealthResults({
                 ))}
               </ul>
             </div>
-
             <div className="plant-health-section">
               <h3 className="plant-health-section-title">
                 <Shield size={20} />
@@ -155,7 +145,6 @@ export default function PlantHealthResults({
                 ))}
               </ul>
             </div>
-
             <div className="plant-health-related">
               <h3 className="plant-health-section-title">
                 <HelpCircle size={20} />
@@ -176,7 +165,6 @@ export default function PlantHealthResults({
               </div>
             </div>
           </div>
-
           <aside className="plant-health-sidebar">
             <div className="plant-health-sidebar-card">
               <h3>Plant Snapshot</h3>
@@ -199,7 +187,6 @@ export default function PlantHealthResults({
                 </li>
               </ul>
             </div>
-
             {analysis.alternatives.length > 0 ? (
               <div className="plant-health-sidebar-card">
                 <h3>Also Consider</h3>
@@ -214,7 +201,6 @@ export default function PlantHealthResults({
                 </div>
               </div>
             ) : null}
-
             <div className="plant-health-sidebar-card">
               <h3>Next Step</h3>
               <p>

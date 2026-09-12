@@ -37,127 +37,156 @@ import ManageSeasonalReminders from './pages/admin/ManageSeasonalReminders'
 import ManageContactMessages from './pages/admin/ManageContactMessages'
 import ManageGardenEntries from './pages/admin/ManageGardenEntries'
 import ForgotPassword from './pages/ForgotPassword'
-
+import ManageHomepage from './pages/admin/ManageHomepage'
+import ManagePageContent from './pages/admin/ManagePageContent'
+import AdminSettingsPage from './pages/admin/AdminSettings'
 function App() {
   return (
     <Routes>
+      {}
       <Route path="/" element={<Home />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      {}
       <Route path="/plants" element={<Plants />} />
       <Route path="/plants/:id" element={<ProductDetail />} />
       <Route path="/pots" element={<Pots />} />
       <Route path="/popular-items" element={<PopularItemsPage />} />
+      <Route path="/best-sellers" element={<BestSellersPage />} />
+      {}
       <Route path="/plant-finder" element={<PlantFinder />} />
-      <Route path="/shipping" element={<ShippingDelivery />} />
+      <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
+      <Route path="/care-tips" element={<CareTips />} />
+      <Route path="/care-tips/:id" element={<CareTipDetail />} />
       <Route path="/blogs" element={<Blogs />} />
       <Route path="/blogs/:id" element={<BlogDetail />} />
+      {}
+      <Route path="/shipping" element={<ShippingDelivery />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/mission" element={<OurMission />} />
+      <Route path="/help-center" element={<HelpCenter />} />
+      {}
       <Route path="/cart" element={<Cart />} />
       <Route path="/account" element={<MyAccount />} />
       <Route path="/my-garden" element={<MyGarden />} />
       <Route path="/checkout" element={<Checkout />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/mission" element={<OurMission />} />
-      <Route path="/care-tips" element={<CareTips />} />
-      <Route path="/care-tips/:id" element={<CareTipDetail />} />
       <Route path="/track-order" element={<TrackOrder />} />
-      <Route path="/help-center" element={<HelpCenter />} />
-      <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
-      <Route path="/best-sellers" element={<BestSellersPage />} />
-      
-      {/* Admin Routes */}
-      <Route 
-        path="/admin" 
+      {}
+      <Route
+        path="/admin"
         element={
           <AdminProtectedRoute>
             <AdminDashboard />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/plants" 
+      <Route
+        path="/admin/homepage"
+        element={
+          <AdminProtectedRoute>
+            <ManageHomepage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/page-content"
+        element={
+          <AdminProtectedRoute>
+            <ManagePageContent />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/plants"
         element={
           <AdminProtectedRoute>
             <ManagePlants />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/accessories" 
+      <Route
+        path="/admin/accessories"
         element={
           <AdminProtectedRoute>
             <ManageAccessories />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/blogs" 
+      <Route
+        path="/admin/blogs"
         element={
           <AdminProtectedRoute>
             <ManageBlogs />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/care-tips" 
+      <Route
+        path="/admin/care-tips"
         element={
           <AdminProtectedRoute>
             <ManageCareTips />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/orders" 
+      <Route
+        path="/admin/orders"
         element={
           <AdminProtectedRoute>
             <ManageOrders />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/users" 
+      <Route
+        path="/admin/users"
         element={
           <AdminProtectedRoute>
             <ManageUsers />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/reports" 
+      <Route
+        path="/admin/reports"
         element={
           <AdminProtectedRoute>
             <Reports />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/seasonal-reminders" 
+      <Route
+        path="/admin/seasonal-reminders"
         element={
           <AdminProtectedRoute>
             <ManageSeasonalReminders />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/contact-messages" 
+      <Route
+        path="/admin/contact-messages"
         element={
           <AdminProtectedRoute>
             <ManageContactMessages />
           </AdminProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/admin/garden-entries" 
+      <Route
+        path="/admin/garden-entries"
         element={
           <AdminProtectedRoute>
             <ManageGardenEntries />
           </AdminProtectedRoute>
-        } 
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <AdminProtectedRoute>
+            <AdminSettingsPage />
+          </AdminProtectedRoute>
+        }
       />
     </Routes>
   )
 }
-
 export default App

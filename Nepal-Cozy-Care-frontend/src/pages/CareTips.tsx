@@ -18,47 +18,36 @@ import Layout from "../components/layout/Layout";
 import TipsGrid from "../components/care-tips/TipsGrid";
 import type { CareTip, CareTipResponse } from "../types/careTip";
 import "../styles/careTips.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 export default function CareTips() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialSearch = searchParams.get("search") || "";
   const initialCategory = searchParams.get("category") || "";
   const initialPage = Number(searchParams.get("page") || "1");
-
   const [careTips, setCareTips] = useState<CareTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [lastPage, setLastPage] = useState(1);
-
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [appliedSearchQuery, setAppliedSearchQuery] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-
   useEffect(() => {
     void fetchCareTips();
   }, [selectedCategory, currentPage, appliedSearchQuery]);
-
   useEffect(() => {
     const params = new URLSearchParams();
-
     if (appliedSearchQuery.trim()) {
       params.set("search", appliedSearchQuery.trim());
     }
-
     if (selectedCategory) {
       params.set("category", selectedCategory);
     }
-
     if (currentPage > 1) {
       params.set("page", String(currentPage));
     }
-
     setSearchParams(params, { replace: true });
   }, [appliedSearchQuery, selectedCategory, currentPage, setSearchParams]);
-
   const fetchCareTips = async () => {
     setLoading(true);
     try {
@@ -66,7 +55,6 @@ export default function CareTips() {
       if (appliedSearchQuery) params.append("search", appliedSearchQuery);
       if (selectedCategory) params.append("category", selectedCategory);
       params.append("page", currentPage.toString());
-
       const response = await fetch(`${API}/api/care-tips?${params.toString()}`);
       if (response.ok) {
         const data: CareTipResponse = await response.json();
@@ -80,7 +68,6 @@ export default function CareTips() {
       setLoading(false);
     }
   };
-
   const clearFilters = () => {
     setSearchQuery("");
     setAppliedSearchQuery("");
@@ -88,18 +75,15 @@ export default function CareTips() {
     setCurrentPage(1);
     setSearchParams({});
   };
-
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setCurrentPage(1);
     setAppliedSearchQuery(searchQuery.trim());
   };
-
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
   };
-
   const getSeasonalAdvice = () => {
     const currentMonth = new Date().getMonth();
     if (currentMonth >= 2 && currentMonth <= 4) {
@@ -126,7 +110,6 @@ export default function CareTips() {
       }[selectedCategory] || "Filtered Topic"
     : "All Topics";
   const pageViews = careTips.reduce((total, tip) => total + tip.views_count, 0);
-
   return (
     <Layout>
       <div className="care-tips-page">
@@ -144,7 +127,6 @@ export default function CareTips() {
                   Learn watering, pest control, indoor light, and seasonal care through
                   cleaner, easier-to-read guides made for everyday plant owners.
                 </p>
-
                 <form className="ct-hero-search-form" onSubmit={handleSearchSubmit}>
                   <label className="ct-hero-search-input">
                     <Search size={18} />
@@ -159,7 +141,6 @@ export default function CareTips() {
                     Explore Tips
                   </button>
                 </form>
-
                 <div className="ct-hero-library-stats">
                   <div className="ct-hero-library-pill">
                     <BookOpenText size={16} />
@@ -175,7 +156,6 @@ export default function CareTips() {
                   </div>
                 </div>
               </div>
-
               <div className="ct-hero-spotlight">
                 <span className="ct-hero-spotlight-label">Featured Guide</span>
                 <h2>{featuredTip?.title || "Build a plant care routine that actually sticks."}</h2>
@@ -205,7 +185,6 @@ export default function CareTips() {
             </div>
           </div>
         </div>
-
         <div className="care-tips-container ct-ecosystem-body">
           <section className="ct-hospital-banner">
             <div className="ct-hospital-visual">
@@ -219,7 +198,6 @@ export default function CareTips() {
               Open Health Checker <ArrowRight size={18} />
             </button>
           </section>
-
           <div className="ct-grid-layout">
             <aside className="ct-sidebar">
               <div className="ct-seasonal-widget">
@@ -230,7 +208,6 @@ export default function CareTips() {
                 <h4>{seasonal.title}</h4>
                 <p>{seasonal.desc}</p>
               </div>
-
               <div className="ct-quick-categories">
                 <h3>Care Categories</h3>
                 <button
@@ -265,7 +242,6 @@ export default function CareTips() {
                 </button>
               </div>
             </aside>
-
             <main className="ct-main-content">
               <section className="ct-library-bar">
                 <div className="ct-library-bar-copy">

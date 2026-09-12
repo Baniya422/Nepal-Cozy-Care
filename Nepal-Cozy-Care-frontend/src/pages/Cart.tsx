@@ -6,9 +6,7 @@ import CartSummary from "../components/cart/CartSummary";
 import EmptyCart from "../components/cart/EmptyCart";
 import RecommendedProducts from "../components/cart/RecommendedProducts";
 import "../styles/cart.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type CartItem = {
   id: number;
   plant_id: number;
@@ -20,23 +18,19 @@ type CartItem = {
     image?: string;
   };
 };
-
 type RecommendedPlant = {
   id: number;
   name: string;
   price: number;
   image?: string;
 };
-
 export default function Cart() {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [recommendedPlants, setRecommendedPlants] = useState<RecommendedPlant[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
-
   const token = localStorage.getItem("token");
-
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -45,7 +39,6 @@ export default function Cart() {
     fetchCart();
     fetchRecommendedPlants();
   }, [token, navigate]);
-
   const fetchCart = async () => {
     try {
       const response = await fetch(`${API}/api/cart`, {
@@ -53,7 +46,6 @@ export default function Cart() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.ok) {
         const data = await response.json();
         setCartItems(data.data?.cart || []);
@@ -66,7 +58,6 @@ export default function Cart() {
       setLoading(false);
     }
   };
-
   const fetchRecommendedPlants = async () => {
     try {
       const response = await fetch(`${API}/api/plants?limit=5`);
@@ -79,11 +70,9 @@ export default function Cart() {
       console.error("Error fetching recommended plants:", error);
     }
   };
-
   const updateQuantity = async (itemId: number, newQuantity: number) => {
     if (newQuantity < 1) return;
     setUpdating(itemId);
-
     try {
       const response = await fetch(`${API}/api/cart/${itemId}`, {
         method: "PUT",
@@ -93,7 +82,6 @@ export default function Cart() {
         },
         body: JSON.stringify({ quantity: newQuantity }),
       });
-
       if (response.ok) {
         setCartItems((prev) =>
           prev.map((item) =>
@@ -108,7 +96,6 @@ export default function Cart() {
       setUpdating(null);
     }
   };
-
   const removeItem = async (itemId: number) => {
     try {
       const response = await fetch(`${API}/api/cart/${itemId}`, {
@@ -117,7 +104,6 @@ export default function Cart() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.ok) {
         setCartItems((prev) => prev.filter((item) => item.id !== itemId));
         window.dispatchEvent(new Event("cozycare:cart-updated"));
@@ -126,7 +112,6 @@ export default function Cart() {
       console.error("Error removing item:", error);
     }
   };
-
   const addToCart = async (plantId: number) => {
     try {
       const response = await fetch(`${API}/api/cart`, {
@@ -137,7 +122,6 @@ export default function Cart() {
         },
         body: JSON.stringify({ plant_id: plantId, quantity: 1 }),
       });
-
       if (response.ok) {
         fetchCart();
         window.dispatchEvent(new Event("cozycare:cart-updated"));
@@ -146,15 +130,12 @@ export default function Cart() {
       console.error("Error adding to cart:", error);
     }
   };
-
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => sum + item.plant.price * item.quantity, 0);
   };
-
   const subtotal = calculateSubtotal();
   const vat = subtotal * 0.1;
   const total = subtotal + vat;
-
   if (loading) {
     return (
       <Layout>
@@ -164,13 +145,11 @@ export default function Cart() {
       </Layout>
     );
   }
-
   return (
     <Layout>
       <div className="cart-page">
         <div className="cart-container">
           <h1 className="cart-title">Your Cart</h1>
-
           {cartItems.length === 0 ? (
             <EmptyCart />
           ) : (
@@ -190,7 +169,6 @@ export default function Cart() {
               </div>
             </>
           )}
-
           <RecommendedProducts
             recommendedPlants={recommendedPlants}
             addToCart={addToCart}

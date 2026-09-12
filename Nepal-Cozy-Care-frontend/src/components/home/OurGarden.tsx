@@ -1,31 +1,23 @@
 import { useNavigate } from "react-router-dom";
-
-// Our greenhouse in Kathmandu
-const GARDEN_IMAGE = "/images/about-plants.jpg";
-
-export default function OurGarden() {
+import { resolveHomepageImage, type InfoSectionContent } from "../../features/homepage/content";
+const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+export default function OurGarden({ content }: { content: InfoSectionContent }) {
   const navigate = useNavigate();
-
   return (
     <section className="info-section info-section-blue">
       <div className="info-content">
         <div className="info-text">
-          <h2 className="info-title">Visit Our Greenhouse</h2>
-          <p className="info-description">
-            Step into our lush greenhouse in Kathmandu where we nurture over 200 varieties 
-            of plants. From rare succulents to flowering beauties, each plant gets 
-            personalized care before finding its forever home with you.
-          </p>
-          <button className="info-btn" onClick={() => navigate("/care-tips")}>
-            Plant Care Tips
+          <h2 className="info-title">{content.title}</h2>
+          <p className="info-description">{content.description}</p>
+          <button className="info-btn" onClick={() => navigate(content.button_path)}>
+            {content.button_label}
           </button>
         </div>
         <div className="info-image">
           <img
-            src={GARDEN_IMAGE}
-            alt="Our greenhouse in Kathmandu"
+            src={resolveHomepageImage(content.image, API)}
+            alt={content.image_alt}
             onError={(e) => {
-              // Hide if image not found
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />

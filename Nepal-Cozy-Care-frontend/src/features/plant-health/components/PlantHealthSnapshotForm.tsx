@@ -5,7 +5,6 @@ import {
   seasonOptions,
   soilOptions,
 } from "../data";
-
 type PlantHealthSnapshotFormProps = {
   plantType: string;
   environment: string;
@@ -16,7 +15,6 @@ type PlantHealthSnapshotFormProps = {
   onSeasonChange: (value: string) => void;
   onSoilStateChange: (value: string) => void;
 };
-
 export default function PlantHealthSnapshotForm({
   plantType,
   environment,
@@ -33,7 +31,6 @@ export default function PlantHealthSnapshotForm({
         <h2>Plant Snapshot</h2>
         <p>Give a little context first so the diagnosis can be more realistic.</p>
       </div>
-
       <div className="plant-health-profile-grid">
         <label className="plant-health-profile-field">
           <span>
@@ -48,7 +45,6 @@ export default function PlantHealthSnapshotForm({
             ))}
           </select>
         </label>
-
         <label className="plant-health-profile-field">
           <span>
             <Home size={16} />
@@ -65,7 +61,6 @@ export default function PlantHealthSnapshotForm({
             ))}
           </select>
         </label>
-
         <label className="plant-health-profile-field">
           <span>
             <CalendarHeart size={16} />
@@ -79,7 +74,6 @@ export default function PlantHealthSnapshotForm({
             ))}
           </select>
         </label>
-
         <label className="plant-health-profile-field">
           <span>
             <Droplets size={16} />

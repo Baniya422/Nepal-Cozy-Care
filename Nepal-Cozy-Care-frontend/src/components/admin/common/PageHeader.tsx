@@ -1,5 +1,4 @@
 import { Plus, Search } from "lucide-react";
-
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
@@ -11,7 +10,6 @@ interface PageHeaderProps {
   showSearch?: boolean;
   showAddButton?: boolean;
 }
-
 export default function PageHeader({
   title,
   subtitle,

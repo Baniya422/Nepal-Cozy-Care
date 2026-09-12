@@ -16,9 +16,9 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     private const PASSWORD_RESET_CODE_LENGTH = 6;
+
     private const PASSWORD_RESET_TTL_MINUTES = 10;
 
-    // for user registration
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -26,7 +26,6 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
-
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -40,22 +39,18 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // for user login
     public function login(Request $request)
     {
         $validated = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
-
         $user = User::where('email', $validated['email'])->first();
-
         if (! $user || ! Hash::check($validated['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid email or password.'],
             ]);
         }
-
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -66,15 +61,12 @@ class AuthController extends Controller
         ]);
     }
 
-    // SEND PASSWORD RESET CODE
     public function forgotPassword(Request $request)
     {
         $validated = $request->validate([
             'email' => ['required', 'email'],
         ]);
-
         $user = User::where('email', $validated['email'])->first();
-
         if ($user) {
             $delivery = $this->sendPasswordResetCode($user);
 
@@ -92,7 +84,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // RESET PASSWORD USING 6-DIGIT CODE
     public function resetPassword(Request $request)
     {
         $validated = $request->validate([
@@ -100,40 +91,31 @@ class AuthController extends Controller
             'code' => ['required', 'digits:'.self::PASSWORD_RESET_CODE_LENGTH],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
-
         $user = User::where('email', $validated['email'])->first();
-
         if (! $user) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid reset request.'],
             ]);
         }
-
         $resetEntry = DB::table('password_reset_tokens')
             ->where('email', $validated['email'])
             ->first();
-
         $createdAt = $resetEntry?->created_at ? Carbon::parse($resetEntry->created_at) : null;
         $isExpired = ! $resetEntry
             || ! $createdAt
             || $createdAt->addMinutes(self::PASSWORD_RESET_TTL_MINUTES)->isPast();
-
         $isInvalid = ! $resetEntry || ! Hash::check($validated['code'], $resetEntry->token);
-
         if ($isExpired || $isInvalid) {
             throw ValidationException::withMessages([
                 'code' => ['Invalid or expired reset code. Please request a new one.'],
             ]);
         }
-
         $user->update([
             'password' => $validated['password'],
         ]);
-
         DB::table('password_reset_tokens')
             ->where('email', $validated['email'])
             ->delete();
-
         $user->tokens()->delete();
 
         return response()->json([
@@ -141,7 +123,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // for user logout
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -151,7 +132,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // LOGOUT ALL DEVICES
     public function logoutAll(Request $request)
     {
         $request->user()->tokens()->delete();
@@ -161,7 +141,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // CURRENT USER
     public function me(Request $request)
     {
         return response()->json([
@@ -169,11 +148,9 @@ class AuthController extends Controller
         ]);
     }
 
-    // UPDATE CURRENT USER PROFILE
     public function update(Request $request)
     {
         $user = $request->user();
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -183,7 +160,6 @@ class AuthController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
         ]);
-
         $user->update($validated);
 
         return response()->json([
@@ -192,26 +168,21 @@ class AuthController extends Controller
         ]);
     }
 
-    // UPDATE PASSWORD AND ROTATE TOKENS
     public function updatePassword(Request $request)
     {
         $user = $request->user();
-
         $validated = $request->validate([
             'current_password' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
-
         if (! Hash::check($validated['current_password'], $user->password)) {
             throw ValidationException::withMessages([
                 'current_password' => ['Current password is incorrect.'],
             ]);
         }
-
         $user->update([
             'password' => $validated['password'],
         ]);
-
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -225,7 +196,6 @@ class AuthController extends Controller
     private function sendPasswordResetCode(User $user): array
     {
         $code = $this->generateNumericCode(self::PASSWORD_RESET_CODE_LENGTH);
-
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
@@ -259,8 +229,7 @@ class AuthController extends Controller
         string $code,
         string $successMessage,
         string $previewMessage
-    ): array
-    {
+    ): array {
         try {
             $user->notify($notification);
 
@@ -276,7 +245,6 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'error' => $exception->getMessage(),
             ]);
-
             if (app()->environment('local')) {
                 return [
                     'message' => $previewMessage,
@@ -284,7 +252,6 @@ class AuthController extends Controller
                     'development_code' => $code,
                 ];
             }
-
             throw ValidationException::withMessages([
                 'email' => ['Email service is not configured correctly yet. Add valid Gmail SMTP credentials and try again.'],
             ]);

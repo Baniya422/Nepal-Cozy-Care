@@ -3,9 +3,7 @@ import Layout from "../components/layout/Layout";
 import FilterSidebar from "../components/plants/FilterSidebar";
 import ProductGrid from "../components/plants/ProductGrid";
 import "../styles/plants.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type Plant = {
   id: number;
   name: string;
@@ -18,7 +16,6 @@ type Plant = {
   difficulty?: string;
   is_active?: boolean;
 };
-
 export default function Plants() {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [filteredPlants, setFilteredPlants] = useState<Plant[]>([]);
@@ -27,55 +24,42 @@ export default function Plants() {
   const [searchTerm, setSearchTerm] = useState("");
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
   const [wishlistBusyId, setWishlistBusyId] = useState<number | null>(null);
-  
-  // Filter states
   const [selectedLightTypes, setSelectedLightTypes] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedPlantTypes, setSelectedPlantTypes] = useState<string[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
-
   useEffect(() => {
     fetchPlants();
     fetchWishlist();
   }, []);
-
   useEffect(() => {
     applyFilters();
   }, [plants, searchTerm, selectedLightTypes, selectedCategories, selectedSizes, selectedPlantTypes, selectedPriceRanges]);
-
   const fetchPlants = async () => {
     setError(null);
     try {
       const response = await fetch(`${API}/api/plants?per_page=100`);
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
       const data = await response.json();
       let plantsData = data.data?.plants || data.data?.data || [];
-      
-      // Convert price to number (backend sends it as string)
       plantsData = plantsData.map((plant: any) => ({
         ...plant,
         price: parseFloat(plant.price) || 0,
         avg_rating: parseFloat(plant.avg_rating) || 0,
       }));
-      
-      // Exclude pots, tools, soil, fertilizers, and accessories - those belong on Pots page
       plantsData = plantsData.filter((plant: any) => {
         const category = (plant.category || "").toLowerCase().trim();
-        return !category.includes("pot") && 
-               !category.includes("tool") && 
-               !category.includes("soil") && 
-               !category.includes("fertilizer") && 
+        return !category.includes("pot") &&
+               !category.includes("tool") &&
+               !category.includes("soil") &&
+               !category.includes("fertilizer") &&
                !category.includes("accessory");
       });
-      
       setPlants(plantsData);
       setFilteredPlants(plantsData);
-      
       if (plantsData.length === 0) {
         setError("No plants found in the database. Please add some plants from the admin panel.");
       }
@@ -85,14 +69,12 @@ export default function Plants() {
       setLoading(false);
     }
   };
-
   const fetchWishlist = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setWishlistIds([]);
       return;
     }
-
     try {
       const response = await fetch(`${API}/api/wishlist`, {
         headers: {
@@ -100,71 +82,54 @@ export default function Plants() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setWishlistIds([]);
         return;
       }
-
       if (!response.ok) {
         return;
       }
-
       const data = await response.json();
       const wishlistItems = data.data?.wishlist ?? [];
       const ids = wishlistItems
         .map((item: any) => item.plant?.id ?? item.plant_id)
         .filter((id: unknown): id is number => typeof id === "number");
-
       setWishlistIds(ids);
     } catch (error) {
       console.error("Error fetching wishlist:", error);
     }
   };
-
   const applyFilters = () => {
     let filtered = [...plants];
-
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(plant =>
         plant.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    // Light type filter
     if (selectedLightTypes.length > 0) {
       filtered = filtered.filter(plant =>
-        selectedLightTypes.some(type => 
+        selectedLightTypes.some(type =>
           plant.light?.toLowerCase().includes(type.toLowerCase())
         )
       );
     }
-
-    // Category filter
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(plant =>
         selectedCategories.includes(plant.category || "")
       );
     }
-
-    // Size filter
     if (selectedSizes.length > 0) {
       filtered = filtered.filter(plant =>
         selectedSizes.includes(plant.size || "")
       );
     }
-
-    // Plant type filter
     if (selectedPlantTypes.length > 0) {
       filtered = filtered.filter(plant =>
         selectedPlantTypes.includes(plant.category || "")
       );
     }
-
-    // Price filter
     if (selectedPriceRanges.length > 0) {
       filtered = filtered.filter(plant => {
         return selectedPriceRanges.some(range => {
@@ -176,10 +141,8 @@ export default function Plants() {
         });
       });
     }
-
     setFilteredPlants(filtered);
   };
-
   const toggleFilter = (filterArray: string[], setFilterArray: (val: string[]) => void, value: string) => {
     if (filterArray.includes(value)) {
       setFilterArray(filterArray.filter(item => item !== value));
@@ -187,18 +150,14 @@ export default function Plants() {
       setFilterArray([...filterArray, value]);
     }
   };
-
   const handleToggleWishlist = async (plantId: number) => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       alert("Please login to add items to your wishlist.");
       return;
     }
-
     const isWishlisted = wishlistIds.includes(plantId);
     setWishlistBusyId(plantId);
-
     try {
       const response = await fetch(
         `${API}/api/wishlist${isWishlisted ? `/${plantId}` : ""}`,
@@ -212,9 +171,7 @@ export default function Plants() {
           body: isWishlisted ? undefined : JSON.stringify({ plant_id: plantId }),
         }
       );
-
       const data = await response.json().catch(() => ({}));
-
       if (response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -222,12 +179,10 @@ export default function Plants() {
         alert("Your session expired. Please login again.");
         return;
       }
-
       if (!response.ok) {
         alert(data.message || "Could not update wishlist.");
         return;
       }
-
       setWishlistIds((current) =>
         isWishlisted
           ? current.filter((id) => id !== plantId)
@@ -240,7 +195,6 @@ export default function Plants() {
       setWishlistBusyId(null);
     }
   };
-
   return (
     <Layout>
       <div className="plants-page">
@@ -259,7 +213,6 @@ export default function Plants() {
           setSelectedPlantTypes={setSelectedPlantTypes}
           setSelectedPriceRanges={setSelectedPriceRanges}
         />
-
         <main className="plants-main">
           <div className="plants-header">
             <h1 className="plants-page-title">Plants</h1>
@@ -267,10 +220,9 @@ export default function Plants() {
               {loading ? "Loading..." : `${filteredPlants.length} products found`}
             </p>
           </div>
-
-          <ProductGrid 
-            plants={filteredPlants} 
-            loading={loading} 
+          <ProductGrid
+            plants={filteredPlants}
+            loading={loading}
             error={error}
             fetchPlants={fetchPlants}
             wishlistIds={wishlistIds}

@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, X } from "lucide-react";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type CartItem = {
   id: number;
   plant_id: number;
@@ -14,14 +12,12 @@ type CartItem = {
     image?: string;
   };
 };
-
 interface CartItemsProps {
   cartItems: CartItem[];
   updating: number | null;
   updateQuantity: (itemId: number, newQuantity: number) => void;
   removeItem: (itemId: number) => void;
 }
-
 export default function CartItems({ cartItems, updating, updateQuantity, removeItem }: CartItemsProps) {
   return (
     <div className="cart-items-section">
@@ -31,7 +27,6 @@ export default function CartItems({ cartItems, updating, updateQuantity, removeI
         <span className="cart-header-quantity">Quantity</span>
         <span className="cart-header-total">Total</span>
       </div>
-
       <div className="cart-items-list">
         {cartItems.map((item) => (
           <div key={item.id} className="cart-item">
@@ -56,11 +51,9 @@ export default function CartItems({ cartItems, updating, updateQuantity, removeI
                 </button>
               </div>
             </div>
-
             <div className="cart-item-price">
               Rs {Number(item.plant.price).toFixed(2)}
             </div>
-
             <div className="cart-item-quantity">
               <button
                 className="cart-qty-btn"
@@ -78,14 +71,12 @@ export default function CartItems({ cartItems, updating, updateQuantity, removeI
                 <Plus size={14} />
               </button>
             </div>
-
             <div className="cart-item-total">
               Rs {(item.plant.price * item.quantity).toFixed(2)}
             </div>
           </div>
         ))}
       </div>
-
       <Link to="/plants" className="cart-continue-link">
         ← Continue Shopping
       </Link>

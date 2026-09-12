@@ -1,5 +1,4 @@
 import { Search } from "lucide-react";
-
 interface FilterSidebarProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
@@ -15,7 +14,6 @@ interface FilterSidebarProps {
   setSelectedPlantTypes: (val: string[]) => void;
   setSelectedPriceRanges: (val: string[]) => void;
 }
-
 export default function FilterSidebar({
   searchTerm,
   setSearchTerm,
@@ -35,8 +33,7 @@ export default function FilterSidebar({
     <aside className="plants-sidebar">
       <div className="plants-filter-section">
         <h3 className="plants-filter-title">Filter :</h3>
-        
-        {/* Search */}
+        {}
         <div className="plants-search-box">
           <Search size={18} />
           <input
@@ -48,8 +45,7 @@ export default function FilterSidebar({
           />
         </div>
       </div>
-
-      {/* Plant Light Requirements */}
+      {}
       <div className="plants-filter-section">
         <h4 className="plants-filter-subtitle">Light Requirements</h4>
         <div className="plants-filter-options">
@@ -65,8 +61,7 @@ export default function FilterSidebar({
           ))}
         </div>
       </div>
-
-      {/* Category */}
+      {}
       <div className="plants-filter-section">
         <h4 className="plants-filter-subtitle">Category</h4>
         <div className="plants-filter-options">
@@ -82,8 +77,7 @@ export default function FilterSidebar({
           ))}
         </div>
       </div>
-
-      {/* Size */}
+      {}
       <div className="plants-filter-section">
         <h4 className="plants-filter-subtitle">Size</h4>
         <div className="plants-filter-options">
@@ -99,8 +93,7 @@ export default function FilterSidebar({
           ))}
         </div>
       </div>
-
-      {/* Plant Type */}
+      {}
       <div className="plants-filter-section">
         <h4 className="plants-filter-subtitle">Plant Type</h4>
         <div className="plants-filter-options">
@@ -116,8 +109,7 @@ export default function FilterSidebar({
           ))}
         </div>
       </div>
-
-      {/* Price */}
+      {}
       <div className="plants-filter-section">
         <h4 className="plants-filter-subtitle">Price</h4>
         <div className="plants-filter-options">

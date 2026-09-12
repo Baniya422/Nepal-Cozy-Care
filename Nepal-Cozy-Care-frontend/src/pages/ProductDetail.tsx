@@ -7,9 +7,7 @@ import ProductInfo from '../components/product-detail/ProductInfo';
 import InfoSections from '../components/product-detail/InfoSections';
 import WhyChooseUs from '../components/product-detail/WhyChooseUs';
 import '../styles/productDetail.css';
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface Plant {
   id: number;
   name: string;
@@ -31,18 +29,15 @@ interface Plant {
   avg_rating?: number;
   review_count?: number;
 }
-
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [plant, setPlant] = useState<Plant | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-
   useEffect(() => {
     fetchPlant();
   }, [id]);
-
   const fetchPlant = async () => {
     try {
       const response = await fetch(`${API}/api/plants/${id}`);
@@ -59,17 +54,14 @@ export function ProductDetail() {
       setLoading(false);
     }
   };
-
   const handleAddToCart = async () => {
     if (!plant) return false;
-
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Please login to add items to cart.");
       navigate('/login');
       return false;
     }
-
     try {
       const response = await fetch(`${API}/api/cart`, {
         method: 'POST',
@@ -79,14 +71,11 @@ export function ProductDetail() {
         },
         body: JSON.stringify({ plant_id: plant.id, quantity }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         alert(data.message || 'Failed to add item to cart.');
         return false;
       }
-
       window.dispatchEvent(new Event("cozycare:cart-updated"));
       alert(`Added ${quantity} ${plant.name} to cart!`);
       return true;
@@ -96,14 +85,12 @@ export function ProductDetail() {
       return false;
     }
   };
-
   const handleBuyNow = async () => {
     const added = await handleAddToCart();
     if (added) {
       navigate('/cart');
     }
   };
-
   if (loading) {
     return (
       <Layout>
@@ -118,7 +105,6 @@ export function ProductDetail() {
       </Layout>
     );
   }
-
   if (!plant) {
     return (
       <Layout>
@@ -135,13 +121,11 @@ export function ProductDetail() {
       </Layout>
     );
   }
-
   return (
     <Layout>
       <div className="product-page">
         <div className="product-container">
           <Breadcrumb productName={plant.name} />
-
           <div className="product-main">
             <ProductImage image={plant.image} name={plant.name} />
             <ProductInfo
@@ -154,7 +138,6 @@ export function ProductDetail() {
               onBuyNow={handleBuyNow}
             />
           </div>
-
           <InfoSections plant={plant} />
           <WhyChooseUs />
         </div>

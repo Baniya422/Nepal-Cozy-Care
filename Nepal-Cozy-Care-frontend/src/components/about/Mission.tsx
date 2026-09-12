@@ -1,18 +1,14 @@
 import { Leaf, Globe } from "lucide-react";
 import PageSection from "../layout/PageSection";
 import { aboutPageTemplate } from "../../features/content/aboutTemplate";
-
 const missionIconMap = {
   Leaf,
   Globe,
 } as const;
-
 const getMissionIcon = (icon?: string) =>
   missionIconMap[icon as keyof typeof missionIconMap] ?? Leaf;
-
 export default function Mission() {
   const mission = aboutPageTemplate.mission;
-
   return (
     <PageSection background="cream" padding="large">
       <div className="section-header">
@@ -22,7 +18,6 @@ export default function Mission() {
       <div className="about-mission-grid">
         {mission.cards.map((card) => {
           const Icon = getMissionIcon(card.icon);
-
           return (
             <div className="about-mission-card" key={card.title}>
               <div className="about-mission-icon">

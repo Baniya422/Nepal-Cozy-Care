@@ -23,7 +23,6 @@ return new class extends Migration
             $table->json('healthy_plant_habits');
             $table->timestamps();
         });
-
         DB::table('plant_health_templates')->insert([
             'name' => 'Starter Plant Health Template',
             'is_active' => true,

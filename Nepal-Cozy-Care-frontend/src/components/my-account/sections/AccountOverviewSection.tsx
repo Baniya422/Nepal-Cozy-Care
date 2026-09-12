@@ -4,7 +4,6 @@ import type {
   AccountSection,
   AddressEntry,
 } from "../types";
-
 type AccountOverviewSectionProps = {
   totalOrders: number;
   activeDeliveries: number;
@@ -20,7 +19,6 @@ type AccountOverviewSectionProps = {
   getOrderStatusTone: (status: string) => string;
   getOrderStatusLabel: (status: string) => string;
 };
-
 export default function AccountOverviewSection({
   totalOrders,
   activeDeliveries,
@@ -60,7 +58,6 @@ export default function AccountOverviewSection({
           <p>Based on your current care reminder preference.</p>
         </article>
       </div>
-
       <div className="account-quick-grid">
         <button
           type="button"
@@ -73,7 +70,6 @@ export default function AccountOverviewSection({
           </div>
           <ChevronRight size={18} />
         </button>
-
         <button
           type="button"
           className="account-quick-card"
@@ -85,7 +81,6 @@ export default function AccountOverviewSection({
           </div>
           <ChevronRight size={18} />
         </button>
-
         <button
           type="button"
           className="account-quick-card"
@@ -97,7 +92,6 @@ export default function AccountOverviewSection({
           </div>
           <ChevronRight size={18} />
         </button>
-
         <button type="button" className="account-quick-card" onClick={() => onOpenTrackOrder()}>
           <div>
             <h3>Track an Order</h3>
@@ -106,7 +100,6 @@ export default function AccountOverviewSection({
           <ExternalLink size={18} />
         </button>
       </div>
-
       <div className="account-overview-grid">
         <section className="account-card">
           <div className="account-card-head">
@@ -119,7 +112,6 @@ export default function AccountOverviewSection({
               View all
             </button>
           </div>
-
           {orders.length === 0 ? (
             <div className="account-empty-state">
               <ShoppingBag size={24} />
@@ -159,7 +151,6 @@ export default function AccountOverviewSection({
             </div>
           )}
         </section>
-
         <section className="account-card">
           <div className="account-card-head">
             <h3>Default Delivery Address</h3>
@@ -171,7 +162,6 @@ export default function AccountOverviewSection({
               Manage
             </button>
           </div>
-
           {defaultAddress ? (
             <div className="account-address-preview">
               <strong>{defaultAddress.label}</strong>

@@ -1,5 +1,4 @@
 import { ScanSearch, Sparkles } from "lucide-react";
-
 export default function PlantHealthHero() {
   return (
     <section className="plant-health-hero">
@@ -15,14 +14,12 @@ export default function PlantHealthHero() {
               Diagnose plant problems with symptom selection plus room, season, and soil
               context so the result feels more like a guided care assistant.
             </p>
-
             <div className="plant-health-hero-highlights">
               <span>Multi-symptom analysis</span>
               <span>Season-aware suggestions</span>
               <span>Care tips + next actions</span>
             </div>
           </div>
-
           <aside className="plant-health-hero-card">
             <h2 className="plant-health-hero-card-title">
               <ScanSearch size={20} />

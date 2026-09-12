@@ -1,11 +1,9 @@
 import { categoryFilterOptions } from "../data";
 import type { CategoryFilter } from "../types";
-
 type CatalogCategoryChipsProps = {
   category: CategoryFilter;
   onChange: (value: CategoryFilter) => void;
 };
-
 export default function CatalogCategoryChips({
   category,
   onChange,

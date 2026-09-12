@@ -1,8 +1,7 @@
 import { useState } from "react";
-
+import type { ContactPageContent } from "../../features/page-content/templates";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-export default function ContactForm() {
+export default function ContactForm({ content }: { content: ContactPageContent["form"] }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,20 +15,17 @@ export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
     setFeedbackMessage("");
-
     try {
       const response = await fetch(`${API}/api/contact`, {
         method: "POST",
@@ -38,9 +34,7 @@ export default function ContactForm() {
         },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (response.ok) {
         setSubmitStatus("success");
         setFeedbackMessage(data.message || "Thank you! Your message has been sent.");
@@ -66,25 +60,20 @@ export default function ContactForm() {
       setIsSubmitting(false);
     }
   };
-
   return (
     <div className="contact-form-wrapper">
       <form onSubmit={handleSubmit} className="contact-form">
         <div className="contact-form-head">
-          <h2>Send a support request</h2>
-          <p>
-            Choose the topic and how you want us to contact you back. For order issues, add the
-            order number if you have it.
-          </p>
+          <h2>{content.title}</h2>
+          <p>{content.description}</p>
         </div>
-
         <div className="contact-form-row">
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Your name*"
+            placeholder={content.name_placeholder}
             className="contact-input"
             required
           />
@@ -93,12 +82,11 @@ export default function ContactForm() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email*"
+            placeholder={content.email_placeholder}
             className="contact-input"
             required
           />
         </div>
-
         <div className="contact-form-row">
           <select
             name="subject"
@@ -107,11 +95,7 @@ export default function ContactForm() {
             className="contact-input"
             required
           >
-            <option value="general_inquiry">General Inquiry</option>
-            <option value="order_support">Order Support</option>
-            <option value="delivery_help">Delivery Help</option>
-            <option value="plant_care">Plant Care</option>
-            <option value="bulk_order">Bulk Order</option>
+            {content.subject_options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
           </select>
           <select
             name="preferred_contact_method"
@@ -120,19 +104,16 @@ export default function ContactForm() {
             className="contact-input"
             required
           >
-            <option value="phone">Call Me</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="email">Email</option>
+            {content.contact_method_options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
           </select>
         </div>
-
         <div className="contact-form-row">
           <input
             type="text"
             name="order_reference"
             value={formData.order_reference}
             onChange={handleChange}
-            placeholder="Order Number (optional)"
+            placeholder={content.order_placeholder}
             className="contact-input"
           />
           <input
@@ -140,41 +121,37 @@ export default function ContactForm() {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="Phone Number*"
+            placeholder={content.phone_placeholder}
             className="contact-input"
             required
           />
         </div>
-
         <input
           type="text"
           name="city"
           value={formData.city}
           onChange={handleChange}
-          placeholder="City / Delivery Area*"
+          placeholder={content.city_placeholder}
           className="contact-input"
           required
         />
-
         <textarea
           name="message"
           value={formData.message}
           onChange={handleChange}
-          placeholder="Tell us what you need help with. If this is a delivery issue, include landmarks or location clarification."
+          placeholder={content.message_placeholder}
           className="contact-textarea"
           rows={5}
           required
         />
-
         <div className="contact-form-footer">
           <p className="contact-form-note">
-            Admin will use your preferred contact method to reply or confirm order details.
+            {content.note}
           </p>
           <button type="submit" className="contact-submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? "Sending..." : "Send Support Request"}
+            {isSubmitting ? content.submitting_label : content.button_label}
           </button>
         </div>
-
         {submitStatus === "success" && (
           <p className="contact-status success">{feedbackMessage}</p>
         )}

@@ -10,7 +10,6 @@ import {
   getSymptomName,
   titleCase,
 } from "./utils";
-
 const templateFixture: PlantHealthTemplatePayload = {
   symptom_categories: [
     {
@@ -99,41 +98,33 @@ const templateFixture: PlantHealthTemplatePayload = {
   },
   healthy_plant_habits: [],
 };
-
 describe("plant-health/utils", () => {
   beforeEach(() => {
     applyPlantHealthTemplate(templateFixture);
   });
-
   it("formats snake_case strings and unknown ids", () => {
     expect(titleCase("yellow_leaves")).toBe("Yellow Leaves");
     expect(getSymptomName("yellow_leaves")).toBe("Yellowing Leaves");
     expect(getSymptomName("root_rot_warning")).toBe("Root Rot Warning");
   });
-
   it("returns option labels with title-case fallback", () => {
     const items = [{ id: "living_room", label: "Living Room" }];
-
     expect(getOptionLabel(items, "living_room")).toBe("Living Room");
     expect(getOptionLabel(items, "bright_balcony")).toBe("Bright Balcony");
   });
-
   it("maps severity to action windows and CSS color tokens", () => {
     expect(getActionWindow("high")).toBe("Take action today");
     expect(getActionWindow("medium")).toBe("Adjust care within 24-48 hours");
     expect(getActionWindow("low")).toBe("Monitor and improve routine");
-
     expect(getSeverityColor("high")).toBe("severity-high");
     expect(getSeverityColor("medium")).toBe("severity-medium");
     expect(getSeverityColor("low")).toBe("severity-low");
   });
-
   it("calculates progress and caps at 100", () => {
     expect(getProgressValue([], "unknown")).toBe(18);
     expect(getProgressValue(["yellow_leaves", "drooping"], "wet")).toBe(54);
     expect(getProgressValue(new Array(10).fill("symptom"), "dry")).toBe(100);
   });
-
   it("scores diagnoses and returns primary plus relevant alternatives", () => {
     const analysis = analyzePlantHealth({
       selectedSymptoms: ["yellow_leaves", "drooping", "brown_spots"],
@@ -142,16 +133,13 @@ describe("plant-health/utils", () => {
       season: "monsoon",
       soilState: "wet",
     });
-
     expect(analysis.primary.id).toBe("overwatering");
     expect(analysis.primary.matchedSymptoms).toEqual(["yellow_leaves", "drooping"]);
     expect(analysis.primary.score).toBeGreaterThan(analysis.alternatives[0].score);
     expect(analysis.alternatives.map((item) => item.id)).toContain("leaf_spot");
   });
-
   it("keeps only the two closest alternatives above the score cutoff", () => {
     const diagnosisProfiles = templateFixture.diagnosis_profiles ?? [];
-
     applyPlantHealthTemplate({
       ...templateFixture,
       diagnosis_profiles: [
@@ -204,7 +192,6 @@ describe("plant-health/utils", () => {
         },
       ],
     });
-
     const analysis = analyzePlantHealth({
       selectedSymptoms: ["yellow_leaves", "drooping", "brown_spots"],
       plantType: "indoor",
@@ -212,7 +199,6 @@ describe("plant-health/utils", () => {
       season: "monsoon",
       soilState: "wet",
     });
-
     expect(analysis.primary.id).toBe("overwatering");
     expect(analysis.alternatives).toHaveLength(2);
     expect(analysis.alternatives.map((item) => item.id)).toEqual([
@@ -220,7 +206,6 @@ describe("plant-health/utils", () => {
       "light_deficit",
     ]);
   });
-
   it("falls back to default diagnosis when no profile receives a score", () => {
     const analysis = analyzePlantHealth({
       selectedSymptoms: ["mystery_signal"],
@@ -229,7 +214,6 @@ describe("plant-health/utils", () => {
       season: "winter",
       soilState: "unknown",
     });
-
     expect(analysis.primary.id).toBe("fallback");
     expect(analysis.primary.score).toBe(1);
     expect(analysis.primary.confidence).toBe(45);

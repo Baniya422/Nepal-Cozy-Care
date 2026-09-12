@@ -1,5 +1,4 @@
 import { healthyPlantHabits } from "../data";
-
 export default function PlantHealthTips() {
   return (
     <section className="plant-health-tips">
@@ -8,7 +7,6 @@ export default function PlantHealthTips() {
         <div className="plant-health-tips-grid">
           {healthyPlantHabits.map((habit) => {
             const HabitIcon = habit.icon;
-
             return (
               <div key={habit.title} className="plant-health-tip-card">
                 <div className="plant-health-tip-icon">

@@ -1,13 +1,11 @@
 import PlantFinderPlantCard from "./PlantFinderPlantCard";
 import type { Plant } from "../types";
-
 type PlantFinderResultsProps = {
   apiBaseUrl: string;
   recommendedPlants: Plant[];
   morePlants: Plant[];
   onPlantClick: (id: number) => void;
 };
-
 export default function PlantFinderResults({
   apiBaseUrl,
   recommendedPlants,
@@ -43,7 +41,6 @@ export default function PlantFinderResults({
           </p>
         )}
       </section>
-
       {morePlants.length > 0 ? (
         <section className="plantfinder-more">
           <h2 className="plantfinder-more-title">

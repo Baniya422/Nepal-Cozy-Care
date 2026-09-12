@@ -2,7 +2,6 @@ import type { FormEvent } from "react";
 import { LogOut, Shield } from "lucide-react";
 import AccountNotice from "../AccountNotice";
 import type { Notice, PasswordForm } from "../types";
-
 type AccountSecuritySectionProps = {
   notice: Notice | null;
   passwordForm: PasswordForm;
@@ -13,7 +12,6 @@ type AccountSecuritySectionProps = {
   onLogoutThisDevice: () => void;
   onLogoutAllDevices: () => void;
 };
-
 export default function AccountSecuritySection({
   notice,
   passwordForm,
@@ -27,20 +25,17 @@ export default function AccountSecuritySection({
   return (
     <div className="account-section-stack">
       <AccountNotice notice={notice} />
-
       <div className="account-security-grid">
         <section className="account-card">
           <div className="account-card-head">
             <h3>Password</h3>
           </div>
-
           <div className="account-security-summary">
             <p>
               Last updated: <strong>{passwordChangedLabel}</strong>
             </p>
             <p>Updating your password signs out other devices and keeps this one active.</p>
           </div>
-
           <form className="account-form" onSubmit={onSubmit}>
             <label className="account-form-field">
               <span>Current password</span>
@@ -51,7 +46,6 @@ export default function AccountSecuritySection({
                 placeholder="Enter current password"
               />
             </label>
-
             <label className="account-form-field">
               <span>New password</span>
               <input
@@ -61,7 +55,6 @@ export default function AccountSecuritySection({
                 placeholder="Minimum 6 characters"
               />
             </label>
-
             <label className="account-form-field">
               <span>Confirm new password</span>
               <input
@@ -71,7 +64,6 @@ export default function AccountSecuritySection({
                 placeholder="Repeat new password"
               />
             </label>
-
             <div className="account-form-actions">
               <button type="submit" className="account-primary-btn" disabled={passwordSaving}>
                 {passwordSaving ? "Updating..." : "Update Password"}
@@ -79,12 +71,10 @@ export default function AccountSecuritySection({
             </div>
           </form>
         </section>
-
         <section className="account-card">
           <div className="account-card-head">
             <h3>Session Controls</h3>
           </div>
-
           <div className="account-session-actions">
             <button type="button" className="account-secondary-btn" onClick={onLogoutThisDevice}>
               <LogOut size={16} />
@@ -95,7 +85,6 @@ export default function AccountSecuritySection({
               Logout All Devices
             </button>
           </div>
-
           <p className="account-form-hint">
             Use logout all if you signed in on another laptop or shared browser and want to invalidate
             every active session.

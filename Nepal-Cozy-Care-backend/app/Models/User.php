@@ -7,6 +7,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * User model representing a database user account.
+ *
+ * @property int $id Unique identifier for this user
+ * @property string $name User's full name
+ * @property string $email User's email address (unique)
+ * @property string $password Hashed password
+ * @property string $role Either 'customer' or 'admin'
+ * @property \Carbon\Carbon $created_at When the account was created
+ * @property \Carbon\Carbon $updated_at When the account was last modified
+ * @property int $orders_count Cached count of user's orders (from withCount)
+ * @property int $tokens_count Cached count of active API tokens (from withCount)
+ * @property float $total_spent Cached sum of all order totals (from withSum)
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -20,7 +34,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // customer / admin
+        'role',
     ];
 
     /**

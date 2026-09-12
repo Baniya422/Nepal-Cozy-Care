@@ -1,12 +1,10 @@
 import { Leaf, Package, Truck } from "lucide-react";
-
 type AccountHeroProps = {
   userName?: string;
   onViewOrders: () => void;
   onOpenMyGarden: () => void;
   onOpenTrackOrder: () => void;
 };
-
 export default function AccountHero({
   userName,
   onViewOrders,
@@ -14,7 +12,6 @@ export default function AccountHero({
   onOpenTrackOrder,
 }: AccountHeroProps) {
   const firstName = userName?.split(" ")[0];
-
   return (
     <section className="account-hero">
       <div className="account-container account-hero-inner">
@@ -26,7 +23,6 @@ export default function AccountHero({
             addresses, and care preferences here.
           </p>
         </div>
-
         <div className="account-hero-actions">
           <button type="button" className="account-hero-btn primary" onClick={onViewOrders}>
             <Package size={16} />

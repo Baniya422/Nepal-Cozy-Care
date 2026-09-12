@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type Blog = {
   id: number;
   title: string;
@@ -10,26 +8,22 @@ type Blog = {
   author?: string;
   category?: string;
 };
-
 interface SidebarProps {
   topTrends: Blog[];
   topStories: Blog[];
   loading: boolean;
 }
-
 export default function Sidebar({ topTrends, topStories, loading }: SidebarProps) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setEmail("");
     alert("Thank you for subscribing!");
   };
-
   return (
     <aside className="blogs-sidebar">
-      {/* Top Trends */}
+      {}
       <div className="blogs-sidebar-section">
         <h3 className="blogs-sidebar-title">Top trends</h3>
         <div className="blogs-trends-list">
@@ -43,10 +37,10 @@ export default function Sidebar({ topTrends, topStories, loading }: SidebarProps
                 onClick={() => navigate(`/blogs/${blog.id}`)}
                 style={{ cursor: "pointer" }}
               >
-                <img 
-                  src={blog.image ? `${API}/storage/${blog.image}` : "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=100"} 
-                  alt={blog.title} 
-                  className="blogs-trend-image" 
+                <img
+                  src={blog.image ? `${API}/storage/${blog.image}` : "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=100"}
+                  alt={blog.title}
+                  className="blogs-trend-image"
                 />
                 <p className="blogs-trend-text">{blog.title}</p>
               </div>
@@ -56,8 +50,7 @@ export default function Sidebar({ topTrends, topStories, loading }: SidebarProps
           )}
         </div>
       </div>
-
-      {/* Top Stories */}
+      {}
       <div className="blogs-sidebar-section">
         <h3 className="blogs-sidebar-title">Top stories</h3>
         <div className="blogs-stories-list">
@@ -79,8 +72,7 @@ export default function Sidebar({ topTrends, topStories, loading }: SidebarProps
           )}
         </div>
       </div>
-
-      {/* Newsletter Signup */}
+      {}
       <div className="blogs-newsletter">
         <h3 className="blogs-newsletter-title">Daily Newsletter</h3>
         <p className="blogs-newsletter-text">Get all the latest news and tips delivered to your inbox</p>

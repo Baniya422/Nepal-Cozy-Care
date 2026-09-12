@@ -1,13 +1,19 @@
-export default function Hero() {
+import { useNavigate } from "react-router-dom";
+import { resolvePageImage, type ShippingPageContent } from "../../features/page-content/templates";
+export default function Hero({ content }: { content: ShippingPageContent["hero"] }) {
+  const navigate = useNavigate();
   return (
-    <section 
+    <section
       className="shipping-hero"
-      style={{ backgroundImage: `url('/images/shipping-hero.jpg')` }}
+      style={{ backgroundImage: `url('${resolvePageImage(content.background_image)}')` }}
     >
+      {}
       <div className="shipping-hero-overlay">
         <div className="shipping-hero-content">
-          <h1 className="shipping-hero-title">Welcome to<br />Delivery and<br />Shipping Services</h1>
-          <button className="shipping-hero-btn">Read more</button>
+          <h1 className="shipping-hero-title">
+            {content.title_lines.map((line, index) => <span key={`${line}-${index}`}>{line}{index < content.title_lines.length - 1 ? <br /> : null}</span>)}
+          </h1>
+          <button className="shipping-hero-btn" onClick={() => navigate(content.button_path)}>{content.button_label}</button>
         </div>
       </div>
     </section>

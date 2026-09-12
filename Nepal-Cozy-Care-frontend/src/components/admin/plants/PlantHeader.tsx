@@ -1,11 +1,9 @@
 import { Plus, Search } from "lucide-react";
-
 interface PlantHeaderProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   onAddNew: () => void;
 }
-
 export default function PlantHeader({ searchQuery, setSearchQuery, onAddNew }: PlantHeaderProps) {
   return (
     <div className="admin-page-header">

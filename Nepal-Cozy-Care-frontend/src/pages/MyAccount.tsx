@@ -30,14 +30,11 @@ import type {
 } from "../components/my-account/types";
 import Layout from "../components/layout/Layout";
 import "../styles/my-account.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 const PROFILE_KEY = "account.profile";
 const ADDRESSES_KEY = "account.addresses";
 const PREFERENCES_KEY = "account.preferences";
 const PASSWORD_CHANGED_KEY = "account.passwordChangedAt";
-
 function readStoredUser(): AccountUser | null {
   try {
     const raw = localStorage.getItem("user");
@@ -47,7 +44,6 @@ function readStoredUser(): AccountUser | null {
     return null;
   }
 }
-
 function readProfileExtras(): ProfileExtras {
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
@@ -60,7 +56,6 @@ function readProfileExtras(): ProfileExtras {
     return { phone: "" };
   }
 }
-
 function readAddresses(): AddressEntry[] {
   try {
     const raw = localStorage.getItem(ADDRESSES_KEY);
@@ -71,7 +66,6 @@ function readAddresses(): AddressEntry[] {
     return [];
   }
 }
-
 function readPreferences(): Preferences {
   try {
     const raw = localStorage.getItem(PREFERENCES_KEY);
@@ -82,7 +76,6 @@ function readPreferences(): Preferences {
         careReminderDays: 3,
       };
     }
-
     const parsed = JSON.parse(raw) as Partial<Preferences>;
     return {
       emailUpdates: parsed.emailUpdates ?? true,
@@ -97,24 +90,19 @@ function readPreferences(): Preferences {
     };
   }
 }
-
 function persistProfileExtras(nextProfile: ProfileExtras) {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(nextProfile));
 }
-
 function persistAddresses(nextAddresses: AddressEntry[]) {
   localStorage.setItem(ADDRESSES_KEY, JSON.stringify(nextAddresses));
 }
-
 function persistPreferences(nextPreferences: Preferences) {
   localStorage.setItem(PREFERENCES_KEY, JSON.stringify(nextPreferences));
 }
-
 type ErrorResponse = {
   message?: string;
   errors?: Record<string, string | string[]>;
 };
-
 function extractErrorMessage(data: unknown, fallback: string) {
   const payload: ErrorResponse =
     data && typeof data === "object" ? (data as ErrorResponse) : {};
@@ -124,34 +112,27 @@ function extractErrorMessage(data: unknown, fallback: string) {
   const firstValidationMessage = validationMessages.find(
     (message): message is string => typeof message === "string"
   );
-
   return payload.message || firstValidationMessage || fallback;
 }
-
 function buildImageUrl(image?: string | null) {
   return image ? `${API}/storage/${image}` : "/images/plant-placeholder.jpg";
 }
-
 function formatCurrency(amount?: number | null) {
   return `Rs. ${Number(amount ?? 0).toLocaleString("en-NP", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   })}`;
 }
-
 function formatDate(dateString?: string | null) {
   if (!dateString) return "Not available";
-
   return new Date(dateString).toLocaleDateString("en-NP", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 }
-
 function formatDateTime(dateString?: string | null) {
   if (!dateString) return "Not available";
-
   return new Date(dateString).toLocaleString("en-NP", {
     month: "short",
     day: "numeric",
@@ -160,7 +141,6 @@ function formatDateTime(dateString?: string | null) {
     minute: "2-digit",
   });
 }
-
 function getOrderStatusLabel(status: string) {
   switch (status) {
     case "out_for_delivery":
@@ -171,7 +151,6 @@ function getOrderStatusLabel(status: string) {
       return status.charAt(0).toUpperCase() + status.slice(1).replaceAll("_", " ");
   }
 }
-
 function getOrderStatusTone(status: string) {
   switch (status) {
     case "delivered":
@@ -186,18 +165,14 @@ function getOrderStatusTone(status: string) {
       return "pending";
   }
 }
-
 function deriveAddressesFromOrders(orders: AccountOrder[]) {
   const seen = new Set<string>();
   const derived: AddressEntry[] = [];
-
   for (const order of orders) {
     const address = order.shipping_address?.trim();
     if (!address) continue;
-
     const lookupKey = address.toLowerCase();
     if (seen.has(lookupKey)) continue;
-
     seen.add(lookupKey);
     derived.push({
       id: `order-${order.id}`,
@@ -207,15 +182,12 @@ function deriveAddressesFromOrders(orders: AccountOrder[]) {
       isDefault: derived.length === 0,
     });
   }
-
   return derived;
 }
-
 export default function MyAccount() {
   const navigate = useNavigate();
   const storedUser = readStoredUser();
   const storedProfileExtras = readProfileExtras();
-
   const [sessionToken, setSessionToken] = useState<string | null>(() =>
     localStorage.getItem("token")
   );
@@ -228,7 +200,6 @@ export default function MyAccount() {
   const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
   const [loadingAccount, setLoadingAccount] = useState(true);
   const [loadingNotice, setLoadingNotice] = useState<Notice | null>(null);
-
   const [profileForm, setProfileForm] = useState<ProfileForm>({
     name: storedUser?.name ?? "",
     email: storedUser?.email ?? "",
@@ -236,7 +207,6 @@ export default function MyAccount() {
   });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileNotice, setProfileNotice] = useState<Notice | null>(null);
-
   const [passwordForm, setPasswordForm] = useState<PasswordForm>({
     current_password: "",
     password: "",
@@ -247,7 +217,6 @@ export default function MyAccount() {
   const [passwordChangedAt, setPasswordChangedAt] = useState<string | null>(() =>
     localStorage.getItem(PASSWORD_CHANGED_KEY)
   );
-
   const [addressForm, setAddressForm] = useState<AddressForm>({
     label: "",
     address: "",
@@ -255,14 +224,11 @@ export default function MyAccount() {
   });
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [addressNotice, setAddressNotice] = useState<Notice | null>(null);
-
   const [preferencesNotice, setPreferencesNotice] = useState<Notice | null>(null);
   const [cancelingOrderId, setCancelingOrderId] = useState<number | null>(null);
   const [wishlistBusyPlantId, setWishlistBusyPlantId] = useState<number | null>(null);
-
   const selectedSection =
     accountSections.find((section) => section.key === activeSection) ?? accountSections[0];
-
   const totalOrders = orders.length;
   const activeDeliveries = orders.filter((order) =>
     ["packed", "shipped", "out_for_delivery"].includes(order.status)
@@ -273,7 +239,6 @@ export default function MyAccount() {
       ? "Tomorrow"
       : `In ${preferences.careReminderDays} days`;
   const defaultAddress = addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
-
   const clearLocalSession = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -282,39 +247,31 @@ export default function MyAccount() {
     setOrders([]);
     setWishlist([]);
   };
-
   useEffect(() => {
     if (!sessionToken) {
       setLoadingAccount(false);
       return;
     }
-
     let isActive = true;
-
     const loadAccount = async () => {
       setLoadingAccount(true);
       setLoadingNotice(null);
-
       try {
         const headers = {
           Accept: "application/json",
           Authorization: `Bearer ${sessionToken}`,
         };
-
         const [meResponse, ordersResponse, wishlistResponse] = await Promise.all([
           fetch(`${API}/api/me`, { headers }),
           fetch(`${API}/api/orders?per_page=8`, { headers }),
           fetch(`${API}/api/wishlist`, { headers }),
         ]);
-
         const [meData, ordersData, wishlistData] = await Promise.all([
           meResponse.json().catch(() => ({})),
           ordersResponse.json().catch(() => ({})),
           wishlistResponse.json().catch(() => ({})),
         ]);
-
         if (!isActive) return;
-
         if (meResponse.status === 401) {
           clearLocalSession();
           setLoadingNotice({
@@ -323,11 +280,9 @@ export default function MyAccount() {
           });
           return;
         }
-
         if (!meResponse.ok) {
           throw new Error(extractErrorMessage(meData, "Failed to load your account."));
         }
-
         const nextUser = (meData.user ?? null) as AccountUser | null;
         setUser(nextUser);
         localStorage.setItem("user", JSON.stringify(nextUser));
@@ -336,7 +291,6 @@ export default function MyAccount() {
           email: nextUser?.email ?? "",
           phone: current.phone || readProfileExtras().phone || "",
         }));
-
         if (ordersResponse.ok) {
           setOrders((ordersData.data?.orders ?? []) as AccountOrder[]);
         } else {
@@ -346,7 +300,6 @@ export default function MyAccount() {
             text: extractErrorMessage(ordersData, "Orders could not be loaded right now."),
           });
         }
-
         if (wishlistResponse.ok) {
           setWishlist((wishlistData.data?.wishlist ?? []) as WishlistEntry[]);
         } else {
@@ -358,7 +311,6 @@ export default function MyAccount() {
         }
       } catch (error) {
         if (!isActive) return;
-
         setLoadingNotice({
           tone: "error",
           text:
@@ -372,17 +324,13 @@ export default function MyAccount() {
         }
       }
     };
-
     void loadAccount();
-
     return () => {
       isActive = false;
     };
   }, [sessionToken]);
-
   useEffect(() => {
     if (!orders.length) return;
-
     if (!profileForm.phone.trim()) {
       const recentPhone = orders.find((order) => order.shipping_phone?.trim())?.shipping_phone?.trim();
       if (recentPhone) {
@@ -393,7 +341,6 @@ export default function MyAccount() {
         persistProfileExtras({ phone: recentPhone });
       }
     }
-
     if (addresses.length === 0) {
       const derivedAddresses = deriveAddressesFromOrders(orders);
       if (derivedAddresses.length > 0) {
@@ -402,48 +349,40 @@ export default function MyAccount() {
       }
     }
   }, [orders]);
-
   const saveProfileExtras = (phone: string) => {
     persistProfileExtras({ phone });
   };
-
   const navigateToSection = (section: AccountSection) => {
     setActiveSection(section);
     setExpandedOrderId(null);
   };
-
   const openTrackOrder = (orderId?: number) => {
     const query = orderId
       ? `?orderId=${orderId}&email=${encodeURIComponent(profileForm.email)}`
       : "";
     navigate(`/track-order${query}`);
   };
-
   const updateProfileField = (field: keyof ProfileForm, value: string) => {
     setProfileForm((current) => ({
       ...current,
       [field]: value,
     }));
   };
-
   const updateAddressField = (field: keyof AddressForm, value: string) => {
     setAddressForm((current) => ({
       ...current,
       [field]: value,
     }));
   };
-
   const updatePasswordField = (field: keyof PasswordForm, value: string) => {
     setPasswordForm((current) => ({
       ...current,
       [field]: value,
     }));
   };
-
   const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setProfileNotice(null);
-
     if (!sessionToken) {
       setProfileNotice({
         tone: "error",
@@ -451,7 +390,6 @@ export default function MyAccount() {
       });
       return;
     }
-
     if (!profileForm.name.trim() || !profileForm.email.trim()) {
       setProfileNotice({
         tone: "error",
@@ -459,9 +397,7 @@ export default function MyAccount() {
       });
       return;
     }
-
     setProfileSaving(true);
-
     try {
       const response = await fetch(`${API}/api/me`, {
         method: "PUT",
@@ -475,19 +411,15 @@ export default function MyAccount() {
           email: profileForm.email.trim(),
         }),
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (response.status === 401) {
         clearLocalSession();
         navigate("/login");
         return;
       }
-
       if (!response.ok) {
         throw new Error(extractErrorMessage(data, "Could not update your profile."));
       }
-
       const nextUser = (data.user ?? user) as AccountUser;
       setUser(nextUser);
       localStorage.setItem("user", JSON.stringify(nextUser));
@@ -512,15 +444,12 @@ export default function MyAccount() {
       setProfileSaving(false);
     }
   };
-
   const handleAddressSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAddressNotice(null);
-
     const label = addressForm.label.trim();
     const address = addressForm.address.trim();
     const note = addressForm.note.trim();
-
     if (!label || !address) {
       setAddressNotice({
         tone: "error",
@@ -528,9 +457,7 @@ export default function MyAccount() {
       });
       return;
     }
-
     let nextAddresses: AddressEntry[];
-
     if (editingAddressId) {
       nextAddresses = addresses.map((entry) =>
         entry.id === editingAddressId
@@ -554,7 +481,6 @@ export default function MyAccount() {
         },
       ];
     }
-
     setAddresses(nextAddresses);
     persistAddresses(nextAddresses);
     setAddressForm({ label: "", address: "", note: "" });
@@ -564,7 +490,6 @@ export default function MyAccount() {
       text: editingAddressId ? "Address updated." : "Address added.",
     });
   };
-
   const handleEditAddress = (address: AddressEntry) => {
     setActiveSection("addresses");
     setAddressNotice(null);
@@ -575,37 +500,30 @@ export default function MyAccount() {
       note: address.note,
     });
   };
-
   const handleDeleteAddress = (addressId: string) => {
     const nextAddresses = addresses.filter((entry) => entry.id !== addressId);
-
     if (nextAddresses.length > 0 && !nextAddresses.some((entry) => entry.isDefault)) {
       nextAddresses[0] = {
         ...nextAddresses[0],
         isDefault: true,
       };
     }
-
     setAddresses(nextAddresses);
     persistAddresses(nextAddresses);
-
     if (editingAddressId === addressId) {
       setEditingAddressId(null);
       setAddressForm({ label: "", address: "", note: "" });
     }
-
     setAddressNotice({
       tone: "success",
       text: "Address removed.",
     });
   };
-
   const handleSetDefaultAddress = (addressId: string) => {
     const nextAddresses = addresses.map((entry) => ({
       ...entry,
       isDefault: entry.id === addressId,
     }));
-
     setAddresses(nextAddresses);
     persistAddresses(nextAddresses);
     setAddressNotice({
@@ -613,7 +531,6 @@ export default function MyAccount() {
       text: "Default address updated.",
     });
   };
-
   const handleSavePreferences = () => {
     persistPreferences(preferences);
     setPreferencesNotice({
@@ -621,13 +538,10 @@ export default function MyAccount() {
       text: "Preferences saved on this device.",
     });
   };
-
   const handleCancelOrder = async (orderId: number) => {
     if (!sessionToken) return;
-
     setCancelingOrderId(orderId);
     setLoadingNotice(null);
-
     try {
       const response = await fetch(`${API}/api/orders/${orderId}/cancel`, {
         method: "POST",
@@ -636,26 +550,21 @@ export default function MyAccount() {
           Authorization: `Bearer ${sessionToken}`,
         },
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (response.status === 401) {
         clearLocalSession();
         navigate("/login");
         return;
       }
-
       if (!response.ok) {
         throw new Error(extractErrorMessage(data, "Unable to cancel that order."));
       }
-
       const updatedOrder = (data.data?.order ?? null) as AccountOrder | null;
       if (updatedOrder) {
         setOrders((current) =>
           current.map((order) => (order.id === orderId ? updatedOrder : order))
         );
       }
-
       setLoadingNotice({
         tone: "success",
         text: `Order #${orderId} was cancelled.`,
@@ -670,13 +579,10 @@ export default function MyAccount() {
       setCancelingOrderId(null);
     }
   };
-
   const handleRemoveWishlistItem = async (plantId: number) => {
     if (!sessionToken) return;
-
     setWishlistBusyPlantId(plantId);
     setLoadingNotice(null);
-
     try {
       const response = await fetch(`${API}/api/wishlist/${plantId}`, {
         method: "DELETE",
@@ -685,19 +591,15 @@ export default function MyAccount() {
           Authorization: `Bearer ${sessionToken}`,
         },
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (response.status === 401) {
         clearLocalSession();
         navigate("/login");
         return;
       }
-
       if (!response.ok) {
         throw new Error(extractErrorMessage(data, "Unable to remove wishlist item."));
       }
-
       setWishlist((current) =>
         current.filter((entry) => (entry.plant?.id ?? entry.plant_id) !== plantId)
       );
@@ -713,11 +615,9 @@ export default function MyAccount() {
       setWishlistBusyPlantId(null);
     }
   };
-
   const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSecurityNotice(null);
-
     if (!sessionToken) {
       setSecurityNotice({
         tone: "error",
@@ -725,7 +625,6 @@ export default function MyAccount() {
       });
       return;
     }
-
     if (passwordForm.password !== passwordForm.password_confirmation) {
       setSecurityNotice({
         tone: "error",
@@ -733,9 +632,7 @@ export default function MyAccount() {
       });
       return;
     }
-
     setPasswordSaving(true);
-
     try {
       const response = await fetch(`${API}/api/me/password`, {
         method: "PUT",
@@ -746,29 +643,23 @@ export default function MyAccount() {
         },
         body: JSON.stringify(passwordForm),
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (response.status === 401) {
         clearLocalSession();
         navigate("/login");
         return;
       }
-
       if (!response.ok) {
         throw new Error(extractErrorMessage(data, "Could not update your password."));
       }
-
       if (data.token) {
         localStorage.setItem("token", data.token);
         setSessionToken(data.token as string);
       }
-
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
         setUser(data.user as AccountUser);
       }
-
       const updatedAt = new Date().toISOString();
       localStorage.setItem(PASSWORD_CHANGED_KEY, updatedAt);
       setPasswordChangedAt(updatedAt);
@@ -791,15 +682,12 @@ export default function MyAccount() {
       setPasswordSaving(false);
     }
   };
-
   const handleLogout = async (logoutAll: boolean) => {
     if (!sessionToken) {
       navigate("/login");
       return;
     }
-
     setSecurityNotice(null);
-
     try {
       const response = await fetch(`${API}/api/${logoutAll ? "logout-all" : "logout"}`, {
         method: "POST",
@@ -808,7 +696,6 @@ export default function MyAccount() {
           Authorization: `Bearer ${sessionToken}`,
         },
       });
-
       if (!response.ok && response.status !== 401) {
         const data = await response.json().catch(() => ({}));
         throw new Error(
@@ -825,11 +712,9 @@ export default function MyAccount() {
       });
       return;
     }
-
     clearLocalSession();
     navigate("/login");
   };
-
   const renderOverview = () => (
     <AccountOverviewSection
       totalOrders={totalOrders}
@@ -847,7 +732,6 @@ export default function MyAccount() {
       getOrderStatusLabel={getOrderStatusLabel}
     />
   );
-
   const renderProfile = () => (
     <AccountProfileSection
       notice={profileNotice}
@@ -858,7 +742,6 @@ export default function MyAccount() {
       onChangeProfileField={updateProfileField}
     />
   );
-
   const renderOrders = () => (
     <AccountOrdersSection
       orders={orders}
@@ -877,7 +760,6 @@ export default function MyAccount() {
       getOrderStatusLabel={getOrderStatusLabel}
     />
   );
-
   const renderAddresses = () => (
     <AccountAddressesSection
       notice={addressNotice}
@@ -895,7 +777,6 @@ export default function MyAccount() {
       onDeleteAddress={handleDeleteAddress}
     />
   );
-
   const renderWishlist = () => (
     <AccountWishlistSection
       wishlist={wishlist}
@@ -907,7 +788,6 @@ export default function MyAccount() {
       formatCurrency={formatCurrency}
     />
   );
-
   const renderSecurity = () => (
     <AccountSecuritySection
       notice={securityNotice}
@@ -920,7 +800,6 @@ export default function MyAccount() {
       onLogoutAllDevices={() => void handleLogout(true)}
     />
   );
-
   const renderPreferences = () => (
     <AccountPreferencesSection
       notice={preferencesNotice}
@@ -946,7 +825,6 @@ export default function MyAccount() {
       onSavePreferences={handleSavePreferences}
     />
   );
-
   const renderActiveSection = () => {
     switch (activeSection) {
       case "profile":
@@ -966,7 +844,6 @@ export default function MyAccount() {
         return renderOverview();
     }
   };
-
   if (!sessionToken) {
     return (
       <Layout>
@@ -974,7 +851,6 @@ export default function MyAccount() {
       </Layout>
     );
   }
-
   return (
     <Layout>
       <div className="account-page">
@@ -984,7 +860,6 @@ export default function MyAccount() {
           onOpenMyGarden={() => navigate("/my-garden")}
           onOpenTrackOrder={() => openTrackOrder()}
         />
-
         <section className="account-shell">
           <div className="account-container account-content">
             <AccountSidebar
@@ -993,7 +868,6 @@ export default function MyAccount() {
               activeSection={activeSection}
               onNavigateToSection={navigateToSection}
             />
-
             <main className="account-main">
               <AccountNotice notice={loadingNotice} />
               <AccountMainHeader section={selectedSection} />

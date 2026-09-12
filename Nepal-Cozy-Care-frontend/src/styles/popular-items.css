@@ -1,7 +1,6 @@
 body {
   background-color: #f3f4f6;
 }
-
 .popular-page {
   display: grid;
   grid-template-columns: 260px 1fr;
@@ -10,31 +9,26 @@ body {
   max-width: 1440px;
   margin: 0 auto 3rem;
 }
-
 .popular-sidebar {
   background-color: #ffffff;
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
 }
-
 .popular-sidebar-section + .popular-sidebar-section {
   margin-top: 1.5rem;
 }
-
 .popular-sidebar-title {
   font-size: 0.875rem;
   font-weight: 600;
   color: #111827;
   margin-bottom: 0.75rem;
 }
-
 .popular-sidebar-options {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .popular-option {
   display: flex;
   align-items: center;
@@ -42,19 +36,16 @@ body {
   font-size: 0.8125rem;
   color: #4b5563;
 }
-
 .popular-option input[type="checkbox"] {
   width: 14px;
   height: 14px;
 }
-
 .popular-main {
   background-color: #ffffff;
   border-radius: 12px;
   padding: 1.75rem 1.75rem 2.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
-
 .popular-header {
   display: flex;
   justify-content: space-between;
@@ -62,26 +53,22 @@ body {
   gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
-
 .popular-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
   margin: 0 0 0.25rem;
 }
-
 .popular-subtitle {
   font-size: 0.8125rem;
   color: #6b7280;
   margin: 0;
 }
-
 .popular-header-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
-
 .popular-search {
   display: flex;
   align-items: center;
@@ -90,7 +77,6 @@ body {
   padding: 0.4rem 0.6rem;
   border-radius: 999px;
 }
-
 .popular-search input {
   border: none;
   background: transparent;
@@ -98,7 +84,6 @@ body {
   outline: none;
   min-width: 160px;
 }
-
 .popular-filter-btn {
   display: inline-flex;
   align-items: center;
@@ -111,7 +96,6 @@ body {
   color: #374151;
   cursor: pointer;
 }
-
 .popular-sort {
   display: flex;
   align-items: center;
@@ -119,7 +103,6 @@ body {
   font-size: 0.75rem;
   color: #6b7280;
 }
-
 .popular-sort-select {
   border-radius: 999px;
   border: 1px solid #e5e7eb;
@@ -136,23 +119,19 @@ body {
   background-size: 14px;
   padding-right: 2rem;
 }
-
 .popular-sort-select:hover {
   border-color: #d1d5db;
 }
-
 .popular-sort-select:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
-
 .popular-chips-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
-
 .popular-chip {
   padding: 0.3rem 0.9rem;
   border-radius: 999px;
@@ -163,25 +142,21 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-
 .popular-chip:hover:not(.popular-chip-active) {
   background-color: #f9fafb;
   border-color: #d1d5db;
 }
-
 .popular-chip-active {
   background-color: #111827;
   border-color: #111827;
   color: #f9fafb;
 }
-
 .popular-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
   max-width: 1400px;
 }
-
 .popular-card {
   background-color: white;
   border-radius: 12px;
@@ -192,12 +167,10 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
-
 .popular-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   transform: translateY(-4px);
 }
-
 .seller-badge {
   position: absolute;
   left: 0.75rem;
@@ -211,20 +184,17 @@ body {
   font-weight: 700;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.16);
 }
-
 .popular-card-image-wrapper {
   position: relative;
   height: 280px;
   background-color: #f9fafb;
 }
-
 .popular-card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   cursor: pointer;
 }
-
 .popular-heart-btn {
   position: absolute;
   top: 1rem;
@@ -241,22 +211,18 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   color: #6b7280;
 }
-
 .popular-heart-btn:hover {
   background-color: #fef2f2;
   color: #ef4444;
 }
-
 .popular-heart-btn.active {
   background-color: #fef2f2;
   color: #ef4444;
 }
-
 .popular-heart-btn:disabled {
   cursor: wait;
   opacity: 0.75;
 }
-
 .popular-card-body {
   padding: 1.25rem;
   display: flex;
@@ -264,20 +230,17 @@ body {
   gap: 0.5rem;
   flex: 1;
 }
-
 .popular-card-name {
   font-size: 1.125rem;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
 }
-
 .popular-card-category {
   font-size: 0.875rem;
   color: #6b7280;
   margin: 0;
 }
-
 .popular-card-rating {
   display: flex;
   align-items: center;
@@ -285,20 +248,16 @@ body {
   font-size: 1rem;
   color: #6b7280;
 }
-
 .popular-rating-text {
   margin-left: 0.25rem;
   font-size: 0.875rem;
 }
-
 .popular-star-filled {
   color: #fbbf24;
 }
-
 .popular-star-empty {
   color: #e5e7eb;
 }
-
 .popular-card-footer {
   display: flex;
   flex-direction: column;
@@ -306,13 +265,11 @@ body {
   gap: 0.75rem;
   margin-top: auto;
 }
-
 .popular-card-price {
   font-size: 1.25rem;
   font-weight: 700;
   color: #1a1a1a;
 }
-
 .popular-add-btn {
   width: 100%;
   padding: 0.75rem 1.5rem;
@@ -326,11 +283,9 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .popular-add-btn:hover {
   background-color: #1e40af;
 }
-
 .popular-empty {
   grid-column: 1 / -1;
   text-align: center;
@@ -338,48 +293,39 @@ body {
   font-size: 0.875rem;
   color: #6b7280;
 }
-
 @media (max-width: 1024px) {
   .popular-page {
     grid-template-columns: 1fr;
   }
-
   .popular-sidebar {
     order: 2;
   }
-
   .popular-main {
     order: 1;
   }
 }
-
 @media (max-width: 768px) {
   .popular-page {
     padding: 1rem;
   }
-
   .popular-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .popular-header-actions {
     width: 100%;
     flex-wrap: wrap;
     justify-content: flex-start;
   }
-
   .popular-search {
     flex: 1;
   }
 }
-
 /* Skeleton Loading Styles */
 .skeleton-card {
   pointer-events: none;
   animation: pulse 1.5s ease-in-out infinite;
 }
-
 .skeleton-image {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
@@ -387,7 +333,6 @@ body {
   position: relative;
   overflow: hidden;
 }
-
 .skeleton-shimmer {
   position: absolute;
   top: 0;
@@ -402,7 +347,6 @@ body {
   );
   animation: shimmer-slide 1.5s infinite;
 }
-
 .skeleton-text {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
@@ -411,29 +355,24 @@ body {
   margin-bottom: 0.75rem;
   height: 20px;
 }
-
 .skeleton-popular-name {
   height: 24px;
   width: 85%;
   margin-bottom: 0.5rem;
 }
-
 .skeleton-popular-rating {
   height: 20px;
   width: 120px;
   margin-bottom: 0.75rem;
 }
-
 .skeleton-popular-price {
   height: 24px;
   width: 100px;
 }
-
 .skeleton-popular-button {
   height: 36px;
   width: 120px;
 }
-
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -442,7 +381,6 @@ body {
     background-position: -200% 0;
   }
 }
-
 @keyframes shimmer-slide {
   0% {
     left: -100%;
@@ -451,7 +389,6 @@ body {
     left: 100%;
   }
 }
-
 @keyframes pulse {
   0%, 100% {
     opacity: 1;

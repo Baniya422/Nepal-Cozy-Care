@@ -1,5 +1,4 @@
 const API_BASE_URL = 'http://localhost:8000/api';
-
 export const apiClient = {
   fetch: async (endpoint: string) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`);
@@ -8,7 +7,6 @@ export const apiClient = {
     }
     return response.json();
   },
-  
   post: async (endpoint: string, data: any) => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',

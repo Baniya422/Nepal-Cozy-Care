@@ -1,12 +1,10 @@
 import { Eye, Edit, Trash2 } from "lucide-react";
-
 interface ActionButtonsProps {
   onView?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
   size?: "sm" | "md";
 }
-
 export default function ActionButtons({
   onView,
   onEdit,
@@ -14,7 +12,6 @@ export default function ActionButtons({
   size = "md",
 }: ActionButtonsProps) {
   const btnClass = size === "sm" ? "admin-btn-icon-sm" : "admin-btn-icon";
-
   return (
     <div className="admin-actions">
       {onView && (

@@ -25,7 +25,6 @@ return new class extends Migration
             $table->json('preview_data');
             $table->timestamps();
         });
-
         DB::table('plant_finder_templates')->insert([
             'name' => 'Starter Plant Finder Template',
             'is_active' => true,

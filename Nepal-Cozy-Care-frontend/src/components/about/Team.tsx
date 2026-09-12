@@ -1,9 +1,8 @@
 import PageSection from "../layout/PageSection";
 import { aboutPageTemplate } from "../../features/content/aboutTemplate";
-
+import { resolvePageImage } from "../../features/page-content/templates";
 export default function Team() {
   const team = aboutPageTemplate.team;
-
   return (
     <PageSection background="white" padding="large">
       <div className="section-header">
@@ -15,7 +14,7 @@ export default function Team() {
           <div key={member.name} className="about-team-card">
             <div className="about-team-image-wrapper">
               <img
-                src={member.image}
+                src={resolvePageImage(member.image)}
                 alt={member.name}
                 className="about-team-image"
                 onError={(e) => {

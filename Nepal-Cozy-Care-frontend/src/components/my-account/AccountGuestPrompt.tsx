@@ -2,11 +2,9 @@ import { Leaf } from "lucide-react";
 import { Link } from "react-router-dom";
 import AccountNotice from "./AccountNotice";
 import type { Notice } from "./types";
-
 type AccountGuestPromptProps = {
   loadingNotice: Notice | null;
 };
-
 export default function AccountGuestPrompt({ loadingNotice }: AccountGuestPromptProps) {
   return (
     <div className="account-page">
@@ -19,7 +17,6 @@ export default function AccountGuestPrompt({ loadingNotice }: AccountGuestPrompt
           </div>
         </div>
       </section>
-
       <section className="account-shell">
         <div className="account-container">
           <AccountNotice notice={loadingNotice} />

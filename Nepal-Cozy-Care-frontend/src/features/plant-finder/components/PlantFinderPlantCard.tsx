@@ -1,11 +1,9 @@
 import type { Plant } from "../types";
-
 type PlantFinderPlantCardProps = {
   plant: Plant;
   apiBaseUrl: string;
   onClick: (id: number) => void;
 };
-
 export default function PlantFinderPlantCard({
   plant,
   apiBaseUrl,

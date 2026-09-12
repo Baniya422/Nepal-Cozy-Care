@@ -4,18 +4,13 @@ type RecommendedPlant = {
   price: number;
   image?: string;
 };
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface RecommendedProductsProps {
   recommendedPlants: RecommendedPlant[];
   addToCart: (plantId: number) => void;
 }
-
 export default function RecommendedProducts({ recommendedPlants, addToCart }: RecommendedProductsProps) {
-  // Safety check: ensure recommendedPlants is an array
   if (!Array.isArray(recommendedPlants) || recommendedPlants.length === 0) return null;
-
   return (
     <section className="cart-recommended">
       <h2 className="cart-recommended-title">You Might Also Like These!</h2>

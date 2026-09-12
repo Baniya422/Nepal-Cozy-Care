@@ -1,5 +1,4 @@
 import { Truck, Shield, Leaf, BookOpen } from "lucide-react";
-
 export default function WhyChooseUs() {
   return (
     <div className="why-choose-section">

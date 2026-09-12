@@ -1,6 +1,5 @@
 import { Package } from "lucide-react";
 import type { AccountOrder } from "../types";
-
 type AccountOrdersSectionProps = {
   orders: AccountOrder[];
   expandedOrderId: number | null;
@@ -15,7 +14,6 @@ type AccountOrdersSectionProps = {
   getOrderStatusTone: (status: string) => string;
   getOrderStatusLabel: (status: string) => string;
 };
-
 export default function AccountOrdersSection({
   orders,
   expandedOrderId,
@@ -46,7 +44,6 @@ export default function AccountOrdersSection({
           {orders.map((order) => {
             const isExpanded = expandedOrderId === order.id;
             const isPending = order.status === "pending";
-
             return (
               <section key={order.id} className="account-card">
                 <div className="account-order-head">
@@ -64,7 +61,6 @@ export default function AccountOrdersSection({
                     <strong>{formatCurrency(order.total)}</strong>
                   </div>
                 </div>
-
                 <div className="account-order-actions">
                   <button
                     type="button"
@@ -91,7 +87,6 @@ export default function AccountOrdersSection({
                     </button>
                   )}
                 </div>
-
                 {isExpanded && (
                   <div className="account-order-details">
                     <div className="account-order-meta-grid">
@@ -112,7 +107,6 @@ export default function AccountOrdersSection({
                         <strong>{order.payment_status || "Pending"}</strong>
                       </article>
                     </div>
-
                     <div className="account-order-items">
                       {order.items.map((item) => (
                         <div key={item.id} className="account-order-item">

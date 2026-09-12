@@ -12,7 +12,6 @@ class SeasonalReminderController extends Controller
     {
         $seasonKey = SeasonalReminder::currentSeasonKey();
         $city = $request->query('city');
-
         $reminders = SeasonalReminder::with('careTip:id,title,excerpt,image,category')
             ->published()
             ->forSeason($seasonKey)
@@ -38,20 +37,17 @@ class SeasonalReminderController extends Controller
             'author:id,name,email',
             'careTip:id,title,category',
         ])->latest();
-
         if ($season = $request->query('season_key')) {
             $query->where('season_key', $season);
         }
-
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%' . $search . '%')
-                    ->orWhere('city', 'like', '%' . $search . '%')
-                    ->orWhere('excerpt', 'like', '%' . $search . '%')
-                    ->orWhere('content', 'like', '%' . $search . '%');
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('city', 'like', '%'.$search.'%')
+                    ->orWhere('excerpt', 'like', '%'.$search.'%')
+                    ->orWhere('content', 'like', '%'.$search.'%');
             });
         }
-
         $reminders = $query->paginate((int) $request->query('per_page', 20));
 
         return response()->json([
@@ -82,7 +78,6 @@ class SeasonalReminderController extends Controller
             'care_tip_id' => 'nullable|exists:care_tips,id',
             'is_published' => 'boolean',
         ]);
-
         $reminder = SeasonalReminder::create([
             ...$validated,
             'user_id' => $request->user()->id,
@@ -101,7 +96,6 @@ class SeasonalReminderController extends Controller
     public function update(Request $request, int $id)
     {
         $reminder = SeasonalReminder::findOrFail($id);
-
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'excerpt' => 'nullable|string|max:500',
@@ -113,7 +107,6 @@ class SeasonalReminderController extends Controller
             'care_tip_id' => 'nullable|exists:care_tips,id',
             'is_published' => 'boolean',
         ]);
-
         $reminder->update($validated);
 
         return response()->json([

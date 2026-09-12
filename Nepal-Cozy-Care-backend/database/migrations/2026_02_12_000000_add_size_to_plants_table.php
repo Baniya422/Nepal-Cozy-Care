@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('plants', function (Blueprint $table) {
-            $table->string('size')->nullable()->after('category'); // Small, Medium, Large, Extra Large
+            $table->string('size')->nullable()->after('category');
         });
     }
 

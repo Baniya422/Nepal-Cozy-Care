@@ -13,20 +13,15 @@ import type {
   PlantFinderSelections,
   PreviewContent,
 } from "./types";
-
 const normalizeValue = (value: unknown) => String(value ?? "").trim().toLowerCase();
-
 const roomMatches = (plantRooms: Plant["rooms"], roomValue: string) => {
   if (!plantRooms) return false;
   const normalizedRoomValue = normalizeValue(roomValue);
-
   if (Array.isArray(plantRooms)) {
     return plantRooms.some((room) => normalizeValue(room) === normalizedRoomValue);
   }
-
   return normalizeValue(plantRooms) === normalizedRoomValue;
 };
-
 export const normalizePlants = (plants: Plant[]): Plant[] =>
   plants.map((plant) => ({
     ...plant,
@@ -35,14 +30,11 @@ export const normalizePlants = (plants: Plant[]): Plant[] =>
         ? parseFloat(plant.price)
         : plant.price || 0,
   }));
-
 export const extractPlantsFromResponse = (payload: any): Plant[] => {
   const rawPlants =
     payload?.data?.plants ?? payload?.data?.data ?? payload?.data ?? [];
-
   return normalizePlants(Array.isArray(rawPlants) ? rawPlants : []);
 };
-
 export const getCurrentSelectionValue = (
   activeField: ActiveField,
   selections: PlantFinderSelections
@@ -59,14 +51,12 @@ export const getCurrentSelectionValue = (
       return selections.location;
   }
 };
-
 export const getCurrentPreview = (
   activeField: ActiveField,
   selections: PlantFinderSelections
 ): PreviewContent => {
   const currentSelection = getCurrentSelectionValue(activeField, selections);
   const fieldPreview = previewData[activeField] ?? {};
-
   return (
     fieldPreview[currentSelection] ??
     fieldPreview[""] ?? {
@@ -77,7 +67,6 @@ export const getCurrentPreview = (
     }
   );
 };
-
 export const getPlantFinderResults = (
   allPlants: Plant[],
   selections: PlantFinderSelections
@@ -85,19 +74,16 @@ export const getPlantFinderResults = (
   const normalizedNonPlantCategories = new Set(
     nonPlantCategories.map((category) => normalizeValue(category))
   );
-
   const filteredPlants = allPlants.filter((plant) => {
     if (plant.category && normalizedNonPlantCategories.has(normalizeValue(plant.category))) {
       return false;
     }
-
     if (selections.light && plant.light) {
       const expectedLight = lightMap[selections.light] ?? selections.light;
       if (normalizeValue(plant.light) !== normalizeValue(expectedLight)) {
         return false;
       }
     }
-
     if (selections.experience && plant.difficulty) {
       const expectedDifficulty =
         difficultyMap[selections.experience] ?? selections.experience;
@@ -105,41 +91,34 @@ export const getPlantFinderResults = (
         return false;
       }
     }
-
     if (selections.location && plant.humidity) {
       const expectedHumidity = humidityMap[selections.location] ?? selections.location;
       if (normalizeValue(plant.humidity) !== normalizeValue(expectedHumidity)) {
         return false;
       }
     }
-
     if (selections.room) {
       const roomValue = roomMap[selections.room] ?? selections.room;
       if (!roomMatches(plant.rooms, roomValue)) {
         return false;
       }
     }
-
     return true;
   });
-
   const plantOnlyFallback = allPlants.filter(
     (plant) =>
       !plant.category || !normalizedNonPlantCategories.has(normalizeValue(plant.category))
   );
-
   if (filteredPlants.length === 0) {
     return {
       recommendedPlants: [],
       morePlants: plantOnlyFallback.slice(0, 6),
     };
   }
-
   const filteredIds = new Set(filteredPlants.map((plant) => plant.id));
   const remainingPlants = plantOnlyFallback.filter(
     (plant) => !filteredIds.has(plant.id)
   );
-
   return {
     recommendedPlants: filteredPlants.slice(0, 3),
     morePlants: remainingPlants.slice(0, 6),

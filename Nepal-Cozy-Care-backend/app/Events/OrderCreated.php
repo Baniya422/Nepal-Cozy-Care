@@ -3,11 +3,8 @@
 namespace App\Events;
 
 use App\Models\Order;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -16,15 +13,12 @@ class OrderCreated
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * Create a new event instance.
+     * Carry the new order so listeners can react to it.
      */
-    public function __construct(public Order $order)
-    {
-        //
-    }
+    public function __construct(public Order $order) {}
 
     /**
-     * Get the channels the event should broadcast on.
+     * Return the broadcast channels when this event is emitted.
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */

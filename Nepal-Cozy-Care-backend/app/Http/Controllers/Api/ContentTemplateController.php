@@ -14,8 +14,20 @@ class ContentTemplateController extends Controller
             ->where('is_active', true)
             ->latest('id')
             ->first();
-
         if (! $template) {
+            $default = AdminPageContentController::defaultPayload($key);
+            if (! empty($default)) {
+                return response()->json([
+                    'message' => 'Template loaded successfully.',
+                    'data' => [
+                        'id' => 0,
+                        'name' => ucwords(str_replace('_', ' ', $key)),
+                        'key' => $key,
+                        'payload' => $default,
+                    ],
+                ]);
+            }
+
             return response()->json([
                 'message' => 'Template not found.',
             ], 404);

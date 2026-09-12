@@ -27,13 +27,11 @@ class SendTestEmailCommand extends Command
     public function handle(): int
     {
         $recipient = (string) $this->argument('email');
-
         if (! config('mail.from.address')) {
             $this->error('MAIL_FROM_ADDRESS is not configured.');
 
             return self::FAILURE;
         }
-
         try {
             Mail::raw(
                 "Nepal Cozy Care SMTP test successful.\n\nIf you received this email, Gmail SMTP is working.",
@@ -50,7 +48,6 @@ class SendTestEmailCommand extends Command
 
             return self::FAILURE;
         }
-
         $this->info('Test email sent successfully to '.$recipient.'.');
 
         return self::SUCCESS;

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->json('payload');
             $table->timestamps();
         });
-
         DB::table('content_templates')->insert([
             [
                 'name' => 'Our Mission Page',

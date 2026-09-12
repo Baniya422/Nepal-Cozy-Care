@@ -11,19 +11,16 @@ use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
-    // Admin: list all blogs (published and unpublished) for management
     public function adminIndex(Request $request)
     {
         $query = Blog::query()
             ->orderByDesc('created_at');
-
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%' . $search . '%')
-                    ->orWhere('content', 'like', '%' . $search . '%');
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('content', 'like', '%'.$search.'%');
             });
         }
-
         $perPage = (int) $request->query('per_page', 10);
         $paginator = $query->paginate($perPage);
 
@@ -41,21 +38,18 @@ class BlogController extends Controller
         ]);
     }
 
-    // Public: list published blogs, with optional search
     public function index(Request $request)
     {
         $query = Blog::query()
             ->where('is_published', true)
             ->orderByDesc('published_at')
             ->orderByDesc('created_at');
-
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%' . $search . '%')
-                    ->orWhere('content', 'like', '%' . $search . '%');
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('content', 'like', '%'.$search.'%');
             });
         }
-
         $perPage = (int) $request->query('per_page', 10);
         $paginator = $query->paginate($perPage);
 
@@ -73,14 +67,11 @@ class BlogController extends Controller
         ]);
     }
 
-    // Public: show a single published blog by id
     public function show(int $id)
     {
         $blog = Blog::where('is_published', true)
             ->findOrFail($id);
-
         $blog->increment('views');
-
         $relatedBlogs = Blog::where('is_published', true)
             ->where('id', '!=', $blog->id)
             ->where(function ($query) use ($blog) {
@@ -101,11 +92,9 @@ class BlogController extends Controller
         ]);
     }
 
-    // Public: get top trends (admin-marked + popular by views)
     public function topTrends(Request $request)
     {
         $limit = (int) $request->query('limit', 5);
-
         $blogs = Blog::where('is_published', true)
             ->orderByRaw('is_top_trend DESC')
             ->orderByDesc('views')
@@ -120,11 +109,9 @@ class BlogController extends Controller
         ]);
     }
 
-    // Public: get top stories (admin-marked + popular)
     public function topStories(Request $request)
     {
         $limit = (int) $request->query('limit', 5);
-
         $blogs = Blog::where('is_published', true)
             ->orderByRaw('is_top_story DESC')
             ->orderByDesc('views')
@@ -139,20 +126,14 @@ class BlogController extends Controller
         ]);
     }
 
-    // Admin: create a blog article
     public function store(StoreBlogRequest $request)
     {
         $validated = $request->validated();
-
         $slug = $validated['slug'] ?? Str::slug($validated['title']);
-
-        // ensure slug unique
         if (Blog::where('slug', $slug)->exists()) {
-            $slug = $slug . '-' . Str::random(6);
+            $slug = $slug.'-'.Str::random(6);
         }
-
         $isPublished = (bool) ($validated['is_published'] ?? false);
-
         $blog = Blog::create([
             'user_id' => $request->user()->id ?? null,
             'title' => $validated['title'],
@@ -174,32 +155,23 @@ class BlogController extends Controller
         ], 201);
     }
 
-    // Admin: update a blog article
     public function update(UpdateBlogRequest $request, int $id)
     {
         $blog = Blog::findOrFail($id);
-
         $validated = $request->validated();
-
-        // Only regenerate slug if title has changed
         if (! empty($validated['title']) && empty($validated['slug'])) {
             $newSlug = Str::slug($validated['title']);
-            // Only update slug if it's different from the current one
             if ($newSlug !== $blog->slug) {
-                // Check if slug exists for a different blog
                 $slugExists = Blog::where('slug', $newSlug)
                     ->where('id', '!=', $id)
                     ->exists();
-                
                 if ($slugExists) {
-                    // Append timestamp to make it unique
-                    $validated['slug'] = $newSlug . '-' . time();
+                    $validated['slug'] = $newSlug.'-'.time();
                 } else {
                     $validated['slug'] = $newSlug;
                 }
             }
         }
-
         if (array_key_exists('is_published', $validated)) {
             $isPublished = (bool) $validated['is_published'];
             if ($isPublished && ! $blog->published_at) {
@@ -209,7 +181,6 @@ class BlogController extends Controller
                 $validated['published_at'] = null;
             }
         }
-
         $blog->update($validated);
 
         return response()->json([
@@ -220,7 +191,6 @@ class BlogController extends Controller
         ]);
     }
 
-    // Admin: delete blog article
     public function destroy(int $id)
     {
         $blog = Blog::findOrFail($id);

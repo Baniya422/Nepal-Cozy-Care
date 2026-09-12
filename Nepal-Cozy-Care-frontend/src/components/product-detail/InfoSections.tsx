@@ -9,21 +9,19 @@ interface Plant {
   fertilizer?: string;
   name: string;
 }
-
 interface InfoSectionsProps {
   plant: Plant;
 }
-
 export default function InfoSections({ plant }: InfoSectionsProps) {
   return (
     <div className="info-sections">
       <div className="info-card">
         <h3>Survival guide</h3>
         <p>
-          {plant.survival_guide || 
-            `This plant thrives in bright, indirect light and prefers well-draining soil. 
-            Water when the top inch of soil feels dry. Avoid overwatering as it can lead 
-            to root rot. Ideal temperature range is 18-24°C. Fertilize monthly during 
+          {plant.survival_guide ||
+            `This plant thrives in bright, indirect light and prefers well-draining soil.
+            Water when the top inch of soil feels dry. Avoid overwatering as it can lead
+            to root rot. Ideal temperature range is 18-24°C. Fertilize monthly during
             growing season with balanced liquid fertilizer.`}
         </p>
       </div>
@@ -45,9 +43,9 @@ export default function InfoSections({ plant }: InfoSectionsProps) {
       <div className="info-card">
         <h3>About Product</h3>
         <p>
-          {plant.description || 
-            `This beautiful ${plant.name} is perfect for indoor spaces. 
-            It purifies air and adds a touch of nature to your home or office. 
+          {plant.description ||
+            `This beautiful ${plant.name} is perfect for indoor spaces.
+            It purifies air and adds a touch of nature to your home or office.
             Easy to care for and suitable for beginners.`}
         </p>
       </div>

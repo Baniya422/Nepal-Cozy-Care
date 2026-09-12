@@ -1,5 +1,4 @@
 import { X, AlertTriangle } from "lucide-react";
-
 interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
@@ -10,7 +9,6 @@ interface ConfirmModalProps {
   onCancel: () => void;
   isDanger?: boolean;
 }
-
 export default function ConfirmModal({
   isOpen,
   title,
@@ -22,7 +20,6 @@ export default function ConfirmModal({
   isDanger = true,
 }: ConfirmModalProps) {
   if (!isOpen) return null;
-
   return (
     <div className="admin-modal-overlay" onClick={onCancel}>
       <div className="admin-modal admin-modal-sm" onClick={(e) => e.stopPropagation()}>
@@ -35,11 +32,9 @@ export default function ConfirmModal({
             <X size={20} />
           </button>
         </div>
-        
         <div className="admin-modal-body">
           <p className="text-gray-600">{message}</p>
         </div>
-
         <div className="admin-modal-footer">
           <button className="admin-btn admin-btn-secondary" onClick={onCancel}>
             {cancelText}

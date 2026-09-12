@@ -14,9 +14,7 @@ import {
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type OrderStatus =
   | "pending"
   | "packed"
@@ -24,16 +22,13 @@ type OrderStatus =
   | "out_for_delivery"
   | "delivered"
   | "cancelled";
-
 type ConfirmationStatus = "pending" | "contacted" | "location_confirmed";
-
 type OrderItem = {
   id: number;
   plant_name: string;
   quantity: number;
   price: number;
 };
-
 type Order = {
   id: number;
   order_id: string;
@@ -57,10 +52,8 @@ type Order = {
   courier_name?: string | null;
   order_items: OrderItem[];
 };
-
 const normalizeStatus = (status: string): OrderStatus => {
   const normalized = status === "processing" ? "packed" : status;
-
   switch (normalized) {
     case "pending":
     case "packed":
@@ -73,7 +66,6 @@ const normalizeStatus = (status: string): OrderStatus => {
       return "pending";
   }
 };
-
 const normalizeConfirmationStatus = (status: string): ConfirmationStatus => {
   switch (status) {
     case "contacted":
@@ -83,13 +75,11 @@ const normalizeConfirmationStatus = (status: string): ConfirmationStatus => {
       return "pending";
   }
 };
-
 const formatStatusLabel = (status: string) =>
   status
     .split("_")
     .join(" ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
 const transformOrder = (order: any): Order => ({
   id: Number(order?.id ?? 0),
   order_id: order?.order_id || `#ORD-${String(order?.id ?? 0).padStart(3, "0")}`,
@@ -123,7 +113,6 @@ const transformOrder = (order: any): Order => ({
       }))
     : [],
 });
-
 const statusFlow: Record<OrderStatus, OrderStatus | null> = {
   pending: "packed",
   packed: "shipped",
@@ -132,17 +121,13 @@ const statusFlow: Record<OrderStatus, OrderStatus | null> = {
   delivered: null,
   cancelled: null,
 };
-
 const normalizePhoneForWhatsApp = (phone: string) => {
   const digits = phone.replace(/\D/g, "");
-
   if (digits.startsWith("977")) return digits;
   if (digits.length === 10 && digits.startsWith("9")) return `977${digits}`;
   if (digits.length === 10 && digits.startsWith("0")) return `977${digits.slice(1)}`;
-
   return digits;
 };
-
 const formatContactMethod = (method: Order["preferred_contact_method"]) => {
   switch (method) {
     case "whatsapp":
@@ -153,7 +138,6 @@ const formatContactMethod = (method: Order["preferred_contact_method"]) => {
       return "Phone Call";
   }
 };
-
 export default function ManageOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,29 +148,23 @@ export default function ManageOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [confirmationNotes, setConfirmationNotes] = useState("");
-
   useEffect(() => {
     void fetchOrders();
   }, []);
-
   const fetchOrders = async () => {
     setError(null);
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Admin login required to view orders.");
       }
-
       const res = await fetch(`${API}/api/admin/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-
       if (!res.ok) {
         throw new Error(data.message || "Failed to load orders.");
       }
-
       const ordersData = Array.isArray(data.data?.orders) ? data.data.orders : [];
       setOrders(ordersData.map(transformOrder));
     } catch (fetchError) {
@@ -196,7 +174,6 @@ export default function ManageOrders() {
       setLoading(false);
     }
   };
-
   const replaceOrder = (updatedOrder: Order) => {
     setOrders((currentOrders) =>
       currentOrders.map((order) => (order.id === updatedOrder.id ? updatedOrder : order))
@@ -205,17 +182,14 @@ export default function ManageOrders() {
       currentOrder?.id === updatedOrder.id ? updatedOrder : currentOrder
     );
   };
-
   const handleUpdateStatus = async (orderId: number, newStatus: OrderStatus) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Admin login required to update orders.");
       }
-
       setSavingOrderId(orderId);
       setError(null);
-
       const res = await fetch(`${API}/api/orders/${orderId}/status`, {
         method: "PUT",
         headers: {
@@ -225,11 +199,9 @@ export default function ManageOrders() {
         body: JSON.stringify({ status: newStatus }),
       });
       const data = await res.json();
-
       if (!res.ok) {
         throw new Error(data.message || "Failed to update order status.");
       }
-
       replaceOrder(transformOrder(data.data?.order));
     } catch (updateError) {
       console.error("Error updating order status:", updateError);
@@ -242,7 +214,6 @@ export default function ManageOrders() {
       setSavingOrderId(null);
     }
   };
-
   const handleUpdateConfirmation = async (
     orderId: number,
     payload: {
@@ -255,10 +226,8 @@ export default function ManageOrders() {
       if (!token) {
         throw new Error("Admin login required to update confirmation.");
       }
-
       setSavingConfirmationId(orderId);
       setError(null);
-
       const res = await fetch(`${API}/api/orders/${orderId}/confirmation`, {
         method: "PUT",
         headers: {
@@ -268,11 +237,9 @@ export default function ManageOrders() {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-
       if (!res.ok) {
         throw new Error(data.message || "Failed to update confirmation.");
       }
-
       const updatedOrder = transformOrder(data.data?.order);
       setConfirmationNotes(updatedOrder.confirmation_notes || "");
       replaceOrder(updatedOrder);
@@ -287,13 +254,11 @@ export default function ManageOrders() {
       setSavingConfirmationId(null);
     }
   };
-
   const handleViewDetail = (order: Order) => {
     setSelectedOrder(order);
     setConfirmationNotes(order.confirmation_notes || "");
     setShowDetailModal(true);
   };
-
   const filteredOrders = useMemo(
     () =>
       orders.filter((order) =>
@@ -311,9 +276,7 @@ export default function ManageOrders() {
       ),
     [orders, searchQuery]
   );
-
   const formatPrice = (price: number) => `Rs ${price.toFixed(2)}`;
-
   const formatDate = (dateString: string | null | undefined) =>
     dateString
       ? new Date(dateString).toLocaleString("en-NP", {
@@ -324,7 +287,6 @@ export default function ManageOrders() {
           minute: "2-digit",
         })
       : "Not available";
-
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
       case "delivered":
@@ -341,7 +303,6 @@ export default function ManageOrders() {
         return <Package size={16} />;
     }
   };
-
   const getConfirmationIcon = (status: ConfirmationStatus) => {
     switch (status) {
       case "location_confirmed":
@@ -352,12 +313,9 @@ export default function ManageOrders() {
         return <MessageCircle size={16} />;
     }
   };
-
   const getNextStatus = (currentStatus: OrderStatus): OrderStatus | null =>
     statusFlow[currentStatus];
-
   const canCancelOrder = (status: OrderStatus) => status === "pending" || status === "packed";
-
   const getActionIcon = (status: OrderStatus) => {
     switch (status) {
       case "packed":
@@ -372,23 +330,19 @@ export default function ManageOrders() {
         return <Package size={16} />;
     }
   };
-
   const openPhone = (phone: string) => {
     window.location.href = `tel:${phone}`;
   };
-
   const openEmail = (email: string, orderId: string) => {
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(
       `Cozy Care Order ${orderId} Confirmation`
     )}`;
   };
-
   const openWhatsApp = (order: Order) => {
     const phone = normalizePhoneForWhatsApp(order.shipping_phone);
     const message = `Hello ${order.shipping_name}, this is Cozy Care regarding your order ${order.order_id}. We are confirming your delivery address and location details.`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
   };
-
   return (
     <AdminLayout>
       <div className="admin-page">
@@ -398,7 +352,6 @@ export default function ManageOrders() {
             <p>Manage delivery progress and contact customers to confirm the location before dispatch.</p>
           </div>
         </div>
-
         {error ? (
           <div className="admin-card" style={{ marginBottom: "1rem" }}>
             <div
@@ -409,7 +362,6 @@ export default function ManageOrders() {
             </div>
           </div>
         ) : null}
-
         <div className="admin-filters">
           <div className="admin-search">
             <Search size={18} />
@@ -421,7 +373,6 @@ export default function ManageOrders() {
             />
           </div>
         </div>
-
         <div className="admin-table-container">
           {loading ? (
             <div className="admin-loading">Loading orders...</div>
@@ -442,7 +393,6 @@ export default function ManageOrders() {
               <tbody>
                 {filteredOrders.map((order) => {
                   const nextStatus = getNextStatus(order.status);
-
                   return (
                     <tr key={order.id}>
                       <td className="admin-order-id">{order.order_id}</td>
@@ -498,14 +448,12 @@ export default function ManageOrders() {
               </tbody>
             </table>
           )}
-
           {!loading && filteredOrders.length === 0 ? (
             <div className="admin-empty-state">
               <p>No orders found.</p>
             </div>
           ) : null}
         </div>
-
         {showDetailModal && selectedOrder ? (
           <div className="admin-modal-overlay" onClick={() => setShowDetailModal(false)}>
             <div
@@ -536,7 +484,6 @@ export default function ManageOrders() {
                       {formatContactMethod(selectedOrder.preferred_contact_method)}
                     </p>
                   </div>
-
                   <div className="admin-info-section">
                     <h4>Order Information</h4>
                     <p>
@@ -559,7 +506,6 @@ export default function ManageOrders() {
                       {selectedOrder.tracking_number || "Not assigned yet"}
                     </p>
                   </div>
-
                   <div className="admin-info-section">
                     <h4>Shipping Information</h4>
                     <p>
@@ -576,7 +522,6 @@ export default function ManageOrders() {
                       {selectedOrder.location_notes || "Not provided"}
                     </p>
                   </div>
-
                   <div className="admin-info-section admin-info-section-wide">
                     <h4>Quick Contact</h4>
                     <div className="admin-order-contact-row">
@@ -603,7 +548,6 @@ export default function ManageOrders() {
                       </button>
                     </div>
                   </div>
-
                   <div className="admin-info-section admin-info-section-wide">
                     <h4>Confirmation Workflow</h4>
                     <div className="admin-order-confirmation-grid">
@@ -626,7 +570,6 @@ export default function ManageOrders() {
                         <strong>{formatDate(selectedOrder.location_confirmed_at)}</strong>
                       </div>
                     </div>
-
                     <div className="admin-form-group" style={{ marginTop: "1rem" }}>
                       <label htmlFor="confirmation_notes">Admin Confirmation Notes</label>
                       <textarea
@@ -637,7 +580,6 @@ export default function ManageOrders() {
                         placeholder="Add a note about the call, landmark clarification, or delivery instructions."
                       />
                     </div>
-
                     <div className="admin-order-contact-row">
                       <button
                         className="admin-btn admin-btn-secondary admin-btn-sm"
@@ -651,7 +593,6 @@ export default function ManageOrders() {
                         <FileText size={14} />
                         Save Note
                       </button>
-
                       {selectedOrder.confirmation_status === "pending" ? (
                         <button
                           className="admin-btn admin-btn-primary admin-btn-sm"
@@ -667,7 +608,6 @@ export default function ManageOrders() {
                           Mark Contacted
                         </button>
                       ) : null}
-
                       {selectedOrder.confirmation_status !== "location_confirmed" ? (
                         <button
                           className="admin-btn admin-btn-primary admin-btn-sm"
@@ -686,7 +626,6 @@ export default function ManageOrders() {
                     </div>
                   </div>
                 </div>
-
                 <div className="admin-order-items">
                   <h4>Order Items</h4>
                   <table className="admin-table">
@@ -710,7 +649,6 @@ export default function ManageOrders() {
                     </tbody>
                   </table>
                 </div>
-
                 <div className="admin-order-actions">
                   {getNextStatus(selectedOrder.status) ? (
                     <button
@@ -727,7 +665,6 @@ export default function ManageOrders() {
                       {formatStatusLabel(getNextStatus(selectedOrder.status) as OrderStatus)}
                     </button>
                   ) : null}
-
                   {canCancelOrder(selectedOrder.status) ? (
                     <button
                       className="admin-btn admin-btn-danger"

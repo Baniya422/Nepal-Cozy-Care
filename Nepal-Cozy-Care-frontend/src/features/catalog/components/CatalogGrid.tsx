@@ -1,6 +1,5 @@
 import { Heart, Star } from "lucide-react";
 import type { CatalogPlant } from "../types";
-
 type CatalogGridProps = {
   apiBaseUrl: string;
   plants: CatalogPlant[];
@@ -14,7 +13,6 @@ type CatalogGridProps = {
   showSalesBadge?: boolean;
   salesBadgeLabel?: (index: number, plant: CatalogPlant) => string;
 };
-
 export default function CatalogGrid({
   apiBaseUrl,
   plants,
@@ -49,11 +47,9 @@ export default function CatalogGrid({
       </div>
     );
   }
-
   if (plants.length === 0) {
     return <div className="popular-empty">{emptyMessage}</div>;
   }
-
   return (
     <div className="popular-grid">
       {plants.map((plant, index) => {
@@ -62,14 +58,12 @@ export default function CatalogGrid({
           Math.min(5, Math.round(plant.avg_rating ?? 5))
         );
         const isWishlisted = wishlistIds.includes(plant.id);
-
         return (
           <article key={plant.id} className="popular-card">
           <div className="popular-card-image-wrapper">
             {showSalesBadge && salesBadgeLabel ? (
               <div className="seller-badge">{salesBadgeLabel(index, plant)}</div>
             ) : null}
-
             <img
               src={
                 plant.image
@@ -84,7 +78,6 @@ export default function CatalogGrid({
               }}
               onClick={() => onPlantClick(plant.id)}
             />
-
             {showWishlistButton ? (
               <button
                 className={`popular-heart-btn ${isWishlisted ? "active" : ""}`}
@@ -100,7 +93,6 @@ export default function CatalogGrid({
               </button>
             ) : null}
           </div>
-
           <div className="popular-card-body">
             <h3 className="popular-card-name">{plant.name}</h3>
             <p className="popular-card-category">{plant.category || "Indoor"}</p>
@@ -118,7 +110,6 @@ export default function CatalogGrid({
               ))}
               <span className="popular-rating-text">({roundedRating})</span>
             </div>
-
             {showSalesBadge ? (
               <div className="popular-card-rating">
                 <span className="popular-rating-text">
@@ -126,7 +117,6 @@ export default function CatalogGrid({
                 </span>
               </div>
             ) : null}
-
             <div className="popular-card-footer">
               <span className="popular-card-price">
                 Rs {Number(plant.price).toFixed(2)}

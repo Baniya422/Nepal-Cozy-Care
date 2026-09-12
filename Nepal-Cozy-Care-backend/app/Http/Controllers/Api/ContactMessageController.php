@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContactMessageReceived;
 use App\Models\ContactMessage;
+use App\Services\MailSettingsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ContactMessageController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, MailSettingsService $mailSettings)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:120',
@@ -20,17 +25,43 @@ class ContactMessageController extends Controller
             'order_reference' => 'nullable|string|max:60',
             'message' => 'required|string|max:3000',
         ]);
-
         $message = ContactMessage::create([
             ...$validated,
             'user_id' => $request->user()?->id,
             'status' => 'new',
         ]);
 
+        $emailDelivery = 'not_configured';
+        $settings = $mailSettings->current();
+        if ($mailSettings->apply($settings)) {
+            try {
+                Mail::purge('smtp');
+                Mail::to($mailSettings->recipient($settings))
+                    ->send(new ContactMessageReceived($message));
+                $message->update([
+                    'email_sent_at' => now(),
+                    'email_error' => null,
+                ]);
+                $emailDelivery = 'sent';
+            } catch (\Throwable $exception) {
+                $emailDelivery = 'failed';
+                $message->update([
+                    'email_error' => Str::limit($exception->getMessage(), 2000),
+                ]);
+                Log::error('Contact notification email failed.', [
+                    'contact_message_id' => $message->id,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
         return response()->json([
-            'message' => 'Message sent successfully. Our team will get back to you soon.',
+            'message' => $emailDelivery === 'failed'
+                ? 'Your message was saved, but the email notification could not be delivered. Our team can still see it in the admin inbox.'
+                : 'Message sent successfully. Our team will get back to you soon.',
             'data' => [
-                'message_record' => $message,
+                'message_record' => $message->fresh(),
+                'email_delivery' => $emailDelivery,
             ],
         ], 201);
     }
@@ -39,22 +70,19 @@ class ContactMessageController extends Controller
     {
         $query = ContactMessage::with('user:id,name,email')
             ->latest();
-
         if ($status = $request->query('status')) {
             $query->where('status', $status);
         }
-
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('email', 'like', '%' . $search . '%')
-                    ->orWhere('city', 'like', '%' . $search . '%')
-                    ->orWhere('subject', 'like', '%' . $search . '%')
-                    ->orWhere('order_reference', 'like', '%' . $search . '%')
-                    ->orWhere('message', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('city', 'like', '%'.$search.'%')
+                    ->orWhere('subject', 'like', '%'.$search.'%')
+                    ->orWhere('order_reference', 'like', '%'.$search.'%')
+                    ->orWhere('message', 'like', '%'.$search.'%');
             });
         }
-
         $messages = $query->paginate((int) $request->query('per_page', 20));
 
         return response()->json([
@@ -76,9 +104,7 @@ class ContactMessageController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:new,in_progress,resolved',
         ]);
-
         $message = ContactMessage::findOrFail($id);
-
         $message->update([
             'status' => $validated['status'],
             'resolved_at' => $validated['status'] === 'resolved' ? now() : null,

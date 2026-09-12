@@ -20,21 +20,18 @@ class PlantControllerTest extends TestCase
             'price' => 15.99,
             'stock' => 10,
         ]);
-
         Plant::create([
             'name' => 'Snake Plant',
             'scientific_name' => 'Sansevieria trifasciata',
             'category' => 'Succulents',
-            'is_active' => false, // inactive plant should not be fetched here
+            'is_active' => false,
             'price' => 20.00,
             'stock' => 10,
         ]);
-
         $response = $this->getJson('/api/plants');
-
         $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data.plants')
-                 ->assertJsonPath('data.plants.0.name', 'Aloe Vera');
+            ->assertJsonCount(1, 'data.plants')
+            ->assertJsonPath('data.plants.0.name', 'Aloe Vera');
     }
 
     public function test_can_get_popular_plants()
@@ -48,7 +45,6 @@ class PlantControllerTest extends TestCase
             'price' => 25.0,
             'stock' => 5,
         ]);
-
         Plant::create([
             'name' => 'Unpopular Plant',
             'scientific_name' => 'Unpopularia',
@@ -58,13 +54,11 @@ class PlantControllerTest extends TestCase
             'price' => 25.0,
             'stock' => 5,
         ]);
-
         $response = $this->getJson('/api/popular-items');
-
         $response->assertStatus(200)
-                 ->assertJsonCount(2, 'data.data')
-                 ->assertJsonPath('data.data.0.name', 'Popular Plant')
-                 ->assertJsonPath('data.data.1.name', 'Unpopular Plant');
+            ->assertJsonCount(2, 'data.data')
+            ->assertJsonPath('data.data.0.name', 'Popular Plant')
+            ->assertJsonPath('data.data.1.name', 'Unpopular Plant');
     }
 
     public function test_can_show_single_plant()
@@ -78,13 +72,9 @@ class PlantControllerTest extends TestCase
             'price' => 30.0,
             'stock' => 2,
         ]);
-
-        $response = $this->getJson('/api/plants/' . $plant->id);
-
+        $response = $this->getJson('/api/plants/'.$plant->id);
         $response->assertStatus(200)
-                 ->assertJsonPath('data.plant.name', 'Ficus');
-                 
-        // Verify views incremented directly in the DB
+            ->assertJsonPath('data.plant.name', 'Ficus');
         $this->assertEquals(1, $plant->fresh()->views);
     }
 
@@ -98,7 +88,6 @@ class PlantControllerTest extends TestCase
             'price' => 10,
             'stock' => 10,
         ]);
-
         Plant::create([
             'name' => 'Other Plant',
             'scientific_name' => 'Other test',
@@ -107,12 +96,10 @@ class PlantControllerTest extends TestCase
             'price' => 10,
             'stock' => 10,
         ]);
-
         $response = $this->getJson('/api/plants?search=Aloe');
-
         $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data.plants')
-                 ->assertJsonPath('data.plants.0.name', 'Searchable Aloe');
+            ->assertJsonCount(1, 'data.plants')
+            ->assertJsonPath('data.plants.0.name', 'Searchable Aloe');
     }
 
     public function test_can_filter_plants_by_category()
@@ -124,7 +111,6 @@ class PlantControllerTest extends TestCase
             'price' => 10,
             'stock' => 10,
         ]);
-
         Plant::create([
             'name' => 'Outdoor Plant',
             'category' => 'Outdoor',
@@ -132,11 +118,9 @@ class PlantControllerTest extends TestCase
             'price' => 10,
             'stock' => 10,
         ]);
-
         $response = $this->getJson('/api/plants?category=Indoor');
-
         $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data.plants')
-                 ->assertJsonPath('data.plants.0.name', 'Indoor Plant');
+            ->assertJsonCount(1, 'data.plants')
+            ->assertJsonPath('data.plants.0.name', 'Indoor Plant');
     }
 }

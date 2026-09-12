@@ -1,5 +1,4 @@
 import { Filter } from "lucide-react";
-
 interface FiltersProps {
   categories: Record<string, string>;
   selectedCategory: string;
@@ -12,7 +11,6 @@ interface FiltersProps {
   total: number;
   hasActiveFilters: boolean;
 }
-
 export default function Filters({
   categories,
   selectedCategory,
@@ -33,8 +31,7 @@ export default function Filters({
             <Filter size={18} />
             <span className="care-tips-filter-label">Filter by:</span>
           </div>
-
-          {/* Category Filter */}
+          {}
           <div className="care-tips-filter-dropdown">
             <select
               value={selectedCategory}
@@ -49,8 +46,7 @@ export default function Filters({
               ))}
             </select>
           </div>
-
-          {/* Difficulty Filter */}
+          {}
           <div className="care-tips-filter-dropdown">
             <select
               value={selectedDifficulty}
@@ -63,8 +59,7 @@ export default function Filters({
               <option value="advanced">Advanced</option>
             </select>
           </div>
-
-          {/* Sort */}
+          {}
           <div className="care-tips-filter-dropdown">
             <select
               value={sortBy}
@@ -76,14 +71,12 @@ export default function Filters({
               <option value="popular">Most Popular</option>
             </select>
           </div>
-
           {hasActiveFilters && (
             <button onClick={clearFilters} className="care-tips-clear-filters">
               Clear Filters
             </button>
           )}
         </div>
-
         <div className="care-tips-results-count">
           {total} {total === 1 ? "tip" : "tips"} found
         </div>

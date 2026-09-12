@@ -1,35 +1,14 @@
-export default function Banner() {
+import { resolvePageImage } from "../../features/page-content/templates";
+export default function Banner({ images }: { images: { image: string; alt: string }[] }) {
   return (
     <section className="contact-banner">
+      {}
       <div className="contact-banner-images">
-        <div className="contact-banner-image-wrapper">
-          <img
-            src="/images/nepal-mountains.jpg"
-            alt="Nepal Mountains"
-            className="contact-banner-image"
-          />
-        </div>
-        <div className="contact-banner-image-wrapper">
-          <img
-            src="/images/nepal-stupa.jpg"
-            alt="Nepal Stupa"
-            className="contact-banner-image"
-          />
-        </div>
-        <div className="contact-banner-image-wrapper">
-          <img
-            src="/images/nepal-plane.jpg"
-            alt="Nepal Plane"
-            className="contact-banner-image"
-          />
-        </div>
-        <div className="contact-banner-image-wrapper">
-          <img
-            src="/images/nepal-landscape.jpg"
-            alt="Nepal Landscape"
-            className="contact-banner-image"
-          />
-        </div>
+        {images.map((item, index) => (
+          <div className="contact-banner-image-wrapper" key={`${item.image}-${index}`}>
+            <img src={resolvePageImage(item.image)} alt={item.alt} className="contact-banner-image" />
+          </div>
+        ))}
       </div>
     </section>
   );

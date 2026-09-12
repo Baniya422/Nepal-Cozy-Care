@@ -1,37 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./auth.css";
-
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-
   useEffect(() => {
     const state = location.state as { email?: string; message?: string } | null;
-
     if (state?.email) {
       setEmail(state.email);
     }
-
     if (state?.message) {
       setSuccess(state.message);
     }
   }, [location.state]);
-
   const parseApiError = (status: number, payload: any) => {
     if (status >= 500) {
       return "Server error. Please try again in a moment.";
     }
-
     return (
       payload?.errors?.email?.[0] ||
       payload?.errors?.password?.[0] ||
@@ -39,15 +30,12 @@ export default function Login() {
       "Login failed."
     );
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
     if (!email.trim()) return setError("Email is required.");
     if (!password) return setError("Password is required.");
-
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/login`, {
@@ -58,32 +46,25 @@ export default function Login() {
         },
         body: JSON.stringify({ email, password }),
       });
-
       const data: any = await res.json().catch(() => ({}));
-
       if (!res.ok) {
         const msg = parseApiError(res.status, data);
         throw new Error(msg);
       }
-
-      // ✅ Save token + user
       if (data?.token) localStorage.setItem("token", data.token);
       if (data?.user) localStorage.setItem("user", JSON.stringify(data.user));
-
-      // ✅ Redirect after login
-      navigate("/plants"); // change if your app uses a different route
+      navigate("/plants");
     } catch (err: any) {
       setError(err?.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="auth-wrap">
       <div className="auth-card">
         <div className="auth-logo">
-          {/* Leaf icon */}
+          {}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path
               d="M20 4c-6.5 0-12 2.5-15 7.5C2.5 16.5 4 20 8.5 20c5 0 9.5-4.5 10.5-11.5z"
@@ -101,13 +82,10 @@ export default function Login() {
             />
           </svg>
         </div>
-
         <div className="auth-topline">Welcome Back</div>
         <p className="auth-subtitle">Login to continue your plant care journey</p>
-
         {error ? <div className="auth-alert auth-alert--error">{error}</div> : null}
         {success ? <div className="auth-alert auth-alert--success">{success}</div> : null}
-
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-label">
             Email Address
@@ -120,7 +98,6 @@ export default function Login() {
               autoComplete="email"
             />
           </label>
-
           <label className="auth-label">
             Password
             <input
@@ -132,12 +109,10 @@ export default function Login() {
               autoComplete="current-password"
             />
           </label>
-
           <button className="auth-btn" disabled={loading} type="submit">
             {loading ? "Logging in..." : "Login"}
           </button>
-
-          {/* Just UI for now. You can wire backend later */}
+          {}
           <button
             type="button"
             className="auth-link-btn"
@@ -151,7 +126,6 @@ export default function Login() {
           >
             Forgot your password?
           </button>
-
           <div className="auth-footer">
             <span>Don’t have an account?</span>
             <Link className="auth-link" to="/register">

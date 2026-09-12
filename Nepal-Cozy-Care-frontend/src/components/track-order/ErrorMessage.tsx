@@ -1,9 +1,7 @@
 import { AlertCircle } from "lucide-react";
-
 interface ErrorMessageProps {
   error: string;
 }
-
 export default function ErrorMessage({ error }: ErrorMessageProps) {
   return (
     <section className="track-order-error-section">

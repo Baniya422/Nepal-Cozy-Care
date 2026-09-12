@@ -20,9 +20,7 @@ import type {
   PriceFilterKey,
 } from "../features/catalog/types";
 import "../styles/popular-items.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 export default function PopularItemsPage() {
   const navigate = useNavigate();
   const [plants, setPlants] = useState<CatalogPlant[]>([]);
@@ -35,7 +33,6 @@ export default function PopularItemsPage() {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [priceFilters, setPriceFilters] = useState<PriceFilterKey[]>([]);
   const [ratingFilters, setRatingFilters] = useState<number[]>([]);
-
   useEffect(() => {
     fetch(`${API}/api/homepage/popular-items?per_page=100`)
       .then((response) => response.json())
@@ -45,7 +42,6 @@ export default function PopularItemsPage() {
       .catch(() => setPlants([]))
       .finally(() => setLoading(false));
   }, []);
-
   const filteredPlants = useMemo(() => {
     const filtered = filterCatalogPlants({
       plants,
@@ -54,10 +50,8 @@ export default function PopularItemsPage() {
       ratingFilters,
       category,
     });
-
     return sortCatalogPlants(filtered, sort);
   }, [plants, searchTerm, priceFilters, ratingFilters, category, sort]);
-
   return (
     <Layout>
       <div className="popular-page">
@@ -71,7 +65,6 @@ export default function PopularItemsPage() {
             setRatingFilters((current) => toggleNumberValue(current, value))
           }
         />
-
         <section className="popular-main">
           <CatalogHeader
             title="Popular Items"
@@ -83,9 +76,7 @@ export default function PopularItemsPage() {
             onSearchChange={setSearchTerm}
             onSortChange={(value) => setSort(value as typeof sort)}
           />
-
           <CatalogCategoryChips category={category} onChange={setCategory} />
-
           <CatalogGrid
             apiBaseUrl={API}
             plants={filteredPlants}

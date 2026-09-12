@@ -1,6 +1,5 @@
 import { Search, SlidersHorizontal } from "lucide-react";
 import type { SortChoice } from "../types";
-
 type CatalogHeaderProps = {
   title: string;
   subtitle: string;
@@ -11,7 +10,6 @@ type CatalogHeaderProps = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
 };
-
 export default function CatalogHeader({
   title,
   subtitle,
@@ -28,7 +26,6 @@ export default function CatalogHeader({
         <h1 className="popular-title">{title}</h1>
         <p className="popular-subtitle">{subtitle}</p>
       </div>
-
       <div className="popular-header-actions">
         <div className="popular-search">
           <Search size={16} />
@@ -39,12 +36,10 @@ export default function CatalogHeader({
             onChange={(event) => onSearchChange(event.target.value)}
           />
         </div>
-
         <button className="popular-filter-btn" type="button">
           <SlidersHorizontal size={16} />
           Filters
         </button>
-
         <div className="popular-sort">
           <span>Sort by</span>
           <select

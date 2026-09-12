@@ -1,10 +1,8 @@
 import { Inbox } from "lucide-react";
-
 interface EmptyStateProps {
   message?: string;
   submessage?: string;
 }
-
 export default function EmptyState({
   message = "No items found",
   submessage = "Try adjusting your search or filters",

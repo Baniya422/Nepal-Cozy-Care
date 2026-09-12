@@ -1,10 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { BookOpen, TrendingUp, Clock3, ArrowRight } from "lucide-react";
 import type { CareTip } from "../../types/careTip";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
-
 interface TipsGridProps {
   careTips: CareTip[];
   loading: boolean;
@@ -13,7 +11,6 @@ interface TipsGridProps {
   lastPage: number;
   setCurrentPage: (page: number) => void;
 }
-
 const categoryLabels: Record<string, string> = {
   watering: "Watering",
   fertilizing: "Fertilizing",
@@ -22,13 +19,11 @@ const categoryLabels: Record<string, string> = {
   outdoor: "Outdoor Plants",
   seasonal: "Seasonal Care",
 };
-
 const difficultyLabels: Record<string, string> = {
   beginner: "Beginner",
   intermediate: "Intermediate",
   advanced: "Advanced",
 };
-
 export default function TipsGrid({
   careTips,
   loading,
@@ -38,33 +33,26 @@ export default function TipsGrid({
   setCurrentPage,
 }: TipsGridProps) {
   const navigate = useNavigate();
-
   const getReadingMinutes = (content: string) => {
     const wordCount = content
       .replace(/<[^>]+>/g, " ")
       .split(/\s+/)
       .filter(Boolean).length;
-
     return Math.max(2, Math.ceil(wordCount / 170));
   };
-
   const getPreviewText = (tip: CareTip) => {
     if (tip.excerpt?.trim()) {
       return tip.excerpt;
     }
-
     const plainContent = tip.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     return plainContent.length > 150 ? `${plainContent.slice(0, 150)}...` : plainContent;
   };
-
   const getCategoryLabel = (category: string) => {
     return categoryLabels[category] || category;
   };
-
   const getDifficultyLabel = (difficulty: string) => {
     return difficultyLabels[difficulty] || difficulty;
   };
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
@@ -77,7 +65,6 @@ export default function TipsGrid({
         return "difficulty-beginner";
     }
   };
-
   if (loading) {
     return (
       <section className="care-tips-grid-section">
@@ -105,7 +92,6 @@ export default function TipsGrid({
       </section>
     );
   }
-
   if (careTips.length === 0) {
     return (
       <section className="care-tips-grid-section">
@@ -122,7 +108,6 @@ export default function TipsGrid({
       </section>
     );
   }
-
   return (
     <section className="care-tips-grid-section">
       <div className="care-tips-container">
@@ -179,8 +164,7 @@ export default function TipsGrid({
             </article>
           ))}
         </div>
-
-        {/* Pagination */}
+        {}
         {lastPage > 1 && (
           <div className="care-tips-pagination">
             <button

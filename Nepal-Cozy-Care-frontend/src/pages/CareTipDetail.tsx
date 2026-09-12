@@ -15,10 +15,8 @@ import {
 import Layout from "../components/layout/Layout";
 import type { CareTip, CareTipDetailResponse } from "../types/careTip";
 import "../styles/careTips.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
-
 const categoryLabels: Record<string, string> = {
   watering: "Watering",
   fertilizing: "Fertilizing",
@@ -27,13 +25,11 @@ const categoryLabels: Record<string, string> = {
   outdoor: "Outdoor Plants",
   seasonal: "Seasonal Care",
 };
-
 const difficultyLabels: Record<string, string> = {
   beginner: "Beginner",
   intermediate: "Intermediate",
   advanced: "Advanced",
 };
-
 const categoryAdvice: Record<string, string> = {
   watering: "Check the soil before watering so you treat the plant, not the calendar.",
   fertilizing: "Feed during active growth and slow down when the plant is resting.",
@@ -42,7 +38,6 @@ const categoryAdvice: Record<string, string> = {
   outdoor: "Watch sun exposure and weather changes because outdoor conditions shift quickly.",
   seasonal: "Adjust care with the season so watering, feeding, and growth expectations stay realistic.",
 };
-
 const bestForCopy: Record<string, string> = {
   watering: "Homes where overwatering is the most common mistake.",
   fertilizing: "Plant owners who want stronger growth without root stress.",
@@ -51,90 +46,71 @@ const bestForCopy: Record<string, string> = {
   outdoor: "Balconies, terraces, and sun-exposed plant corners.",
   seasonal: "Nepal homes adapting plant care across spring, monsoon, autumn, and winter.",
 };
-
 const stripHtml = (value: string) => value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-
 const createExcerpt = (tip: CareTip) => {
   if (tip.excerpt?.trim()) {
     return tip.excerpt;
   }
-
   const plainContent = stripHtml(tip.content);
   return plainContent.length > 180 ? `${plainContent.slice(0, 180)}...` : plainContent;
 };
-
 const getReadingMinutes = (tip: CareTip) => {
   const source = `${tip.excerpt || ""} ${stripHtml(tip.content)}`.trim();
   const words = source.split(/\s+/).filter(Boolean).length;
   return Math.max(2, Math.ceil(words / 170));
 };
-
 const formatPlainTextToHtml = (value: string) => {
   const blocks = value
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean);
-
   if (blocks.length === 0) {
     return "<p>No content available yet.</p>";
   }
-
   return blocks
     .map((block) => {
       const lines = block
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean);
-
       const isList = lines.every((line) => /^[-*]\s+/.test(line) || /^\d+\.\s+/.test(line));
-
       if (isList) {
         const listType = lines.every((line) => /^\d+\.\s+/.test(line)) ? "ol" : "ul";
         const items = lines
           .map((line) => line.replace(/^[-*]\s+/, "").replace(/^\d+\.\s+/, ""))
           .map((line) => `<li>${line}</li>`)
           .join("");
-
         return `<${listType}>${items}</${listType}>`;
       }
-
       if (lines.length === 1 && /:$/.test(lines[0]) && lines[0].length < 80) {
         return `<h3>${lines[0].slice(0, -1)}</h3>`;
       }
-
       return `<p>${lines.join("<br />")}</p>`;
     })
     .join("");
 };
-
 const getContentHtml = (content: string) => {
   const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content);
   return looksLikeHtml ? content : formatPlainTextToHtml(content);
 };
-
 export default function CareTipDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   const [tip, setTip] = useState<CareTip | null>(null);
   const [relatedTips, setRelatedTips] = useState<CareTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shareLabel, setShareLabel] = useState("Copy Link");
-
   useEffect(() => {
     if (id) {
       void fetchCareTip();
     }
   }, [id]);
-
   const fetchCareTip = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await fetch(`${API}/api/care-tips/${id}`);
-
       if (response.ok) {
         const data: CareTipDetailResponse = await response.json();
         setTip(data.data.tip);
@@ -151,9 +127,7 @@ export default function CareTipDetail() {
       setLoading(false);
     }
   };
-
   const getCategoryLabel = (category: string) => categoryLabels[category] || category;
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
@@ -166,11 +140,9 @@ export default function CareTipDetail() {
         return "difficulty-beginner";
     }
   };
-
   const handleShare = async () => {
     const shareTitle = tip?.title || "Care Tip";
     const shareText = tip ? createExcerpt(tip) : "Read this care tip";
-
     try {
       if (navigator.share) {
         await navigator.share({
@@ -190,7 +162,6 @@ export default function CareTipDetail() {
       window.setTimeout(() => setShareLabel("Copy Link"), 2200);
     }
   };
-
   if (loading) {
     return (
       <Layout>
@@ -202,7 +173,6 @@ export default function CareTipDetail() {
       </Layout>
     );
   }
-
   if (error || !tip) {
     return (
       <Layout>
@@ -223,7 +193,6 @@ export default function CareTipDetail() {
       </Layout>
     );
   }
-
   const leadText = createExcerpt(tip);
   const readMinutes = getReadingMinutes(tip);
   const contentHtml = getContentHtml(tip.content);
@@ -232,7 +201,6 @@ export default function CareTipDetail() {
     month: "long",
     day: "numeric",
   });
-
   return (
     <Layout>
       <div className="care-tip-detail-page">
@@ -245,7 +213,6 @@ export default function CareTipDetail() {
             Back to Care Tips
           </button>
         </div>
-
         <section className="care-tip-detail-hero">
           <div className="care-tips-container">
             <div className="care-tip-detail-hero-shell">
@@ -258,10 +225,8 @@ export default function CareTipDetail() {
                     {difficultyLabels[tip.difficulty]}
                   </span>
                 </div>
-
                 <h1 className="care-tip-detail-title">{tip.title}</h1>
                 <p className="care-tip-detail-lead">{leadText}</p>
-
                 <div className="care-tip-detail-meta">
                   <span className="care-tip-detail-meta-item">
                     <User size={16} />
@@ -276,7 +241,6 @@ export default function CareTipDetail() {
                     {tip.views_count.toLocaleString()} views
                   </span>
                 </div>
-
                 <div className="care-tip-detail-stat-strip">
                   <div className="care-tip-detail-stat-card">
                     <span>Read Time</span>
@@ -292,7 +256,6 @@ export default function CareTipDetail() {
                   </div>
                 </div>
               </div>
-
               <div className="care-tip-detail-hero-visual">
                 <div className="care-tip-detail-hero-image-frame">
                   <img
@@ -313,7 +276,6 @@ export default function CareTipDetail() {
             </div>
           </div>
         </section>
-
         <section className="care-tip-detail-content-section">
           <div className="care-tips-container">
             <div className="care-tip-detail-grid">
@@ -322,13 +284,11 @@ export default function CareTipDetail() {
                   <span className="care-tip-detail-intro-label">Quick Summary</span>
                   <p>{leadText}</p>
                 </div>
-
                 <article
                   className="care-tip-detail-content"
                   dangerouslySetInnerHTML={{ __html: contentHtml }}
                 />
               </div>
-
               <aside className="care-tip-detail-sidebar">
                 <div className="care-tip-detail-info-card">
                   <h3 className="care-tip-detail-info-title">
@@ -358,7 +318,6 @@ export default function CareTipDetail() {
                     </span>
                   </div>
                 </div>
-
                 <div className="care-tip-detail-info-card care-tip-detail-action-card">
                   <h3 className="care-tip-detail-info-title">
                     <ShieldCheck size={18} />
@@ -370,7 +329,6 @@ export default function CareTipDetail() {
                     {shareLabel}
                   </button>
                 </div>
-
                 <div className="care-tip-detail-info-card care-tip-detail-cta-card">
                   <h3 className="care-tip-detail-info-title">
                     <Sprout size={18} />
@@ -393,7 +351,6 @@ export default function CareTipDetail() {
             </div>
           </div>
         </section>
-
         {relatedTips.length > 0 && (
           <section className="care-tip-detail-related">
             <div className="care-tips-container">
@@ -404,7 +361,6 @@ export default function CareTipDetail() {
                 </h2>
                 <p>More guides from the Cozy Care library to help you build a complete routine.</p>
               </div>
-
               <div className="care-tip-detail-related-grid">
                 {relatedTips.map((relatedTip) => (
                   <article

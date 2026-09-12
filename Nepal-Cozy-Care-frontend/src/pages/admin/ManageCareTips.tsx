@@ -16,9 +16,7 @@ import {
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 import "../../styles/adminCareTips.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 interface CareTip {
   id: number;
   title: string;
@@ -31,7 +29,6 @@ interface CareTip {
   status: "published" | "draft";
   image: string | null;
 }
-
 interface CareTipFormData {
   title: string;
   excerpt: string;
@@ -40,7 +37,6 @@ interface CareTipFormData {
   difficulty: "beginner" | "intermediate" | "advanced";
   status: "published" | "draft";
 }
-
 const emptyForm: CareTipFormData = {
   title: "",
   excerpt: "",
@@ -49,9 +45,7 @@ const emptyForm: CareTipFormData = {
   difficulty: "beginner",
   status: "draft",
 };
-
 const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
-
 export default function ManageCareTips() {
   const [careTips, setCareTips] = useState<CareTip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,39 +57,30 @@ export default function ManageCareTips() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
   useEffect(() => {
     void fetchCareTips();
   }, []);
-
   const getToken = () => localStorage.getItem("token");
-
   const getPreviewText = (excerpt: string, content: string, maxLength = 155) => {
     if (excerpt.trim()) {
       return excerpt;
     }
-
     const plainContent = content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     return plainContent.length > maxLength ? `${plainContent.slice(0, maxLength)}...` : plainContent;
   };
-
   const getReadTime = (content: string, excerpt = "") => {
     const wordCount = `${excerpt} ${content.replace(/<[^>]+>/g, " ")}`
       .split(/\s+/)
       .filter(Boolean).length;
-
     return Math.max(1, Math.ceil(wordCount / 180));
   };
-
   const fetchCareTips = async () => {
     setLoading(true);
-
     try {
       const token = getToken();
       const res = await fetch(`${API}/api/admin/care-tips`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) {
         const data = await res.json();
         const tipsData = data.data?.tips || data.data?.data || data.data || [];
@@ -120,7 +105,6 @@ export default function ManageCareTips() {
       setLoading(false);
     }
   };
-
   const closeEditor = () => {
     setShowModal(false);
     setEditingTip(null);
@@ -129,20 +113,16 @@ export default function ManageCareTips() {
     setImagePreview(null);
     setSubmitError(null);
   };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitError(null);
     const token = getToken();
-
     try {
       let imagePath = null;
-
       if (selectedImage) {
         const formDataImage = new FormData();
         formDataImage.append("file", selectedImage);
         formDataImage.append("directory", "care-tips");
-
         const uploadRes = await fetch(`${API}/api/upload`, {
           method: "POST",
           headers: {
@@ -150,7 +130,6 @@ export default function ManageCareTips() {
           },
           body: formDataImage,
         });
-
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
           imagePath = uploadData.data?.path || uploadData.path;
@@ -158,10 +137,8 @@ export default function ManageCareTips() {
           console.error("Image upload failed");
         }
       }
-
       const url = editingTip ? `${API}/api/care-tips/${editingTip.id}` : `${API}/api/care-tips`;
       const method = editingTip ? "PUT" : "POST";
-
       const requestBody: Record<string, unknown> = {
         title: formData.title,
         excerpt: formData.excerpt,
@@ -170,11 +147,9 @@ export default function ManageCareTips() {
         difficulty: formData.difficulty,
         is_published: formData.status === "published",
       };
-
       if (imagePath) {
         requestBody.image = imagePath;
       }
-
       const res = await fetch(url, {
         method,
         headers: {
@@ -183,7 +158,6 @@ export default function ManageCareTips() {
         },
         body: JSON.stringify(requestBody),
       });
-
       if (res.ok) {
         closeEditor();
         await fetchCareTips();
@@ -196,18 +170,14 @@ export default function ManageCareTips() {
       setSubmitError("Failed to save care tip. Please try again.");
     }
   };
-
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this care tip?")) return;
-
     const token = getToken();
-
     try {
       const res = await fetch(`${API}/api/care-tips/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) {
         await fetchCareTips();
       } else {
@@ -217,10 +187,8 @@ export default function ManageCareTips() {
       console.error("Error deleting care tip:", error);
     }
   };
-
   const handlePublish = async (id: number) => {
     const token = getToken();
-
     try {
       const res = await fetch(`${API}/api/care-tips/${id}`, {
         method: "PUT",
@@ -230,7 +198,6 @@ export default function ManageCareTips() {
         },
         body: JSON.stringify({ is_published: true }),
       });
-
       if (res.ok) {
         await fetchCareTips();
       }
@@ -238,7 +205,6 @@ export default function ManageCareTips() {
       console.error("Error publishing care tip:", error);
     }
   };
-
   const handleEdit = (tip: CareTip) => {
     setEditingTip(tip);
     setFormData({
@@ -254,7 +220,6 @@ export default function ManageCareTips() {
     setSubmitError(null);
     setShowModal(true);
   };
-
   const handleAddNew = () => {
     setEditingTip(null);
     setFormData(emptyForm);
@@ -263,16 +228,13 @@ export default function ManageCareTips() {
     setSubmitError(null);
     setShowModal(true);
   };
-
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
     if (file) {
       setSelectedImage(file);
       setImagePreview(URL.createObjectURL(file));
     }
   };
-
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
       watering: "Watering",
@@ -282,10 +244,8 @@ export default function ManageCareTips() {
       outdoor: "Outdoor Plants",
       seasonal: "Seasonal Care",
     };
-
     return labels[category] || category;
   };
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
@@ -298,7 +258,6 @@ export default function ManageCareTips() {
         return "";
     }
   };
-
   const filteredTips = careTips.filter(
     (tip) =>
       tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -306,14 +265,12 @@ export default function ManageCareTips() {
       tip.difficulty.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tip.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-
   const publishedCount = careTips.filter((tip) => tip.status === "published").length;
   const draftCount = careTips.length - publishedCount;
   const totalViews = careTips.reduce((sum, tip) => sum + tip.views_count, 0);
@@ -326,7 +283,6 @@ export default function ManageCareTips() {
   const excerptLength = formData.excerpt.trim().length;
   const liveReadTime = getReadTime(formData.content, formData.excerpt);
   const livePreviewText = getPreviewText(formData.excerpt, formData.content, 200);
-
   return (
     <AdminLayout>
       <div className="admin-page admin-care-tips-page">
@@ -339,7 +295,6 @@ export default function ManageCareTips() {
               and help your My Garden and seasonal reminder features feel more premium.
             </p>
           </div>
-
           <div className="admin-care-tips-hero-side">
             {topTip ? (
               <div className="admin-care-tips-top-tip">
@@ -348,14 +303,12 @@ export default function ManageCareTips() {
                 <p>{topTip.views_count.toLocaleString()} total views</p>
               </div>
             ) : null}
-
             <button className="admin-btn admin-btn-primary" onClick={handleAddNew}>
               <Plus size={18} />
               Create New Tip
             </button>
           </div>
         </section>
-
         <section className="admin-care-tips-stats">
           <article className="admin-care-tips-stat-card">
             <div className="admin-care-tips-stat-icon emerald">
@@ -366,7 +319,6 @@ export default function ManageCareTips() {
               <strong>{careTips.length}</strong>
             </div>
           </article>
-
           <article className="admin-care-tips-stat-card">
             <div className="admin-care-tips-stat-icon blue">
               <Sparkles size={20} />
@@ -376,7 +328,6 @@ export default function ManageCareTips() {
               <strong>{publishedCount}</strong>
             </div>
           </article>
-
           <article className="admin-care-tips-stat-card">
             <div className="admin-care-tips-stat-icon amber">
               <Clock3 size={20} />
@@ -386,7 +337,6 @@ export default function ManageCareTips() {
               <strong>{draftCount}</strong>
             </div>
           </article>
-
           <article className="admin-care-tips-stat-card">
             <div className="admin-care-tips-stat-icon slate">
               <BarChart3 size={20} />
@@ -397,7 +347,6 @@ export default function ManageCareTips() {
             </div>
           </article>
         </section>
-
         <div className="admin-filters admin-care-tips-filters">
           <div className="admin-search admin-care-tips-search">
             <Search size={18} />
@@ -412,7 +361,6 @@ export default function ManageCareTips() {
             Content studio tip: write short summaries first, then expand the full guidance.
           </p>
         </div>
-
         <div className="admin-table-container admin-care-tips-table-wrap">
           {loading ? (
             <div className="admin-loading">Loading care tips...</div>
@@ -505,14 +453,12 @@ export default function ManageCareTips() {
               </tbody>
             </table>
           )}
-
           {!loading && filteredTips.length === 0 && (
             <div className="admin-empty-state">
               <p>No care tips found. Create your first care tip!</p>
             </div>
           )}
         </div>
-
         {previewTip && (
           <div className="admin-modal-overlay" onClick={() => setPreviewTip(null)}>
             <div
@@ -525,7 +471,6 @@ export default function ManageCareTips() {
                   <X size={20} />
                 </button>
               </div>
-
               <div className="admin-care-tip-preview">
                 <div className="admin-care-tip-preview-hero">
                   <div className="admin-care-tip-preview-media">
@@ -554,18 +499,15 @@ export default function ManageCareTips() {
                     </div>
                   </div>
                 </div>
-
                 <div className="admin-care-tip-preview-section">
                   <h5>Brief Summary</h5>
                   <p>{previewTip.excerpt || "No separate summary added yet."}</p>
                 </div>
-
                 <div className="admin-care-tip-preview-section">
                   <h5>Full Content</h5>
                   <div className="admin-care-tip-preview-text">{previewTip.content}</div>
                 </div>
               </div>
-
               <div className="admin-modal-footer">
                 {previewTip.status === "published" ? (
                   <a
@@ -597,7 +539,6 @@ export default function ManageCareTips() {
             </div>
           </div>
         )}
-
         {showModal && (
           <div className="admin-modal-overlay" onClick={closeEditor}>
             <div
@@ -610,9 +551,7 @@ export default function ManageCareTips() {
                   <X size={20} />
                 </button>
               </div>
-
               {submitError && <div className="admin-care-tip-error">{submitError}</div>}
-
               <form onSubmit={handleSubmit} className="admin-form">
                 <div className="admin-care-tip-editor-stats">
                   <div className="admin-care-tip-editor-chip">
@@ -630,7 +569,6 @@ export default function ManageCareTips() {
                       : "Draft mode"}
                   </div>
                 </div>
-
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
                     <label>Care Tip Title *</label>
@@ -697,7 +635,6 @@ export default function ManageCareTips() {
                     </select>
                   </div>
                 </div>
-
                 <div className="admin-form-group">
                   <label>Excerpt (Brief Summary)</label>
                   <textarea
@@ -709,7 +646,6 @@ export default function ManageCareTips() {
                     placeholder="Summarize the care tip in 1-2 clear sentences."
                   />
                 </div>
-
                 <div className="admin-form-group">
                   <label>Content *</label>
                   <textarea
@@ -722,7 +658,6 @@ export default function ManageCareTips() {
                     placeholder="Write the full guide here. Use short paragraphs and line breaks for easier reading."
                   />
                 </div>
-
                 <div className="admin-form-group">
                   <label>Featured Image</label>
                   <div className="admin-image-upload">
@@ -738,7 +673,6 @@ export default function ManageCareTips() {
                     </label>
                   </div>
                 </div>
-
                 <section className="admin-care-tip-live-preview">
                   <div className="admin-care-tip-live-preview-head">
                     <Sparkles size={16} />
@@ -760,7 +694,6 @@ export default function ManageCareTips() {
                     </div>
                   </div>
                 </section>
-
                 <div className="admin-modal-footer">
                   <button
                     type="button"

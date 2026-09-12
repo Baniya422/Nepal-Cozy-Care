@@ -1,106 +1,81 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\PlantController;
-use App\Http\Controllers\Api\CartController;
-use App\Http\Controllers\Api\OrderController;
-use App\Http\Controllers\Api\WishlistController;
-use App\Http\Controllers\Api\BlogController;
-use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\CareTipController;
-use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminPageContentController;
+use App\Http\Controllers\Api\AdminSettingsController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\CareTipController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ContentTemplateController;
 use App\Http\Controllers\Api\GardenEntryController;
 use App\Http\Controllers\Api\HelpCenterTemplateController;
+use App\Http\Controllers\Api\HomepageContentController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PlantController;
 use App\Http\Controllers\Api\PlantFinderTemplateController;
 use App\Http\Controllers\Api\PlantHealthTemplateController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SeasonalReminderController;
+use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\WishlistController;
+use Illuminate\Support\Facades\Route;
 
-// Test endpoint where ping testing is done to check if API is connected
 Route::get('/ping', function () {
     return response()->json([
         'status' => 'success',
-        'message' => 'Laravel API is connected!'
+        'message' => 'Laravel API is connected!',
     ]);
 });
-
-// Auth routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/contact', [ContactMessageController::class, 'store']);
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/logout-all', [AuthController::class, 'logoutAll']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/me', [AuthController::class, 'update']);
     Route::put('/me/password', [AuthController::class, 'updatePassword']);
-    
-    // File upload
     Route::post('/upload', [UploadController::class, 'store']);
 });
-
-// Public plant routes (browsing and learning)
-Route::get('/plants', [PlantController::class, 'index']);        // list all active plants with filters
-Route::get('/plants/{id}', [PlantController::class, 'show']);    // single plant detail
-Route::get('/popular-items', [PlantController::class, 'popular']); // popular items (by views)
-Route::get('/best-sellers', [PlantController::class, 'bestSellers']); // best sellers (by total_sold)
-
-// Homepage category endpoints
-Route::get('/homepage/popular-items', [PlantController::class, 'popularItemsHomepage']); // Popular Items section
-Route::get('/homepage/shop-plants', [PlantController::class, 'shopPlantsHomepage']); // Shop Plants section
-Route::get('/homepage/best-sellers', [PlantController::class, 'bestSellersHomepage']); // Best Sellers section
-
-// Authenticated routes
+Route::get('/plants', [PlantController::class, 'index']);
+Route::get('/plants/{id}', [PlantController::class, 'show']);
+Route::get('/popular-items', [PlantController::class, 'popular']);
+Route::get('/best-sellers', [PlantController::class, 'bestSellers']);
+Route::get('/homepage/content', [HomepageContentController::class, 'show']);
+Route::get('/homepage/popular-items', [PlantController::class, 'popularItemsHomepage']);
+Route::get('/homepage/shop-plants', [PlantController::class, 'shopPlantsHomepage']);
+Route::get('/homepage/best-sellers', [PlantController::class, 'bestSellersHomepage']);
 Route::middleware('auth:sanctum')->group(function () {
-    // Cart
-    Route::get('/cart', [CartController::class, 'index']);        // view cart
-    Route::post('/cart', [CartController::class, 'store']);       // add item
-    Route::put('/cart/{id}', [CartController::class, 'update']);  // update quantity
-    Route::delete('/cart/{id}', [CartController::class, 'destroy']); // remove item
-    Route::delete('/cart', [CartController::class, 'clear']);     // clear cart
-
-    // Orders
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart', [CartController::class, 'store']);
+    Route::put('/cart/{id}', [CartController::class, 'update']);
+    Route::delete('/cart/{id}', [CartController::class, 'destroy']);
+    Route::delete('/cart', [CartController::class, 'clear']);
     Route::post('/checkout', [OrderController::class, 'checkout']);
     Route::get('/orders', [OrderController::class, 'myOrders']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
-
-    // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index']);
     Route::post('/wishlist', [WishlistController::class, 'store']);
     Route::delete('/wishlist/{plantId}', [WishlistController::class, 'destroy']);
-
-    // My Garden
     Route::get('/my-garden', [GardenEntryController::class, 'index']);
     Route::post('/my-garden', [GardenEntryController::class, 'store']);
     Route::put('/my-garden/{id}', [GardenEntryController::class, 'update']);
     Route::delete('/my-garden/{id}', [GardenEntryController::class, 'destroy']);
     Route::post('/my-garden/{id}/water', [GardenEntryController::class, 'markWatered']);
     Route::post('/my-garden/{id}/fertilize', [GardenEntryController::class, 'markFertilized']);
-
-    // Reviews (creating requires login)
     Route::post('/reviews', [ReviewController::class, 'store']);
 });
-
-// Public reviews (viewing)
 Route::get('/plants/{id}/reviews', [ReviewController::class, 'plantReviews']);
-
-// Public order tracking
 Route::post('/orders/track', [OrderController::class, 'track']);
-
-// Public blogs (learning)
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/blogs/{id}', [BlogController::class, 'show']);
 Route::get('/top-trends', [BlogController::class, 'topTrends']);
 Route::get('/top-stories', [BlogController::class, 'topStories']);
-
-// Public care tips
 Route::get('/care-tips', [CareTipController::class, 'index']);
 Route::get('/care-tips/categories', [CareTipController::class, 'categories']);
 Route::get('/care-tips/{id}', [CareTipController::class, 'show']);
@@ -109,46 +84,39 @@ Route::get('/content-templates/{key}', [ContentTemplateController::class, 'show'
 Route::get('/help-center/template', [HelpCenterTemplateController::class, 'show']);
 Route::get('/plant-finder/template', [PlantFinderTemplateController::class, 'show']);
 Route::get('/plant-health/template', [PlantHealthTemplateController::class, 'show']);
-
-// Admin-only status update for orders + blog CRUD
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    // Dashboard stats
+    Route::get('/admin/homepage', [HomepageContentController::class, 'adminShow']);
+    Route::put('/admin/homepage', [HomepageContentController::class, 'update']);
+    Route::get('/admin/page-content', [AdminPageContentController::class, 'index']);
+    Route::put('/admin/page-content/{key}', [AdminPageContentController::class, 'update']);
+    Route::get('/admin/settings', [AdminSettingsController::class, 'show']);
+    Route::put('/admin/settings/mail', [AdminSettingsController::class, 'updateMail']);
+    Route::post('/admin/settings/mail/test', [AdminSettingsController::class, 'testMail']);
     Route::get('/admin/dashboard/stats', [AdminController::class, 'dashboardStats']);
     Route::get('/admin/dashboard/recent-orders', [AdminController::class, 'recentOrders']);
     Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);
     Route::get('/admin/reports', [AdminController::class, 'reports']);
     Route::get('/admin/users', [AdminController::class, 'users']);
-    
-    // Admin plant management - list all plants including inactive
     Route::get('/admin/plants', [PlantController::class, 'adminIndex']);
     Route::post('/plants', [PlantController::class, 'store']);
     Route::put('/plants/{id}', [PlantController::class, 'update']);
     Route::delete('/plants/{id}', [PlantController::class, 'destroy']);
-    
     Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
     Route::put('/orders/{id}/confirmation', [OrderController::class, 'updateConfirmation']);
     Route::get('/admin/garden-entries', [GardenEntryController::class, 'adminIndex']);
-
-    // Blog admin CRUD
-    Route::get('/admin/blogs', [BlogController::class, 'adminIndex']);  // get all blogs (published + unpublished)
+    Route::get('/admin/blogs', [BlogController::class, 'adminIndex']);
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::put('/blogs/{id}', [BlogController::class, 'update']);
     Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
-
-    // Care tips admin CRUD
-    Route::get('/admin/care-tips', [CareTipController::class, 'adminIndex']);  // get all care tips (published + unpublished)
+    Route::get('/admin/care-tips', [CareTipController::class, 'adminIndex']);
     Route::post('/care-tips', [CareTipController::class, 'store']);
     Route::put('/care-tips/{id}', [CareTipController::class, 'update']);
     Route::delete('/care-tips/{id}', [CareTipController::class, 'destroy']);
-
-    // Seasonal reminders
     Route::get('/admin/seasonal-reminders', [SeasonalReminderController::class, 'adminIndex']);
     Route::post('/seasonal-reminders', [SeasonalReminderController::class, 'store']);
     Route::put('/seasonal-reminders/{id}', [SeasonalReminderController::class, 'update']);
     Route::delete('/seasonal-reminders/{id}', [SeasonalReminderController::class, 'destroy']);
-
-    // Contact inbox
     Route::get('/admin/contact-messages', [ContactMessageController::class, 'adminIndex']);
     Route::put('/contact-messages/{id}/status', [ContactMessageController::class, 'updateStatus']);
     Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy']);

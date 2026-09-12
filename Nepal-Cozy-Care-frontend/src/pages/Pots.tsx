@@ -5,9 +5,7 @@ import PotsHeader from "../components/pots/PotsHeader";
 import PotsSidebar from "../components/pots/PotsSidebar";
 import PotsGrid from "../components/pots/PotsGrid";
 import "../styles/pots.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 type Pot = {
   id: number;
   name: string;
@@ -18,7 +16,6 @@ type Pot = {
   description?: string;
   is_active?: boolean;
 };
-
 export default function Pots() {
   const navigate = useNavigate();
   const [pots, setPots] = useState<Pot[]>([]);
@@ -28,12 +25,9 @@ export default function Pots() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPrice, setSelectedPrice] = useState<string[]>([]);
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
-
-  // Load pots on mount
   useEffect(() => {
     fetchPots();
   }, []);
-
   const fetchPots = async () => {
     try {
       const response = await fetch(`${API}/api/plants?per_page=100&include_accessories=1`);
@@ -42,24 +36,20 @@ export default function Pots() {
         setFilteredPots([]);
         return;
       }
-
       const data = await response.json();
       const plantsData = data.data?.plants || data.data?.data || data.data || [];
       const normalizedPlants = (Array.isArray(plantsData) ? plantsData : []).map((item: any) => ({
         ...item,
         price: typeof item.price === "string" ? parseFloat(item.price) : item.price || 0,
       }));
-
-      // Filter for items with category "Pots", "Tools", "Soil", "Fertilizers", or "Accessories" (case-insensitive)
       const backendPots = normalizedPlants.filter((item: Pot) => {
         const category = (item.category || "").toLowerCase().trim();
-        return category.includes("pot") || 
-               category.includes("tool") || 
-               category.includes("soil") || 
-               category.includes("fertilizer") || 
+        return category.includes("pot") ||
+               category.includes("tool") ||
+               category.includes("soil") ||
+               category.includes("fertilizer") ||
                category.includes("accessory");
       });
-
       setPots(backendPots);
       setFilteredPots(backendPots);
     } catch (error) {
@@ -70,32 +60,22 @@ export default function Pots() {
       setLoading(false);
     }
   };
-
-  // Re-apply filters when dependencies change
   useEffect(() => {
     applyFilters();
   }, [searchTerm, selectedCategories, selectedPrice, pots]);
-
-  // Apply filters
   const applyFilters = () => {
     let filtered = [...pots];
-
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter((pot) =>
         pot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         pot.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    // Category filter
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((pot) =>
         selectedCategories.includes(pot.category)
       );
     }
-
-    // Price filter
     if (selectedPrice.length > 0) {
       filtered = filtered.filter((pot) => {
         return selectedPrice.some((range) => {
@@ -107,11 +87,8 @@ export default function Pots() {
         });
       });
     }
-
     setFilteredPots(filtered);
   };
-
-  // Update filters
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
       prev.includes(category)
@@ -119,7 +96,6 @@ export default function Pots() {
         : [...prev, category]
     );
   };
-
   const handlePriceChange = (range: string) => {
     setSelectedPrice((prev) =>
       prev.includes(range)
@@ -127,16 +103,13 @@ export default function Pots() {
         : [...prev, range]
     );
   };
-
   const handleAddToCart = async (pot: Pot) => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       alert("Please login to add accessories to your cart.");
       navigate("/login");
       return;
     }
-
     try {
       const response = await fetch(`${API}/api/cart`, {
         method: "POST",
@@ -147,14 +120,11 @@ export default function Pots() {
         },
         body: JSON.stringify({ plant_id: pot.id, quantity: 1 }),
       });
-
       const data = await response.json().catch(() => ({}));
-
       if (!response.ok) {
         alert(data.message || "Could not add this item to cart.");
         return;
       }
-
       window.dispatchEvent(new Event("cozycare:cart-updated"));
       alert(`${pot.name} added to cart!`);
     } catch (error) {
@@ -162,18 +132,15 @@ export default function Pots() {
       alert("Something went wrong while adding this item to cart.");
     }
   };
-
   const toggleWishlist = (potId: number) => {
     setWishlistIds((prev) =>
       prev.includes(potId) ? prev.filter((id) => id !== potId) : [...prev, potId]
     );
   };
-
   return (
     <Layout>
       <div className="pots-page">
         <PotsHeader />
-
         <div className="pots-container">
           <PotsSidebar
             searchTerm={searchTerm}
@@ -183,7 +150,6 @@ export default function Pots() {
             selectedPrice={selectedPrice}
             handlePriceChange={handlePriceChange}
           />
-
           <PotsGrid
             filteredPots={filteredPots}
             pots={pots}

@@ -14,33 +14,27 @@ import {
 } from "../features/content/aboutTemplate";
 import type { AboutPageTemplatePayload } from "../features/content/types";
 import "../styles/about.css";
-
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
 export default function About() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [, setTemplateRevision] = useState(0);
-
   useEffect(() => {
     let isMounted = true;
-
     const loadTemplate = async () => {
       try {
         const response = await fetch(`${API}/api/content-templates/about_page`, {
+          cache: "no-store",
           headers: {
             Accept: "application/json",
           },
         });
-
         if (!response.ok) {
           throw new Error("Could not load about page content.");
         }
-
         const payload = await response.json().catch(() => ({}));
         const template = (payload?.data?.payload ?? null) as AboutPageTemplatePayload | null;
         applyAboutPageTemplate(template);
-
         if (isMounted) {
           setTemplateRevision((current) => current + 1);
           setError(null);
@@ -59,14 +53,16 @@ export default function About() {
         }
       }
     };
-
     void loadTemplate();
-
+    const handleUpdated = () => {
+      void loadTemplate();
+    };
+    window.addEventListener("cozycare:content-updated", handleUpdated);
     return () => {
       isMounted = false;
+      window.removeEventListener("cozycare:content-updated", handleUpdated);
     };
   }, []);
-
   if (loading) {
     return (
       <Layout>
@@ -81,7 +77,6 @@ export default function About() {
       </Layout>
     );
   }
-
   if (error) {
     return (
       <Layout>
@@ -97,7 +92,6 @@ export default function About() {
       </Layout>
     );
   }
-
   if (!aboutPageTemplate.hero.title) {
     return (
       <Layout>
@@ -112,7 +106,6 @@ export default function About() {
       </Layout>
     );
   }
-
   return (
     <Layout>
       <div className="about-page">
@@ -128,4 +121,3 @@ export default function About() {
     </Layout>
   );
 }
-

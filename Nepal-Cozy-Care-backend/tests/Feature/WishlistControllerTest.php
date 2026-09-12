@@ -17,7 +17,6 @@ class WishlistControllerTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-
         $plant = Plant::create([
             'name' => 'Rose',
             'category' => 'Outdoor',
@@ -25,17 +24,14 @@ class WishlistControllerTest extends TestCase
             'stock' => 10,
             'is_active' => true,
         ]);
-
         $response = $this->postJson('/api/wishlist', [
-            'plant_id' => $plant->id
+            'plant_id' => $plant->id,
         ]);
-
         $response->assertStatus(201)
-                 ->assertJsonPath('message', 'Added to wishlist');
-
+            ->assertJsonPath('message', 'Added to wishlist');
         $this->assertDatabaseHas('wishlists', [
             'user_id' => $user->id,
-            'plant_id' => $plant->id
+            'plant_id' => $plant->id,
         ]);
     }
 
@@ -43,7 +39,6 @@ class WishlistControllerTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-
         $plant = Plant::create([
             'name' => 'Tulip',
             'category' => 'Outdoor',
@@ -51,14 +46,9 @@ class WishlistControllerTest extends TestCase
             'stock' => 10,
             'is_active' => true,
         ]);
-
-        // Add first time
         $this->postJson('/api/wishlist', ['plant_id' => $plant->id]);
-        
-        // Add second time
         $response = $this->postJson('/api/wishlist', ['plant_id' => $plant->id]);
-
-        $response->assertStatus(201); // firstOrCreate returns 201 Usually if new, but should handle gracefully
+        $response->assertStatus(201);
         $this->assertDatabaseCount('wishlists', 1);
     }
 
@@ -66,7 +56,6 @@ class WishlistControllerTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
-
         $plant = Plant::create([
             'name' => 'Lily',
             'category' => 'Outdoor',
@@ -74,17 +63,13 @@ class WishlistControllerTest extends TestCase
             'stock' => 5,
             'is_active' => true,
         ]);
-
         Wishlist::create([
             'user_id' => $user->id,
-            'plant_id' => $plant->id
+            'plant_id' => $plant->id,
         ]);
-
         $response = $this->deleteJson("/api/wishlist/{$plant->id}");
-
         $response->assertStatus(200)
-                 ->assertJsonPath('message', 'Removed from wishlist');
-
+            ->assertJsonPath('message', 'Removed from wishlist');
         $this->assertDatabaseCount('wishlists', 0);
     }
 }

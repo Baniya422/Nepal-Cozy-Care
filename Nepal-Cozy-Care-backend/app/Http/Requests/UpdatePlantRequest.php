@@ -32,7 +32,7 @@ class UpdatePlantRequest extends FormRequest
             'care_instructions' => ['nullable', 'string'],
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'stock' => ['sometimes', 'required', 'integer', 'min:0'],
-            'image' => ['nullable', 'file', 'image', 'max:2048'], // 2MB max
+            'image' => ['nullable', 'file', 'image', 'max:2048'],
             'is_active' => ['nullable'],
             'is_popular_item' => ['nullable', 'boolean'],
             'is_best_seller' => ['nullable', 'boolean'],
