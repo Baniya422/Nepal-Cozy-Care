@@ -1,5 +1,6 @@
 import { Heart, ShoppingCart } from "lucide-react";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { resolveImageUrl, handleImageError, DEFAULT_POT_IMAGE } from "../../utils/imageUrl";
+
 type Pot = {
   id: number;
   name: string;
@@ -50,18 +51,11 @@ export default function PotsGrid({
             <div key={pot.id} className="pot-card">
               <div className="pot-image-container">
                 <div className="pot-image-placeholder">
-                  {pot.image ? (
-                    <img
-                      src={`${API}/storage/${pot.image}`}
-                      alt={pot.name}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "/images/placeholder-pot.jpg";
-                      }}
-                    />
-                  ) : (
-                    <div className="placeholder-text">No Image</div>
-                  )}
+                  <img
+                    src={resolveImageUrl(pot.image, DEFAULT_POT_IMAGE)}
+                    alt={pot.name}
+                    onError={(e) => handleImageError(e, DEFAULT_POT_IMAGE)}
+                  />
                 </div>
                 <button
                   className={`wishlist-btn ${

@@ -15,7 +15,11 @@ import {
   Stethoscope,
   Info,
   Eye,
+  ArrowRight,
+  Compass,
+  House,
 } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 
@@ -37,9 +41,10 @@ export function resolvePageImage(path: string): string {
 }
 
 const PAGE_ICONS: Record<string, any> = {
+  homepage: House,
   blogs_page: BookOpen,
   about_page: Info,
-  our_mission: BookOpen,
+  our_mission: Sparkles,
   contact_page: Send,
   shipping_page: Truck,
   help_center: HelpCircle,
@@ -47,17 +52,138 @@ const PAGE_ICONS: Record<string, any> = {
   plant_health: Stethoscope,
 };
 
+type DirectoryCardMeta = {
+  key: string;
+  name: string;
+  url: string;
+  description: string;
+  sectionsCount: string;
+  icon: any;
+  badge: string;
+  accentColor: string;
+  isCustomRoute?: string;
+};
+
+const DIRECTORY_PAGES: DirectoryCardMeta[] = [
+  {
+    key: "homepage",
+    name: "Homepage",
+    url: "/",
+    description: "Hero banner, curated plant sections, why choose us, and brand promotional cards.",
+    sectionsCount: "6 Key Sections",
+    icon: House,
+    badge: "Landing",
+    accentColor: "#10b981",
+    isCustomRoute: "/admin/homepage",
+  },
+  {
+    key: "blogs_page",
+    name: "Care Blogs Hub",
+    url: "/blogs",
+    description: "Featured editorial story, headline kicker, search bar, and community newsletter CTA.",
+    sectionsCount: "3 Sections",
+    icon: BookOpen,
+    badge: "Editorial",
+    accentColor: "#3b82f6",
+  },
+  {
+    key: "about_page",
+    name: "About Us",
+    url: "/about",
+    description: "Founder story, key growth metrics, company values, and greenhouse team members.",
+    sectionsCount: "7 Sections",
+    icon: Info,
+    badge: "Brand Story",
+    accentColor: "#8b5cf6",
+  },
+  {
+    key: "our_mission",
+    name: "Our Mission",
+    url: "/mission",
+    description: "Purpose statement, four-pillar roadmap, sustainable growth, and customer care promises.",
+    sectionsCount: "6 Sections",
+    icon: Sparkles,
+    badge: "Purpose",
+    accentColor: "#ec4899",
+  },
+  {
+    key: "contact_page",
+    name: "Contact & Support",
+    url: "/contact",
+    description: "Support channels, office hours, customer inquiries, and emergency care hotlines.",
+    sectionsCount: "4 Sections",
+    icon: Send,
+    badge: "Support",
+    accentColor: "#f59e0b",
+  },
+  {
+    key: "shipping_page",
+    name: "Shipping & Delivery",
+    url: "/shipping",
+    description: "Packaging protection guarantees, valley-wide delivery options, and customer reviews.",
+    sectionsCount: "5 Sections",
+    icon: Truck,
+    badge: "Logistics",
+    accentColor: "#06b6d4",
+  },
+  {
+    key: "help_center",
+    name: "Help Center",
+    url: "/help-center",
+    description: "FAQ accordions, customer service topics, return policies, and plant guarantees.",
+    sectionsCount: "4 Sections",
+    icon: HelpCircle,
+    badge: "Knowledge",
+    accentColor: "#6366f1",
+  },
+  {
+    key: "plant_finder",
+    name: "Plant Finder Tool",
+    url: "/plant-finder",
+    description: "Interactive lifestyle quiz, room/light matching algorithms, and plant filter logic.",
+    sectionsCount: "Quiz Tool",
+    icon: Sparkles,
+    badge: "Interactive",
+    accentColor: "#14b8a6",
+  },
+  {
+    key: "plant_health",
+    name: "Plant Health Doctor",
+    url: "/plant-health-checker",
+    description: "Symptom diagnosis profiles, pest/disease guides, and seasonal remedies.",
+    sectionsCount: "Diagnostic Tool",
+    icon: Stethoscope,
+    badge: "Diagnostic",
+    accentColor: "#ef4444",
+  },
+];
+
+const INITIAL_PAGES: PageItem[] = [
+  { key: "blogs_page", name: "Care Blogs Hub", url: "/blogs", payload: {}, updated_at: null },
+  { key: "about_page", name: "About Us", url: "/about", payload: {}, updated_at: null },
+  { key: "our_mission", name: "Our Mission", url: "/mission", payload: {}, updated_at: null },
+  { key: "contact_page", name: "Contact & Support", url: "/contact", payload: {}, updated_at: null },
+  { key: "shipping_page", name: "Shipping & Delivery", url: "/shipping", payload: {}, updated_at: null },
+  { key: "help_center", name: "Help Center", url: "/help-center", payload: {}, updated_at: null },
+  { key: "plant_finder", name: "Plant Finder", url: "/plant-finder", payload: {}, updated_at: null, technical: true },
+  { key: "plant_health", name: "Plant Health Checker", url: "/plant-health-checker", payload: {}, updated_at: null, technical: true },
+];
+
 export default function ManagePageContent() {
-  const [pages, setPages] = useState<PageItem[]>([]);
-  const [activeKey, setActiveKey] = useState<string>("blogs_page");
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [pages, setPages] = useState<PageItem[]>(INITIAL_PAGES);
+  const tabParam = searchParams.get("tab");
+  const activeKey = tabParam || "directory";
   const [currentPayload, setCurrentPayload] = useState<Record<string, any>>({});
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const token = localStorage.getItem("token");
 
   const loadPages = async () => {
+    if (!token) return;
     setLoading(true);
     setStatusMessage(null);
     try {
@@ -67,21 +193,21 @@ export default function ManagePageContent() {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) throw new Error("Failed to load page content.");
-      const data = await response.json();
-      const pageList: PageItem[] = data.data?.pages || [];
-      setPages(pageList);
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const tabParam = urlParams.get("tab");
-      const targetKey = tabParam && pageList.some((p) => p.key === tabParam) ? tabParam : activeKey;
-      const found = pageList.find((p) => p.key === targetKey) || pageList.find((p) => p.key === "blogs_page") || pageList[0];
-      if (found) {
-        setActiveKey(found.key);
-        setCurrentPayload(JSON.parse(JSON.stringify(found.payload || {})));
+      if (response.ok) {
+        const data = await response.json();
+        const pageList: PageItem[] = data.data?.pages || [];
+        if (pageList.length > 0) {
+          setPages(pageList);
+          if (activeKey !== "directory") {
+            const found = pageList.find((p) => p.key === activeKey);
+            if (found) {
+              setCurrentPayload(JSON.parse(JSON.stringify(found.payload || {})));
+            }
+          }
+        }
       }
-    } catch (err: any) {
-      setStatusMessage({ type: "error", text: err.message || "Failed to load pages." });
+    } catch {
+      // Keep resilient fallback
     } finally {
       setLoading(false);
     }
@@ -91,11 +217,25 @@ export default function ManagePageContent() {
     void loadPages();
   }, []);
 
+  // When activeKey changes via URL or selection, sync currentPayload
+  useEffect(() => {
+    if (activeKey !== "directory") {
+      const found = pages.find((p) => p.key === activeKey);
+      if (found && found.payload && Object.keys(found.payload).length > 0) {
+        setCurrentPayload(JSON.parse(JSON.stringify(found.payload)));
+      }
+    }
+  }, [activeKey, pages]);
+
   const handleSelectPage = (key: string) => {
-    setActiveKey(key);
     setStatusMessage(null);
+    if (key === "directory") {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    setSearchParams({ tab: key }, { replace: true });
     const found = pages.find((p) => p.key === key);
-    if (found) {
+    if (found && Object.keys(found.payload || {}).length > 0) {
       setCurrentPayload(JSON.parse(JSON.stringify(found.payload || {})));
     }
   };
@@ -237,9 +377,10 @@ export default function ManagePageContent() {
 
   return (
     <AdminLayout>
-      <div className="admin-page-content-manager" style={{ padding: "1.75rem", maxWidth: "1400px", margin: "0 auto" }}>
+      <div className="admin-page-content-manager" style={{ maxWidth: "1400px", margin: "0 auto" }}>
         {/* Header section */}
         <div
+          className="admin-page-content-header"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -269,16 +410,39 @@ export default function ManagePageContent() {
                 <PageIcon size={18} />
               </span>
               <h1 style={{ fontSize: "1.65rem", fontWeight: 700, color: "#102e23", margin: 0 }}>
-                Page Content CMS
+                {activeKey === "directory" ? "Page Content CMS" : `Edit Content: ${activePage?.name || "Page"}`}
               </h1>
             </div>
             <p style={{ color: "#64748b", margin: 0, fontSize: "0.9rem" }}>
-              Customize and update all public website content, headings, images, and copy visually in real time.
+              {activeKey === "directory"
+                ? "Select any public page or tool below to customize headings, hero media, copy, and features."
+                : `Updating public content and sections for ${activePage?.name || "this page"}. Click save to publish changes.`}
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
-            {activePage?.url && (
+          <div className="admin-page-content-header-actions" style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
+            {activeKey !== "directory" && (
+              <button
+                type="button"
+                className="admin-btn admin-btn-secondary"
+                onClick={() => handleSelectPage("directory")}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.45rem",
+                  padding: "0.6rem 1rem",
+                  fontSize: "0.88rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  background: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "8px",
+                }}
+              >
+                ← Back to Visual Directory
+              </button>
+            )}
+            {activeKey !== "directory" && activePage?.url && (
               <a
                 href={activePage.url}
                 target="_blank"
@@ -297,24 +461,26 @@ export default function ManagePageContent() {
                 <Eye size={16} /> View Live Page <ExternalLink size={14} />
               </a>
             )}
-            <button
-              type="button"
-              className="admin-btn admin-btn-primary"
-              onClick={handleSave}
-              disabled={saving || loading}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.65rem 1.4rem",
-                fontSize: "0.92rem",
-                fontWeight: 700,
-                backgroundColor: "#1b4e54",
-                boxShadow: "0 4px 12px rgba(27, 78, 84, 0.25)",
-              }}
-            >
-              <Save size={18} /> {saving ? "Saving Changes..." : "Save All Changes"}
-            </button>
+            {activeKey !== "directory" && (
+              <button
+                type="button"
+                className="admin-btn admin-btn-primary"
+                onClick={handleSave}
+                disabled={saving || loading}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.65rem 1.4rem",
+                  fontSize: "0.92rem",
+                  fontWeight: 700,
+                  backgroundColor: "#1b4e54",
+                  boxShadow: "0 4px 12px rgba(27, 78, 84, 0.25)",
+                }}
+              >
+                <Save size={18} /> {saving ? "Saving Changes..." : "Save All Changes"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -343,15 +509,40 @@ export default function ManagePageContent() {
 
         {/* Page Switcher Navigation Bar */}
         <div
+          className="admin-page-switcher-tabs"
           style={{
             display: "flex",
             gap: "0.5rem",
             overflowX: "auto",
-            padding: "0.4rem 0.2rem 0.8rem",
+            padding: "0.25rem 0.2rem 0.65rem",
             marginBottom: "1.75rem",
-            borderBottom: "2px solid #e2e8f0",
+            borderBottom: "1px solid #e2e8f0",
+            scrollbarWidth: "none",
           }}
         >
+          <button
+            type="button"
+            onClick={() => handleSelectPage("directory")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.65rem 1.15rem",
+              borderRadius: "999px",
+              border: activeKey === "directory" ? "none" : "1px solid #e2e8f0",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: "0.9rem",
+              whiteSpace: "nowrap",
+              transition: "all 0.2s ease",
+              background: activeKey === "directory" ? "#1b4e54" : "#ffffff",
+              color: activeKey === "directory" ? "#ffffff" : "#475569",
+              boxShadow: activeKey === "directory" ? "0 4px 12px rgba(27, 78, 84, 0.25)" : "none",
+            }}
+          >
+            <Compass size={16} />
+            Visual Directory
+          </button>
           {pages.map((page) => {
             const IconComponent = PAGE_ICONS[page.key] || Info;
             const isSelected = activeKey === page.key;
@@ -384,8 +575,155 @@ export default function ManagePageContent() {
           })}
         </div>
 
-        {/* Page Content Visual Form */}
-        {loading ? (
+        {/* Visual Directory Grid View when activeKey === 'directory' */}
+        {activeKey === "directory" ? (
+          <div>
+            <div style={{ marginBottom: "1.5rem" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#102e23", margin: "0 0 0.4rem" }}>
+                Select a Page to Edit Content
+              </h2>
+              <p style={{ color: "#64748b", margin: 0, fontSize: "0.92rem" }}>
+                Each page has structured fields for headlines, hero media, copy, FAQs, and interactive widgets.
+              </p>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: "1.25rem",
+              }}
+            >
+              {DIRECTORY_PAGES.map((item) => {
+                const DirIcon = item.icon;
+                return (
+                  <div
+                    key={item.key}
+                    className="admin-cms-card"
+                    style={{
+                      background: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "14px",
+                      padding: "1.35rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: "1rem",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "42px",
+                            height: "42px",
+                            borderRadius: "10px",
+                            background: `${item.accentColor}18`,
+                            color: item.accentColor,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <DirIcon size={22} />
+                        </div>
+                        <span
+                          style={{
+                            fontSize: "0.72rem",
+                            fontWeight: 700,
+                            padding: "0.25rem 0.6rem",
+                            borderRadius: "999px",
+                            background: "#f1f5f9",
+                            color: "#475569",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.04em",
+                          }}
+                        >
+                          {item.badge}
+                        </span>
+                      </div>
+                      <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.4rem" }}>
+                        {item.name}
+                      </h3>
+                      <p style={{ fontSize: "0.86rem", color: "#64748b", margin: "0 0 1rem", lineHeight: 1.5 }}>
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div style={{ paddingTop: "1rem", borderTop: "1px solid #f1f5f9" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          fontSize: "0.82rem",
+                          color: "#94a3b8",
+                          marginBottom: "0.85rem",
+                        }}
+                      >
+                        <span>{item.sectionsCount}</span>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            color: "#1b4e54",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.25rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Visit <ExternalLink size={12} />
+                        </a>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (item.isCustomRoute) {
+                            navigate(item.isCustomRoute);
+                          } else {
+                            handleSelectPage(item.key);
+                          }
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "0.62rem 0.85rem",
+                          borderRadius: "9px",
+                          border: "none",
+                          background: item.isCustomRoute ? "#0f766e" : "#1b4e54",
+                          color: "#ffffff",
+                          fontSize: "0.85rem",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.45rem",
+                          whiteSpace: "nowrap",
+                          boxShadow: "0 2px 6px rgba(27,78,84,0.18)",
+                          transition: "background 0.2s ease",
+                        }}
+                      >
+                        {item.isCustomRoute ? "Open Homepage Builder" : "Edit Page Content"} <ArrowRight size={15} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          /* Page Content Visual Form */
+          loading ? (
           <div
             style={{
               textAlign: "center",
@@ -519,7 +857,8 @@ export default function ManagePageContent() {
               </button>
             </div>
           </div>
-        )}
+        )
+      )}
       </div>
     </AdminLayout>
   );

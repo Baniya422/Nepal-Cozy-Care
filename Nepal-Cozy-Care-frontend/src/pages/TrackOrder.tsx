@@ -17,6 +17,7 @@ import {
   Download,
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../utils/imageUrl";
 import "../styles/trackOrder.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 type OrderItem = {
@@ -490,13 +491,10 @@ export default function TrackOrder() {
                   {order.items.map((item) => (
                     <div key={item.id} className="track-order-item">
                       <img
-                        src={
-                          item.plant.image
-                            ? `${API}/storage/${item.plant.image}`
-                            : "/images/plant-placeholder.jpg"
-                        }
+                        src={resolveImageUrl(item.plant.image, DEFAULT_PLANT_IMAGE)}
                         alt={item.plant.name}
                         className="track-order-item-image"
+                        onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
                       />
                       <div className="track-order-item-details">
                         <h4 className="track-order-item-name">

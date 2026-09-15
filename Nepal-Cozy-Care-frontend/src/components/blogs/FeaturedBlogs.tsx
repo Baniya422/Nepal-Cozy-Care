@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../../utils/imageUrl";
+
 type Blog = {
   id: number;
   title: string;
@@ -55,9 +56,10 @@ export default function FeaturedBlogs({ blogs, loading }: FeaturedBlogsProps) {
         <article key={blog.id} className="blogs-card">
           <div className="blogs-card-image-wrapper">
             <img
-              src={blog.image ? `${API}/storage/${blog.image}` : "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=600&h=400&fit=crop"}
+              src={resolveImageUrl(blog.image, DEFAULT_BLOG_IMAGE)}
               alt={blog.title}
               className="blogs-card-image"
+              onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
             />
           </div>
           <div className="blogs-card-content">

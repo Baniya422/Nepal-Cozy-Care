@@ -15,6 +15,7 @@ import AccountPreferencesSection from "../components/my-account/sections/Account
 import AccountProfileSection from "../components/my-account/sections/AccountProfileSection";
 import AccountSecuritySection from "../components/my-account/sections/AccountSecuritySection";
 import AccountWishlistSection from "../components/my-account/sections/AccountWishlistSection";
+import { resolveImageUrl, DEFAULT_PLANT_IMAGE } from "../utils/imageUrl";
 import type {
   AccountOrder,
   AccountSection,
@@ -115,7 +116,7 @@ function extractErrorMessage(data: unknown, fallback: string) {
   return payload.message || firstValidationMessage || fallback;
 }
 function buildImageUrl(image?: string | null) {
-  return image ? `${API}/storage/${image}` : "/images/plant-placeholder.jpg";
+  return resolveImageUrl(image, DEFAULT_PLANT_IMAGE);
 }
 function formatCurrency(amount?: number | null) {
   return `Rs. ${Number(amount ?? 0).toLocaleString("en-NP", {

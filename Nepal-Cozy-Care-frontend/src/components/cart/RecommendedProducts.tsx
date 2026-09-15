@@ -1,10 +1,11 @@
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
+
 type RecommendedPlant = {
   id: number;
   name: string;
   price: number;
   image?: string;
 };
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 interface RecommendedProductsProps {
   recommendedPlants: RecommendedPlant[];
   addToCart: (plantId: number) => void;
@@ -19,13 +20,10 @@ export default function RecommendedProducts({ recommendedPlants, addToCart }: Re
           <div key={plant.id} className="cart-recommended-card">
             <div className="cart-recommended-image-wrapper">
               <img
-                src={
-                  plant.image
-                    ? `${API}/storage/${plant.image}`
-                    : "/images/plant-placeholder.jpg"
-                }
+                src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
                 alt={plant.name}
                 className="cart-recommended-image"
+                onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
               />
             </div>
             <h3 className="cart-recommended-name">{plant.name}</h3>

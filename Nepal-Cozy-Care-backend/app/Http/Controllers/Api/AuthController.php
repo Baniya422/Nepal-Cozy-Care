@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -56,6 +58,92 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    public function googleAuth(Request $request)
+    {
+        $validated = $request->validate([
+            'credential' => ['required', 'string'],
+        ]);
+
+        try {
+            $response = Http::timeout(10)->get('https://oauth2.googleapis.com/tokeninfo', [
+                'id_token' => $validated['credential'],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Google Auth verification request failed', ['error' => $e->getMessage()]);
+            throw ValidationException::withMessages([
+                'credential' => ['Failed to connect to Google authentication service. Please try again.'],
+            ]);
+        }
+
+        if (! $response->successful()) {
+            Log::warning('Google Token Verification Error', ['response' => $response->json()]);
+            throw ValidationException::withMessages([
+                'credential' => ['Invalid or expired Google authentication credential.'],
+            ]);
+        }
+
+        $payload = $response->json();
+
+        // Validate client id audience if configured
+        $expectedClientId = config('services.google.client_id');
+        if ($expectedClientId && ! empty($payload['aud']) && $payload['aud'] !== $expectedClientId) {
+            Log::warning('Google token audience mismatch', [
+                'expected' => $expectedClientId,
+                'received' => $payload['aud'] ?? null,
+            ]);
+            throw ValidationException::withMessages([
+                'credential' => ['Google authentication credential was not issued for this application.'],
+            ]);
+        }
+
+        $googleId = $payload['sub'] ?? null;
+        $email = $payload['email'] ?? null;
+        $name = $payload['name'] ?? ($payload['given_name'] ?? ($email ? explode('@', $email)[0] : 'User'));
+        $avatar = $payload['picture'] ?? null;
+
+        if (! $email) {
+            throw ValidationException::withMessages([
+                'credential' => ['Google account did not return a valid email address.'],
+            ]);
+        }
+
+        // Check if user exists by google_id or email
+        $user = User::where('google_id', $googleId)
+            ->orWhere('email', $email)
+            ->first();
+
+        if ($user) {
+            $updates = [];
+            if (! $user->google_id && $googleId) {
+                $updates['google_id'] = $googleId;
+            }
+            if (! $user->avatar && $avatar) {
+                $updates['avatar'] = $avatar;
+            }
+            if (! empty($updates)) {
+                $user->update($updates);
+            }
+        } else {
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'google_id' => $googleId,
+                'avatar' => $avatar,
+                'password' => Hash::make(Str::random(32)),
+                'role' => 'customer',
+            ]);
+        }
+
+        $user->tokens()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Google authentication successful',
             'user' => $user,
             'token' => $token,
         ]);

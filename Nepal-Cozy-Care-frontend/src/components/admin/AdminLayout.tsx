@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -18,7 +18,6 @@ import {
   Menu,
   X,
   ChevronRight,
-  House,
   Globe,
   Settings,
 } from "lucide-react";
@@ -26,26 +25,58 @@ import "./admin.css";
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
-const menuItems = [
-  { path: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-  { path: "/admin/homepage", icon: House, label: "Homepage Content" },
-  { path: "/admin/page-content", icon: Globe, label: "Page Content (CMS)" },
-  { path: "/admin/plants", icon: Leaf, label: "Manage Plants" },
-  { path: "/admin/accessories", icon: Package, label: "Manage Accessories" },
-  { path: "/admin/blogs", icon: BookOpen, label: "Manage Care Blogs" },
-  { path: "/admin/care-tips", icon: Lightbulb, label: "Manage Care Tips" },
-  { path: "/admin/orders", icon: ShoppingCart, label: "Orders" },
-  { path: "/admin/garden-entries", icon: Flower2, label: "Garden Entries" },
-  { path: "/admin/seasonal-reminders", icon: CloudSun, label: "Seasonal Reminders" },
-  { path: "/admin/contact-messages", icon: Mail, label: "Contact Inbox" },
-  { path: "/admin/users", icon: Users, label: "Users" },
-  { path: "/admin/reports", icon: BarChart3, label: "Reports" },
-  { path: "/admin/settings", icon: Settings, label: "Settings" },
+const menuGroups = [
+  {
+    group: "Overview",
+    items: [
+      { path: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+      { path: "/admin/reports", icon: BarChart3, label: "Reports & Stats" },
+    ],
+  },
+  {
+    group: "Store & Catalog",
+    items: [
+      { path: "/admin/orders", icon: ShoppingCart, label: "Orders" },
+      { path: "/admin/plants", icon: Leaf, label: "Manage Plants" },
+      { path: "/admin/accessories", icon: Package, label: "Accessories" },
+    ],
+  },
+  {
+    group: "Website & Content",
+    items: [
+      { path: "/admin/page-content", icon: Globe, label: "Website Pages (CMS)" },
+      { path: "/admin/blogs", icon: BookOpen, label: "Care Blogs" },
+      { path: "/admin/care-tips", icon: Lightbulb, label: "Care Tips" },
+      { path: "/admin/seasonal-reminders", icon: CloudSun, label: "Seasonal Reminders" },
+    ],
+  },
+  {
+    group: "Customers & Support",
+    items: [
+      { path: "/admin/contact-messages", icon: Mail, label: "Contact Inbox" },
+      { path: "/admin/users", icon: Users, label: "Users" },
+      { path: "/admin/garden-entries", icon: Flower2, label: "Garden Entries" },
+    ],
+  },
+  {
+    group: "System",
+    items: [
+      { path: "/admin/settings", icon: Settings, label: "Settings" },
+    ],
+  },
 ];
+
+const allMenuItems = menuGroups.flatMap((g) => g.items);
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth > 1024;
+    }
+    return true;
+  });
   const [notifications] = useState(3);
   let adminName = "Admin User";
   try {
@@ -65,51 +96,81 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
     return location.pathname.startsWith(path);
   };
+
+  // Close sidebar on mobile route change
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname]);
+
+  const handleNavClick = () => {
+    if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <div className="admin-layout">
-      {}
+      {/* Mobile Drawer Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="admin-sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <aside className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="admin-sidebar-header">
-          <Link to="/admin" className="admin-logo">
-            <Leaf size={28} />
+          <Link to="/admin" className="admin-logo" onClick={handleNavClick}>
+            <Leaf size={26} />
             <span>Cozy Care Admin</span>
           </Link>
           <button
+            type="button"
             className="admin-sidebar-toggle"
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Close sidebar"
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
         <nav className="admin-sidebar-nav">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`admin-sidebar-link ${isActive(item.path) ? "active" : ""}`}
-            >
-              <item.icon size={20} />
-              <span>{item.label}</span>
-              {isActive(item.path) && <ChevronRight size={16} className="admin-link-arrow" />}
-            </Link>
+          {menuGroups.map((group) => (
+            <div key={group.group} className="admin-sidebar-group">
+              <div className="admin-sidebar-group-title">{group.group}</div>
+              {group.items.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={handleNavClick}
+                  className={`admin-sidebar-link ${isActive(item.path) ? "active" : ""}`}
+                >
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                  {isActive(item.path) && <ChevronRight size={15} className="admin-link-arrow" />}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
       </aside>
-      {}
       <div className={`admin-main ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
-        {}
         <header className="admin-header">
           <div className="admin-header-left">
             <button
+              type="button"
               className="admin-menu-btn"
               onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Toggle navigation menu"
             >
               <Menu size={20} />
             </button>
             <h1 className="admin-page-title">
-              {menuItems.find((item) => isActive(item.path))?.label || "Dashboard"}
+              {allMenuItems.find((item) => isActive(item.path))?.label || "Dashboard"}
             </h1>
           </div>
+
           <div className="admin-header-right">
             <button className="admin-header-btn">
               <Bell size={20} />

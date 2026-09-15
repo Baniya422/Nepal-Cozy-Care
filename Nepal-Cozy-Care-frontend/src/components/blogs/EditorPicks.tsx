@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../../utils/imageUrl";
+
 type Blog = {
   id: number;
   title: string;
@@ -47,9 +48,10 @@ export default function EditorPicks({ blogs, loading }: EditorPicksProps) {
           >
             <div className="blogs-editor-image-wrapper">
               <img
-                src={blog.image ? `${API}/storage/${blog.image}` : "/images/blog-placeholder.jpg"}
+                src={resolveImageUrl(blog.image, DEFAULT_BLOG_IMAGE)}
                 alt={blog.title}
                 className="blogs-editor-image"
+                onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
               />
             </div>
             <div className="blogs-editor-content">

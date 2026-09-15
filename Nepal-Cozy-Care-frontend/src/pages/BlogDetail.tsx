@@ -13,6 +13,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { CURATED_BLOGS, type CuratedBlog } from "../features/blogs/curatedBlogs";
+import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../utils/imageUrl";
 import "../styles/blogDetail.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -65,14 +66,16 @@ export default function BlogDetail() {
               title: apiBlog.title,
               excerpt: apiBlog.excerpt || "",
               content: apiBlog.content || "",
-              image: apiBlog.image
-                ? apiBlog.image.startsWith("http") || apiBlog.image.startsWith("/")
-                  ? apiBlog.image
-                  : `${API}/storage/${apiBlog.image}`
-                : foundCurated?.image || "/images/blog-hero-lush.jpg",
+              image: resolveImageUrl(
+                apiBlog.image || foundCurated?.image,
+                DEFAULT_BLOG_IMAGE
+              ),
               author: apiBlog.author || foundCurated?.author || "Sarah Johnson",
               author_role: foundCurated?.author_role || "Senior Botanist",
-              author_image: foundCurated?.author_image || "/images/team-sarah.jpg",
+              author_image: resolveImageUrl(
+                foundCurated?.author_image,
+                "/images/team-sarah.jpg"
+              ),
               category: apiBlog.category || foundCurated?.category || "Indoor Plants",
               read_time: foundCurated?.read_time || "5 min read",
               views: apiBlog.views || foundCurated?.views || 1840,
@@ -97,11 +100,7 @@ export default function BlogDetail() {
                   title: rb.title,
                   excerpt: rb.excerpt || "",
                   content: rb.content || "",
-                  image: rb.image
-                    ? rb.image.startsWith("http") || rb.image.startsWith("/")
-                      ? rb.image
-                      : `${API}/storage/${rb.image}`
-                    : "/images/blog-leaf-macro.jpg",
+                  image: resolveImageUrl(rb.image, "/images/blog-leaf-macro.jpg"),
                   author: rb.author || "Cozy Care Team",
                   author_role: "Care Specialist",
                   author_image: "/images/team-emily.jpg",
@@ -194,7 +193,10 @@ export default function BlogDetail() {
             1. ARTICLE HERO HEADER WITH ATMOSPHERIC BACKGROUND
             ===================================================================== */}
         <header className="cozy-article-hero">
-          <div className="cozy-article-hero-bg" />
+          <div
+            className="cozy-article-hero-bg"
+            style={{ backgroundImage: `url(${blog.image})` }}
+          />
           <div className="cozy-article-hero-content">
             <button type="button" className="cozy-article-back-link" onClick={() => navigate("/blogs")}>
               <ArrowLeft size={16} /> Back to Botanical Journal
@@ -215,7 +217,12 @@ export default function BlogDetail() {
 
             <div className="cozy-article-author-meta">
               <div className="cozy-author-cluster">
-                <img src={blog.author_image} alt={blog.author} className="cozy-article-author-img" />
+                <img
+                  src={blog.author_image}
+                  alt={blog.author}
+                  className="cozy-article-author-img"
+                  onError={(e) => handleImageError(e, "/images/team-sarah.jpg")}
+                />
                 <div className="cozy-author-text">
                   <h4>{blog.author}</h4>
                   <span>
@@ -255,7 +262,11 @@ export default function BlogDetail() {
               onClick={() => setLightboxImg(blog.image)}
               title="Click to zoom image"
             >
-              <img src={blog.image} alt={blog.title} />
+              <img
+                src={blog.image}
+                alt={blog.title}
+                onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
+              />
               <div className="cozy-article-img-caption">
                 Photo: {blog.title} — Tap to expand in high-definition lightbox
               </div>
@@ -347,7 +358,12 @@ export default function BlogDetail() {
                   onClick={() => navigate(`/blogs/${rel.id}`)}
                 >
                   <div className="cozy-card-media">
-                    <img src={rel.image} alt={rel.title} className="cozy-card-img" />
+                    <img
+                      src={rel.image}
+                      alt={rel.title}
+                      className="cozy-card-img"
+                      onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
+                    />
                     <span className="cozy-card-category">{rel.category}</span>
                   </div>
                   <div className="cozy-card-body">
@@ -375,7 +391,12 @@ export default function BlogDetail() {
             ===================================================================== */}
         {lightboxImg && (
           <div className="cozy-image-lightbox" onClick={() => setLightboxImg(null)}>
-            <img src={lightboxImg} alt="Enlarged botanical preview" className="cozy-lightbox-img" />
+            <img
+              src={lightboxImg}
+              alt="Enlarged botanical preview"
+              className="cozy-lightbox-img"
+              onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
+            />
           </div>
         )}
       </div>

@@ -99,6 +99,14 @@ function App() {
         }
       />
       <Route
+        path="/admin/page_content"
+        element={
+          <AdminProtectedRoute>
+            <ManagePageContent />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
         path="/admin/plants"
         element={
           <AdminProtectedRoute>

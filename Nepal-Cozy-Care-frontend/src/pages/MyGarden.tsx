@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
+import { resolveImageUrl, DEFAULT_PLANT_IMAGE } from "../utils/imageUrl";
 import "../styles/myGarden.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 type CareAction = "water" | "fertilize";
@@ -108,7 +109,7 @@ const emptySummary: Summary = {
   needs_fertilizer: 0,
 };
 const buildImageUrl = (image?: string | null) =>
-  image ? `${API}/storage/${image}` : "/images/placeholder-plant.jpg";
+  resolveImageUrl(image, DEFAULT_PLANT_IMAGE);
 const formatDate = (value?: string | null) => {
   if (!value) return "Not set";
   return new Date(value).toLocaleDateString("en-NP", {

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import TipsGrid from "../components/care-tips/TipsGrid";
+import AIPlantHealthScanner from "../components/care-tips/AIPlantHealthScanner";
 import type { CareTip, CareTipResponse } from "../types/careTip";
 import "../styles/careTips.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -198,6 +199,10 @@ export default function CareTips() {
               Open Health Checker <ArrowRight size={18} />
             </button>
           </section>
+
+          {/* AI Machine Learning Leaf Scanner */}
+          <AIPlantHealthScanner />
+
           <div className="ct-grid-layout">
             <aside className="ct-sidebar">
               <div className="ct-seasonal-widget">

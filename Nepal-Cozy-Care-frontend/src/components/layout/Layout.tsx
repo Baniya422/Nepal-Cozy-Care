@@ -5,10 +5,10 @@ interface LayoutProps {
 }
 export default function Layout({ children }: LayoutProps) {
   return (
-    <>
+    <div className="site-layout">
       <Navbar />
-      <main>{children}</main>
+      <main className="site-main">{children}</main>
       <Footer />
-    </>
+    </div>
   );
 }

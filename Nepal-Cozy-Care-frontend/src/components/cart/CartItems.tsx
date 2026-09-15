@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, X } from "lucide-react";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
+
 type CartItem = {
   id: number;
   plant_id: number;
@@ -32,13 +33,10 @@ export default function CartItems({ cartItems, updating, updateQuantity, removeI
           <div key={item.id} className="cart-item">
             <div className="cart-item-info">
               <img
-                src={
-                  item.plant.image
-                    ? `${API}/storage/${item.plant.image}`
-                    : "/images/plant-placeholder.jpg"
-                }
+                src={resolveImageUrl(item.plant.image, DEFAULT_PLANT_IMAGE)}
                 alt={item.plant.name}
                 className="cart-item-image"
+                onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
               />
               <div className="cart-item-details">
                 <h3 className="cart-item-name">{item.plant.name}</h3>

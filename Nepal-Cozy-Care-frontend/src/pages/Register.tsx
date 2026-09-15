@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import "./auth.css";
 type RegisterResponse = {
   message?: string;
@@ -107,6 +108,21 @@ export default function Register() {
         <p className="auth-subtitle">Start your plant care journey today</p>
         {error ? <div className="auth-alert auth-alert--error">{error}</div> : null}
         {success ? <div className="auth-alert auth-alert--success">{success}</div> : null}
+
+        <GoogleAuthButton
+          mode="signup"
+          onError={(msg) => setError(msg)}
+          onSuccess={() => {
+            navigate("/plants");
+          }}
+        />
+
+        <div className="auth-divider">
+          <div className="auth-divider-line" />
+          <span className="auth-divider-text">Or register with email</span>
+          <div className="auth-divider-line" />
+        </div>
+
         <form className="auth-form" onSubmit={handleSubmit} autoComplete="off">
           <label className="auth-label">
             Full Name

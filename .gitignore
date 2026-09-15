@@ -4,6 +4,8 @@ vendor/
 
 # Environment files
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
 

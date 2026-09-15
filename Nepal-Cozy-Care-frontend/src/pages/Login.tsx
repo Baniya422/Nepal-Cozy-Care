@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import GoogleAuthButton from "../components/auth/GoogleAuthButton";
 import "./auth.css";
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 export default function Login() {
@@ -86,6 +87,21 @@ export default function Login() {
         <p className="auth-subtitle">Login to continue your plant care journey</p>
         {error ? <div className="auth-alert auth-alert--error">{error}</div> : null}
         {success ? <div className="auth-alert auth-alert--success">{success}</div> : null}
+
+        <GoogleAuthButton
+          mode="signin"
+          onError={(msg) => setError(msg)}
+          onSuccess={() => {
+            navigate("/plants");
+          }}
+        />
+
+        <div className="auth-divider">
+          <div className="auth-divider-line" />
+          <span className="auth-divider-text">Or login with email</span>
+          <div className="auth-divider-line" />
+        </div>
+
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-label">
             Email Address

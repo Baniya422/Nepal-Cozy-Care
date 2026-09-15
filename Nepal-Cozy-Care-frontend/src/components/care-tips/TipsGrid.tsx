@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { BookOpen, TrendingUp, Clock3, ArrowRight } from "lucide-react";
 import type { CareTip } from "../../types/careTip";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
+import { resolveImageUrl, handleImageError, DEFAULT_CARE_TIP_IMAGE } from "../../utils/imageUrl";
+const FALLBACK_IMAGE = DEFAULT_CARE_TIP_IMAGE;
 interface TipsGridProps {
   careTips: CareTip[];
   loading: boolean;
@@ -120,13 +120,10 @@ export default function TipsGrid({
             >
               <div className="care-tip-image-wrapper">
                 <img
-                  src={
-                    tip.image
-                      ? `${API}/storage/${tip.image}`
-                      : FALLBACK_IMAGE
-                  }
+                  src={resolveImageUrl(tip.image, FALLBACK_IMAGE)}
                   alt={tip.title}
                   className="care-tip-image"
+                  onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
                 />
                 <div className="care-tip-image-overlay"></div>
                 <span className="care-tip-top-badge">{getCategoryLabel(tip.category)}</span>

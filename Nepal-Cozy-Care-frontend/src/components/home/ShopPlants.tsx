@@ -4,8 +4,8 @@ import { Heart, Star } from "lucide-react";
 import { useAddToCart } from "../../hooks/useAddToCart";
 import { useWishlist } from "../../hooks/useWishlist";
 import type { ProductSectionContent } from "../../features/homepage/content";
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-const FALLBACK_PLANT_IMAGE = "/images/alovera.jpg";
 type Plant = {
   id: number;
   name: string;
@@ -68,12 +68,10 @@ export default function ShopPlants({ content }: { content: ProductSectionContent
             <div className="product-image-wrapper">
               <img
                 className="product-image"
-                src={plant.image ? `${API}/storage/${plant.image}` : FALLBACK_PLANT_IMAGE}
+                src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
                 alt={plant.name}
                 onClick={() => navigate(`/plants/${plant.id}`)}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = FALLBACK_PLANT_IMAGE;
-                }}
+                onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
               />
               <button
                 type="button"

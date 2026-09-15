@@ -1,5 +1,6 @@
 import { Heart } from "lucide-react";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
+
 interface ProductImageProps {
   image?: string;
   name: string;
@@ -9,9 +10,10 @@ export default function ProductImage({ image, name }: ProductImageProps) {
     <div className="product-image-section">
       <div className="main-image-wrapper">
         <img
-          src={image ? `${API}/storage/${image}` : '/images/placeholder-plant.jpg'}
+          src={resolveImageUrl(image, DEFAULT_PLANT_IMAGE)}
           alt={name}
           className="main-image"
+          onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
         />
         <button className="wishlist-btn">
           <Heart size={20} />

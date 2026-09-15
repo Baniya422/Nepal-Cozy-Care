@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
+
 type Plant = {
   id: number;
   name: string;
@@ -87,9 +88,10 @@ export default function ProductGrid({
           <div key={plant.id} className="plants-card">
             <div className="plants-card-image-wrapper">
               <img
-                src={plant.image ? `${API}/storage/${plant.image}` : "/images/placeholder-plant.jpg"}
+                src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
                 alt={plant.name}
                 className="plants-card-image"
+                onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
                 onClick={() => navigate(`/plants/${plant.id}`)}
               />
               <button

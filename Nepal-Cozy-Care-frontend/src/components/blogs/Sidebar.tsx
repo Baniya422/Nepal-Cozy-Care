@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../../utils/imageUrl";
+
 type Blog = {
   id: number;
   title: string;
@@ -38,9 +39,10 @@ export default function Sidebar({ topTrends, topStories, loading }: SidebarProps
                 style={{ cursor: "pointer" }}
               >
                 <img
-                  src={blog.image ? `${API}/storage/${blog.image}` : "https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=100"}
+                  src={resolveImageUrl(blog.image, DEFAULT_BLOG_IMAGE)}
                   alt={blog.title}
                   className="blogs-trend-image"
+                  onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
                 />
                 <p className="blogs-trend-text">{blog.title}</p>
               </div>

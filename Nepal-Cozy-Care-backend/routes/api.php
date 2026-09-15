@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\HomepageContentController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PlantController;
 use App\Http\Controllers\Api\PlantFinderTemplateController;
+use App\Http\Controllers\Api\PlantHealthAiController;
 use App\Http\Controllers\Api\PlantHealthTemplateController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SeasonalReminderController;
@@ -30,6 +31,7 @@ Route::get('/ping', function () {
 });
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/google', [AuthController::class, 'googleAuth']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/contact', [ContactMessageController::class, 'store']);
@@ -84,6 +86,7 @@ Route::get('/content-templates/{key}', [ContentTemplateController::class, 'show'
 Route::get('/help-center/template', [HelpCenterTemplateController::class, 'show']);
 Route::get('/plant-finder/template', [PlantFinderTemplateController::class, 'show']);
 Route::get('/plant-health/template', [PlantHealthTemplateController::class, 'show']);
+Route::post('/plant-health/ai-diagnose', [PlantHealthAiController::class, 'diagnose']);
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/homepage', [HomepageContentController::class, 'adminShow']);
     Route::put('/admin/homepage', [HomepageContentController::class, 'update']);

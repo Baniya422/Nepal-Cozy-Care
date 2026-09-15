@@ -7,6 +7,10 @@ import {
   DollarSign,
   TrendingUp,
   TrendingDown,
+  Globe,
+  BookOpen,
+  Compass,
+  ArrowRight,
 } from "lucide-react";
 import AdminLayout from "../components/admin/AdminLayout";
 import "../components/admin/admin.css";
@@ -206,7 +210,169 @@ export default function AdminDashboard() {
             ))
           )}
         </div>
-        {}
+
+        {/* Website Content Management Quick Access */}
+        <div
+          style={{
+            marginBottom: "2rem",
+            background: "#ffffff",
+            borderRadius: "14px",
+            border: "1px solid #e2e8f0",
+            padding: "1.25rem 1.5rem",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+            }}
+          >
+            <div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#102e23", margin: 0 }}>
+                Website & Content Management
+              </h3>
+              <p style={{ color: "#64748b", margin: "0.2rem 0 0", fontSize: "0.86rem" }}>
+                Update live public website copy, care guides, blogs, and plant health diagnostics.
+              </p>
+            </div>
+            <Link
+              to="/admin/page-content"
+              style={{
+                fontSize: "0.85rem",
+                color: "#1b4e54",
+                fontWeight: 600,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.3rem",
+              }}
+            >
+              Open Full Page Directory <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "1rem",
+            }}
+          >
+            <Link
+              to="/admin/page-content"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "1rem 1.25rem",
+                borderRadius: "10px",
+                border: "1px solid #e2e8f0",
+                background: "#f8fafc",
+                textDecoration: "none",
+                color: "#1e293b",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "10px",
+                  background: "#e8f3ef",
+                  color: "#1b4e54",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Compass size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#0f172a" }}>Page Content CMS</div>
+                <div style={{ fontSize: "0.8rem", color: "#64748b" }}>Edit 8 public pages & tools</div>
+              </div>
+            </Link>
+
+            <Link
+              to="/admin/blogs"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "1rem 1.25rem",
+                borderRadius: "10px",
+                border: "1px solid #e2e8f0",
+                background: "#f8fafc",
+                textDecoration: "none",
+                color: "#1e293b",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "10px",
+                  background: "#eff6ff",
+                  color: "#2563eb",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <BookOpen size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#0f172a" }}>Editorial Blogs</div>
+                <div style={{ fontSize: "0.8rem", color: "#64748b" }}>Publish & manage stories</div>
+              </div>
+            </Link>
+
+            <Link
+              to="/admin/care-tips"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "1rem 1.25rem",
+                borderRadius: "10px",
+                border: "1px solid #e2e8f0",
+                background: "#f8fafc",
+                textDecoration: "none",
+                color: "#1e293b",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <div
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "10px",
+                  background: "#fef3c7",
+                  color: "#d97706",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Globe size={20} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: "0.92rem", color: "#0f172a" }}>Plant Care Guides</div>
+                <div style={{ fontSize: "0.8rem", color: "#64748b" }}>Watering & tips library</div>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         <div className="admin-dashboard-grid">
           {}
           <div className="admin-card">
@@ -222,30 +388,32 @@ export default function AdminDashboard() {
               ) : recentOrders.length === 0 ? (
                 <div className="admin-empty">No recent orders</div>
               ) : (
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Customer</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentOrders.map((order) => (
-                      <tr key={order.id}>
-                        <td className="order-id">{order.order_id}</td>
-                        <td>{order.customer}</td>
-                        <td className="amount">{formatCurrency(order.amount)}</td>
-                        <td>
-                          <span className={`status-badge ${getStatusClass(order.status)}`}>
-                            {formatStatusLabel(order.status)}
-                          </span>
-                        </td>
+                <div className="admin-table-container" style={{ border: "none", borderRadius: 0 }}>
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {recentOrders.map((order) => (
+                        <tr key={order.id}>
+                          <td className="order-id">{order.order_id}</td>
+                          <td>{order.customer}</td>
+                          <td className="amount">{formatCurrency(order.amount)}</td>
+                          <td>
+                            <span className={`status-badge ${getStatusClass(order.status)}`}>
+                              {formatStatusLabel(order.status)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>

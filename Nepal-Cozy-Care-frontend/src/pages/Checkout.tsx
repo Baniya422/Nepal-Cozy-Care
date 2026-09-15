@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, CreditCard, MapPin, Truck } from "lucide-react";
 import Layout from "../components/layout/Layout";
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../utils/imageUrl";
 import "../styles/checkout.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 type CartItem = {
@@ -209,13 +210,12 @@ export default function Checkout() {
                         onClick={() => toggleItemExpansion(item.id)}
                       >
                         <div className="checkout-item-main">
-                          {item.plant.image ? (
-                            <img
-                              src={`${API}/storage/${item.plant.image}`}
-                              alt={item.plant.name}
-                              className="checkout-item-image"
-                            />
-                          ) : null}
+                          <img
+                            src={resolveImageUrl(item.plant.image, DEFAULT_PLANT_IMAGE)}
+                            alt={item.plant.name}
+                            className="checkout-item-image"
+                            onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
+                          />
                           <div className="checkout-item-details">
                             <h3>{item.plant.name}</h3>
                             <p className="checkout-item-qty">Qty: {item.quantity}</p>
