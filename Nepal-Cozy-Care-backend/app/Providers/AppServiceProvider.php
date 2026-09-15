@@ -17,6 +17,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(MailSettingsService $mailSettings): void
     {
+        if (class_exists(\Illuminate\Foundation\Console\ServeCommand::class)) {
+            \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables = array_merge(
+                \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables,
+                [
+                    'SystemRoot',
+                    'SystemDrive',
+                    'windir',
+                    'WINDIR',
+                    'ComSpec',
+                    'COMSPEC',
+                    'TEMP',
+                    'TMP',
+                    'LOCALAPPDATA',
+                    'APPDATA',
+                    'USERPROFILE',
+                ]
+            );
+        }
+
+        if ($this->app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         try {
             $mailSettings->apply();
         } catch (\Throwable) {

@@ -8,8 +8,8 @@ return new class extends Migration
     public function up(): void
     {
         DB::table('plants')->update([
-            'rooms' => DB::raw("JSON_ARRAY('Living Room', 'Bedroom')"),
-            'quantity_categories' => DB::raw("JSON_ARRAY('One', '2-3')"),
+            'rooms' => json_encode(['Living Room', 'Bedroom']),
+            'quantity_categories' => json_encode(['One', '2-3']),
         ]);
     }
 

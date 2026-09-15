@@ -73,7 +73,7 @@ export default function Register() {
       });
     } catch (err: any) {
       if (err?.message === "Failed to fetch") {
-        setError("Cannot connect to server. Please make sure the backend is running on http://127.0.0.1:8000");
+        setError("Cannot connect to server. Please make sure the backend is reachable.");
       } else {
         setError(err?.message || "Something went wrong.");
       }

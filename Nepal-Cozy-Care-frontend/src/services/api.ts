@@ -1,4 +1,6 @@
-const API_BASE_URL = '/api';
+import { API_BASE_URL, API_TIMEOUT } from '../config/api';
+
+const API_ENDPOINT = `${API_BASE_URL}/api`;
 /**
  * API Service for making HTTP requests to the Laravel backend
  */
@@ -10,8 +12,12 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${API_ENDPOINT}${cleanEndpoint}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
     const defaultOptions: RequestInit = {
+      signal: options.signal || controller.signal,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -29,6 +35,8 @@ class ApiService {
     } catch (error) {
       console.error('API request failed:', error);
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
   /**
