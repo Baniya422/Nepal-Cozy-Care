@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -17,6 +17,34 @@ import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../utils/
 import "../styles/blogDetail.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+type RelatedBlogApi = {
+  id: number;
+  title: string;
+  excerpt?: string | null;
+  content?: string | null;
+  image?: string | null;
+  author?: string | null;
+  category?: string | null;
+  views?: number | null;
+  published_at?: string | null;
+};
+
+const renderInlineFormatting = (text: string): ReactNode[] =>
+  text
+    .split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
+    .filter(Boolean)
+    .map((part, index) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>;
+      }
+
+      if (part.startsWith("*") && part.endsWith("*")) {
+        return <em key={`${part}-${index}`}>{part.slice(1, -1)}</em>;
+      }
+
+      return part;
+    });
 
 export default function BlogDetail() {
   const navigate = useNavigate();
@@ -95,7 +123,7 @@ export default function BlogDetail() {
             const apiRelated = data.data?.related_blogs || [];
             if (apiRelated.length > 0) {
               setRelatedBlogs(
-                apiRelated.map((rb: any) => ({
+                apiRelated.map((rb: RelatedBlogApi) => ({
                   id: rb.id,
                   title: rb.title,
                   excerpt: rb.excerpt || "",
@@ -257,24 +285,29 @@ export default function BlogDetail() {
         <div className="cozy-article-shell">
           <article className="cozy-article-main-card">
             {/* Primary High-Resolution Picture with Zoom Lightbox */}
-            <div
-              className="cozy-article-feature-image-box"
-              onClick={() => setLightboxImg(blog.image)}
-              title="Click to zoom image"
-            >
-              <img
-                src={blog.image}
-                alt={blog.title}
-                onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
-              />
-              <div className="cozy-article-img-caption">
-                Photo: {blog.title} — Tap to expand in high-definition lightbox
-              </div>
-            </div>
+            <figure className="cozy-article-feature-image-box">
+              <button
+                type="button"
+                className="cozy-article-image-button"
+                onClick={() => setLightboxImg(blog.image)}
+                aria-label={`Expand image: ${blog.title}`}
+              >
+                <img
+                  src={blog.image}
+                  alt={blog.title}
+                  onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
+                />
+              </button>
+              <figcaption className="cozy-article-img-caption">
+                {blog.title} — select the image to view it full size
+              </figcaption>
+            </figure>
 
             {/* Editorial Prose Body */}
             <div className="cozy-article-prose">
               {paragraphs.map((pText, pIdx) => {
+                const lines = pText.split("\n").map((line) => line.trim()).filter(Boolean);
+
                 // Check if it's a heading
                 if (pText.startsWith("### ")) {
                   return <h2 key={pIdx}>{pText.replace("### ", "")}</h2>;
@@ -286,8 +319,32 @@ export default function BlogDetail() {
                 if (pText.startsWith("> ")) {
                   return (
                     <blockquote key={pIdx} className="cozy-pullquote">
-                      {pText.replace("> ", "").replace(/"/g, "")}
+                      {renderInlineFormatting(pText.replace("> ", "").replace(/"/g, ""))}
                     </blockquote>
+                  );
+                }
+
+                if (lines.length > 0 && lines.every((line) => /^\d+\.\s/.test(line))) {
+                  return (
+                    <ol key={pIdx} className="cozy-article-list cozy-article-numbered-list">
+                      {lines.map((line, lineIdx) => (
+                        <li key={lineIdx}>
+                          {renderInlineFormatting(line.replace(/^\d+\.\s*/, ""))}
+                        </li>
+                      ))}
+                    </ol>
+                  );
+                }
+
+                if (lines.length > 0 && lines.every((line) => /^[-*]\s/.test(line))) {
+                  return (
+                    <ul key={pIdx} className="cozy-article-list">
+                      {lines.map((line, lineIdx) => (
+                        <li key={lineIdx}>
+                          {renderInlineFormatting(line.replace(/^[-*]\s*/, ""))}
+                        </li>
+                      ))}
+                    </ul>
                   );
                 }
 
@@ -295,7 +352,7 @@ export default function BlogDetail() {
                 const isFirst = pIdx === 0;
                 return (
                   <p key={pIdx} className={isFirst ? "cozy-drop-cap" : ""}>
-                    {pText}
+                    {renderInlineFormatting(pText)}
                   </p>
                 );
               })}

@@ -4,11 +4,18 @@
    ========================================================================== */
 
 .ublog-root {
+  --ublog-font-sans: "Aptos", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --ublog-font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   min-height: 100vh;
   background-color: #ffffff;
   color: #101828;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--ublog-font-sans);
   overflow-x: hidden;
+}
+
+.ublog-root button,
+.ublog-root input {
+  font: inherit;
 }
 
 /* --------------------------------------------------------------------------
@@ -85,14 +92,16 @@
 }
 
 .ublog-hero-title {
-  font-size: 2.35rem;
-  font-weight: 800;
-  line-height: 1.22;
+  font-family: var(--ublog-font-display);
+  font-size: 2.55rem;
+  font-weight: 700;
+  line-height: 1.14;
   color: #ffffff;
   margin: 0;
   max-width: 860px;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.035em;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-wrap: balance;
 }
 
 .ublog-hero-excerpt {
@@ -189,8 +198,9 @@
 }
 
 .ublog-section-title {
+  font-family: var(--ublog-font-display);
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 700;
   color: #101828;
   margin: 0;
   letter-spacing: -0.02em;
@@ -426,13 +436,14 @@
 }
 
 .ublog-card-title {
+  font-family: var(--ublog-font-display);
   font-size: 1.16rem;
   font-weight: 700;
   color: #101828;
   line-height: 1.38;
   margin: 0;
   flex: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.018em;
   transition: color 0.15s ease;
 }
 
@@ -621,9 +632,10 @@
 }
 
 .ublog-cta-title {
+  font-family: var(--ublog-font-display);
   font-size: 2.25rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   margin: 0 0 0.75rem;
   color: #ffffff;
 }
