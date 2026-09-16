@@ -102,12 +102,12 @@ export default function CareTips() {
     [...careTips].sort((first, second) => second.views_count - first.views_count)[0] ?? null;
   const activeTopicLabel = selectedCategory
     ? {
-        watering: "Watering",
-        indoor: "Indoor Plants",
+        watering: "Watering 101",
+        indoor: "Lighting & Indoor 101",
         pest_control: "Pest Control",
-        fertilizing: "Fertilizing",
-        outdoor: "Outdoor Plants",
-        seasonal: "Seasonal Care",
+        fertilizing: "Fertilizing & Nutrients",
+        outdoor: "Outdoor & Balcony",
+        seasonal: "Seasonal & Climate Care",
       }[selectedCategory] || "Filtered Topic"
     : "All Topics";
   const pageViews = careTips.reduce((total, tip) => total + tip.views_count, 0);
@@ -244,6 +244,18 @@ export default function CareTips() {
                   onClick={() => handleCategoryChange("fertilizing")}
                 >
                   <Flower2 size={16}/> Fertilizing
+                </button>
+                <button
+                  className={`ct-quick-pill ${selectedCategory === "seasonal" ? "active" : ""}`}
+                  onClick={() => handleCategoryChange("seasonal")}
+                >
+                  <CalendarHeart size={16}/> Seasonal & Climate
+                </button>
+                <button
+                  className={`ct-quick-pill ${selectedCategory === "outdoor" ? "active" : ""}`}
+                  onClick={() => handleCategoryChange("outdoor")}
+                >
+                  <Sprout size={16}/> Outdoor & Balcony
                 </button>
               </div>
             </aside>

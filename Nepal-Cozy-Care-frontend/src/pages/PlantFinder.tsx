@@ -117,6 +117,12 @@ export function PlantFinder() {
       setRecommendedPlants(results.recommendedPlants);
       setMorePlants(results.morePlants);
       setShowResults(true);
+      setTimeout(() => {
+        const resultsEl = document.getElementById("plantfinder-results-section");
+        if (resultsEl) {
+          resultsEl.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 150);
     } catch (error) {
       console.error("Error fetching plants:", error);
       setRecommendedPlants([]);
@@ -185,6 +191,7 @@ export function PlantFinder() {
             recommendedPlants={recommendedPlants}
             morePlants={morePlants}
             onPlantClick={(id) => navigate(`/plants/${id}`)}
+            onStartOver={handleStartOver}
           />
         ) : null}
       </div>

@@ -67,6 +67,60 @@ export const getCurrentPreview = (
     }
   );
 };
+const isLightCompatible = (plantLight?: string, selectionLight?: string) => {
+  if (!selectionLight || !plantLight) return true;
+  const p = normalizeValue(plantLight);
+  const s = normalizeValue(selectionLight);
+  if (p === s) return true;
+  if (s === "bright-light" || s.includes("bright")) {
+    return p.includes("bright") || p.includes("direct");
+  }
+  if (s === "medium-light" || s.includes("medium")) {
+    return p.includes("medium") || p.includes("indirect") || p.includes("bright");
+  }
+  if (s === "low-light" || s.includes("low")) {
+    return p.includes("low") || p.includes("medium");
+  }
+  if (s === "indirect-light" || s.includes("indirect")) {
+    return p.includes("indirect") || p.includes("medium") || p.includes("bright");
+  }
+  return false;
+};
+
+const isDifficultyCompatible = (plantDifficulty?: string, selectionExp?: string) => {
+  if (!selectionExp || !plantDifficulty) return true;
+  const p = normalizeValue(plantDifficulty);
+  const s = normalizeValue(selectionExp);
+  if (p === s) return true;
+  if (s === "beginner" || s === "easy") {
+    return p === "easy" || p === "beginner";
+  }
+  if (s === "intermediate" || s === "medium" || s === "moderate") {
+    return p === "intermediate" || p === "medium" || p === "moderate" || p === "easy" || p === "beginner";
+  }
+  if (s === "expert" || s === "hard" || s === "advanced") {
+    return true;
+  }
+  return false;
+};
+
+const isHumidityCompatible = (plantHumidity?: string, selectionLocation?: string) => {
+  if (!selectionLocation || !plantHumidity) return true;
+  const p = normalizeValue(plantHumidity);
+  const s = normalizeValue(selectionLocation);
+  if (p === s) return true;
+  if (s === "humid" || s.includes("humid")) {
+    return p.includes("60") || p.includes("70") || p.includes("80") || p.includes("high") || p.includes("humid");
+  }
+  if (s === "dry" || s.includes("dry")) {
+    return p.includes("20") || p.includes("30") || p.includes("40") || p.includes("dry") || p.includes("low");
+  }
+  if (s === "normal" || s.includes("normal")) {
+    return true;
+  }
+  return false;
+};
+
 export const getPlantFinderResults = (
   allPlants: Plant[],
   selections: PlantFinderSelections
@@ -80,20 +134,26 @@ export const getPlantFinderResults = (
     }
     if (selections.light && plant.light) {
       const expectedLight = lightMap[selections.light] ?? selections.light;
-      if (normalizeValue(plant.light) !== normalizeValue(expectedLight)) {
+      const exactMatch = normalizeValue(plant.light) === normalizeValue(expectedLight);
+      const semanticMatch = isLightCompatible(plant.light, selections.light);
+      if (!exactMatch && !semanticMatch) {
         return false;
       }
     }
     if (selections.experience && plant.difficulty) {
       const expectedDifficulty =
         difficultyMap[selections.experience] ?? selections.experience;
-      if (normalizeValue(plant.difficulty) !== normalizeValue(expectedDifficulty)) {
+      const exactMatch = normalizeValue(plant.difficulty) === normalizeValue(expectedDifficulty);
+      const semanticMatch = isDifficultyCompatible(plant.difficulty, selections.experience);
+      if (!exactMatch && !semanticMatch) {
         return false;
       }
     }
     if (selections.location && plant.humidity) {
       const expectedHumidity = humidityMap[selections.location] ?? selections.location;
-      if (normalizeValue(plant.humidity) !== normalizeValue(expectedHumidity)) {
+      const exactMatch = normalizeValue(plant.humidity) === normalizeValue(expectedHumidity);
+      const semanticMatch = isHumidityCompatible(plant.humidity, selections.location);
+      if (!exactMatch && !semanticMatch) {
         return false;
       }
     }
@@ -120,7 +180,7 @@ export const getPlantFinderResults = (
     (plant) => !filteredIds.has(plant.id)
   );
   return {
-    recommendedPlants: filteredPlants.slice(0, 3),
+    recommendedPlants: filteredPlants.slice(0, 6),
     morePlants: remainingPlants.slice(0, 6),
   };
 };
