@@ -13,14 +13,34 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@cozycare.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
-        $this->command->info('Admin user created successfully!');
-        $this->command->info('Email: admin@cozycare.com');
-        $this->command->info('Password: admin123');
+        // Primary Admin Account
+        User::updateOrCreate(
+            ['email' => 'admin@cozycare.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
+
+        // Dedicated Brand Admin Account
+        User::updateOrCreate(
+            ['email' => 'admin@nepalcozycare.com'],
+            [
+                'name' => 'Nepal Cozy Care Admin',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
+
+        // Demo customer account for order history and reviews
+        User::updateOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'name' => 'Aayush Shrestha',
+                'password' => Hash::make('password123'),
+                'role' => 'user',
+            ]
+        );
     }
 }

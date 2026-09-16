@@ -23,11 +23,16 @@ php artisan view:clear || true
 echo "Ensuring public storage symlink..."
 php artisan storage:link || true
 
-# Run database migrations if enabled
+# Run database migrations and seeds if enabled
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     echo "Running database migrations..."
     php artisan migrate --force || {
         echo "Migration warning: could not run migrations immediately. Please check database connection."
+    }
+
+    echo "Running database seeders..."
+    php artisan db:seed --force || {
+        echo "Seeding warning: could not run seeders immediately."
     }
 fi
 
