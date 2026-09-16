@@ -4,7 +4,7 @@ import Layout from "../components/layout/Layout";
 import PlantFinderPreview from "../features/plant-finder/components/PlantFinderPreview";
 import PlantFinderQuizForm from "../features/plant-finder/components/PlantFinderQuizForm";
 import PlantFinderResults from "../features/plant-finder/components/PlantFinderResults";
-import { applyPlantFinderTemplate } from "../features/plant-finder/data";
+import { applyPlantFinderTemplate, DEFAULT_PLANT_CATALOG } from "../features/plant-finder/data";
 import { extractPlantsFromResponse } from "../features/plant-finder/utils";
 import { getAIPlantRecommendations } from "../features/plant-finder/aiMatchmaker";
 import type {
@@ -26,7 +26,7 @@ export function PlantFinder() {
   const [templateLoading, setTemplateLoading] = useState(true);
   const [templateError, setTemplateError] = useState<string | null>(null);
   const [, setTemplateRevision] = useState(0);
-  const [cachedPlants, setCachedPlants] = useState<Plant[]>([]);
+  const [cachedPlants, setCachedPlants] = useState<Plant[]>(DEFAULT_PLANT_CATALOG);
   const [selections, setSelections] = useState<PlantFinderSelections>({
     room: "",
     light: "",
@@ -135,13 +135,16 @@ export function PlantFinder() {
     event.preventDefault();
     try {
       let plants = cachedPlants;
-      if (plants.length === 0) {
+      if (!plants || plants.length === 0) {
         const response = await fetch(`${API}/api/plants?per_page=100`);
         const data = await response.json();
         plants = extractPlantsFromResponse(data);
-        setCachedPlants(plants);
+        if (plants && plants.length > 0) {
+          setCachedPlants(plants);
+        }
       }
-      const results = getAIPlantRecommendations(plants, selections);
+      const activePlants = plants && plants.length > 0 ? plants : DEFAULT_PLANT_CATALOG;
+      const results = getAIPlantRecommendations(activePlants, selections);
       setRecommendedPlants(results.recommendedPlants);
       setMorePlants(results.morePlants);
       setShowResults(true);
@@ -152,10 +155,17 @@ export function PlantFinder() {
         }
       }, 150);
     } catch (error) {
-      console.error("Error fetching plants:", error);
-      setRecommendedPlants([]);
-      setMorePlants([]);
+      console.warn("API fetch notice in plant finder, using catalog:", error);
+      const results = getAIPlantRecommendations(DEFAULT_PLANT_CATALOG, selections);
+      setRecommendedPlants(results.recommendedPlants);
+      setMorePlants(results.morePlants);
       setShowResults(true);
+      setTimeout(() => {
+        const resultsEl = document.getElementById("plantfinder-results-section");
+        if (resultsEl) {
+          resultsEl.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 150);
     }
   };
   const handleStartOver = () => {
