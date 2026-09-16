@@ -1,4 +1,4 @@
-import { Sparkles, Sprout, ArrowDown } from "lucide-react";
+import { Sparkles, ArrowDown, RotateCcw } from "lucide-react";
 import PlantFinderPlantCard from "./PlantFinderPlantCard";
 import type { Plant } from "../types";
 
@@ -23,14 +23,24 @@ export default function PlantFinderResults({
         <div className="pf-results-header">
           <div className="pf-results-badge">
             <Sparkles size={16} />
-            <span>AI Matchmaker Results</span>
+            <span>AI Matchmaker Recommendations</span>
           </div>
           <h2 className="plantfinder-results-title">
-            Your Perfect Plant Matches
+            Your Perfect Botanical Matches
           </h2>
           <p className="pf-results-desc">
-            Hand-picked for your light, room, and lifestyle. Ready to thrive in your space.
+            Smart botanical suggestions tailored specifically to your room, light, and routine.
           </p>
+          {onStartOver && (
+            <button
+              type="button"
+              className="pf-btn-reset pf-results-reset-btn"
+              onClick={onStartOver}
+            >
+              <RotateCcw size={14} />
+              <span>Tweak My Answers</span>
+            </button>
+          )}
         </div>
 
         {recommendedPlants.length > 0 ? (
@@ -44,24 +54,7 @@ export default function PlantFinderResults({
               />
             ))}
           </div>
-        ) : (
-          <div className="pf-empty-box">
-            <Sprout size={36} className="pf-empty-icon" />
-            <h3>No exact 100% matches for that specific combination</h3>
-            <p>
-              Don't worry! Below are versatile species that adapt exceptionally well to various home conditions.
-            </p>
-            {onStartOver && (
-              <button
-                type="button"
-                className="pf-tweak-btn"
-                onClick={onStartOver}
-              >
-                Tweak Preferences
-              </button>
-            )}
-          </div>
-        )}
+        ) : null}
       </section>
 
       {morePlants.length > 0 ? (

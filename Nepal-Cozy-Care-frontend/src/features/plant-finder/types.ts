@@ -42,6 +42,9 @@ export type Plant = {
   difficulty?: string;
   humidity?: string;
   rooms?: string[] | string | null;
+  aiMatchScore?: number;
+  aiMatchReason?: string;
+  aiHighlights?: string[];
 };
 export type PlantFinderResults = {
   recommendedPlants: Plant[];

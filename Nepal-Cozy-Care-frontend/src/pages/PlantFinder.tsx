@@ -5,7 +5,8 @@ import PlantFinderPreview from "../features/plant-finder/components/PlantFinderP
 import PlantFinderQuizForm from "../features/plant-finder/components/PlantFinderQuizForm";
 import PlantFinderResults from "../features/plant-finder/components/PlantFinderResults";
 import { applyPlantFinderTemplate } from "../features/plant-finder/data";
-import { extractPlantsFromResponse, getPlantFinderResults } from "../features/plant-finder/utils";
+import { extractPlantsFromResponse } from "../features/plant-finder/utils";
+import { getAIPlantRecommendations } from "../features/plant-finder/aiMatchmaker";
 import type {
   ActiveField,
   ExperienceKey,
@@ -25,6 +26,7 @@ export function PlantFinder() {
   const [templateLoading, setTemplateLoading] = useState(true);
   const [templateError, setTemplateError] = useState<string | null>(null);
   const [, setTemplateRevision] = useState(0);
+  const [cachedPlants, setCachedPlants] = useState<Plant[]>([]);
   const [selections, setSelections] = useState<PlantFinderSelections>({
     room: "",
     light: "",
@@ -54,6 +56,20 @@ export function PlantFinder() {
       setTemplateRevision((current) => current + 1);
       setTemplateLoading(false);
     }
+
+    // Pre-fetch plants quietly in background so recommendations are instant
+    fetch(`${API}/api/plants?per_page=100`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted) {
+          const plants = extractPlantsFromResponse(data);
+          setCachedPlants(plants);
+        }
+      })
+      .catch((err) => {
+        console.warn("Background plants pre-fetch notice:", err);
+      });
+
     const loadTemplate = async () => {
       const controller = new AbortController();
       const timeoutId = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
@@ -102,18 +118,30 @@ export function PlantFinder() {
     field: K,
     value: PlantFinderSelections[K]
   ) => {
-    setSelections((current) => ({
-      ...current,
+    const updated = {
+      ...selections,
       [field]: value,
-    }));
+    };
+    setSelections(updated);
+
+    // If results are already showing, live update AI recommendations
+    if (showResults && cachedPlants.length > 0) {
+      const aiResults = getAIPlantRecommendations(cachedPlants, updated);
+      setRecommendedPlants(aiResults.recommendedPlants);
+      setMorePlants(aiResults.morePlants);
+    }
   };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const response = await fetch(`${API}/api/plants?per_page=100`);
-      const data = await response.json();
-      const allPlants = extractPlantsFromResponse(data);
-      const results = getPlantFinderResults(allPlants, selections);
+      let plants = cachedPlants;
+      if (plants.length === 0) {
+        const response = await fetch(`${API}/api/plants?per_page=100`);
+        const data = await response.json();
+        plants = extractPlantsFromResponse(data);
+        setCachedPlants(plants);
+      }
+      const results = getAIPlantRecommendations(plants, selections);
       setRecommendedPlants(results.recommendedPlants);
       setMorePlants(results.morePlants);
       setShowResults(true);

@@ -40,12 +40,22 @@ export default function PlantFinderPlantCard({
           loading="lazy"
         />
         <div className="pf-card-overlay-badge">
-          <Sparkles size={13} />
-          <span>Recommended Match</span>
+          <Sparkles size={13} className="pf-badge-sparkle" />
+          <span>{plant.aiMatchScore ? `${plant.aiMatchScore}% AI Match` : "Recommended Match"}</span>
         </div>
       </div>
 
       <div className="pf-plant-card-body">
+        {plant.aiHighlights && plant.aiHighlights.length > 0 ? (
+          <div className="pf-ai-tags-row">
+            {plant.aiHighlights.map((tag, idx) => (
+              <span key={idx} className="pf-ai-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
         <div className="pf-card-chips">
           {plant.difficulty && (
             <span className="pf-card-chip pf-chip-diff">
@@ -63,7 +73,14 @@ export default function PlantFinderPlantCard({
 
         <h3 className="pf-plant-card-title">{plant.name}</h3>
 
-        {plant.category && (
+        {plant.aiMatchReason && (
+          <p className="pf-card-ai-reason">
+            <Sparkles size={12} className="pf-reason-sparkle" />
+            <span>{plant.aiMatchReason}</span>
+          </p>
+        )}
+
+        {plant.category && !plant.aiMatchReason && (
           <p className="pf-plant-card-category">{plant.category}</p>
         )}
 
