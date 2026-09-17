@@ -10,9 +10,10 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->role !== 'admin') {
+        $user = $request->user();
+        if (! $user || ! in_array($user->role, ['super_admin', 'admin'], true)) {
             return response()->json([
-                'message' => 'Forbidden. Admin access required.',
+                'message' => 'Forbidden. Super Admin access required.',
             ], 403);
         }
 

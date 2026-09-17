@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePlantRequest;
 use App\Http\Requests\UpdatePlantRequest;
 use App\Models\Plant;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 
 class PlantController extends Controller
@@ -13,9 +14,20 @@ class PlantController extends Controller
     public function index(Request $request)
     {
         $query = Plant::query()
-            ->where('is_active', true)
+            ->marketplaceApproved()
+            ->with('shop:id,name,slug,logo,is_verified,city,status')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
+
+        if ($shopId = $request->query('shop_id')) {
+            $query->where('shop_id', $shopId);
+        }
+
+        if ($shopSlug = $request->query('shop_slug')) {
+            $query->whereHas('shop', function ($q) use ($shopSlug) {
+                $q->where('slug', $shopSlug);
+            });
+        }
         $includeAccessories = filter_var($request->query('include_accessories', false), FILTER_VALIDATE_BOOLEAN);
         if (! $includeAccessories) {
             $query->excludeAccessories();
@@ -90,7 +102,8 @@ class PlantController extends Controller
 
     public function show($id)
     {
-        $plant = Plant::withAvg('reviews', 'rating')
+        $plant = Plant::with('shop:id,name,slug,logo,banner,short_description,city,address,phone,email,is_verified,status')
+            ->withAvg('reviews', 'rating')
             ->withCount('reviews')
             ->where('is_active', true)
             ->findOrFail($id);
@@ -121,12 +134,19 @@ class PlantController extends Controller
             $path = $image->storeAs('plants', $filename, 'public');
             $data['image'] = $path;
         }
+
+        if (empty($data['shop_id'])) {
+            $defaultShop = Shop::where('slug', 'nepal-cozy-care')->first();
+            $data['shop_id'] = $defaultShop?->id;
+        }
+        $data['approval_status'] = Plant::STATUS_APPROVED;
+
         $plant = Plant::create($data);
 
         return response()->json([
             'message' => 'Plant added successfully',
             'data' => [
-                'plant' => $plant,
+                'plant' => $plant->load('shop'),
             ],
         ], 201);
     }
@@ -196,6 +216,8 @@ class PlantController extends Controller
     public function popular(Request $request)
     {
         $query = Plant::mostViewed()
+            ->marketplaceApproved()
+            ->with('shop:id,name,slug,logo,is_verified,city,status')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 12);
@@ -225,6 +247,8 @@ class PlantController extends Controller
     public function bestSellers(Request $request)
     {
         $query = Plant::bestSellers()
+            ->marketplaceApproved()
+            ->with('shop:id,name,slug,logo,is_verified,city,status')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 12);
@@ -254,6 +278,8 @@ class PlantController extends Controller
     public function popularItemsHomepage(Request $request)
     {
         $query = Plant::popularItems()
+            ->marketplaceApproved()
+            ->with('shop:id,name,slug,logo,is_verified,city,status')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 4);
@@ -283,6 +309,8 @@ class PlantController extends Controller
     public function shopPlantsHomepage(Request $request)
     {
         $query = Plant::shopPlants()
+            ->marketplaceApproved()
+            ->with('shop:id,name,slug,logo,is_verified,city,status')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 4);
@@ -312,6 +340,8 @@ class PlantController extends Controller
     public function bestSellersHomepage(Request $request)
     {
         $query = Plant::homepageBestSellers()
+            ->marketplaceApproved()
+            ->with('shop:id,name,slug,logo,is_verified,city,status')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 4);

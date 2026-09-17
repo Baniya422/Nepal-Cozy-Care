@@ -58,6 +58,11 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public const ROLE_SUPER_ADMIN = 'super_admin';
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_SELLER = 'seller';
+    public const ROLE_CUSTOMER = 'customer';
+
     public function orders()
     {
         return $this->hasMany(Order::class);
@@ -66,5 +71,25 @@ class User extends Authenticatable
     public function gardenEntries()
     {
         return $this->hasMany(GardenEntry::class);
+    }
+
+    public function shop()
+    {
+        return $this->hasOne(Shop::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN], true);
+    }
+
+    public function isSeller(): bool
+    {
+        return $this->role === self::ROLE_SELLER;
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === self::ROLE_CUSTOMER;
     }
 }

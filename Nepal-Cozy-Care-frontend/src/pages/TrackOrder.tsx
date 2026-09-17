@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   Search,
   Package,
@@ -15,6 +15,7 @@ import {
   Mail,
   HelpCircle,
   Download,
+  Store,
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../utils/imageUrl";
@@ -26,6 +27,12 @@ type OrderItem = {
     id: number;
     name: string;
     image?: string;
+  };
+  product_name?: string;
+  shop_name?: string;
+  shop?: {
+    name: string;
+    slug: string;
   };
   quantity: number;
   price: number;
@@ -106,9 +113,12 @@ const normalizeOrderData = (rawOrder: any): OrderData => ({
         id: Number(item?.id ?? 0),
         quantity: toNumber(item?.quantity),
         price: toNumber(item?.price),
+        product_name: item?.product_name ?? undefined,
+        shop_name: item?.shop_name ?? item?.shop?.name ?? undefined,
+        shop: item?.shop ? { name: item.shop.name, slug: item.shop.slug } : undefined,
         plant: {
           id: Number(item?.plant?.id ?? 0),
-          name: String(item?.plant?.name ?? "Unknown Plant"),
+          name: String(item?.product_name ?? item?.plant?.name ?? "Unknown Plant"),
           image: item?.plant?.image ?? undefined,
         },
       }))
@@ -500,6 +510,19 @@ export default function TrackOrder() {
                         <h4 className="track-order-item-name">
                           {item.plant.name}
                         </h4>
+                        {(item.shop_name || item.shop?.name) && (
+                          <p style={{ fontSize: "0.8rem", color: "#059669", display: "flex", alignItems: "center", gap: "0.25rem", marginTop: "0.15rem" }}>
+                            <Store size={13} />
+                            Sold by:{" "}
+                            {item.shop?.slug ? (
+                              <Link to={`/shops/${item.shop.slug}`} style={{ color: "#059669", fontWeight: 600, textDecoration: "none" }}>
+                                {item.shop.name}
+                              </Link>
+                            ) : (
+                              <span>{item.shop_name || item.shop?.name}</span>
+                            )}
+                          </p>
+                        )}
                         <p className="track-order-item-qty">
                           Qty: {item.quantity}
                         </p>

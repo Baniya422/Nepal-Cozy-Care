@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminMarketplaceController;
 use App\Http\Controllers\Api\AdminPageContentController;
 use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AuthController;
@@ -19,6 +20,8 @@ use App\Http\Controllers\Api\PlantHealthAiController;
 use App\Http\Controllers\Api\PlantHealthTemplateController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SeasonalReminderController;
+use App\Http\Controllers\Api\SellerController;
+use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -87,6 +90,31 @@ Route::get('/help-center/template', [HelpCenterTemplateController::class, 'show'
 Route::get('/plant-finder/template', [PlantFinderTemplateController::class, 'show']);
 Route::get('/plant-health/template', [PlantHealthTemplateController::class, 'show']);
 Route::post('/plant-health/ai-diagnose', [PlantHealthAiController::class, 'diagnose']);
+// Public Shop Marketplace Routes
+Route::get('/shops', [ShopController::class, 'index']);
+Route::get('/shops/{slug}', [ShopController::class, 'show']);
+Route::get('/shops/{slug}/plants', [ShopController::class, 'plants']);
+
+// Seller Application Routes (Authenticated Customers / Users)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/seller/apply', [SellerController::class, 'apply']);
+    Route::get('/seller/application-status', [SellerController::class, 'applicationStatus']);
+});
+
+// Seller Portal Routes (Protected by auth:sanctum and seller middleware)
+Route::middleware(['auth:sanctum', 'seller'])->group(function () {
+    Route::get('/seller/dashboard/stats', [SellerController::class, 'dashboardStats']);
+    Route::get('/seller/shop', [SellerController::class, 'getShop']);
+    Route::put('/seller/shop', [SellerController::class, 'updateShop']);
+    Route::post('/seller/shop', [SellerController::class, 'updateShop']); // supports multipart
+    Route::get('/seller/products', [SellerController::class, 'products']);
+    Route::post('/seller/products', [SellerController::class, 'storeProduct']);
+    Route::put('/seller/products/{id}', [SellerController::class, 'updateProduct']);
+    Route::post('/seller/products/{id}', [SellerController::class, 'updateProduct']); // supports multipart
+    Route::delete('/seller/products/{id}', [SellerController::class, 'destroyProduct']);
+    Route::get('/seller/orders', [SellerController::class, 'orders']);
+});
+
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/homepage', [HomepageContentController::class, 'adminShow']);
     Route::put('/admin/homepage', [HomepageContentController::class, 'update']);
@@ -123,4 +151,16 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/contact-messages', [ContactMessageController::class, 'adminIndex']);
     Route::put('/contact-messages/{id}/status', [ContactMessageController::class, 'updateStatus']);
     Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy']);
+
+    // Super Admin Marketplace Management
+    Route::get('/admin/shops', [AdminMarketplaceController::class, 'shops']);
+    Route::get('/admin/shops/{id}', [AdminMarketplaceController::class, 'showShop']);
+    Route::post('/admin/shops/{id}/approve', [AdminMarketplaceController::class, 'approveShop']);
+    Route::post('/admin/shops/{id}/reject', [AdminMarketplaceController::class, 'rejectShop']);
+    Route::post('/admin/shops/{id}/suspend', [AdminMarketplaceController::class, 'suspendShop']);
+    Route::post('/admin/shops/{id}/reactivate', [AdminMarketplaceController::class, 'reactivateShop']);
+    Route::post('/admin/shops/{id}/verify', [AdminMarketplaceController::class, 'toggleVerifyShop']);
+    Route::get('/admin/marketplace/products', [AdminMarketplaceController::class, 'products']);
+    Route::post('/admin/marketplace/products/{id}/approve', [AdminMarketplaceController::class, 'approveProduct']);
+    Route::post('/admin/marketplace/products/{id}/reject', [AdminMarketplaceController::class, 'rejectProduct']);
 });

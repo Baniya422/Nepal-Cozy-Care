@@ -28,6 +28,13 @@ interface Plant {
   image?: string;
   avg_rating?: number;
   review_count?: number;
+  shop?: {
+    id: number;
+    name: string;
+    slug: string;
+    is_verified?: boolean;
+    logo?: string | null;
+  };
 }
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -136,6 +143,7 @@ export function ProductDetail() {
               setQuantity={setQuantity}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
+              shop={plant.shop}
             />
           </div>
           <InfoSections plant={plant} />

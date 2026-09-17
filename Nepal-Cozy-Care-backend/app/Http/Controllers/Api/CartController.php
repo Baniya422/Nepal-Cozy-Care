@@ -13,7 +13,7 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $cartItems = Cart::with('plant')
+        $cartItems = Cart::with(['plant.shop:id,name,slug,logo,is_verified,city,status'])
             ->where('user_id', $request->user()->id)
             ->latest()
             ->get();

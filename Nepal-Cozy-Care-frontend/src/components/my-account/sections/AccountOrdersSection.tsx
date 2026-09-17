@@ -1,4 +1,5 @@
-import { Package } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Package, Store, CheckCircle2 } from "lucide-react";
 import type { AccountOrder } from "../types";
 type AccountOrdersSectionProps = {
   orders: AccountOrder[];
@@ -108,18 +109,42 @@ export default function AccountOrdersSection({
                       </article>
                     </div>
                     <div className="account-order-items">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="account-order-item">
-                          <img src={buildImageUrl(item.plant?.image)} alt={item.plant?.name || "Plant"} />
-                          <div>
-                            <p className="account-item-title">{item.plant?.name || "Product"}</p>
-                            <p className="account-item-meta">
-                              Qty {item.quantity} |{" "}
-                              {formatCurrency(item.line_total ?? item.price * item.quantity)}
-                            </p>
+                      {order.items.map((item) => {
+                        const shopName = item.shop?.name || item.shop_name || item.plant?.shop?.name;
+                        const shopSlug = item.shop?.slug || item.plant?.shop?.slug;
+                        const isVerified = item.shop?.is_verified ?? item.plant?.shop?.is_verified;
+
+                        return (
+                          <div key={item.id} className="account-order-item">
+                            <img src={buildImageUrl(item.plant?.image)} alt={item.plant?.name || item.product_name || "Plant"} />
+                            <div style={{ flex: 1 }}>
+                              <p className="account-item-title">{item.plant?.name || item.product_name || "Product"}</p>
+                              {shopName && (
+                                <p style={{ fontSize: "0.78rem", color: "#4b5563", display: "flex", alignItems: "center", gap: "0.3rem", marginTop: "0.2rem" }}>
+                                  <Store size={13} style={{ color: "#059669" }} />
+                                  Sold by:{" "}
+                                  {shopSlug ? (
+                                    <Link to={`/shops/${shopSlug}`} style={{ color: "#059669", fontWeight: 600, textDecoration: "none" }}>
+                                      {shopName}
+                                    </Link>
+                                  ) : (
+                                    <span style={{ fontWeight: 600, color: "#111827" }}>{shopName}</span>
+                                  )}
+                                  {isVerified && (
+                                    <span title="Verified Partner">
+                                      <CheckCircle2 size={12} style={{ color: "#059669" }} />
+                                    </span>
+                                  )}
+                                </p>
+                              )}
+                              <p className="account-item-meta" style={{ marginTop: "0.25rem" }}>
+                                Qty {item.quantity} |{" "}
+                                {formatCurrency(item.line_total ?? item.price * item.quantity)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

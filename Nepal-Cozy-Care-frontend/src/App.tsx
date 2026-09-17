@@ -40,6 +40,17 @@ import ForgotPassword from './pages/ForgotPassword'
 import ManageHomepage from './pages/admin/ManageHomepage'
 import ManagePageContent from './pages/admin/ManagePageContent'
 import AdminSettingsPage from './pages/admin/AdminSettings'
+import ManageSellerApplications from './pages/admin/ManageSellerApplications'
+import ManageShops from './pages/admin/ManageShops'
+import ManageMarketplaceProducts from './pages/admin/ManageMarketplaceProducts'
+import ShopsDirectory from './pages/shops/ShopsDirectory'
+import ShopDetail from './pages/shops/ShopDetail'
+import BecomeASeller from './pages/seller/BecomeASeller'
+import SellerProtectedRoute from './components/seller/SellerProtectedRoute'
+import SellerDashboard from './pages/seller/SellerDashboard'
+import SellerShop from './pages/seller/SellerShop'
+import SellerProducts from './pages/seller/SellerProducts'
+import SellerOrders from './pages/seller/SellerOrders'
 function App() {
   return (
     <Routes>
@@ -192,6 +203,87 @@ function App() {
           <AdminProtectedRoute>
             <AdminSettingsPage />
           </AdminProtectedRoute>
+        }
+      />
+
+      {/* Super Admin Marketplace Routes */}
+      <Route
+        path="/admin/seller-applications"
+        element={
+          <AdminProtectedRoute>
+            <ManageSellerApplications />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/shops"
+        element={
+          <AdminProtectedRoute>
+            <ManageShops />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/marketplace-products"
+        element={
+          <AdminProtectedRoute>
+            <ManageMarketplaceProducts />
+          </AdminProtectedRoute>
+        }
+      />
+
+      {/* Public Marketplace Routes */}
+      <Route path="/shops" element={<ShopsDirectory />} />
+      <Route path="/shops/:slug" element={<ShopDetail />} />
+      <Route path="/become-a-seller" element={<BecomeASeller />} />
+
+      {/* Seller Dashboard Routes */}
+      <Route
+        path="/seller"
+        element={
+          <SellerProtectedRoute>
+            <SellerDashboard />
+          </SellerProtectedRoute>
+        }
+      />
+      <Route
+        path="/seller/dashboard"
+        element={
+          <SellerProtectedRoute>
+            <SellerDashboard />
+          </SellerProtectedRoute>
+        }
+      />
+      <Route
+        path="/seller/shop"
+        element={
+          <SellerProtectedRoute>
+            <SellerShop />
+          </SellerProtectedRoute>
+        }
+      />
+      <Route
+        path="/seller/products"
+        element={
+          <SellerProtectedRoute>
+            <SellerProducts />
+          </SellerProtectedRoute>
+        }
+      />
+      <Route
+        path="/seller/orders"
+        element={
+          <SellerProtectedRoute>
+            <SellerOrders />
+          </SellerProtectedRoute>
+        }
+      />
+      <Route
+        path="/seller/settings"
+        element={
+          <SellerProtectedRoute>
+            <SellerShop />
+          </SellerProtectedRoute>
         }
       />
     </Routes>

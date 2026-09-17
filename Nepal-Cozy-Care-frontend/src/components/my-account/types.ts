@@ -19,10 +19,25 @@ export type OrderItem = {
   quantity: number;
   price: number;
   line_total?: number;
+  product_name?: string;
+  shop_name?: string;
+  shop_id?: number;
+  shop?: {
+    id: number;
+    name: string;
+    slug: string;
+    is_verified?: boolean;
+  } | null;
   plant?: {
     id: number;
     name: string;
     image?: string | null;
+    shop?: {
+      id: number;
+      name: string;
+      slug: string;
+      is_verified?: boolean;
+    } | null;
   } | null;
 };
 export type AccountOrder = {

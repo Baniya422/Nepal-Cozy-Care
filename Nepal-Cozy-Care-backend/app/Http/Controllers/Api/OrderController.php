@@ -12,6 +12,7 @@ use App\Models\GardenEntry;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Plant;
+use App\Models\Shop;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,7 @@ class OrderController extends Controller
             ], 422);
         }
         $userId = $request->user()->id;
-        $cartItems = Cart::with('plant')
+        $cartItems = Cart::with(['plant.shop'])
             ->where('user_id', $userId)
             ->get();
         if ($cartItems->isEmpty()) {
@@ -76,13 +77,26 @@ class OrderController extends Controller
                 'confirmation_status' => 'pending',
                 'estimated_delivery_date' => now()->addDays(4),
             ]);
+
+            $defaultShop = null;
             foreach ($cartItems as $item) {
                 $plant = $item->plant;
                 $price = $plant->price;
                 $lineTotal = $price * $item->quantity;
+
+                $shop = $plant->shop;
+                if (! $shop && ! $plant->shop_id && ! $defaultShop) {
+                    $defaultShop = Shop::where('slug', 'nepal-cozy-care')->first();
+                }
+                $shopId = $plant->shop_id ?? $defaultShop?->id;
+                $shopName = $shop?->name ?? $defaultShop?->name ?? 'Nepal Cozy Care';
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'plant_id' => $plant->id,
+                    'shop_id' => $shopId,
+                    'product_name' => $plant->name,
+                    'shop_name' => $shopName,
                     'quantity' => $item->quantity,
                     'price' => $price,
                     'line_total' => $lineTotal,
@@ -105,7 +119,7 @@ class OrderController extends Controller
             }
             Cart::where('user_id', $userId)->delete();
 
-            return $order->load(['items.plant', 'user']);
+            return $order->load(['items.plant', 'items.shop', 'user']);
         });
 
         if ($result instanceof JsonResponse) {
@@ -124,8 +138,15 @@ class OrderController extends Controller
 
     public function adminIndex(Request $request)
     {
-        $query = Order::with(['items.plant', 'user'])
+        $query = Order::with(['items.plant', 'items.shop', 'user'])
             ->latest();
+
+        if ($shopId = $request->query('shop_id')) {
+            $query->whereHas('items', function ($q) use ($shopId) {
+                $q->where('shop_id', $shopId);
+            });
+        }
+
         $perPage = (int) $request->query('per_page', 20);
         $paginator = $query->paginate($perPage);
 
@@ -145,7 +166,7 @@ class OrderController extends Controller
 
     public function cancel(Request $request, $id)
     {
-        $order = Order::with('items.plant')->findOrFail($id);
+        $order = Order::with(['items.plant', 'items.shop'])->findOrFail($id);
         $user = $request->user();
         if ($order->status !== 'pending') {
             return response()->json([
@@ -153,7 +174,7 @@ class OrderController extends Controller
                 'errors' => [],
             ], 400);
         }
-        if ($user->role !== 'admin' && $order->user_id !== $user->id) {
+        if (! $user->isSuperAdmin() && $order->user_id !== $user->id) {
             return response()->json([
                 'message' => 'Forbidden',
                 'errors' => [],
@@ -172,14 +193,14 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Order cancelled successfully',
             'data' => [
-                'order' => $order->fresh('items.plant'),
+                'order' => $order->fresh(['items.plant', 'items.shop']),
             ],
         ]);
     }
 
     public function myOrders(Request $request)
     {
-        $query = Order::with('items.plant')
+        $query = Order::with(['items.plant', 'items.shop'])
             ->where('user_id', $request->user()->id)
             ->latest();
         $perPage = (int) $request->query('per_page', 10);
@@ -201,8 +222,8 @@ class OrderController extends Controller
 
     public function show(Request $request, $id)
     {
-        $order = Order::with('items.plant')->findOrFail($id);
-        if ($order->user_id !== $request->user()->id) {
+        $order = Order::with(['items.plant', 'items.shop', 'user'])->findOrFail($id);
+        if ($order->user_id !== $request->user()->id && ! $request->user()->isSuperAdmin()) {
             return response()->json([
                 'message' => 'Forbidden',
                 'errors' => [],
@@ -306,7 +327,7 @@ class OrderController extends Controller
             'order_id' => 'required|string',
             'email' => 'required|email',
         ]);
-        $order = Order::with(['items.plant', 'user'])
+        $order = Order::with(['items.plant', 'items.shop', 'user'])
             ->where('id', $validated['order_id'])
             ->first();
         if (! $order) {

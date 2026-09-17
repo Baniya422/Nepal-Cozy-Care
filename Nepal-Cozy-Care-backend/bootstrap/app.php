@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'seller' => \App\Http\Middleware\SellerMiddleware::class,
         ]);
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {

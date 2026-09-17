@@ -14,7 +14,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
   if (!token) {
     return <Navigate to="/login" replace />;
   }
-  if (!user || user.role !== "admin") {
+  if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
     return <Navigate to="/" replace />;
   }
   return <>{children}</>;

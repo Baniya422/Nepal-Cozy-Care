@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ChevronDown, CreditCard, MapPin, Truck } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { ChevronDown, CreditCard, MapPin, Truck, Store, ShieldCheck } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../utils/imageUrl";
 import "../styles/checkout.css";
@@ -14,6 +14,13 @@ type CartItem = {
     name: string;
     price: number;
     image?: string;
+    shop?: {
+      id: number;
+      name: string;
+      slug: string;
+      is_verified?: boolean;
+      logo?: string | null;
+    };
   };
 };
 type FormData = {
@@ -202,55 +209,113 @@ export default function Checkout() {
                   <span className="checkout-icon">Order</span>
                   Order Review
                 </h2>
-                <div className="checkout-items">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="checkout-item">
-                      <div
-                        className="checkout-item-header"
-                        onClick={() => toggleItemExpansion(item.id)}
+                <div className="checkout-items space-y-4">
+                  {Object.entries(
+                    cartItems.reduce<
+                      Record<
+                        string,
+                        {
+                          shopName: string;
+                          shopSlug: string;
+                          isVerified: boolean;
+                          items: CartItem[];
+                        }
                       >
-                        <div className="checkout-item-main">
-                          <img
-                            src={resolveImageUrl(item.plant.image, DEFAULT_PLANT_IMAGE)}
-                            alt={item.plant.name}
-                            className="checkout-item-image"
-                            onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
-                          />
-                          <div className="checkout-item-details">
-                            <h3>{item.plant.name}</h3>
-                            <p className="checkout-item-qty">Qty: {item.quantity}</p>
+                    >((acc, item) => {
+                      const shop = item.plant?.shop;
+                      const key = shop?.slug || "nepal-cozy-care";
+                      const name = shop?.name || "Nepal Cozy Care";
+                      const isVerified = shop?.is_verified ?? true;
+                      if (!acc[key]) {
+                        acc[key] = { shopName: name, shopSlug: key, isVerified, items: [] };
+                      }
+                      acc[key].items.push(item);
+                      return acc;
+                    }, {})
+                  ).map(([shopKey, group]) => {
+                    const shopSubtotal = group.items.reduce(
+                      (sum, item) => sum + item.plant.price * item.quantity,
+                      0
+                    );
+
+                    return (
+                      <div
+                        key={shopKey}
+                        className="border border-slate-200 rounded-xl overflow-hidden bg-white mb-3"
+                      >
+                        <div className="px-3.5 py-2 bg-emerald-50/80 border-b border-emerald-100 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-1.5 font-bold text-emerald-950">
+                            <Store size={14} className="text-emerald-700" />
+                            <span>Fulfilled by:</span>
+                            <Link
+                              to={`/shops/${group.shopSlug}`}
+                              target="_blank"
+                              className="text-emerald-800 hover:underline"
+                            >
+                              {group.shopName}
+                            </Link>
+                            {group.isVerified && (
+                              <ShieldCheck size={13} className="text-emerald-600" />
+                            )}
                           </div>
-                        </div>
-                        <div className="checkout-item-price">
-                          <span className="checkout-price">
-                            Rs {(item.plant.price * item.quantity).toFixed(2)}
+                          <span className="font-semibold text-emerald-900">
+                            Rs. {shopSubtotal.toFixed(2)}
                           </span>
-                          <ChevronDown
-                            size={20}
-                            className={`checkout-expand-icon ${
-                              expandedItems[item.id] ? "expanded" : ""
-                            }`}
-                          />
+                        </div>
+
+                        <div className="divide-y divide-slate-100">
+                          {group.items.map((item) => (
+                            <div key={item.id} className="checkout-item">
+                              <div
+                                className="checkout-item-header"
+                                onClick={() => toggleItemExpansion(item.id)}
+                              >
+                                <div className="checkout-item-main">
+                                  <img
+                                    src={resolveImageUrl(item.plant.image, DEFAULT_PLANT_IMAGE)}
+                                    alt={item.plant.name}
+                                    className="checkout-item-image"
+                                    onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
+                                  />
+                                  <div className="checkout-item-details">
+                                    <h3>{item.plant.name}</h3>
+                                    <p className="checkout-item-qty">Qty: {item.quantity}</p>
+                                  </div>
+                                </div>
+                                <div className="checkout-item-price">
+                                  <span className="checkout-price">
+                                    Rs {(item.plant.price * item.quantity).toFixed(2)}
+                                  </span>
+                                  <ChevronDown
+                                    size={20}
+                                    className={`checkout-expand-icon ${
+                                      expandedItems[item.id] ? "expanded" : ""
+                                    }`}
+                                  />
+                                </div>
+                              </div>
+                              {expandedItems[item.id] ? (
+                                <div className="checkout-item-expanded">
+                                  <div className="checkout-item-row">
+                                    <span>Unit Price:</span>
+                                    <span>Rs {Number(item.plant.price).toFixed(2)}</span>
+                                  </div>
+                                  <div className="checkout-item-row">
+                                    <span>Quantity:</span>
+                                    <span>{item.quantity}</span>
+                                  </div>
+                                  <div className="checkout-item-row checkout-item-total">
+                                    <span>Subtotal:</span>
+                                    <span>Rs {(item.plant.price * item.quantity).toFixed(2)}</span>
+                                  </div>
+                                </div>
+                              ) : null}
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      {expandedItems[item.id] ? (
-                        <div className="checkout-item-expanded">
-                          <div className="checkout-item-row">
-                            <span>Unit Price:</span>
-                            <span>Rs {Number(item.plant.price).toFixed(2)}</span>
-                          </div>
-                          <div className="checkout-item-row">
-                            <span>Quantity:</span>
-                            <span>{item.quantity}</span>
-                          </div>
-                          <div className="checkout-item-row checkout-item-total">
-                            <span>Subtotal:</span>
-                            <span>Rs {(item.plant.price * item.quantity).toFixed(2)}</span>
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
               <div className="checkout-section">

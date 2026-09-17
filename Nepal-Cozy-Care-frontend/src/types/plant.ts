@@ -32,6 +32,20 @@ export interface Plant {
   is_best_seller?: boolean;
   total_sold?: number;
   views?: number;
+  shop_id?: number;
+  approval_status?: 'draft' | 'pending' | 'approved' | 'rejected' | 'archived';
+  rejection_reason?: string | null;
+  shop?: {
+    id: number;
+    name: string;
+    slug: string;
+    logo?: string | null;
+    banner?: string | null;
+    is_verified?: boolean;
+    city?: string;
+    status?: string;
+    short_description?: string | null;
+  };
   created_at?: string;
   updated_at?: string;
   reviews?: PlantReview[];

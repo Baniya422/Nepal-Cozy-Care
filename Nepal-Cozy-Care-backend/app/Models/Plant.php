@@ -68,12 +68,28 @@ class Plant extends Model
         'total_sold',
         'is_popular_item',
         'is_best_seller',
+        'shop_id',
+        'approval_status',
+        'rejection_reason',
+        'submitted_at',
     ];
+
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_ARCHIVED = 'archived';
 
     protected $casts = [
         'rooms' => 'array',
         'quantity_categories' => 'array',
+        'submitted_at' => 'datetime',
     ];
+
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
+    }
 
     public function reviews(): HasMany
     {
@@ -94,6 +110,21 @@ class Plant extends Model
     {
         $this->increment('views');
         $this->update(['last_viewed_at' => now()]);
+    }
+
+    public function scopeMarketplaceApproved($query)
+    {
+        return $query->where('is_active', true)
+            ->where(function ($q) {
+                $q->where('approval_status', self::STATUS_APPROVED)
+                    ->orWhereNull('approval_status');
+            })
+            ->where(function ($q) {
+                $q->whereDoesntHave('shop')
+                    ->orWhereHas('shop', function ($sq) {
+                        $sq->where('status', Shop::STATUS_APPROVED);
+                    });
+            });
     }
 
     public function scopeExcludeAccessories($query)

@@ -20,6 +20,9 @@ import {
   ChevronRight,
   Globe,
   Settings,
+  Store,
+  Building2,
+  PackageCheck,
 } from "lucide-react";
 import "./admin.css";
 interface AdminLayoutProps {
@@ -31,6 +34,14 @@ const menuGroups = [
     items: [
       { path: "/admin", icon: LayoutDashboard, label: "Dashboard" },
       { path: "/admin/reports", icon: BarChart3, label: "Reports & Stats" },
+    ],
+  },
+  {
+    group: "Marketplace & Vendors",
+    items: [
+      { path: "/admin/seller-applications", icon: Store, label: "Seller Applications" },
+      { path: "/admin/shops", icon: Building2, label: "Manage Shops" },
+      { path: "/admin/marketplace-products", icon: PackageCheck, label: "Marketplace Products" },
     ],
   },
   {
@@ -124,7 +135,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="admin-sidebar-header">
           <Link to="/admin" className="admin-logo" onClick={handleNavClick}>
             <Leaf size={26} />
-            <span>Cozy Care Admin</span>
+            <span>Cozy Care Super Admin</span>
           </Link>
           <button
             type="button"
@@ -184,7 +195,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
               <div className="admin-user-info">
                 <span className="admin-user-name">{adminName}</span>
-                <span className="admin-user-role">Administrator</span>
+                <span className="admin-user-role">Super Admin</span>
               </div>
               <button className="admin-logout-btn" onClick={handleLogout}>
                 <LogOut size={18} />

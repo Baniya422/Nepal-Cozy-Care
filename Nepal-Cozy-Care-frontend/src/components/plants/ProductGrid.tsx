@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Heart, Store, ShieldCheck } from "lucide-react";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
 
 type Plant = {
@@ -9,6 +9,13 @@ type Plant = {
   image?: string;
   avg_rating?: number;
   category?: string;
+  shop?: {
+    id: number;
+    name: string;
+    slug: string;
+    is_verified?: boolean;
+    logo?: string | null;
+  };
 };
 interface ProductGridProps {
   plants: Plant[];
@@ -117,6 +124,19 @@ export default function ProductGrid({
             <div className="plants-card-content">
               <h3 className="plants-card-name">{plant.name}</h3>
               <p className="plants-card-category">{plant.category || "Indoor Plant"}</p>
+              {plant.shop && (
+                <Link
+                  to={`/shops/${plant.shop.slug}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800 hover:text-emerald-950 transition mb-1"
+                >
+                  <Store size={12} className="text-emerald-600" />
+                  <span>Sold by {plant.shop.name}</span>
+                  {plant.shop.is_verified && (
+                    <ShieldCheck size={11} className="text-emerald-600" />
+                  )}
+                </Link>
+              )}
               <p className="plants-card-price">Rs {Number(plant.price).toFixed(2)}</p>
               <div className="plants-card-rating">
                 {[...Array(5)].map((_, i) => (
