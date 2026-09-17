@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, Star } from "lucide-react";
+import { Heart, Star, ShoppingBag } from "lucide-react";
 import { useAddToCart } from "../../hooks/useAddToCart";
 import { useWishlist } from "../../hooks/useWishlist";
 import type { ProductSectionContent } from "../../features/homepage/content";
@@ -92,11 +92,21 @@ export default function ShopPlants({ content }: { content: ProductSectionContent
               </button>
             </div>
             <div className="product-info">
-              <h3 className="product-name">{plant.name}</h3>
-              <p className="product-price">Rs {Number(plant.price).toFixed(2)}</p>
+              <h3 className="product-name" title={plant.name}>{plant.name}</h3>
+              <div className="product-price-row">
+                <span className="product-price">Rs. {Number(plant.price).toLocaleString()}</span>
+                <span className="product-compare-price">
+                  Rs. {Math.round(Number(plant.price) * 1.25).toLocaleString()}
+                </span>
+              </div>
               <div className="product-rating">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={16} className={i < Math.floor(plant.avg_rating || 5) ? "star-filled" : "star-empty"} fill="currentColor" />
+                  <Star
+                    key={i}
+                    size={15}
+                    className={i < Math.floor(plant.avg_rating || 5) ? "star-filled" : "star-empty"}
+                    fill="currentColor"
+                  />
                 ))}
               </div>
               <button
@@ -106,8 +116,22 @@ export default function ShopPlants({ content }: { content: ProductSectionContent
               >
                 {cartBusyId === plant.id ? "ADDING..." : "ADD TO CART"}
               </button>
+              <button
+                type="button"
+                className="mobile-cart-circle-btn"
+                onClick={() => void addToCart({ id: plant.id, name: plant.name })}
+                disabled={cartBusyId === plant.id}
+                aria-label={`Add ${plant.name} to cart`}
+              >
+                <ShoppingBag size={17} />
+              </button>
             </div>
           </div>
+        ))}
+      </div>
+      <div className="mobile-carousel-dots" aria-hidden="true">
+        {plants.map((p, idx) => (
+          <span key={p.id} className={`carousel-dot ${idx === 0 ? "active" : ""}`} />
         ))}
       </div>
       <div className="section-action">

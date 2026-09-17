@@ -73,7 +73,7 @@ class AdminSettingsController extends Controller
 
         try {
             Mail::raw(
-                "Nepal Cozy Care SMTP test successful.\n\nContact-form notifications will be delivered using these settings.",
+                "Nepal Cozy Care SMTP test successful.\n\nContact requests and new-order notifications will be delivered using these settings.",
                 fn ($message) => $message->to($recipient)->subject('Nepal Cozy Care SMTP Test')
             );
         } catch (\Throwable $exception) {

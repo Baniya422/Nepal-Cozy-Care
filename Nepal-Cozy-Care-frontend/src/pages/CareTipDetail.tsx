@@ -14,9 +14,10 @@ import {
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import type { CareTip, CareTipDetailResponse } from "../types/careTip";
+import { resolveImageUrl, handleImageError, DEFAULT_CARE_TIP_IMAGE } from "../utils/imageUrl";
 import "../styles/careTips.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
+const FALLBACK_IMAGE = DEFAULT_CARE_TIP_IMAGE;
 const categoryLabels: Record<string, string> = {
   watering: "Watering",
   fertilizing: "Fertilizing",
@@ -259,9 +260,10 @@ export default function CareTipDetail() {
               <div className="care-tip-detail-hero-visual">
                 <div className="care-tip-detail-hero-image-frame">
                   <img
-                    src={tip.image ? `${API}/storage/${tip.image}` : FALLBACK_IMAGE}
+                    src={resolveImageUrl(tip.image, FALLBACK_IMAGE)}
                     alt={tip.title}
                     className="care-tip-detail-image"
+                    onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
                   />
                 </div>
                 <div className="care-tip-detail-hero-note">
@@ -370,13 +372,10 @@ export default function CareTipDetail() {
                   >
                     <div className="care-tip-related-image-wrapper">
                       <img
-                        src={
-                          relatedTip.image
-                            ? `${API}/storage/${relatedTip.image}`
-                            : FALLBACK_IMAGE
-                        }
+                        src={resolveImageUrl(relatedTip.image, FALLBACK_IMAGE)}
                         alt={relatedTip.title}
                         className="care-tip-related-image"
+                        onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
                       />
                     </div>
                     <div className="care-tip-related-content">

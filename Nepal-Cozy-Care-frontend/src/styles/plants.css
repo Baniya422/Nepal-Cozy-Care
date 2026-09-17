@@ -350,3 +350,661 @@
     opacity: 0.8;
   }
 }
+
+/* =========================================================
+   UGAOO-STYLE PLANT CATALOG & FILTER DRAWER STYLES
+   ========================================================= */
+
+.ugaoo-plants-page {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #fafbfa;
+}
+
+.ugaoo-plants-hero {
+  background: linear-gradient(180deg, #f0f6f2 0%, #fafbfa 100%);
+  padding: 3rem 1.5rem 1.75rem;
+  border-bottom: 1px solid #e8ede9;
+  text-align: center;
+}
+
+.ugaoo-plants-hero-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ugaoo-page-heading {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #1b4332;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+.ugaoo-page-subtext {
+  font-size: 1.05rem;
+  color: #526058;
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* Ugaoo Action Bar (Screenshot 1 & 4) */
+.ugaoo-action-bar-container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 0.5rem;
+}
+
+.ugaoo-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5ebe6;
+  gap: 1rem;
+}
+
+/* Ugaoo FILTER Button (Screenshot 1) */
+.ugaoo-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  color: #1b4332;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.ugaoo-filter-btn:hover {
+  opacity: 0.85;
+}
+
+.ugaoo-filter-icon {
+  color: #1b4332;
+}
+
+.ugaoo-filter-text {
+  font-weight: 700;
+}
+
+.ugaoo-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2d6a4f;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  padding: 0 5px;
+}
+
+/* Right side of action bar */
+.ugaoo-action-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.ugaoo-count-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+@media (max-width: 640px) {
+  .ugaoo-count-label {
+    display: none;
+  }
+  .ugaoo-action-bar-container {
+    padding: 1rem 1rem 0.5rem;
+  }
+}
+
+/* Ugaoo Sort Dropdown (Screenshot 4) */
+.ugaoo-sort-wrapper {
+  position: relative;
+}
+
+.ugaoo-sort-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1b4332;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: all 0.2s ease;
+}
+
+.ugaoo-sort-trigger:hover {
+  opacity: 0.85;
+}
+
+.ugaoo-sort-chevron {
+  transition: transform 0.2s ease;
+}
+
+.ugaoo-sort-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+.ugaoo-sort-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e2ece3;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  min-width: 210px;
+  z-index: 100;
+  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  animation: ugaooFadeIn 0.2s ease;
+}
+
+@keyframes ugaooFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ugaoo-sort-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.92rem;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ugaoo-sort-item:hover {
+  background: #f4f8f4;
+  color: #1b4332;
+}
+
+.ugaoo-sort-item.selected {
+  font-weight: 700;
+  color: #1b4332;
+  background: #eef6f0;
+}
+
+/* Active Chips Bar */
+.ugaoo-active-chips-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.85rem;
+}
+
+.ugaoo-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #e8f5ec;
+  color: #1b4332;
+  border: 1px solid #cce8d3;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.ugaoo-active-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #2d6a4f;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ugaoo-active-chip button:hover {
+  color: #b91c1c;
+}
+
+.ugaoo-clear-all-chip-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #b91c1c;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Main catalog container */
+.ugaoo-plants-main {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 4rem;
+}
+
+@media (max-width: 640px) {
+  .ugaoo-plants-main {
+    padding: 1rem 1rem 3rem;
+  }
+}
+
+/* =========================================================
+   UGAOO MULTI-LEVEL FILTER DRAWER (Screenshots 2 & 3)
+   ========================================================= */
+
+.ugaoo-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-start;
+  animation: ugaooOverlayFade 0.25s ease;
+}
+
+@keyframes ugaooOverlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ugaoo-drawer-panel {
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.2);
+  animation: ugaooSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes ugaooSlideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Drawer Header (Screenshots 2 & 3) */
+.ugaoo-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #eef2ef;
+  background: #ffffff;
+}
+
+.ugaoo-root-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.ugaoo-drawer-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.ugaoo-products-count {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.ugaoo-sub-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ugaoo-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #1b4332;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.ugaoo-back-btn:hover {
+  background: #f0f5f1;
+}
+
+.ugaoo-sub-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+/* Circular Close Button (X in circle) */
+.ugaoo-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f3f5f3;
+  border: none;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ugaoo-close-btn:hover {
+  background: #e5eae5;
+  color: #111827;
+}
+
+/* Drawer Body */
+.ugaoo-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+/* Root Category Rows (Screenshot 2) */
+.ugaoo-category-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ugaoo-category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1.15rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f1f4f1;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.ugaoo-category-row:hover {
+  background: #f8faf8;
+}
+
+.ugaoo-cat-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ugaoo-cat-label {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.ugaoo-cat-active-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2d6a4f;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  padding: 0 4px;
+}
+
+.ugaoo-cat-arrow {
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.ugaoo-category-row:hover .ugaoo-cat-arrow {
+  color: #1b4332;
+  transform: translateX(2px);
+}
+
+/* Sub-views (Screenshot 3) */
+.ugaoo-sub-view {
+  padding: 1.5rem;
+  animation: ugaooSubFade 0.2s ease;
+}
+
+@keyframes ugaooSubFade {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Price Sub-view (Screenshot 3) */
+.ugaoo-price-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ugaoo-price-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5ece6;
+}
+
+.ugaoo-price-field label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ugaoo-input-prefix-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ugaoo-currency-symbol {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.ugaoo-input-prefix-wrap input {
+  width: 100px;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  text-align: right;
+  outline: none;
+}
+
+.ugaoo-input-prefix-wrap input:focus {
+  border-color: #2d6a4f;
+  box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.15);
+}
+
+.ugaoo-quick-chips {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ugaoo-quick-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ugaoo-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+}
+
+.ugaoo-quick-chip {
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: #f4f8f4;
+  border: 1px solid #dbe8dd;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2d6a4f;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ugaoo-quick-chip:hover {
+  background: #2d6a4f;
+  color: #ffffff;
+  border-color: #2d6a4f;
+}
+
+/* Checkbox options list */
+.ugaoo-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ugaoo-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 0.5rem;
+  border-bottom: 1px solid #f2f5f2;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.ugaoo-checkbox-row:hover {
+  background: #f8faf8;
+}
+
+.ugaoo-checkbox-row input[type="checkbox"] {
+  display: none;
+}
+
+.ugaoo-custom-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ugaoo-checkbox-row input:checked + .ugaoo-custom-checkbox {
+  background: #2d6a4f;
+  border-color: #2d6a4f;
+}
+
+.ugaoo-opt-label {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.ugaoo-opt-count {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+/* Drawer Sticky Footer (Screenshots 2 & 3) */
+.ugaoo-drawer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #eef2ef;
+  background: #ffffff;
+  gap: 1rem;
+}
+
+.ugaoo-reset-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ugaoo-reset-btn:hover {
+  color: #b91c1c;
+}
+
+.ugaoo-footer-placeholder {
+  flex: 1;
+}
+
+/* Full-width Vibrant Green APPLY Button (Screenshots 2 & 3) */
+.ugaoo-apply-btn {
+  flex: 2;
+  background: #00a651;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.95rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 166, 81, 0.3);
+}
+
+.ugaoo-apply-btn:hover {
+  background: #008f45;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 166, 81, 0.4);
+}
+

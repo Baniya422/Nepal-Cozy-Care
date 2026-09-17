@@ -54,6 +54,11 @@ class MailSettingsService
 
     public function recipient(?AdminSetting $settings = null): ?string
     {
+        return $this->notificationRecipient($settings);
+    }
+
+    public function notificationRecipient(?AdminSetting $settings = null): ?string
+    {
         $settings ??= $this->current();
 
         return $settings?->contact_recipient;

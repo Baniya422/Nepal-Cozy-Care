@@ -12,6 +12,7 @@ use App\Models\GardenEntry;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Plant;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +41,7 @@ class OrderController extends Controller
             ], 400);
         }
 
-        return DB::transaction(function () use ($cartItems, $request, $userId) {
+        $result = DB::transaction(function () use ($cartItems, $request, $userId) {
             $subtotal = 0;
             foreach ($cartItems as $item) {
                 $plant = $item->plant;
@@ -103,15 +104,22 @@ class OrderController extends Controller
                 }
             }
             Cart::where('user_id', $userId)->delete();
-            OrderCreated::dispatch($order->load('items.plant'));
 
-            return response()->json([
-                'message' => 'Order placed successfully',
-                'data' => [
-                    'order' => $order->load('items.plant'),
-                ],
-            ], 201);
+            return $order->load(['items.plant', 'user']);
         });
+
+        if ($result instanceof JsonResponse) {
+            return $result;
+        }
+
+        OrderCreated::dispatch($result);
+
+        return response()->json([
+            'message' => 'Order placed successfully',
+            'data' => [
+                'order' => $result,
+            ],
+        ], 201);
     }
 
     public function adminIndex(Request $request)

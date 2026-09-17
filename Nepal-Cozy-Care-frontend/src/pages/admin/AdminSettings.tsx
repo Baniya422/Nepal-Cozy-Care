@@ -169,7 +169,7 @@ export default function AdminSettingsPage() {
         <div className="admin-page-header">
           <div>
             <h2>Admin Settings</h2>
-            <p>Manage the administrator account and contact-notification email delivery.</p>
+            <p>Manage the administrator account and notification email delivery.</p>
           </div>
           <span className={`admin-status-badge ${mail.is_configured ? "admin-status-active" : "admin-status-pending"}`}>
             SMTP {mail.is_configured ? "configured" : "not configured"}
@@ -227,7 +227,7 @@ export default function AdminSettingsPage() {
             <section className="admin-editor-card admin-settings-mail-card">
               <div className="admin-editor-card-head admin-editor-card-head-icon">
                 <Mail size={21} />
-                <div><h3>SMTP email</h3><p>Send every new contact request to the recipient below.</p></div>
+                <div><h3>SMTP email</h3><p>Send every new contact request and order alert to the recipient below.</p></div>
               </div>
               <div className="admin-smtp-help">
                 For Gmail, use <strong>smtp.gmail.com</strong>, port <strong>587</strong>, TLS, your full Gmail address, and a Google <strong>App Password</strong>. Do not use your normal Gmail password.
@@ -235,7 +235,7 @@ export default function AdminSettingsPage() {
               <form onSubmit={saveMail}>
                 <label className="admin-toggle-row">
                   <input type="checkbox" checked={mail.mail_enabled} onChange={(event) => setMail((current) => ({ ...current, mail_enabled: event.target.checked }))} />
-                  <span><strong>Enable SMTP notifications</strong><small>Contact requests will always remain saved in Contact Inbox, even if email fails.</small></span>
+                  <span><strong>Enable SMTP notifications</strong><small>Contact requests and orders remain saved in the admin panel even if email delivery fails.</small></span>
                 </label>
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
@@ -271,8 +271,9 @@ export default function AdminSettingsPage() {
                     <input value={mail.mail_from_name || ""} onChange={(event) => setMail((current) => ({ ...current, mail_from_name: event.target.value }))} required={mail.mail_enabled} />
                   </div>
                   <div className="admin-form-group">
-                    <label>Contact notification recipient</label>
+                    <label>Notification recipient</label>
                     <input type="email" value={mail.contact_recipient || ""} onChange={(event) => setMail((current) => ({ ...current, contact_recipient: event.target.value }))} required={mail.mail_enabled} />
+                    <small>New contact requests and new orders will be sent to this address.</small>
                   </div>
                 </div>
                 <button className="admin-btn admin-btn-primary" disabled={busy === "mail"}>
