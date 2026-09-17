@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Star, ShoppingBag } from "lucide-react";
 import { useAddToCart } from "../../hooks/useAddToCart";
@@ -17,8 +17,32 @@ export default function BestSellers({ content }: { content: ProductSectionConten
   const navigate = useNavigate();
   const [plants, setPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const gridRef = useRef<HTMLDivElement>(null);
   const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
   const { cartBusyId, addToCart } = useAddToCart(API);
+
+  const handleScroll = () => {
+    const el = gridRef.current;
+    if (!el) return;
+    const firstCard = el.firstElementChild as HTMLElement | null;
+    const step = firstCard ? firstCard.offsetWidth + 14 : 199;
+    const index = Math.round(el.scrollLeft / step);
+    const clamped = Math.max(0, Math.min(index, plants.length - 1));
+    setActiveSlide(clamped);
+  };
+
+  const scrollToSlide = (index: number) => {
+    const el = gridRef.current;
+    if (!el) return;
+    const firstCard = el.firstElementChild as HTMLElement | null;
+    const step = firstCard ? firstCard.offsetWidth + 14 : 199;
+    el.scrollTo({
+      left: index * step,
+      behavior: "smooth",
+    });
+    setActiveSlide(index);
+  };
   useEffect(() => {
     fetch(`${API}/api/homepage/best-sellers?per_page=4`)
       .then(res => res.json())
@@ -62,7 +86,7 @@ export default function BestSellers({ content }: { content: ProductSectionConten
   return (
     <section className="product-section">
       <h2 className="section-title">{content.title}</h2>
-      <div className="product-grid">
+      <div className="product-grid" ref={gridRef} onScroll={handleScroll}>
         {plants.map(plant => (
           <div className="product-card" key={plant.id}>
             <div className="product-image-wrapper">
@@ -129,9 +153,15 @@ export default function BestSellers({ content }: { content: ProductSectionConten
           </div>
         ))}
       </div>
-      <div className="mobile-carousel-dots" aria-hidden="true">
+      <div className="mobile-carousel-dots" role="tablist" aria-label="Best sellers navigation">
         {plants.map((p, idx) => (
-          <span key={p.id} className={`carousel-dot ${idx === 0 ? "active" : ""}`} />
+          <button
+            key={p.id}
+            type="button"
+            className={`carousel-dot ${idx === activeSlide ? "active" : ""}`}
+            onClick={() => scrollToSlide(idx)}
+            aria-label={`Slide ${idx + 1}`}
+          />
         ))}
       </div>
       <div className="section-action">
