@@ -113,7 +113,7 @@ export default function Register() {
           mode="signup"
           onError={(msg) => setError(msg)}
           onSuccess={() => {
-            navigate("/plants");
+            navigate("/");
           }}
         />
 

@@ -96,7 +96,7 @@ export default function GoogleAuthButton({
       if (onSuccess) {
         onSuccess(data.user);
       } else {
-        navigate("/plants");
+        navigate("/");
       }
     } catch (err: any) {
       if (err?.message === "Failed to fetch") {

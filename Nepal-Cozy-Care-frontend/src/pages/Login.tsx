@@ -54,7 +54,8 @@ export default function Login() {
       }
       if (data?.token) localStorage.setItem("token", data.token);
       if (data?.user) localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/plants");
+      const redirectPath = (location.state as any)?.from?.pathname || (location.state as any)?.from || "/";
+      navigate(redirectPath);
     } catch (err: any) {
       setError(err?.message || "Something went wrong.");
     } finally {
@@ -92,7 +93,8 @@ export default function Login() {
           mode="signin"
           onError={(msg) => setError(msg)}
           onSuccess={() => {
-            navigate("/plants");
+            const redirectPath = (location.state as any)?.from?.pathname || (location.state as any)?.from || "/";
+            navigate(redirectPath);
           }}
         />
 
