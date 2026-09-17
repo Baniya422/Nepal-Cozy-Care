@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, CalendarHeart, CloudSun, MapPin } from "lucide-react";
 import type { HomepageContent } from "../../features/homepage/content";
+import { resolveImageUrl, handleImageError } from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const FALLBACK_IMAGE = "/images/winter-garden.png";
 type SeasonalReminder = {
@@ -93,9 +94,10 @@ export default function SeasonalCarePreview({ content }: { content: HomepageCont
                 className={`seasonal-home-card ${index === 0 ? "featured" : ""}`}
               >
                 <img
-                  src={reminder.image ? `${API}/storage/${reminder.image}` : FALLBACK_IMAGE}
+                  src={resolveImageUrl(reminder.image, FALLBACK_IMAGE)}
                   alt={reminder.title}
                   className="seasonal-home-card-image"
+                  onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
                 />
                 <div className="seasonal-home-card-body">
                   <div className="seasonal-home-card-head">

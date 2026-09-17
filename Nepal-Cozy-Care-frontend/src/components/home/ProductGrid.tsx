@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 type Plant = {
   id: number;
@@ -25,8 +26,9 @@ export default function ProductGrid() {
           <div className="card" key={p.id}>
             <img
               className="card-img"
-              src={p.image ? `${API}/storage/${p.image}` : "/placeholder.png"}
+              src={resolveImageUrl(p.image, DEFAULT_PLANT_IMAGE)}
               alt={p.name}
+              onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
             />
             <div className="card-body">
               <strong>{p.name}</strong>
