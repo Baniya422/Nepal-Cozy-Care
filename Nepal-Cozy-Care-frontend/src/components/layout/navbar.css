@@ -273,7 +273,7 @@
 }
 
 .site-nav__admin-banner {
-  display: none;
+  display: none !important;
 }
 
 .site-nav__admin-link {
@@ -483,8 +483,11 @@
   }
 
   .site-nav__admin-banner {
-    display: block;
-    margin-bottom: 0.65rem;
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    width: 100%;
   }
 
   @keyframes navDropdown {

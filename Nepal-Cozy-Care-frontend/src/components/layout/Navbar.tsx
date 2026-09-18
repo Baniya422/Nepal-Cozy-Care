@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, ShieldCheck, Store } from "lucide-react";
+import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, Store } from "lucide-react";
 import "./navbar.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -164,64 +164,6 @@ export default function Navbar() {
           id="site-navigation-panel"
           className={`site-header__panel${menuOpen ? " is-open" : ""}`}
         >
-          {isSuperAdmin ? (
-            <div className="site-nav__admin-banner" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", padding: "0.35rem 0.75rem" }}>
-              <Link
-                to="/admin"
-                onClick={() => setMenuOpen(false)}
-                className="site-nav__admin-link"
-                style={{ flex: 1 }}
-              >
-                <div className="site-nav__admin-info">
-                  <ShieldCheck size={18} className="site-nav__admin-icon" />
-                  <span className="site-nav__admin-text">Super Admin Dashboard</span>
-                </div>
-                <span className="site-admin-pill">Admin</span>
-              </Link>
-              <Link
-                to="/seller/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="site-nav__admin-link"
-                style={{ flex: 1, background: "rgba(255, 255, 255, 0.15)", borderRadius: "6px", padding: "0.25rem 0.5rem" }}
-                title="View & test Vendor / Seller Portal"
-              >
-                <div className="site-nav__admin-info">
-                  <Store size={18} className="site-nav__admin-icon" />
-                  <span className="site-nav__admin-text">Vendor Portal</span>
-                </div>
-                <span className="site-admin-pill" style={{ background: "rgba(255, 255, 255, 0.25)" }}>Seller</span>
-              </Link>
-            </div>
-          ) : isSeller ? (
-            <div className="site-nav__admin-banner" style={{ background: "linear-gradient(135deg, #059669 0%, #047857 100%)" }}>
-              <Link
-                to="/seller/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className="site-nav__admin-link"
-              >
-                <div className="site-nav__admin-info">
-                  <Store size={18} className="site-nav__admin-icon" />
-                  <span className="site-nav__admin-text">Seller Dashboard</span>
-                </div>
-                <span className="site-admin-pill" style={{ background: "rgba(255, 255, 255, 0.25)" }}>Seller</span>
-              </Link>
-            </div>
-          ) : (
-            <div className="site-nav__admin-banner" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
-              <Link
-                to="/become-a-seller"
-                onClick={() => setMenuOpen(false)}
-                className="site-nav__admin-link"
-                style={{ color: "#166534" }}
-              >
-                <div className="site-nav__admin-info">
-                  <Store size={18} style={{ color: "#166534" }} />
-                  <span className="site-nav__admin-text" style={{ color: "#166534", fontWeight: 600 }}>Become a Seller</span>
-                </div>
-                <span className="site-admin-pill" style={{ background: "#22c55e", color: "#ffffff" }}>Join</span>
-              </Link>
-            </div>
-          )}
           <nav className="site-nav" aria-label="Primary navigation">
             {navItems.map((item) => (
               <NavLink
@@ -269,29 +211,6 @@ export default function Navbar() {
             </button>
             {token ? (
               <>
-                {isSuperAdmin && (
-                  <Link
-                    to="/admin"
-                    className="site-primary-btn site-admin-btn"
-                    onClick={() => setMenuOpen(false)}
-                    title="Open Super Admin Dashboard"
-                  >
-                    <ShieldCheck size={15} />
-                    <span>Super Admin</span>
-                  </Link>
-                )}
-                {(isSeller || isSuperAdmin) && (
-                  <Link
-                    to="/seller/dashboard"
-                    className="site-primary-btn"
-                    style={{ background: "#059669", borderColor: "#059669" }}
-                    onClick={() => setMenuOpen(false)}
-                    title="Open Seller Dashboard"
-                  >
-                    <Store size={15} />
-                    <span>Seller</span>
-                  </Link>
-                )}
                 {!isSuperAdmin && !isSeller && (
                   <Link
                     to="/become-a-seller"
