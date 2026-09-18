@@ -331,4 +331,57 @@ class MarketplaceMultiVendorTest extends TestCase
         $this->assertTrue($items->contains('product_name', 'Himalayan Orchid'));
         $this->assertFalse($items->contains('product_name', 'Monstera Deliciosa'));
     }
+
+    public function test_super_admin_can_directly_create_and_assign_vendor_shop_to_user(): void
+    {
+        $newCustomer = User::factory()->create([
+            'role' => User::ROLE_CUSTOMER,
+        ]);
+
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->postJson('/api/admin/shops', [
+                'user_id' => $newCustomer->id,
+                'name' => 'Kathmandu Valley Bonsai',
+                'city' => 'Bhaktapur',
+                'address' => 'Suryabinayak',
+                'phone' => '9841234567',
+                'short_description' => 'Authentic miniature bonsai trees',
+            ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('shops', [
+            'user_id' => $newCustomer->id,
+            'name' => 'Kathmandu Valley Bonsai',
+            'city' => 'Bhaktapur',
+            'status' => Shop::STATUS_APPROVED,
+            'is_verified' => true,
+        ]);
+
+        // User role should now be seller
+        $this->assertEquals(User::ROLE_SELLER, $newCustomer->fresh()->role);
+    }
+
+    public function test_super_admin_can_update_user_role_to_vendor_and_auto_create_shop(): void
+    {
+        $customer = User::factory()->create([
+            'name' => 'Bishal Thapa',
+            'role' => User::ROLE_CUSTOMER,
+        ]);
+
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->putJson("/api/admin/users/{$customer->id}/role", [
+                'role' => 'seller',
+                'shop_name' => 'Bishal Green House',
+                'city' => 'Pokhara',
+            ]);
+
+        $response->assertStatus(200);
+        $this->assertEquals(User::ROLE_SELLER, $customer->fresh()->role);
+        $this->assertDatabaseHas('shops', [
+            'user_id' => $customer->id,
+            'name' => 'Bishal Green House',
+            'city' => 'Pokhara',
+            'status' => Shop::STATUS_APPROVED,
+        ]);
+    }
 }

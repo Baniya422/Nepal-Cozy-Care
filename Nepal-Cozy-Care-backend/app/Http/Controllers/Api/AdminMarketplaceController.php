@@ -54,6 +54,72 @@ class AdminMarketplaceController extends Controller
     }
 
     /**
+     * Directly create and assign a vendor shop to a user.
+     */
+    public function storeShop(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'name' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'short_description' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'establishment_year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
+            'is_verified' => 'boolean',
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+
+        $existing = Shop::where('user_id', $user->id)->first();
+        if ($existing) {
+            return response()->json([
+                'message' => "User '{$user->name}' already owns shop '{$existing->name}'.",
+            ], 422);
+        }
+
+        $baseSlug = \Illuminate\Support\Str::slug($validated['name']);
+        $slug = $baseSlug;
+        $counter = 1;
+        while (Shop::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        $admin = $request->user();
+
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'city' => $validated['city'],
+            'address' => $validated['address'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? $user->email,
+            'short_description' => $validated['short_description'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'establishment_year' => $validated['establishment_year'] ?? date('Y'),
+            'status' => Shop::STATUS_APPROVED,
+            'is_verified' => $validated['is_verified'] ?? true,
+            'approved_at' => now(),
+            'approved_by' => $admin->id,
+        ]);
+
+        if (in_array($user->role, [User::ROLE_CUSTOMER, 'user'], true)) {
+            $user->update(['role' => User::ROLE_SELLER]);
+        }
+
+        return response()->json([
+            'message' => "Vendor shop '{$shop->name}' created and assigned to '{$user->name}' successfully.",
+            'data' => [
+                'shop' => $shop->fresh(['user', 'approvedBy']),
+            ],
+        ], 201);
+    }
+
+    /**
      * Show a single shop and owner details.
      */
     public function showShop($id)

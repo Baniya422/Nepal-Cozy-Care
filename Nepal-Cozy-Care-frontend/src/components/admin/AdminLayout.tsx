@@ -23,6 +23,7 @@ import {
   Store,
   Building2,
   PackageCheck,
+  ExternalLink,
 } from "lucide-react";
 import "./admin.css";
 interface AdminLayoutProps {
@@ -42,6 +43,7 @@ const menuGroups = [
       { path: "/admin/seller-applications", icon: Store, label: "Seller Applications" },
       { path: "/admin/shops", icon: Building2, label: "Manage Shops" },
       { path: "/admin/marketplace-products", icon: PackageCheck, label: "Marketplace Products" },
+      { path: "/seller/dashboard", icon: ExternalLink, label: "Vendor Dashboard (Live)" },
     ],
   },
   {

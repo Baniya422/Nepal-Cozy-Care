@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Plant;
+use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -208,7 +210,8 @@ class AdminController extends Controller
      */
     public function users(Request $request)
     {
-        $users = User::withCount(['orders', 'tokens'])
+        $users = User::with(['shop:id,user_id,name,slug,status,is_verified,city'])
+            ->withCount(['orders', 'tokens'])
             ->withSum('orders as total_spent', 'total')
             ->latest()
             ->get()
@@ -222,6 +225,14 @@ class AdminController extends Controller
                     'orders_count' => $user->orders_count,
                     'total_spent' => (float) ($user->total_spent ?? 0),
                     'status' => $user->tokens_count > 0 ? 'active' : 'inactive',
+                    'shop' => $user->shop ? [
+                        'id' => $user->shop->id,
+                        'name' => $user->shop->name,
+                        'slug' => $user->shop->slug,
+                        'city' => $user->shop->city,
+                        'status' => $user->shop->status,
+                        'is_verified' => $user->shop->is_verified,
+                    ] : null,
                 ];
             });
         $totalUsers = $users->count();
@@ -239,6 +250,80 @@ class AdminController extends Controller
                         now()->startOfMonth(),
                         now()->endOfMonth(),
                     ])->count(),
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Update user role and assign/manage vendor shop
+     */
+    public function updateUserRole(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'role' => 'required|in:admin,super_admin,seller,customer,user',
+            'shop_name' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+        ]);
+
+        $user = User::findOrFail($id);
+        $newRole = $validated['role'] === 'user' ? 'customer' : $validated['role'];
+
+        $user->update(['role' => $newRole]);
+
+        $shop = Shop::where('user_id', $user->id)->first();
+
+        // If promoted to seller and no shop exists, auto-create an approved shop
+        if ($newRole === User::ROLE_SELLER) {
+            if (! $shop) {
+                $shopName = ! empty($validated['shop_name']) ? $validated['shop_name'] : ($user->name . ' Nursery');
+                $baseSlug = Str::slug($shopName);
+                $slug = $baseSlug;
+                $counter = 1;
+                while (Shop::where('slug', $slug)->exists()) {
+                    $slug = $baseSlug . '-' . $counter;
+                    $counter++;
+                }
+
+                $shop = Shop::create([
+                    'user_id' => $user->id,
+                    'name' => $shopName,
+                    'slug' => $slug,
+                    'city' => ! empty($validated['city']) ? $validated['city'] : 'Kathmandu',
+                    'address' => $validated['address'] ?? null,
+                    'phone' => $validated['phone'] ?? null,
+                    'email' => $user->email,
+                    'status' => Shop::STATUS_APPROVED,
+                    'is_verified' => true,
+                    'approved_at' => now(),
+                    'approved_by' => $request->user()->id,
+                ]);
+            } else {
+                $shop->update([
+                    'status' => Shop::STATUS_APPROVED,
+                    'approved_at' => $shop->approved_at ?? now(),
+                    'approved_by' => $shop->approved_by ?? $request->user()->id,
+                    'rejection_reason' => null,
+                ]);
+            }
+        } elseif ($newRole === User::ROLE_CUSTOMER && $shop && $shop->status === Shop::STATUS_APPROVED) {
+            // Suspend shop if role changed back to customer
+            $shop->update([
+                'status' => Shop::STATUS_SUSPENDED,
+            ]);
+        }
+
+        return response()->json([
+            'message' => "User '{$user->name}' role updated to '{$newRole}' successfully.",
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'shop' => $shop ? $shop->fresh() : null,
                 ],
             ],
         ]);

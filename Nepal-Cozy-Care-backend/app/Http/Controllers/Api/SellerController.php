@@ -497,6 +497,11 @@ class SellerController extends Controller
 
         $shop = Shop::where('user_id', $user->id)->first();
 
+        // If admin / super_admin doesn't have a personal shop record, fall back to default platform shop or first shop
+        if (! $shop && ($user->isSuperAdmin() || in_array($user->role, ['admin', 'super_admin'], true))) {
+            $shop = Shop::where('slug', 'nepal-cozy-care')->first() ?? Shop::first();
+        }
+
         if (! $shop) {
             abort(403, 'No shop found for this account.');
         }

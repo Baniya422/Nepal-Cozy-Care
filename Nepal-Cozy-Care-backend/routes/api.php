@@ -128,6 +128,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);
     Route::get('/admin/reports', [AdminController::class, 'reports']);
     Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::put('/admin/users/{id}/role', [AdminController::class, 'updateUserRole']);
     Route::get('/admin/plants', [PlantController::class, 'adminIndex']);
     Route::post('/plants', [PlantController::class, 'store']);
     Route::put('/plants/{id}', [PlantController::class, 'update']);
@@ -154,6 +155,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
     // Super Admin Marketplace Management
     Route::get('/admin/shops', [AdminMarketplaceController::class, 'shops']);
+    Route::post('/admin/shops', [AdminMarketplaceController::class, 'storeShop']);
     Route::get('/admin/shops/{id}', [AdminMarketplaceController::class, 'showShop']);
     Route::post('/admin/shops/{id}/approve', [AdminMarketplaceController::class, 'approveShop']);
     Route::post('/admin/shops/{id}/reject', [AdminMarketplaceController::class, 'rejectShop']);

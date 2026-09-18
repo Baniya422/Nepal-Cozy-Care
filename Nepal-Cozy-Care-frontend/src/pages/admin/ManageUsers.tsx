@@ -1,24 +1,38 @@
 import { useEffect, useState } from "react";
-import { Search, Eye, Shield } from "lucide-react";
+import { Search, Eye, Shield, Store, CheckCircle2, AlertCircle } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
+
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+interface UserShop {
+  id: number;
+  name: string;
+  slug: string;
+  city: string;
+  status: string;
+  is_verified: boolean;
+}
+
 interface User {
   id: number;
   name: string;
   email: string;
-  role: "admin" | "customer";
+  role: "admin" | "super_admin" | "seller" | "customer" | "user";
   join_date: string;
   orders_count: number;
   total_spent: number;
   status: "active" | "inactive";
+  shop?: UserShop | null;
 }
+
 interface UserStats {
   total: number;
   active: number;
   avg_orders: number;
   new_this_month: number;
 }
+
 export default function ManageUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,15 +40,72 @@ export default function ManageUsers() {
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Assign Vendor & Role Modal State
+  const [editingRoleUser, setEditingRoleUser] = useState<User | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>("customer");
+  const [shopName, setShopName] = useState("");
+  const [shopCity, setShopCity] = useState("Kathmandu");
+  const [shopPhone, setShopPhone] = useState("");
+  const [shopAddress, setShopAddress] = useState("");
+  const [savingRole, setSavingRole] = useState(false);
+  const [roleFeedback, setRoleFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   const [stats, setStats] = useState<UserStats>({
     total: 0,
     active: 0,
     avg_orders: 0,
     new_this_month: 0,
   });
+
   useEffect(() => {
     void fetchUsers();
   }, []);
+
+  const openRoleModal = (user: User) => {
+    setEditingRoleUser(user);
+    setSelectedRole(user.role === "user" ? "customer" : user.role);
+    setShopName(user.shop?.name || `${user.name} Nursery`);
+    setShopCity(user.shop?.city || "Kathmandu");
+    setShopPhone("");
+    setShopAddress("");
+    setRoleFeedback(null);
+  };
+
+  const handleSaveRole = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRoleUser) return;
+    setSavingRole(true);
+    setRoleFeedback(null);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/admin/users/${editingRoleUser.id}/role`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          role: selectedRole,
+          shop_name: shopName,
+          city: shopCity,
+          phone: shopPhone,
+          address: shopAddress,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update user role");
+      setRoleFeedback({ type: "success", text: data.message });
+      void fetchUsers();
+      setTimeout(() => {
+        setEditingRoleUser(null);
+      }, 1200);
+    } catch (err: any) {
+      setRoleFeedback({ type: "error", text: err.message });
+    } finally {
+      setSavingRole(false);
+    }
+  };
   const fetchUsers = async () => {
     setError(null);
     try {
@@ -161,9 +232,17 @@ export default function ManageUsers() {
                     <td>
                       <div className="admin-user-info">
                         <span className="admin-user-name">{user.name}</span>
-                        {user.role === "admin" && (
-                          <span className="admin-role-badge">
+                        {user.role === "admin" || user.role === "super_admin" ? (
+                          <span className="admin-role-badge" style={{ background: "#ede9fe", color: "#6d28d9", border: "1px solid #ddd6fe" }}>
                             <Shield size={12} /> Admin
+                          </span>
+                        ) : user.role === "seller" ? (
+                          <span className="admin-role-badge" style={{ background: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0" }}>
+                            <Store size={12} /> Vendor ({user.shop?.name || "Nursery"})
+                          </span>
+                        ) : (
+                          <span className="admin-role-badge" style={{ background: "#f1f5f9", color: "#475569", border: "1px solid #e2e8f0" }}>
+                            Customer
                           </span>
                         )}
                       </div>
@@ -185,6 +264,14 @@ export default function ManageUsers() {
                     </td>
                     <td>
                       <div className="admin-actions">
+                        <button
+                          className="admin-action-btn"
+                          style={{ color: "#059669", background: "#ecfdf5" }}
+                          title="Assign Vendor Role / Edit Shop"
+                          onClick={() => openRoleModal(user)}
+                        >
+                          <Store size={16} />
+                        </button>
                         <button
                           className="admin-action-btn admin-action-view"
                           title="View Details"
@@ -208,6 +295,196 @@ export default function ManageUsers() {
             </div>
           )}
         </div>
+
+        {/* Assign Vendor & Role Modal */}
+        {editingRoleUser && (
+          <div className="admin-modal-overlay" onClick={() => setEditingRoleUser(null)}>
+            <div
+              className="admin-modal"
+              style={{ maxWidth: "520px", width: "100%" }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="admin-modal-header">
+                <div>
+                  <h3 style={{ margin: 0 }}>Assign Role / Vendor</h3>
+                  <p style={{ margin: "0.25rem 0 0", fontSize: "0.85rem", color: "#64748b" }}>
+                    Configure permissions and storefront for <strong>{editingRoleUser.name}</strong> ({editingRoleUser.email})
+                  </p>
+                </div>
+                <button className="admin-modal-close" onClick={() => setEditingRoleUser(null)}>
+                  &times;
+                </button>
+              </div>
+
+              {roleFeedback && (
+                <div
+                  style={{
+                    margin: "1rem 1.5rem 0",
+                    padding: "0.75rem 1rem",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.88rem",
+                    background: roleFeedback.type === "success" ? "#ecfdf5" : "#fef2f2",
+                    color: roleFeedback.type === "success" ? "#065f46" : "#991b1b",
+                    border: `1px solid ${roleFeedback.type === "success" ? "#a7f3d0" : "#fecaca"}`,
+                  }}
+                >
+                  {roleFeedback.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  <span>{roleFeedback.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveRole} style={{ padding: "1.5rem" }}>
+                <div style={{ marginBottom: "1.25rem" }}>
+                  <label style={{ display: "block", fontSize: "0.88rem", fontWeight: 600, color: "#1e293b", marginBottom: "0.5rem" }}>
+                    Account Role
+                  </label>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid #cbd5e1",
+                      fontSize: "0.95rem",
+                      background: "#ffffff",
+                    }}
+                  >
+                    <option value="customer">Customer (Standard Buyer)</option>
+                    <option value="seller">Seller / Vendor Partner (Owns Nursery Shop)</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+
+                {selectedRole === "seller" && (
+                  <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "1rem", marginBottom: "1.25rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.85rem", color: "#065f46", fontWeight: 600, fontSize: "0.9rem" }}>
+                      <Store size={18} />
+                      <span>Vendor Nursery Details</span>
+                    </div>
+
+                    <div style={{ marginBottom: "0.85rem" }}>
+                      <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 500, color: "#334155", marginBottom: "0.25rem" }}>
+                        Shop / Nursery Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={shopName}
+                        onChange={(e) => setShopName(e.target.value)}
+                        placeholder="e.g. Kathmandu Valley Botanical Nursery"
+                        style={{
+                          width: "100%",
+                          padding: "0.55rem 0.75rem",
+                          borderRadius: "6px",
+                          border: "1px solid #cbd5e1",
+                          fontSize: "0.88rem",
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.85rem" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 500, color: "#334155", marginBottom: "0.25rem" }}>
+                          City / Region *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={shopCity}
+                          onChange={(e) => setShopCity(e.target.value)}
+                          placeholder="e.g. Kathmandu"
+                          style={{
+                            width: "100%",
+                            padding: "0.55rem 0.75rem",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            fontSize: "0.88rem",
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 500, color: "#334155", marginBottom: "0.25rem" }}>
+                          Contact Phone
+                        </label>
+                        <input
+                          type="text"
+                          value={shopPhone}
+                          onChange={(e) => setShopPhone(e.target.value)}
+                          placeholder="98XXXXXXXX"
+                          style={{
+                            width: "100%",
+                            padding: "0.55rem 0.75rem",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            fontSize: "0.88rem",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 500, color: "#334155", marginBottom: "0.25rem" }}>
+                        Street Address
+                      </label>
+                      <input
+                        type="text"
+                        value={shopAddress}
+                        onChange={(e) => setShopAddress(e.target.value)}
+                        placeholder="e.g. Ward 4, Baluwatar"
+                        style={{
+                          width: "100%",
+                          padding: "0.55rem 0.75rem",
+                          borderRadius: "6px",
+                          border: "1px solid #cbd5e1",
+                          fontSize: "0.88rem",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.5rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setEditingRoleUser(null)}
+                    style={{
+                      padding: "0.6rem 1.1rem",
+                      borderRadius: "6px",
+                      border: "1px solid #cbd5e1",
+                      background: "#ffffff",
+                      fontSize: "0.88rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingRole}
+                    style={{
+                      padding: "0.6rem 1.3rem",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: "#059669",
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: "0.88rem",
+                      cursor: "pointer",
+                      opacity: savingRole ? 0.7 : 1,
+                    }}
+                  >
+                    {savingRole ? "Saving..." : "Save Role & Assign Vendor"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {showDetailModal && selectedUser && (
           <div className="admin-modal-overlay" onClick={() => setShowDetailModal(false)}>
             <div className="admin-modal" onClick={(event) => event.stopPropagation()}>
@@ -225,6 +502,9 @@ export default function ManageUsers() {
                     <p><strong>Name:</strong> {selectedUser.name}</p>
                     <p><strong>Email:</strong> {selectedUser.email}</p>
                     <p><strong>Role:</strong> {selectedUser.role}</p>
+                    {selectedUser.shop && (
+                      <p><strong>Vendor Nursery:</strong> {selectedUser.shop.name} ({selectedUser.shop.city})</p>
+                    )}
                   </div>
                   <div className="admin-info-section">
                     <h4>Account Activity</h4>

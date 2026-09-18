@@ -165,17 +165,31 @@ export default function Navbar() {
           className={`site-header__panel${menuOpen ? " is-open" : ""}`}
         >
           {isSuperAdmin ? (
-            <div className="site-nav__admin-banner">
+            <div className="site-nav__admin-banner" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", padding: "0.35rem 0.75rem" }}>
               <Link
                 to="/admin"
                 onClick={() => setMenuOpen(false)}
                 className="site-nav__admin-link"
+                style={{ flex: 1 }}
               >
                 <div className="site-nav__admin-info">
                   <ShieldCheck size={18} className="site-nav__admin-icon" />
                   <span className="site-nav__admin-text">Super Admin Dashboard</span>
                 </div>
-                <span className="site-admin-pill">Portal</span>
+                <span className="site-admin-pill">Admin</span>
+              </Link>
+              <Link
+                to="/seller/dashboard"
+                onClick={() => setMenuOpen(false)}
+                className="site-nav__admin-link"
+                style={{ flex: 1, background: "rgba(255, 255, 255, 0.15)", borderRadius: "6px", padding: "0.25rem 0.5rem" }}
+                title="View & test Vendor / Seller Portal"
+              >
+                <div className="site-nav__admin-info">
+                  <Store size={18} className="site-nav__admin-icon" />
+                  <span className="site-nav__admin-text">Vendor Portal</span>
+                </div>
+                <span className="site-admin-pill" style={{ background: "rgba(255, 255, 255, 0.25)" }}>Seller</span>
               </Link>
             </div>
           ) : isSeller ? (
@@ -266,7 +280,7 @@ export default function Navbar() {
                     <span>Super Admin</span>
                   </Link>
                 )}
-                {isSeller && (
+                {(isSeller || isSuperAdmin) && (
                   <Link
                     to="/seller/dashboard"
                     className="site-primary-btn"
@@ -275,7 +289,7 @@ export default function Navbar() {
                     title="Open Seller Dashboard"
                   >
                     <Store size={15} />
-                    <span>Seller Portal</span>
+                    <span>Seller</span>
                   </Link>
                 )}
                 {!isSuperAdmin && !isSeller && (
