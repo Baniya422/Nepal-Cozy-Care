@@ -111,8 +111,20 @@ Route::middleware(['auth:sanctum', 'seller'])->group(function () {
     Route::post('/seller/products', [SellerController::class, 'storeProduct']);
     Route::put('/seller/products/{id}', [SellerController::class, 'updateProduct']);
     Route::post('/seller/products/{id}', [SellerController::class, 'updateProduct']); // supports multipart
-    Route::delete('/seller/products/{id}', [SellerController::class, 'destroyProduct']);
     Route::get('/seller/orders', [SellerController::class, 'orders']);
+
+    // Vendor Blogs & Care Tips
+    Route::get('/seller/blogs', [SellerController::class, 'blogs']);
+    Route::post('/seller/blogs', [SellerController::class, 'storeBlog']);
+    Route::put('/seller/blogs/{id}', [SellerController::class, 'updateBlog']);
+    Route::post('/seller/blogs/{id}', [SellerController::class, 'updateBlog']); // multipart
+    Route::delete('/seller/blogs/{id}', [SellerController::class, 'destroyBlog']);
+
+    Route::get('/seller/care-tips', [SellerController::class, 'careTips']);
+    Route::post('/seller/care-tips', [SellerController::class, 'storeCareTip']);
+    Route::put('/seller/care-tips/{id}', [SellerController::class, 'updateCareTip']);
+    Route::post('/seller/care-tips/{id}', [SellerController::class, 'updateCareTip']); // multipart
+    Route::delete('/seller/care-tips/{id}', [SellerController::class, 'destroyCareTip']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {

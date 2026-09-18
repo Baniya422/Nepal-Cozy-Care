@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Blog;
+use App\Models\CareTip;
 use App\Models\OrderItem;
 use App\Models\Plant;
 use App\Models\Shop;
@@ -507,5 +509,314 @@ class SellerController extends Controller
         }
 
         return $shop;
+    }
+
+    /**
+     * List blogs authored by this seller.
+     */
+    public function blogs(Request $request)
+    {
+        $shop = $this->resolveSellerShop($request);
+        $user = $request->user();
+
+        $query = Blog::query()
+            ->where(function ($q) use ($user, $shop) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('author', $shop->name);
+            })
+            ->orderByDesc('created_at');
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                  ->orWhere('content', 'like', '%'.$search.'%');
+            });
+        }
+
+        $perPage = (int) $request->query('per_page', 20);
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'blogs' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Store a new blog authored by the vendor.
+     */
+    public function storeBlog(Request $request)
+    {
+        $shop = $this->resolveSellerShop($request);
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'excerpt' => 'nullable|string|max:500',
+            'content' => 'required|string',
+            'category' => 'nullable|string|max:100',
+            'image' => 'nullable',
+            'is_published' => 'nullable|boolean',
+        ]);
+
+        $slug = Str::slug($validated['title']);
+        if (Blog::where('slug', $slug)->exists()) {
+            $slug = $slug.'-'.Str::random(6);
+        }
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time().'_blog_'.$file->getClientOriginalName();
+            $path = $file->storeAs('blogs', $filename, 'public');
+            $validated['image'] = $path;
+        }
+
+        $isPublished = (bool) ($validated['is_published'] ?? true);
+
+        $blog = Blog::create([
+            'user_id' => $user->id,
+            'title' => $validated['title'],
+            'slug' => $slug,
+            'excerpt' => $validated['excerpt'] ?? null,
+            'content' => $validated['content'],
+            'image' => $validated['image'] ?? null,
+            'author' => $shop->name ?? $user->name,
+            'category' => $validated['category'] ?? 'Nursery Care',
+            'is_published' => $isPublished,
+            'published_at' => $isPublished ? now() : null,
+        ]);
+
+        return response()->json([
+            'message' => 'Nursery blog article published successfully!',
+            'data' => ['blog' => $blog],
+        ], 201);
+    }
+
+    /**
+     * Update an existing blog article.
+     */
+    public function updateBlog(Request $request, $id)
+    {
+        $user = $request->user();
+        $blog = Blog::where('id', $id)
+            ->where(function ($q) use ($user) {
+                if (! $user->isSuperAdmin()) {
+                    $q->where('user_id', $user->id);
+                }
+            })
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'excerpt' => 'nullable|string|max:500',
+            'content' => 'sometimes|string',
+            'category' => 'nullable|string|max:100',
+            'image' => 'nullable',
+            'is_published' => 'nullable|boolean',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time().'_blog_'.$file->getClientOriginalName();
+            $path = $file->storeAs('blogs', $filename, 'public');
+            $validated['image'] = $path;
+        }
+
+        if (isset($validated['is_published'])) {
+            $isPublished = (bool) $validated['is_published'];
+            if ($isPublished && ! $blog->published_at) {
+                $validated['published_at'] = now();
+            }
+        }
+
+        $blog->update($validated);
+
+        return response()->json([
+            'message' => 'Blog article updated successfully!',
+            'data' => ['blog' => $blog->fresh()],
+        ]);
+    }
+
+    /**
+     * Delete an existing blog article.
+     */
+    public function destroyBlog(Request $request, $id)
+    {
+        $user = $request->user();
+        $blog = Blog::where('id', $id)
+            ->where(function ($q) use ($user) {
+                if (! $user->isSuperAdmin()) {
+                    $q->where('user_id', $user->id);
+                }
+            })
+            ->firstOrFail();
+
+        $blog->delete();
+
+        return response()->json([
+            'message' => 'Blog article removed successfully.',
+        ]);
+    }
+
+    /**
+     * List care tips authored by this seller.
+     */
+    public function careTips(Request $request)
+    {
+        $user = $request->user();
+
+        $query = CareTip::query()
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orderByDesc('created_at');
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                  ->orWhere('content', 'like', '%'.$search.'%');
+            });
+        }
+
+        $perPage = (int) $request->query('per_page', 20);
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'tips' => $paginator->items(),
+                'pagination' => [
+                    'current_page' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'last_page' => $paginator->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Store a new care tip authored by the vendor.
+     */
+    public function storeCareTip(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'excerpt' => 'nullable|string|max:500',
+            'content' => 'required|string',
+            'category' => 'required|in:watering,fertilizing,pest_control,indoor,outdoor,seasonal',
+            'difficulty' => 'required|in:beginner,intermediate,advanced',
+            'image' => 'nullable',
+            'is_published' => 'nullable|boolean',
+        ]);
+
+        $slug = Str::slug($validated['title']);
+        if (CareTip::where('slug', $slug)->exists()) {
+            $slug = $slug.'-'.Str::random(6);
+        }
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time().'_care_'.$file->getClientOriginalName();
+            $path = $file->storeAs('care-tips', $filename, 'public');
+            $validated['image'] = $path;
+        }
+
+        $isPublished = (bool) ($validated['is_published'] ?? true);
+
+        $careTip = CareTip::create([
+            'user_id' => $user->id,
+            'title' => $validated['title'],
+            'slug' => $slug,
+            'excerpt' => $validated['excerpt'] ?? null,
+            'content' => $validated['content'],
+            'category' => $validated['category'],
+            'difficulty' => $validated['difficulty'],
+            'image' => $validated['image'] ?? null,
+            'is_published' => $isPublished,
+            'published_at' => $isPublished ? now() : null,
+        ]);
+
+        return response()->json([
+            'message' => 'Plant care tip published successfully!',
+            'data' => ['care_tip' => $careTip],
+        ], 201);
+    }
+
+    /**
+     * Update an existing care tip.
+     */
+    public function updateCareTip(Request $request, $id)
+    {
+        $user = $request->user();
+        $careTip = CareTip::where('id', $id)
+            ->where(function ($q) use ($user) {
+                if (! $user->isSuperAdmin()) {
+                    $q->where('user_id', $user->id);
+                }
+            })
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'excerpt' => 'nullable|string|max:500',
+            'content' => 'sometimes|string',
+            'category' => 'sometimes|in:watering,fertilizing,pest_control,indoor,outdoor,seasonal',
+            'difficulty' => 'sometimes|in:beginner,intermediate,advanced',
+            'image' => 'nullable',
+            'is_published' => 'nullable|boolean',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time().'_care_'.$file->getClientOriginalName();
+            $path = $file->storeAs('care-tips', $filename, 'public');
+            $validated['image'] = $path;
+        }
+
+        if (isset($validated['is_published'])) {
+            $isPublished = (bool) $validated['is_published'];
+            if ($isPublished && ! $careTip->published_at) {
+                $validated['published_at'] = now();
+            }
+        }
+
+        $careTip->update($validated);
+
+        return response()->json([
+            'message' => 'Care tip updated successfully!',
+            'data' => ['care_tip' => $careTip->fresh()],
+        ]);
+    }
+
+    /**
+     * Delete an existing care tip.
+     */
+    public function destroyCareTip(Request $request, $id)
+    {
+        $user = $request->user();
+        $careTip = CareTip::where('id', $id)
+            ->where(function ($q) use ($user) {
+                if (! $user->isSuperAdmin()) {
+                    $q->where('user_id', $user->id);
+                }
+            })
+            ->firstOrFail();
+
+        $careTip->delete();
+
+        return response()->json([
+            'message' => 'Care tip removed successfully.',
+        ]);
     }
 }

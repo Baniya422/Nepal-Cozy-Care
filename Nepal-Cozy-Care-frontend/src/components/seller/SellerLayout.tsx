@@ -13,6 +13,8 @@ import {
   ChevronRight,
   ShieldCheck,
   User as UserIcon,
+  BookOpen,
+  Lightbulb,
 } from "lucide-react";
 import type { Shop } from "../../types/shop";
 import "./seller.css";
@@ -66,6 +68,8 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
     { path: "/seller/shop", label: "Shop Profile", icon: Store },
     { path: "/seller/products", label: "My Catalog", icon: Leaf },
     { path: "/seller/orders", label: "Customer Orders", icon: ShoppingBag },
+    { path: "/seller/blogs", label: "Nursery Blogs", icon: BookOpen },
+    { path: "/seller/care-tips", label: "Care Tips", icon: Lightbulb },
     { path: "/seller/settings", label: "Settings", icon: Settings },
   ];
 

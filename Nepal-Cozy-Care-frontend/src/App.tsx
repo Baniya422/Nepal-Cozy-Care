@@ -51,6 +51,8 @@ import SellerDashboard from './pages/seller/SellerDashboard'
 import SellerShop from './pages/seller/SellerShop'
 import SellerProducts from './pages/seller/SellerProducts'
 import SellerOrders from './pages/seller/SellerOrders'
+import SellerBlogs from './pages/seller/SellerBlogs'
+import SellerCareTips from './pages/seller/SellerCareTips'
 function App() {
   return (
     <Routes>
@@ -275,6 +277,22 @@ function App() {
         element={
           <SellerProtectedRoute>
             <SellerOrders />
+          </SellerProtectedRoute>
+        }
+      />
+      <Route
+        path="/seller/blogs"
+        element={
+          <SellerProtectedRoute>
+            <SellerBlogs />
+          </SellerProtectedRoute>
+        }
+      />
+      <Route
+        path="/seller/care-tips"
+        element={
+          <SellerProtectedRoute>
+            <SellerCareTips />
           </SellerProtectedRoute>
         }
       />

@@ -5,14 +5,14 @@ import {
   Search,
   Edit,
   Trash2,
-  X,
   Upload,
   CheckCircle2,
   Clock,
   AlertCircle,
-  Package,
+  Leaf,
 } from "lucide-react";
 import SellerLayout from "../../components/seller/SellerLayout";
+import "../../components/seller/seller.css";
 import type { Plant } from "../../types/plant";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -172,7 +172,7 @@ export default function SellerProducts() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this plant product?")) return;
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API}/api/seller/products/${id}`, {
@@ -197,102 +197,150 @@ export default function SellerProducts() {
     );
   });
 
+  const approvedCount = plants.filter((p) => p.approval_status === "approved" || !p.approval_status).length;
+  const pendingCount = plants.filter((p) => p.approval_status === "pending").length;
+  const rejectedCount = plants.filter((p) => p.approval_status === "rejected").length;
+
   return (
     <SellerLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        {/* Header Bar */}
+        <div className="seller-form-card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
           <div>
-            <h2 className="text-xl font-bold text-slate-900">My Product Catalog</h2>
-            <p className="text-xs text-slate-500">
-              Create, update, and manage inventory for all plants and garden supplies sold by your shop.
+            <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+              My Product Catalog
+            </h2>
+            <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0.2rem 0 0" }}>
+              Create, update, and manage inventory for all plants and garden supplies sold by your nursery.
             </p>
           </div>
           <button
+            type="button"
             onClick={openAddModal}
-            className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition"
+            className="seller-btn seller-btn-primary"
           >
             <Plus size={16} />
-            Add New Product
+            <span>Add New Product</span>
           </button>
         </div>
 
         {feedback && (
           <div
-            className={`p-4 rounded-xl text-xs flex items-center gap-2 ${
-              feedback.type === "success"
-                ? "bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium"
-                : "bg-rose-50 border border-rose-200 text-rose-800"
-            }`}
+            style={{
+              padding: "0.9rem 1.25rem",
+              borderRadius: "10px",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.6rem",
+              background: feedback.type === "success" ? "#ecfdf5" : "#fef2f2",
+              color: feedback.type === "success" ? "#065f46" : "#991b1b",
+              border: `1px solid ${feedback.type === "success" ? "#a7f3d0" : "#fecaca"}`,
+            }}
           >
-            {feedback.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            {feedback.text}
+            {feedback.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <span>{feedback.text}</span>
           </div>
         )}
 
-        {/* Filter & Search Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
-            {["all", "approved", "pending", "draft", "rejected"].map((st) => (
+        {/* 4 Mini Stat Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+          <div className="seller-stat-card">
+            <span className="seller-stat-label">Total Catalog</span>
+            <div className="seller-stat-value">{plants.length}</div>
+            <div className="seller-stat-caption">Items listed</div>
+          </div>
+          <div className="seller-stat-card">
+            <span className="seller-stat-label">Live In Store</span>
+            <div className="seller-stat-value" style={{ color: "#059669" }}>{approvedCount}</div>
+            <div className="seller-stat-caption" style={{ color: "#059669" }}>Visible to buyers</div>
+          </div>
+          <div className="seller-stat-card">
+            <span className="seller-stat-label">Pending Review</span>
+            <div className="seller-stat-value" style={{ color: "#ca8a04" }}>{pendingCount}</div>
+            <div className="seller-stat-caption" style={{ color: "#ca8a04" }}>Awaiting admin approval</div>
+          </div>
+          <div className="seller-stat-card">
+            <span className="seller-stat-label">Needs Edit</span>
+            <div className="seller-stat-value" style={{ color: "#dc2626" }}>{rejectedCount}</div>
+            <div className="seller-stat-caption" style={{ color: "#dc2626" }}>Requires correction</div>
+          </div>
+        </div>
+
+        {/* Toolbar & Filters */}
+        <div className="seller-toolbar">
+          <div className="seller-tab-group">
+            {[
+              { key: "all", label: "All Products" },
+              { key: "approved", label: "Approved" },
+              { key: "pending", label: "Pending" },
+              { key: "draft", label: "Draft" },
+              { key: "rejected", label: "Rejected" },
+            ].map((tab) => (
               <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
-                  statusFilter === st
-                    ? "bg-emerald-800 text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                }`}
+                key={tab.key}
+                type="button"
+                onClick={() => setStatusFilter(tab.key)}
+                className={`seller-tab-btn ${statusFilter === tab.key ? "active" : ""}`}
               >
-                {st === "all" ? "All Products" : st}
+                {tab.label}
               </button>
             ))}
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+          <div className="seller-search" style={{ width: "260px" }}>
+            <Search size={15} style={{ color: "#94a3b8" }} />
             <input
               type="text"
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="seller-card">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 text-xs">Loading products...</div>
+            <div className="seller-empty-state">Loading your catalog products...</div>
           ) : filteredPlants.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
-              <Package className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm font-semibold">No products found</p>
-              <p className="text-xs text-slate-400 mt-1">
-                {searchQuery
-                  ? "Try changing your search keywords"
-                  : "Click 'Add New Product' to list your first item"}
-              </p>
+            <div className="seller-empty-state">
+              <div className="seller-empty-icon">
+                <Leaf size={26} />
+              </div>
+              <h4>No products found</h4>
+              <p>There are no products matching this filter. Click "Add New Product" to list your nursery stock.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
+            <div className="seller-table-container">
+              <table className="seller-table">
+                <thead>
                   <tr>
-                    <th className="p-3">Product</th>
-                    <th className="p-3">Category</th>
-                    <th className="p-3">Price</th>
-                    <th className="p-3">Stock</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3 text-right">Actions</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Approval Status</th>
+                    <th style={{ textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {filteredPlants.map((plant) => (
-                    <tr key={plant.id} className="hover:bg-slate-50/50">
-                      <td className="p-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
+                    <tr key={plant.id}>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                          <div
+                            style={{
+                              width: "44px",
+                              height: "44px",
+                              borderRadius: "10px",
+                              background: "#f1f5f9",
+                              overflow: "hidden",
+                              flexShrink: 0,
+                              border: "1px solid #e2e8f0",
+                            }}
+                          >
                             {plant.image ? (
                               <img
                                 src={
@@ -301,75 +349,79 @@ export default function SellerProducts() {
                                     : `${API}/storage/${plant.image}`
                                 }
                                 alt={plant.name}
-                                className="w-full h-full object-cover"
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold">
+                              <div
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  color: "#94a3b8",
+                                  fontWeight: 700,
+                                }}
+                              >
                                 {plant.name.charAt(0)}
                               </div>
                             )}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-900">{plant.name}</p>
+                            <div style={{ fontWeight: 700, color: "#0f172a" }}>{plant.name}</div>
                             {plant.scientific_name && (
-                              <p className="text-[11px] text-slate-400 italic">
+                              <span style={{ fontSize: "0.72rem", color: "#64748b", fontStyle: "italic" }}>
                                 {plant.scientific_name}
-                              </p>
+                              </span>
                             )}
                             {plant.rejection_reason && (
-                              <p className="text-[10px] text-rose-600 mt-0.5">
-                                Reason: {plant.rejection_reason}
+                              <p style={{ margin: "0.15rem 0 0", fontSize: "0.7rem", color: "#dc2626" }}>
+                                Note: {plant.rejection_reason}
                               </p>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="p-3 text-slate-600">{plant.category || "General"}</td>
-                      <td className="p-3 font-semibold text-slate-900">
-                        Rs. {plant.price.toLocaleString()}
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`font-semibold ${
-                            (plant.stock ?? 0) < 5 ? "text-rose-600" : "text-slate-700"
-                          }`}
-                        >
-                          {plant.stock ?? 0} units
+                      <td>
+                        <span style={{ fontWeight: 500, color: "#334155" }}>
+                          {plant.category || "General"}
                         </span>
                       </td>
-                      <td className="p-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-                            plant.approval_status === "approved"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : plant.approval_status === "pending"
-                              ? "bg-amber-100 text-amber-800"
-                              : plant.approval_status === "rejected"
-                              ? "bg-rose-100 text-rose-800"
-                              : "bg-slate-100 text-slate-800"
-                          }`}
-                        >
-                          {plant.approval_status === "approved" && <CheckCircle2 size={10} />}
-                          {plant.approval_status === "pending" && <Clock size={10} />}
-                          {plant.approval_status === "rejected" && <AlertCircle size={10} />}
-                          {plant.approval_status || "approved"}
+                      <td>
+                        <strong style={{ color: "#0f172a" }}>Rs. {plant.price.toLocaleString()}</strong>
+                      </td>
+                      <td>
+                        <span style={{ color: (plant.stock ?? 0) < 5 ? "#dc2626" : "#334155", fontWeight: 600 }}>
+                          {plant.stock ?? 0}
+                        </span>{" "}
+                        <span style={{ fontSize: "0.75rem", color: "#64748b" }}>units</span>
+                      </td>
+                      <td>
+                        <span className={`seller-badge seller-badge-${plant.approval_status || "approved"}`}>
+                          {plant.approval_status === "approved" && <CheckCircle2 size={11} />}
+                          {plant.approval_status === "pending" && <Clock size={11} />}
+                          {plant.approval_status === "rejected" && <AlertCircle size={11} />}
+                          <span>{plant.approval_status || "approved"}</span>
                         </span>
                       </td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td style={{ textAlign: "right" }}>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", justifyContent: "flex-end" }}>
                           <button
+                            type="button"
                             onClick={() => openEditModal(plant)}
-                            className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded transition"
-                            title="Edit Product"
+                            className="seller-btn seller-btn-secondary seller-btn-sm"
+                            title="Edit product"
                           >
-                            <Edit size={15} />
+                            <Edit size={13} />
+                            <span>Edit</span>
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDelete(plant.id)}
-                            className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded transition"
-                            title="Delete Product"
+                            className="seller-btn seller-btn-danger seller-btn-sm"
+                            title="Delete product"
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={13} />
                           </button>
                         </div>
                       </td>
@@ -383,196 +435,202 @@ export default function SellerProducts() {
 
         {/* Add/Edit Product Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="text-base font-bold text-slate-900">
-                  {editingPlant ? "Edit Product" : "Add New Marketplace Product"}
-                </h3>
+          <div className="seller-modal-overlay">
+            <div className="seller-modal seller-modal-large">
+              <div className="seller-modal-header">
+                <h3>{editingPlant ? `Edit Plant: ${editingPlant.name}` : "Add New Plant to Catalog"}</h3>
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
-                  className="text-slate-400 hover:text-slate-700"
+                  className="seller-modal-close"
                 >
-                  <X size={20} />
+                  ✕
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Product Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Peace Lily"
-                      className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Scientific Botanical Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.scientific_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, scientific_name: e.target.value })
-                      }
-                      placeholder="e.g. Spathiphyllum"
-                      className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Category *</label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="Indoor">Indoor</option>
-                      <option value="Succulents">Succulents</option>
-                      <option value="Flowering">Flowering</option>
-                      <option value="Ferns">Ferns</option>
-                      <option value="Bonsai">Bonsai</option>
-                      <option value="Pots">Pots</option>
-                      <option value="Tools">Tools</option>
-                      <option value="Accessories">Accessories</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Price (Rs.) *</label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="e.g. 850"
-                      className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Stock Count *</label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={formData.stock}
-                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                      placeholder="e.g. 15"
-                      className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Care Level</label>
-                    <select
-                      value={formData.difficulty}
-                      onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-                      className="w-full text-xs border border-slate-300 rounded-lg px-2.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="easy">Easy</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="advanced">Advanced</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Light Requirement
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.light}
-                      onChange={(e) => setFormData({ ...formData, light: e.target.value })}
-                      placeholder="e.g. Bright indirect sunlight"
-                      className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">
-                      Watering Schedule
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.water}
-                      onChange={(e) => setFormData({ ...formData, water: e.target.value })}
-                      placeholder="e.g. Once a week when top soil is dry"
-                      className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Description *</label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Product details, plant size, health, and tips..."
-                    className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                  />
-                </div>
-
-                {/* Image Upload */}
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Product Photo</label>
-                  <div className="flex items-center gap-4">
-                    {imagePreview && (
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-16 h-16 rounded-lg object-cover border border-slate-200"
-                      />
-                    )}
-                    <label className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-1.5 transition font-semibold">
-                      <Upload size={14} />
-                      Choose Photo
+              <form onSubmit={handleSubmit}>
+                <div className="seller-modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  <div className="seller-form-grid">
+                    <div className="seller-form-group">
+                      <label htmlFor="pName">Plant Common Name *</label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setImageFile(file);
-                            setImagePreview(URL.createObjectURL(file));
-                          }
-                        }}
+                        id="pName"
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Monstera Deliciosa"
                       />
-                    </label>
+                    </div>
+
+                    <div className="seller-form-group">
+                      <label htmlFor="pSciName">Scientific / Botanical Name</label>
+                      <input
+                        id="pSciName"
+                        type="text"
+                        value={formData.scientific_name}
+                        onChange={(e) => setFormData({ ...formData, scientific_name: e.target.value })}
+                        placeholder="e.g. Monstera deliciosa Liebm."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="seller-form-grid-3">
+                    <div className="seller-form-group">
+                      <label htmlFor="pCategory">Category *</label>
+                      <select
+                        id="pCategory"
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      >
+                        <option value="Indoor">Indoor Plants</option>
+                        <option value="Outdoor">Outdoor Garden</option>
+                        <option value="Flowering">Flowering Plants</option>
+                        <option value="Succulents">Succulents & Cacti</option>
+                        <option value="Herbs">Herbs & Edibles</option>
+                        <option value="Bonsai">Bonsai & Rare</option>
+                        <option value="Air Purifying">Air Purifying</option>
+                      </select>
+                    </div>
+
+                    <div className="seller-form-group">
+                      <label htmlFor="pPrice">Price (NPR) *</label>
+                      <input
+                        id="pPrice"
+                        type="number"
+                        min="1"
+                        required
+                        value={formData.price}
+                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        placeholder="e.g. 1200"
+                      />
+                    </div>
+
+                    <div className="seller-form-group">
+                      <label htmlFor="pStock">Available Stock (Units) *</label>
+                      <input
+                        id="pStock"
+                        type="number"
+                        min="0"
+                        required
+                        value={formData.stock}
+                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                        placeholder="e.g. 15"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="seller-form-grid-3">
+                    <div className="seller-form-group">
+                      <label htmlFor="pDiff">Care Difficulty</label>
+                      <select
+                        id="pDiff"
+                        value={formData.difficulty}
+                        onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                      >
+                        <option value="easy">Easy (Low Maintenance)</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="expert">Expert</option>
+                      </select>
+                    </div>
+
+                    <div className="seller-form-group">
+                      <label htmlFor="pLight">Lighting Requirements</label>
+                      <select
+                        id="pLight"
+                        value={formData.light}
+                        onChange={(e) => setFormData({ ...formData, light: e.target.value })}
+                      >
+                        <option value="low-light">Low Light Tolerant</option>
+                        <option value="bright-indirect">Bright Indirect Light</option>
+                        <option value="direct-sunlight">Direct Full Sunlight</option>
+                      </select>
+                    </div>
+
+                    <div className="seller-form-group">
+                      <label htmlFor="pWater">Watering Frequency</label>
+                      <select
+                        id="pWater"
+                        value={formData.water}
+                        onChange={(e) => setFormData({ ...formData, water: e.target.value })}
+                      >
+                        <option value="bi-weekly">Bi-weekly / Drought Tolerant</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="daily">Daily / Moist Soil</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Photo upload */}
+                  <div className="seller-form-group">
+                    <label>Plant Photo</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                      {imagePreview && (
+                        <div
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            borderRadius: "10px",
+                            overflow: "hidden",
+                            border: "1px solid #e2e8f0",
+                          }}
+                        >
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </div>
+                      )}
+                      <label className="seller-btn seller-btn-secondary" style={{ cursor: "pointer" }}>
+                        <Upload size={14} />
+                        <span>{imagePreview ? "Change Photo" : "Upload Photo"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setImageFile(file);
+                              setImagePreview(URL.createObjectURL(file));
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="seller-form-group">
+                    <label htmlFor="pDesc">Plant Care & Botanical Description</label>
+                    <textarea
+                      id="pDesc"
+                      rows={3}
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Describe the plant's size, pot size, foliage beauty, and care tips for buyers..."
+                    />
                   </div>
                 </div>
 
-                <div className="bg-emerald-50 p-3 rounded-lg text-[11px] text-emerald-800">
-                  <span className="font-semibold">Note:</span> Newly added or edited products are
-                  sent to the Super Admin for quick approval before appearing publicly on the
-                  marketplace.
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <div className="seller-modal-footer">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold"
+                    className="seller-btn seller-btn-secondary"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-5 py-2 rounded-lg transition disabled:opacity-50"
+                    className="seller-btn seller-btn-primary"
                   >
-                    {submitting ? "Submitting..." : editingPlant ? "Save & Submit" : "Submit for Approval"}
+                    {submitting
+                      ? "Submitting..."
+                      : editingPlant
+                      ? "Update Product"
+                      : "Submit Product for Review"}
                   </button>
                 </div>
               </form>

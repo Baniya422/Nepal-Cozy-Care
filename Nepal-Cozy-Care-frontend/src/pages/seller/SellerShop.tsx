@@ -9,6 +9,7 @@ import {
   Save,
 } from "lucide-react";
 import SellerLayout from "../../components/seller/SellerLayout";
+import "../../components/seller/seller.css";
 import type { Shop } from "../../types/shop";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -114,45 +115,39 @@ export default function SellerShop() {
 
   return (
     <SellerLayout>
-      <div className="max-w-4xl space-y-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "1000px" }}>
         {/* Header with status badge & view store button */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="seller-form-card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-xl font-bold text-slate-900">Shop Profile & Branding</h2>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+              <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                {shop?.name || "Shop Profile & Branding"}
+              </h2>
               {shop?.is_verified && (
-                <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-full">
-                  <ShieldCheck size={12} className="text-emerald-600" />
-                  Verified Partner
+                <span className="seller-badge seller-badge-approved">
+                  <ShieldCheck size={12} />
+                  <span>Verified Partner</span>
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500">
-              Customize how your farm and plant catalog appears to customers across the marketplace.
+            <p style={{ fontSize: "0.82rem", color: "#64748b", margin: 0 }}>
+              Customize how your farm nursery and plant catalog appears to customers across Nepal Cozy Care.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
-                shop?.status === "approved"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : shop?.status === "pending"
-                  ? "bg-amber-100 text-amber-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              Status: {shop?.status}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <span className={`seller-badge seller-badge-${shop?.status || "pending"}`}>
+              Status: {shop?.status || "Pending"}
             </span>
             {shop?.slug && (
               <a
                 href={`/shops/${shop.slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center gap-1.5 transition"
+                className="seller-btn seller-btn-secondary seller-btn-sm"
               >
-                <ExternalLink size={13} />
-                Preview Store
+                <ExternalLink size={14} />
+                <span>Preview Store</span>
               </a>
             )}
           </div>
@@ -160,47 +155,72 @@ export default function SellerShop() {
 
         {statusMsg && (
           <div
-            className={`p-4 rounded-xl text-xs flex items-center gap-2 ${
-              statusMsg.type === "success"
-                ? "bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium"
-                : "bg-rose-50 border border-rose-200 text-rose-800"
-            }`}
+            style={{
+              padding: "0.9rem 1.25rem",
+              borderRadius: "10px",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.6rem",
+              background: statusMsg.type === "success" ? "#ecfdf5" : "#fef2f2",
+              color: statusMsg.type === "success" ? "#065f46" : "#991b1b",
+              border: `1px solid ${statusMsg.type === "success" ? "#a7f3d0" : "#fecaca"}`,
+            }}
           >
-            {statusMsg.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            {statusMsg.text}
+            {statusMsg.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <span>{statusMsg.text}</span>
           </div>
         )}
 
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">Loading shop details...</div>
+          <div className="seller-card" style={{ padding: "3rem", textAlign: "center", color: "#64748b" }}>
+            Loading nursery profile...
+          </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Banner & Logo Preview Section */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900">Brand Imagery</h3>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {/* Brand Imagery Section */}
+            <div className="seller-form-card">
+              <div className="seller-form-card-head">
+                <h3>Storefront Brand Imagery</h3>
+                <p>Upload a clean nursery storefront banner and high-resolution logo</p>
+              </div>
 
               {/* Banner */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Storefront Banner
+              <div style={{ marginBottom: "1.5rem" }}>
+                <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#334155", display: "block", marginBottom: "0.4rem" }}>
+                  Storefront Banner Image (Recommended: 1200x350)
                 </label>
-                <div className="relative h-40 w-full rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                <div className="seller-banner-upload-box">
                   {bannerPreview ? (
-                    <img
-                      src={bannerPreview}
-                      alt="Banner Preview"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={bannerPreview} alt="Banner Preview" />
                   ) : (
-                    <span className="text-xs text-slate-400">No banner uploaded yet</span>
+                    <span style={{ fontSize: "0.82rem", color: "#94a3b8" }}>No banner uploaded yet</span>
                   )}
-                  <label className="absolute bottom-3 right-3 bg-white/90 hover:bg-white text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 cursor-pointer flex items-center gap-1.5 transition">
+                  <label
+                    style={{
+                      position: "absolute",
+                      bottom: "12px",
+                      right: "12px",
+                      background: "rgba(255,255,255,0.95)",
+                      color: "#1e293b",
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      padding: "0.45rem 0.85rem",
+                      borderRadius: "8px",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.4rem",
+                    }}
+                  >
                     <Upload size={14} />
-                    Upload Banner
+                    <span>Upload Banner</span>
                     <input
                       type="file"
                       accept="image/*"
-                      className="hidden"
+                      style={{ display: "none" }}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
@@ -215,178 +235,179 @@ export default function SellerShop() {
 
               {/* Logo */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Shop Logo
+                <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#334155", display: "block", marginBottom: "0.4rem" }}>
+                  Shop Logo (Recommended: Square 400x400)
                 </label>
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="seller-logo-upload-wrap">
+                  <div className="seller-logo-avatar-box">
                     {logoPreview ? (
-                      <img
-                        src={logoPreview}
-                        alt="Logo Preview"
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={logoPreview} alt="Logo Preview" />
                     ) : (
-                      <Store size={24} className="text-slate-400" />
+                      shop?.name?.charAt(0) || <Store size={26} />
                     )}
                   </div>
-                  <label className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg cursor-pointer flex items-center gap-1.5 transition border border-slate-200">
-                    <Upload size={14} />
-                    Change Logo
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setLogoFile(file);
-                          setLogoPreview(URL.createObjectURL(file));
-                        }
-                      }}
-                    />
-                  </label>
+                  <div>
+                    <label className="seller-btn seller-btn-secondary" style={{ cursor: "pointer" }}>
+                      <Upload size={14} />
+                      <span>Choose New Logo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setLogoFile(file);
+                            setLogoPreview(URL.createObjectURL(file));
+                          }
+                        }}
+                      />
+                    </label>
+                    <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0.3rem 0 0" }}>
+                      Supports PNG, JPG, or WEBP up to 5MB.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* General Info */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900">General Information</h3>
+            {/* General Nursery Details */}
+            <div className="seller-form-card">
+              <div className="seller-form-card-head">
+                <h3>General Nursery Information</h3>
+                <p>Basic information displayed on your storefront and order receipts</p>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Shop / Farm Name *
-                  </label>
+              <div className="seller-form-grid">
+                <div className="seller-form-group">
+                  <label htmlFor="shopName">Shop / Nursery Name *</label>
                   <input
+                    id="shopName"
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Evergreen Flora Nursery"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Establishment Year
-                  </label>
+
+                <div className="seller-form-group">
+                  <label htmlFor="estYear">Establishment Year</label>
                   <input
+                    id="estYear"
                     type="number"
-                    min="1950"
-                    max={new Date().getFullYear()}
                     value={formData.establishment_year}
                     onChange={(e) => setFormData({ ...formData, establishment_year: e.target.value })}
-                    className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. 2018"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Short Tagline *
-                </label>
+              <div className="seller-form-group">
+                <label htmlFor="tagline">Short Tagline / Catchphrase *</label>
                 <input
+                  id="tagline"
                   type="text"
                   required
-                  maxLength={255}
                   value={formData.short_description}
                   onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                  className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  placeholder="e.g. Specialist in indoor air-purifying foliage and rare succulents"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  About the Nursery & Story
-                </label>
+              <div className="seller-form-group">
+                <label htmlFor="aboutDesc">About the Nursery & Farm Story</label>
                 <textarea
+                  id="aboutDesc"
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  placeholder="Tell customers about your passion for plants, your cultivation techniques, and your warranty on plant health..."
                 />
               </div>
             </div>
 
-            {/* Contact & Location */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-slate-900">Contact & Address</h3>
+            {/* Contact & Location Details */}
+            <div className="seller-form-card">
+              <div className="seller-form-card-head">
+                <h3>Contact & Physical Location</h3>
+                <p>Location details for customer deliveries and contact channels</p>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Business Email *
-                  </label>
+              <div className="seller-form-grid">
+                <div className="seller-form-group">
+                  <label htmlFor="bizEmail">Business Email *</label>
                   <input
+                    id="bizEmail"
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="nursery@example.com"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Contact Phone *
-                  </label>
+
+                <div className="seller-form-group">
+                  <label htmlFor="bizPhone">Contact Phone *</label>
                   <input
-                    type="tel"
+                    id="bizPhone"
+                    type="text"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="98XXXXXXXX"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">City *</label>
+              <div className="seller-form-grid">
+                <div className="seller-form-group">
+                  <label htmlFor="bizCity">City / Region *</label>
                   <input
+                    id="bizCity"
                     type="text"
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Kathmandu"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Street Address *
-                  </label>
+
+                <div className="seller-form-group">
+                  <label htmlFor="bizAddress">Street / Physical Address *</label>
                   <input
+                    id="bizAddress"
                     type="text"
                     required
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Ward 4, Baluwatar"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Website / Social Page (Optional)
-                </label>
+              <div className="seller-form-group">
+                <label htmlFor="bizWeb">Official Website (Optional)</label>
                 <input
+                  id="bizWeb"
                   type="url"
                   value={formData.website}
                   onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full text-sm border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  placeholder="https://yournursery.com.np"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end">
+            {/* Submit Action */}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-sm flex items-center gap-2 disabled:opacity-50 text-sm"
+                className="seller-btn seller-btn-primary"
+                style={{ padding: "0.75rem 1.75rem", fontSize: "0.9rem" }}
               >
                 <Save size={16} />
-                {saving ? "Saving Changes..." : "Save Shop Profile"}
+                <span>{saving ? "Saving Changes..." : "Save Shop Profile"}</span>
               </button>
             </div>
           </form>
