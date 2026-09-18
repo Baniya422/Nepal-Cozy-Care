@@ -589,9 +589,9 @@ export default function ManagePageContent() {
               </p>
             </div>
             <div
+              className="admin-cms-cards-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
                 gap: "1.25rem",
               }}
             >
