@@ -66,7 +66,7 @@ class AdminSettingsAndContactEmailTest extends TestCase
             'order_reference' => null,
             'message' => 'Please help me with yellow leaves.',
         ])->assertCreated()
-            ->assertJsonPath('data.email_delivery', 'sent');
+            ->assertJsonPath('data.email_delivery', 'scheduled');
 
         $this->assertDatabaseHas('contact_messages', [
             'email' => 'customer@example.com',
@@ -121,5 +121,27 @@ class AdminSettingsAndContactEmailTest extends TestCase
                 && $mail->order->items->first()->plant->name === 'Peace Lily'
                 && str_contains($mail->render(), 'Peace Lily');
         });
+        $this->assertDatabaseHas('orders', [
+            'notification_email_error' => null,
+        ]);
+        $this->assertNotNull(DB::table('orders')->value('notification_email_sent_at'));
+    }
+
+    public function test_gmail_cannot_be_enabled_without_a_username_and_app_password(): void
+    {
+        Sanctum::actingAs(User::factory()->create(['role' => 'admin']));
+
+        $this->putJson('/api/admin/settings/mail', [
+            'mail_enabled' => true,
+            'mail_host' => 'smtp.gmail.com',
+            'mail_port' => 587,
+            'mail_encryption' => 'tls',
+            'mail_from_address' => 'mailer@gmail.com',
+            'mail_from_name' => 'Cozy Care',
+            'contact_recipient' => 'admin@example.com',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('mail');
+
+        $this->assertFalse(AdminSetting::query()->first()->mail_enabled);
     }
 }

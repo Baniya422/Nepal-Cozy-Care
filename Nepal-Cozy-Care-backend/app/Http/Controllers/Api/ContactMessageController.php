@@ -3,13 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Mail\ContactMessageReceived;
+use App\Jobs\SendContactNotificationEmail;
 use App\Models\ContactMessage;
 use App\Services\MailSettingsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class ContactMessageController extends Controller
 {
@@ -31,33 +28,27 @@ class ContactMessageController extends Controller
             'status' => 'new',
         ]);
 
-        $emailDelivery = 'not_configured';
-        $settings = $mailSettings->current();
-        if ($mailSettings->apply($settings)) {
-            try {
-                Mail::purge('smtp');
-                Mail::to($mailSettings->recipient($settings))
-                    ->send(new ContactMessageReceived($message));
-                $message->update([
-                    'email_sent_at' => now(),
-                    'email_error' => null,
-                ]);
-                $emailDelivery = 'sent';
-            } catch (\Throwable $exception) {
-                $emailDelivery = 'failed';
-                $message->update([
-                    'email_error' => Str::limit($exception->getMessage(), 2000),
-                ]);
-                Log::error('Contact notification email failed.', [
-                    'contact_message_id' => $message->id,
-                    'error' => $exception->getMessage(),
-                ]);
-            }
+        $emailDelivery = 'scheduled';
+        try {
+            $settings = $mailSettings->current();
+            $configurationIssues = $mailSettings->configurationIssues($settings);
+        } catch (\Throwable $exception) {
+            $configurationIssues = ['Email settings could not be read: '.$exception->getMessage()];
+        }
+
+        if ($configurationIssues === []) {
+            // The SMTP connection happens after the JSON response has reached the browser.
+            SendContactNotificationEmail::dispatch($message->id)->afterResponse();
+        } else {
+            $emailDelivery = 'not_configured';
+            $message->update([
+                'email_error' => implode(' ', $configurationIssues),
+            ]);
         }
 
         return response()->json([
-            'message' => $emailDelivery === 'failed'
-                ? 'Your message was saved, but the email notification could not be delivered. Our team can still see it in the admin inbox.'
+            'message' => $emailDelivery === 'not_configured'
+                ? 'Your message was saved in our support inbox. Email notifications are not configured yet.'
                 : 'Message sent successfully. Our team will get back to you soon.',
             'data' => [
                 'message_record' => $message->fresh(),

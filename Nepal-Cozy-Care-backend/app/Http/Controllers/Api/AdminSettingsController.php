@@ -39,11 +39,23 @@ class AdminSettingsController extends Controller
         $settings = $this->settings();
         $password = $validated['mail_password'] ?? null;
         unset($validated['mail_password'], $validated['clear_mail_password']);
+
+        $candidate = $settings->replicate();
+        $candidate->fill($validated);
         if ($password !== null && $password !== '') {
             $validated['mail_password'] = $password;
+            $candidate->mail_password = $password;
         } elseif ($request->boolean('clear_mail_password')) {
             $validated['mail_password'] = null;
+            $candidate->mail_password = null;
         }
+
+        if ($candidate->mail_enabled && ($issues = $mailSettings->configurationIssues($candidate))) {
+            throw ValidationException::withMessages([
+                'mail' => $issues,
+            ]);
+        }
+
         $settings->fill($validated)->save();
 
         $mailSettings->apply($settings->fresh());

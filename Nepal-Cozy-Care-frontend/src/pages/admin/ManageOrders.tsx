@@ -50,6 +50,8 @@ type Order = {
   location_confirmed_at?: string | null;
   tracking_number?: string | null;
   courier_name?: string | null;
+  notification_email_sent_at?: string | null;
+  notification_email_error?: string | null;
   order_items: OrderItem[];
 };
 const normalizeStatus = (status: string): OrderStatus => {
@@ -104,6 +106,8 @@ const transformOrder = (order: any): Order => ({
   location_confirmed_at: order?.location_confirmed_at ?? null,
   tracking_number: order?.tracking_number ?? null,
   courier_name: order?.courier_name ?? null,
+  notification_email_sent_at: order?.notification_email_sent_at ?? null,
+  notification_email_error: order?.notification_email_error ?? null,
   order_items: Array.isArray(order?.items)
     ? order.items.map((item: any) => ({
         id: Number(item?.id ?? 0),
@@ -386,6 +390,7 @@ export default function ManageOrders() {
                   <th>Total</th>
                   <th>Date</th>
                   <th>Order Status</th>
+                  <th>Email Alert</th>
                   <th>Contact Status</th>
                   <th>Actions</th>
                 </tr>
@@ -410,6 +415,24 @@ export default function ManageOrders() {
                         <span className={`admin-status-badge status-${order.status}`}>
                           {getStatusIcon(order.status)}
                           {formatStatusLabel(order.status)}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`admin-status-badge ${
+                            order.notification_email_sent_at
+                              ? "admin-status-active"
+                              : order.notification_email_error
+                                ? "admin-status-inactive"
+                                : "admin-status-pending"
+                          }`}
+                          title={order.notification_email_error || undefined}
+                        >
+                          {order.notification_email_sent_at
+                            ? "Sent"
+                            : order.notification_email_error
+                              ? "Failed"
+                              : "Pending"}
                         </span>
                       </td>
                       <td>
@@ -497,6 +520,14 @@ export default function ManageOrders() {
                     </p>
                     <p>
                       <strong>Total:</strong> {formatPrice(selectedOrder.total)}
+                    </p>
+                    <p>
+                      <strong>Email alert:</strong>{" "}
+                      {selectedOrder.notification_email_sent_at
+                        ? "Sent"
+                        : selectedOrder.notification_email_error
+                          ? `Failed - ${selectedOrder.notification_email_error}`
+                          : "Pending"}
                     </p>
                     <p>
                       <strong>Courier:</strong> {selectedOrder.courier_name || "Not assigned yet"}

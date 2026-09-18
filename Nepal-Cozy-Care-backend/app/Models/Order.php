@@ -32,6 +32,8 @@ class Order extends Model
         'confirmation_notes',
         'contacted_at',
         'location_confirmed_at',
+        'notification_email_sent_at',
+        'notification_email_error',
     ];
 
     protected $casts = [
@@ -46,6 +48,7 @@ class Order extends Model
         'estimated_delivery_date' => 'datetime',
         'contacted_at' => 'datetime',
         'location_confirmed_at' => 'datetime',
+        'notification_email_sent_at' => 'datetime',
     ];
 
     public function items()

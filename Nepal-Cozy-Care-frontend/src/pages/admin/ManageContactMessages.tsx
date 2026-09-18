@@ -176,7 +176,7 @@ export default function ManageContactMessages() {
                           }`}
                           title={message.email_error || undefined}
                         >
-                          {message.email_sent_at ? "Sent" : message.email_error ? "Failed" : "Not configured"}
+                          {message.email_sent_at ? "Sent" : message.email_error ? "Failed" : "Pending"}
                         </span>
                       </td>
                       <td>
