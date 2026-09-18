@@ -8,6 +8,7 @@ use App\Http\Requests\UpdatePlantRequest;
 use App\Models\Plant;
 use App\Models\Shop;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PlantController extends Controller
 {
@@ -277,24 +278,26 @@ class PlantController extends Controller
 
     public function popularItemsHomepage(Request $request)
     {
-        $query = Plant::popularItems()
-            ->marketplaceApproved()
-            ->with('shop:id,name,slug,logo,is_verified,city,status')
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 4);
-        $paginator = $query->paginate($perPage);
-        $paginator->getCollection()->transform(function ($plant) {
-            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
-            $plant->review_count = (int) ($plant->reviews_count ?? 0);
-            unset($plant->reviews_avg_rating, $plant->reviews_count);
+        $cacheKey = 'homepage_popular_items_'.$perPage;
 
-            return $plant;
-        });
+        $data = Cache::remember($cacheKey, 300, function () use ($perPage) {
+            $query = Plant::popularItems()
+                ->marketplaceApproved()
+                ->with('shop:id,name,slug,logo,is_verified,city,status')
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews');
 
-        return response()->json([
-            'message' => null,
-            'data' => [
+            $paginator = $query->paginate($perPage);
+            $paginator->getCollection()->transform(function ($plant) {
+                $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+                $plant->review_count = (int) ($plant->reviews_count ?? 0);
+                unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+                return $plant;
+            });
+
+            return [
                 'data' => $paginator->items(),
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
@@ -302,30 +305,37 @@ class PlantController extends Controller
                     'total' => $paginator->total(),
                     'last_page' => $paginator->lastPage(),
                 ],
-            ],
-        ]);
+            ];
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => $data,
+        ])->header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
     }
 
     public function shopPlantsHomepage(Request $request)
     {
-        $query = Plant::shopPlants()
-            ->marketplaceApproved()
-            ->with('shop:id,name,slug,logo,is_verified,city,status')
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 4);
-        $paginator = $query->paginate($perPage);
-        $paginator->getCollection()->transform(function ($plant) {
-            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
-            $plant->review_count = (int) ($plant->reviews_count ?? 0);
-            unset($plant->reviews_avg_rating, $plant->reviews_count);
+        $cacheKey = 'homepage_shop_plants_'.$perPage;
 
-            return $plant;
-        });
+        $data = Cache::remember($cacheKey, 300, function () use ($perPage) {
+            $query = Plant::shopPlants()
+                ->marketplaceApproved()
+                ->with('shop:id,name,slug,logo,is_verified,city,status')
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews');
 
-        return response()->json([
-            'message' => null,
-            'data' => [
+            $paginator = $query->paginate($perPage);
+            $paginator->getCollection()->transform(function ($plant) {
+                $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+                $plant->review_count = (int) ($plant->reviews_count ?? 0);
+                unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+                return $plant;
+            });
+
+            return [
                 'data' => $paginator->items(),
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
@@ -333,30 +343,37 @@ class PlantController extends Controller
                     'total' => $paginator->total(),
                     'last_page' => $paginator->lastPage(),
                 ],
-            ],
-        ]);
+            ];
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => $data,
+        ])->header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
     }
 
     public function bestSellersHomepage(Request $request)
     {
-        $query = Plant::homepageBestSellers()
-            ->marketplaceApproved()
-            ->with('shop:id,name,slug,logo,is_verified,city,status')
-            ->withAvg('reviews', 'rating')
-            ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 4);
-        $paginator = $query->paginate($perPage);
-        $paginator->getCollection()->transform(function ($plant) {
-            $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
-            $plant->review_count = (int) ($plant->reviews_count ?? 0);
-            unset($plant->reviews_avg_rating, $plant->reviews_count);
+        $cacheKey = 'homepage_best_sellers_'.$perPage;
 
-            return $plant;
-        });
+        $data = Cache::remember($cacheKey, 300, function () use ($perPage) {
+            $query = Plant::homepageBestSellers()
+                ->marketplaceApproved()
+                ->with('shop:id,name,slug,logo,is_verified,city,status')
+                ->withAvg('reviews', 'rating')
+                ->withCount('reviews');
 
-        return response()->json([
-            'message' => null,
-            'data' => [
+            $paginator = $query->paginate($perPage);
+            $paginator->getCollection()->transform(function ($plant) {
+                $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
+                $plant->review_count = (int) ($plant->reviews_count ?? 0);
+                unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+                return $plant;
+            });
+
+            return [
                 'data' => $paginator->items(),
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
@@ -364,7 +381,12 @@ class PlantController extends Controller
                     'total' => $paginator->total(),
                     'last_page' => $paginator->lastPage(),
                 ],
-            ],
-        ]);
+            ];
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => $data,
+        ])->header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
     }
 }

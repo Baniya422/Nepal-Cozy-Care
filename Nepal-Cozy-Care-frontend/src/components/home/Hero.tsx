@@ -38,19 +38,6 @@ export default function Hero({ content }: { content: HeroContent }) {
                 })}
               </div>
             </div>
-            <aside className="hero-side-card">
-              <span className="hero-side-kicker">{content.side_kicker}</span>
-              <h2>{content.side_title}</h2>
-              <p>{content.side_description}</p>
-              <div className="hero-side-points">
-                {content.side_points.map((point, index) => (
-                  <div key={`${point.title}-${index}`}>
-                    <strong>{point.title}</strong>
-                    <span>{point.description}</span>
-                  </div>
-                ))}
-              </div>
-            </aside>
           </div>
         </div>
       </div>

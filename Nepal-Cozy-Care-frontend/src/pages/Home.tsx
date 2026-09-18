@@ -17,20 +17,47 @@ import {
 import "../components/home/home.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 export default function Home() {
-  const [content, setContent] = useState<HomepageContent>(defaultHomepageContent);
+  const [content, setContent] = useState<HomepageContent>(() => {
+    try {
+      const cached = localStorage.getItem("cozycare_cache_homepage_content");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed === "object") return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return defaultHomepageContent;
+  });
+
   useEffect(() => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
     const fetchContent = async () => {
       try {
-        const response = await fetch(`${API}/api/homepage/content`);
+        const response = await fetch(`${API}/api/homepage/content`, { signal: controller.signal });
         const data = await response.json().catch(() => ({}));
         if (response.ok && data.data?.payload) {
           setContent(data.data.payload as HomepageContent);
+          try {
+            localStorage.setItem("cozycare_cache_homepage_content", JSON.stringify(data.data.payload));
+          } catch {
+            // ignore
+          }
         }
       } catch (error) {
-        console.error("Could not load homepage content:", error);
+        console.warn("Could not background-refresh homepage content:", error);
+      } finally {
+        clearTimeout(timeout);
       }
     };
     void fetchContent();
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
   return (
     <Layout>

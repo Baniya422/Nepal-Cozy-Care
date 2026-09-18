@@ -12,6 +12,7 @@ import {
   type TextCardContent,
   type ToolContent,
 } from "../../features/homepage/content";
+import { compressImage } from "../../utils/imageCompressor";
 import "../../components/admin/admin.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -58,8 +59,9 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
     setUploading(true);
     setError("");
     try {
+      const compressedFile = await compressImage(file, { maxWidth: 1600, quality: 0.82 });
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", compressedFile);
       formData.append("directory", "homepage");
       const response = await fetch(`${API}/api/upload`, {
         method: "POST",
@@ -99,7 +101,7 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
   );
 }
 
-type HeroTextKey = "badge" | "title" | "description" | "side_kicker" | "side_title" | "side_description";
+type HeroTextKey = "badge" | "title" | "description";
 type SmartTextKey = "kicker" | "title" | "description";
 type SeasonalTextKey = "kicker" | "title" | "description" | "badge_suffix" | "empty_title_suffix" | "empty_description";
 type ProductKey = keyof HomepageContent["product_sections"];
@@ -159,8 +161,6 @@ export default function ManageHomepage() {
     setContent((current) => ({ ...current, hero: { ...current.hero, [key]: { ...current.hero[key], [field]: value } } }));
   const updateHighlight = (index: number, value: string) =>
     setContent((current) => ({ ...current, hero: { ...current.hero, highlights: current.hero.highlights.map((item, itemIndex) => itemIndex === index ? value : item) } }));
-  const updateSidePoint = (index: number, field: keyof TextCardContent, value: string) =>
-    setContent((current) => ({ ...current, hero: { ...current.hero, side_points: current.hero.side_points.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item) } }));
   const updateFeature = (index: number, field: keyof TextCardContent, value: string) =>
     setContent((current) => ({ ...current, features: current.features.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item) }));
   const updateSmart = (field: SmartTextKey, value: string) =>
@@ -213,18 +213,6 @@ export default function ManageHomepage() {
               <div className="admin-form-grid admin-form-grid-three">
                 {content.hero.highlights.map((item, index) => <Field key={index} label={`Highlight ${index + 1}`} value={item} onChange={(value) => updateHighlight(index, value)} />)}
               </div>
-              <h4 className="admin-editor-subtitle">Hero side card</h4>
-              <div className="admin-form-grid">
-                <Field label="Kicker" value={content.hero.side_kicker} onChange={(value) => updateHero("side_kicker", value)} />
-                <Field label="Title" value={content.hero.side_title} onChange={(value) => updateHero("side_title", value)} />
-              </div>
-              <Field label="Description" value={content.hero.side_description} onChange={(value) => updateHero("side_description", value)} multiline />
-              {content.hero.side_points.map((point, index) => (
-                <div className="admin-editor-inline-card" key={index}>
-                  <Field label={`Point ${index + 1} title`} value={point.title} onChange={(value) => updateSidePoint(index, "title", value)} />
-                  <Field label="Description" value={point.description} onChange={(value) => updateSidePoint(index, "description", value)} multiline />
-                </div>
-              ))}
             </SectionCard>
 
             <SectionCard title="Service Features">

@@ -19,6 +19,7 @@ import type { Shop } from "../../types/shop";
 import type { Plant } from "../../types/plant";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
 import { useWishlist } from "../../hooks/useWishlist";
+import "../../styles/shops.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -92,9 +93,9 @@ export default function ShopDetail() {
 
   if (loadingShop) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <div className="shop-detail-page">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center p-12 text-slate-400">
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "4rem", color: "#94a3b8" }}>
           Loading nursery profile...
         </div>
         <Footer />
@@ -104,17 +105,18 @@ export default function ShopDetail() {
 
   if (!shop) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <div className="shop-detail-page">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-          <Store className="w-16 h-16 text-slate-300 mb-4" />
-          <h2 className="text-2xl font-bold text-slate-800">Nursery Not Found</h2>
-          <p className="text-sm text-slate-500 mt-2">
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "4rem", textAlign: "center" }}>
+          <Store style={{ width: "64px", height: "64px", color: "#cbd5e1", marginBottom: "1rem" }} />
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a" }}>Nursery Not Found</h2>
+          <p style={{ fontSize: "0.875rem", color: "#64748b", marginTop: "0.5rem" }}>
             The nursery you are looking for might be unavailable or currently undergoing verification.
           </p>
           <Link
             to="/shops"
-            className="mt-6 inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition shadow-sm"
+            className="shop-card-btn"
+            style={{ width: "auto", display: "inline-flex", marginTop: "1.5rem", padding: "0.625rem 1.5rem" }}
           >
             <ArrowLeft size={14} /> Back to Directory
           </Link>
@@ -136,136 +138,119 @@ export default function ShopDetail() {
     : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="shop-detail-page">
       <Navbar />
 
       {/* Storefront Banner */}
-      <div className="relative h-60 md:h-80 bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-900 overflow-hidden">
-        {bannerUrl ? (
-          <img
-            src={bannerUrl}
-            alt={`${shop.name} Banner`}
-            className="w-full h-full object-cover opacity-80"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-pattern opacity-10" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-        <div className="absolute top-4 left-4">
-          <Link
-            to="/shops"
-            className="inline-flex items-center gap-1.5 bg-black/40 hover:bg-black/60 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full backdrop-blur-sm border border-white/20 transition"
-          >
+      <section
+        className="shop-storefront-hero"
+        style={
+          bannerUrl
+            ? {
+                backgroundImage: `linear-gradient(to bottom, rgba(2, 44, 34, 0.75), rgba(6, 78, 59, 0.9)), url(${bannerUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+            : undefined
+        }
+      >
+        <div className="shop-storefront-hero-inner">
+          <Link to="/shops" className="shop-back-link">
             <ArrowLeft size={14} /> All Partner Shops
           </Link>
         </div>
-      </div>
+      </section>
 
       {/* Shop Info Card Overlapping Banner */}
-      <div className="max-w-6xl mx-auto px-4 -mt-20 relative z-10 w-full mb-8">
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-200/80">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-            <div className="flex items-start gap-4">
-              {/* Logo */}
-              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-white shadow-md border border-slate-200 overflow-hidden flex items-center justify-center flex-shrink-0 p-1">
-                {logoUrl ? (
-                  <img
-                    src={logoUrl}
-                    alt={shop.name}
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-xl bg-emerald-100 text-emerald-800 font-black text-2xl flex items-center justify-center">
-                    {shop.name.charAt(0)}
-                  </div>
+      <div className="shop-profile-card-wrap">
+        <div className="shop-profile-card">
+          <div className="shop-profile-top">
+            {/* Logo */}
+            <div className="shop-profile-avatar">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={shop.name}
+                  className="shop-profile-avatar-img"
+                />
+              ) : (
+                <div className="shop-profile-avatar-fallback">
+                  {shop.name.charAt(0)}
+                </div>
+              )}
+            </div>
+
+            <div className="shop-profile-info">
+              <div className="shop-profile-title-row">
+                <h1 className="shop-profile-name">
+                  {shop.name}
+                </h1>
+                {shop.is_verified && (
+                  <span className="shop-chip verified-chip">
+                    <ShieldCheck size={14} />
+                    Verified Partner Nursery
+                  </span>
                 )}
               </div>
 
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">
-                    {shop.name}
-                  </h1>
-                  {shop.is_verified && (
-                    <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                      <ShieldCheck size={14} className="text-emerald-600" />
-                      Verified Partner Nursery
-                    </span>
-                  )}
-                </div>
+              <p className="shop-profile-tagline">
+                {shop.short_description ||
+                  "Specialized in healthy house plants, seasonal flowering varieties & gardening essentials."}
+              </p>
 
-                <p className="text-sm text-slate-600 mt-1 max-w-2xl font-medium">
-                  {shop.short_description || "Specialized in healthy house plants, seasonal flowering varieties & gardening essentials."}
-                </p>
-
-                {/* Quick Meta */}
-                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-3">
-                  {shop.city && (
-                    <span className="flex items-center gap-1 font-medium text-slate-700">
-                      <MapPin size={14} className="text-emerald-600" />
-                      {shop.address ? `${shop.address}, ` : ""}
-                      {shop.city}
-                    </span>
-                  )}
-                  {shop.establishment_year && (
-                    <span className="flex items-center gap-1">
-                      <Calendar size={14} className="text-slate-400" />
-                      Est. {shop.establishment_year}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1 text-emerald-700 font-semibold">
-                    <Package size={14} />
-                    {shop.plants_count ?? plants.length} Available Items
+              {/* Quick Meta Chips */}
+              <div className="shop-chips-row">
+                {shop.city && (
+                  <span className="shop-chip">
+                    <MapPin size={13} style={{ color: "#059669" }} />
+                    {shop.address ? `${shop.address}, ` : ""}
+                    {shop.city}
                   </span>
-                </div>
+                )}
+                {shop.establishment_year && (
+                  <span className="shop-chip">
+                    <Calendar size={13} style={{ color: "#64748b" }} />
+                    Est. {shop.establishment_year}
+                  </span>
+                )}
+                <span className="shop-chip" style={{ color: "#047857", background: "#ecfdf5" }}>
+                  <Package size={13} />
+                  {shop.plants_count ?? plants.length} Available Items
+                </span>
+                {shop.phone && (
+                  <a href={`tel:${shop.phone}`} className="shop-chip contact-chip">
+                    <Phone size={13} />
+                    {shop.phone}
+                  </a>
+                )}
+                {shop.email && (
+                  <a href={`mailto:${shop.email}`} className="shop-chip contact-chip">
+                    <Mail size={13} />
+                    {shop.email}
+                  </a>
+                )}
+                {shop.website && (
+                  <a
+                    href={shop.website.startsWith("http") ? shop.website : `https://${shop.website}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="shop-chip contact-chip"
+                  >
+                    <Globe size={13} />
+                    {shop.website}
+                  </a>
+                )}
               </div>
-            </div>
-
-            {/* Direct Contact Details */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs space-y-2 md:w-72 flex-shrink-0">
-              <span className="block font-bold text-slate-900 text-xs uppercase tracking-wider text-[10px] text-slate-400">
-                Direct Nursery Contact
-              </span>
-              {shop.phone && (
-                <a
-                  href={`tel:${shop.phone}`}
-                  className="flex items-center gap-2 text-slate-700 hover:text-emerald-700 font-medium"
-                >
-                  <Phone size={13} className="text-emerald-600" />
-                  {shop.phone}
-                </a>
-              )}
-              {shop.email && (
-                <a
-                  href={`mailto:${shop.email}`}
-                  className="flex items-center gap-2 text-slate-700 hover:text-emerald-700 font-medium truncate"
-                >
-                  <Mail size={13} className="text-emerald-600" />
-                  <span className="truncate">{shop.email}</span>
-                </a>
-              )}
-              {shop.website && (
-                <a
-                  href={shop.website.startsWith("http") ? shop.website : `https://${shop.website}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-2 text-emerald-700 hover:underline font-medium truncate"
-                >
-                  <Globe size={13} className="text-emerald-600" />
-                  <span className="truncate">{shop.website}</span>
-                </a>
-              )}
             </div>
           </div>
 
           {/* Description Story */}
           {shop.description && (
-            <div className="mt-6 pt-6 border-t border-slate-100">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
+            <div className="shop-story-section">
+              <h3 className="shop-story-heading">
                 About The Nursery
               </h3>
-              <p className="text-xs md:text-sm text-slate-600 leading-relaxed max-w-4xl whitespace-pre-line">
+              <p className="shop-story-text">
                 {shop.description}
               </p>
             </div>
@@ -274,26 +259,26 @@ export default function ShopDetail() {
       </div>
 
       {/* Catalog Section */}
-      <main className="max-w-6xl mx-auto px-4 pb-16 flex-1 w-full">
+      <main className="shop-catalog-section">
         {/* Controls Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+        <div className="shop-catalog-header">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">Products by {shop.name}</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="shop-catalog-title">Products by {shop.name}</h2>
+            <p className="shop-catalog-subtext">
               All items are prepared and dispatched directly from this nursery.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
+          <div className="shop-catalog-filters">
             {/* Search */}
-            <div className="relative w-full sm:w-60">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+            <div className="shop-catalog-search-wrap">
+              <Search className="shops-search-icon" size={16} />
               <input
                 type="text"
                 placeholder="Search shop items..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="shop-catalog-search-input"
               />
             </div>
 
@@ -302,7 +287,7 @@ export default function ShopDetail() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="text-xs border border-slate-200 rounded-xl px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-700"
+                className="shop-catalog-select"
               >
                 <option value="all">All Categories</option>
                 {categories.map((c) => (
@@ -317,69 +302,84 @@ export default function ShopDetail() {
 
         {/* Product Grid */}
         {loadingPlants ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="shop-products-grid">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-72 bg-white rounded-2xl animate-pulse border border-slate-200" />
+              <div
+                key={i}
+                className="shop-product-card"
+                style={{ height: "300px", opacity: 0.6, background: "#f1f5f9" }}
+              />
             ))}
           </div>
         ) : filteredPlants.length === 0 ? (
-          <div className="p-16 text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
-            <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-800">No products currently available</h3>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+          <div
+            style={{
+              padding: "4rem 1.5rem",
+              textAlign: "center",
+              background: "#ffffff",
+              borderRadius: "1rem",
+              border: "1px solid #e2e8f0",
+              color: "#64748b",
+            }}
+          >
+            <Package style={{ width: "48px", height: "48px", color: "#cbd5e1", margin: "0 auto 0.75rem" }} />
+            <h3 style={{ fontSize: "1.125rem", fontWeight: 700, color: "#0f172a" }}>No products currently available</h3>
+            <p style={{ fontSize: "0.875rem", color: "#64748b", marginTop: "0.25rem", maxWidth: "24rem", margin: "0.25rem auto 0" }}>
               This nursery hasn’t listed any products matching this filter yet. Check back soon!
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="shop-products-grid">
             {filteredPlants.map((plant) => (
-              <div
-                key={plant.id}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col group"
-              >
-                <div className="relative aspect-square bg-slate-100 overflow-hidden">
+              <div key={plant.id} className="shop-product-card">
+                {/* Fixed aspect ratio container so images NEVER stretch or blow up */}
+                <div className="shop-product-image-container">
                   <img
                     src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
                     alt={plant.name}
                     onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    className="shop-product-image"
                   />
                   <button
                     type="button"
                     onClick={() => toggleWishlist(plant.id)}
                     disabled={wishlistBusyId === plant.id}
-                    className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/80 hover:bg-white shadow-sm flex items-center justify-center text-slate-600 transition"
+                    className={`shop-product-wishlist-btn ${
+                      wishlistIds.includes(plant.id) ? "active" : ""
+                    }`}
+                    aria-label="Wishlist"
                   >
                     <Heart
-                      size={16}
-                      className={wishlistIds.includes(plant.id) ? "fill-rose-500 text-rose-500" : ""}
+                      size={15}
+                      fill={wishlistIds.includes(plant.id) ? "currentColor" : "none"}
                     />
                   </button>
                 </div>
 
-                <div className="p-4 flex-1 flex flex-col">
-                  <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">
+                <div className="shop-product-body">
+                  <span className="shop-product-category">
                     {plant.category || "House Plant"}
                   </span>
                   <Link
                     to={`/plants/${plant.id}`}
-                    className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition mt-1 line-clamp-1"
+                    className="shop-product-title"
+                    title={plant.name}
                   >
                     {plant.name}
                   </Link>
                   {plant.scientific_name && (
-                    <span className="text-[11px] text-slate-400 italic line-clamp-1">
+                    <span className="shop-product-botanical">
                       {plant.scientific_name}
                     </span>
                   )}
 
-                  <div className="mt-auto pt-3 flex items-center justify-between">
-                    <span className="text-sm font-black text-slate-900">
-                      Rs. {plant.price.toLocaleString()}
+                  <div className="shop-product-footer">
+                    <span className="shop-product-price">
+                      Rs. {Number(plant.price).toLocaleString()}
                     </span>
                     <Link
                       to={`/plants/${plant.id}`}
-                      className="text-xs bg-emerald-50 hover:bg-emerald-700 text-emerald-800 hover:text-white font-bold px-3 py-1.5 rounded-lg transition"
+                      className="shop-product-view-btn"
                     >
                       View
                     </Link>

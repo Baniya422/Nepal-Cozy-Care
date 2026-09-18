@@ -16,6 +16,7 @@ class HomepageContentTest extends TestCase
         $this->getJson('/api/homepage/content')
             ->assertOk()
             ->assertJsonPath('data.payload.hero.title', 'Bring Nature Home')
+            ->assertJsonMissingPath('data.payload.hero.side_title')
             ->assertJsonCount(3, 'data.payload.features');
     }
 

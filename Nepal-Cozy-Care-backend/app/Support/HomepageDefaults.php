@@ -19,14 +19,6 @@ class HomepageDefaults
                     'Plant Finder quiz',
                     'Plant Health Checker',
                 ],
-                'side_kicker' => 'Why It Feels Smarter',
-                'side_title' => 'Your plant companion, not just a plant store.',
-                'side_description' => 'Cozy Care helps users before and after buying by combining plant shopping, guidance tools, and personal care tracking in one experience.',
-                'side_points' => [
-                    ['title' => 'Choose better', 'description' => 'Use Plant Finder to match plants to your room and lifestyle.'],
-                    ['title' => 'Solve problems faster', 'description' => 'Open the Health Checker when leaves start yellowing or drooping.'],
-                    ['title' => 'Track care after checkout', 'description' => 'Use My Garden for watering, fertilizer reminders, and notes.'],
-                ],
             ],
             'features' => [
                 ['title' => 'Healthy Guarantee', 'description' => 'Every plant checked before delivery'],

@@ -69,32 +69,32 @@ export default function CartItems({
           return (
             <div
               key={shopKey}
-              className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs"
+              className="cart-shop-group"
             >
               {/* Shop Group Header */}
-              <div className="p-3.5 bg-emerald-50/70 border-b border-emerald-100/80 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Store size={16} className="text-emerald-700" />
-                  <span className="text-xs text-slate-500 font-medium">Sold & Shipped by:</span>
+              <div className="cart-shop-header">
+                <div className="cart-shop-info">
+                  <Store size={16} className="cart-shop-icon" />
+                  <span className="cart-shop-label">Sold & Shipped by:</span>
                   <Link
                     to={`/shops/${group.shopSlug}`}
-                    className="text-xs font-bold text-emerald-950 hover:underline hover:text-emerald-700 transition"
+                    className="cart-shop-name-link"
                   >
                     {group.shopName}
                   </Link>
                   {group.isVerified && (
-                    <span title="Verified Partner Nursery">
-                      <ShieldCheck size={14} className="text-emerald-600" />
+                    <span className="cart-shop-verified-badge" title="Verified Partner Nursery">
+                      <ShieldCheck size={14} />
                     </span>
                   )}
                 </div>
-                <span className="text-xs font-semibold text-emerald-900 bg-emerald-100/60 px-2.5 py-0.5 rounded-full">
+                <span className="cart-shop-subtotal-badge">
                   Shop Subtotal: Rs. {shopSubtotal.toFixed(2)}
                 </span>
               </div>
 
               {/* Items from this shop */}
-              <div className="divide-y divide-slate-100">
+              <div className="cart-shop-items">
                 {group.items.map((item) => (
                   <div key={item.id} className="cart-item">
                     <div className="cart-item-info">

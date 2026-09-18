@@ -45,7 +45,9 @@ class HomepageContentController extends Controller
             ]);
         }
 
-        $payload = array_replace_recursive(HomepageDefaults::get(), $validated['payload']);
+        $payload = $this->withoutRemovedHeroSideCard(
+            array_replace_recursive(HomepageDefaults::get(), $validated['payload'])
+        );
         $template = ContentTemplate::query()->updateOrCreate(
             ['key' => 'home_page'],
             [
@@ -72,7 +74,21 @@ class HomepageContentController extends Controller
             ->where('is_active', true)
             ->first();
 
-        return array_replace_recursive(HomepageDefaults::get(), $template?->payload ?? []);
+        return $this->withoutRemovedHeroSideCard(
+            array_replace_recursive(HomepageDefaults::get(), $template?->payload ?? [])
+        );
+    }
+
+    private function withoutRemovedHeroSideCard(array $payload): array
+    {
+        unset(
+            $payload['hero']['side_kicker'],
+            $payload['hero']['side_title'],
+            $payload['hero']['side_description'],
+            $payload['hero']['side_points'],
+        );
+
+        return $payload;
     }
 
     private function rules(): array
@@ -96,13 +112,6 @@ class HomepageContentController extends Controller
             'payload.hero.secondary_cta.path' => $path,
             'payload.hero.highlights' => ['sometimes', 'array', 'max:6'],
             'payload.hero.highlights.*' => $shortText,
-            'payload.hero.side_kicker' => $shortText,
-            'payload.hero.side_title' => $shortText,
-            'payload.hero.side_description' => $longText,
-            'payload.hero.side_points' => ['sometimes', 'array', 'max:6'],
-            'payload.hero.side_points.*' => ['array'],
-            'payload.hero.side_points.*.title' => $shortText,
-            'payload.hero.side_points.*.description' => $longText,
             'payload.features' => ['sometimes', 'array', 'max:6'],
             'payload.features.*' => ['array'],
             'payload.features.*.title' => $shortText,

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { compressImage } from "../../utils/imageCompressor";
 import "../../components/admin/admin.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -355,10 +356,11 @@ export default function ManagePageContent() {
   };
 
   const uploadImage = async (file: File, onUploadSuccess: (url: string) => void) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("directory", "pages");
     try {
+      const compressed = await compressImage(file, { maxWidth: 1600, quality: 0.82 });
+      const formData = new FormData();
+      formData.append("file", compressed);
+      formData.append("directory", "pages");
       const response = await fetch(`${API}/api/upload`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },

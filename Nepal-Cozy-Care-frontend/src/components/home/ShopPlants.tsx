@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Star, ShoppingBag } from "lucide-react";
 import { useAddToCart } from "../../hooks/useAddToCart";
 import { useWishlist } from "../../hooks/useWishlist";
-import type { ProductSectionContent } from "../../features/homepage/content";
+import { shopFallbackPlants, type ProductSectionContent } from "../../features/homepage/content";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 type Plant = {
@@ -13,10 +13,24 @@ type Plant = {
   image?: string;
   avg_rating?: number;
 };
+
+const CACHE_KEY = "cozycare_cache_shop_plants";
+
 export default function ShopPlants({ content }: { content: ProductSectionContent }) {
   const navigate = useNavigate();
-  const [plants, setPlants] = useState<Plant[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [plants, setPlants] = useState<Plant[]>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return shopFallbackPlants;
+  });
+  const [loading, setLoading] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const gridRef = useRef<HTMLDivElement>(null);
   const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
@@ -43,17 +57,36 @@ export default function ShopPlants({ content }: { content: ProductSectionContent
     });
     setActiveSlide(index);
   };
+
   useEffect(() => {
-    fetch(`${API}/api/homepage/shop-plants?per_page=4`)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    fetch(`${API}/api/homepage/shop-plants?per_page=4`, { signal: controller.signal })
       .then(res => res.json())
       .then(json => {
-        setPlants(json.data.data || []);
-        setLoading(false);
+        const items = json?.data?.data;
+        if (Array.isArray(items) && items.length > 0) {
+          setPlants(items);
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(items));
+          } catch {
+            // ignore
+          }
+        }
       })
       .catch(() => {
-        setPlants([]);
+        // keep fallback/cached silently
+      })
+      .finally(() => {
+        clearTimeout(timeout);
         setLoading(false);
       });
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
   if (loading) {
     return (

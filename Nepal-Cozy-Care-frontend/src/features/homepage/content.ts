@@ -38,10 +38,6 @@ export type HomepageContent = {
     primary_cta: CtaContent;
     secondary_cta: CtaContent;
     highlights: string[];
-    side_kicker: string;
-    side_title: string;
-    side_description: string;
-    side_points: TextCardContent[];
   };
   features: TextCardContent[];
   smart_tools: {
@@ -86,15 +82,6 @@ export const defaultHomepageContent: HomepageContent = {
     primary_cta: { label: "Explore Plants", path: "/plants" },
     secondary_cta: { label: "Find My Plant", path: "/plant-finder" },
     highlights: ["My Garden care tracking", "Plant Finder quiz", "Plant Health Checker"],
-    side_kicker: "Why It Feels Smarter",
-    side_title: "Your plant companion, not just a plant store.",
-    side_description:
-      "Cozy Care helps users before and after buying by combining plant shopping, guidance tools, and personal care tracking in one experience.",
-    side_points: [
-      { title: "Choose better", description: "Use Plant Finder to match plants to your room and lifestyle." },
-      { title: "Solve problems faster", description: "Open the Health Checker when leaves start yellowing or drooping." },
-      { title: "Track care after checkout", description: "Use My Garden for watering, fertilizer reminders, and notes." },
-    ],
   },
   features: [
     { title: "Healthy Guarantee", description: "Every plant checked before delivery" },
@@ -156,3 +143,32 @@ export function resolveHomepageImage(path: string, apiBaseUrl: string): string {
   if (/^(https?:|data:|blob:)/i.test(path) || path.startsWith("/")) return path;
   return `${apiBaseUrl}/storage/${path}`;
 }
+
+export type HomepageFallbackPlant = {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  avg_rating: number;
+};
+
+export const popularFallbackPlants: HomepageFallbackPlant[] = [
+  { id: 1, name: "Monstera Deliciosa", price: 1450, image: "/images/mos.jpg", avg_rating: 4.8 },
+  { id: 2, name: "Fiddle Leaf Fig Tree", price: 2200, image: "/images/fiddle.jpg", avg_rating: 4.9 },
+  { id: 3, name: "Golden Pothos Devil's Ivy", price: 600, image: "/images/pothos.jpg", avg_rating: 4.7 },
+  { id: 4, name: "Areca Butterfly Palm", price: 1750, image: "/images/palm.jpg", avg_rating: 4.8 },
+];
+
+export const shopFallbackPlants: HomepageFallbackPlant[] = [
+  { id: 5, name: "Snake Plant Laurentii", price: 850, image: "/images/snake.jpg", avg_rating: 4.9 },
+  { id: 6, name: "Rubber Plant Burgundy", price: 1150, image: "/images/rubber.jpg", avg_rating: 4.8 },
+  { id: 7, name: "Peace Lily Bloom", price: 950, image: "/images/lily.jpg", avg_rating: 4.6 },
+  { id: 8, name: "Aloe Vera Medicinal", price: 450, image: "/images/alovera.jpg", avg_rating: 4.7 },
+];
+
+export const bestSellersFallbackPlants: HomepageFallbackPlant[] = [
+  { id: 1, name: "Monstera Deliciosa", price: 1450, image: "/images/mos.jpg", avg_rating: 4.9 },
+  { id: 3, name: "Golden Pothos Devil's Ivy", price: 600, image: "/images/pothos.jpg", avg_rating: 4.8 },
+  { id: 4, name: "Areca Butterfly Palm", price: 1750, image: "/images/palm.jpg", avg_rating: 4.8 },
+  { id: 5, name: "Snake Plant Laurentii", price: 850, image: "/images/snake.jpg", avg_rating: 4.9 },
+];
