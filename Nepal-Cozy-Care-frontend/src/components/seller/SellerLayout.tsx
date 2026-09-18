@@ -15,6 +15,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import type { Shop } from "../../types/shop";
+import "./seller.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -25,12 +26,7 @@ interface SellerLayoutProps {
 export default function SellerLayout({ children }: SellerLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth > 1024;
-    }
-    return true;
-  });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [shop, setShop] = useState<Shop | null>(null);
 
   let userName = "Partner Seller";
@@ -49,11 +45,11 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
-          const data = await res.json();
-          setShop(data.data?.shop || null);
+          const json = await res.json();
+          setShop(json.data.shop);
         }
       } catch (err) {
-        console.error("Error loading seller shop:", err);
+        console.error("Failed to load seller shop info", err);
       }
     };
     fetchShop();
@@ -66,11 +62,11 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
   };
 
   const navItems = [
-    { path: "/seller/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/seller/dashboard", label: "Overview", icon: LayoutDashboard },
     { path: "/seller/shop", label: "Shop Profile", icon: Store },
-    { path: "/seller/products", label: "My Products", icon: Leaf },
-    { path: "/seller/orders", label: "My Orders", icon: ShoppingBag },
-    { path: "/seller/settings", label: "Account & Contact", icon: Settings },
+    { path: "/seller/products", label: "My Catalog", icon: Leaf },
+    { path: "/seller/orders", label: "Customer Orders", icon: ShoppingBag },
+    { path: "/seller/settings", label: "Settings", icon: Settings },
   ];
 
   const isActive = (path: string) => {
@@ -81,84 +77,57 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans">
-      {/* Mobile top navigation */}
-      <div className="lg:hidden bg-emerald-950 text-white px-4 py-3 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 rounded-md text-emerald-200 hover:text-white hover:bg-emerald-900 focus:outline-none"
-          >
-            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-          <div className="flex items-center gap-1.5 font-bold text-emerald-400">
-            <Store size={18} />
-            <span className="text-white text-base font-semibold">Seller Portal</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {shop?.slug && (
-            <Link
-              to={`/shops/${shop.slug}`}
-              target="_blank"
-              className="text-xs bg-emerald-800 hover:bg-emerald-700 px-2.5 py-1 rounded text-emerald-100 flex items-center gap-1"
-            >
-              <ExternalLink size={12} />
-              Store
-            </Link>
-          )}
-        </div>
-      </div>
+    <div className="seller-layout">
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 999,
+          }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
-      <aside
-        className={`${
-          sidebarOpen ? "block" : "hidden"
-        } lg:block w-full lg:w-64 bg-emerald-950 text-emerald-100 flex-shrink-0 flex flex-col border-r border-emerald-900/60 z-20`}
-      >
-        {/* Brand header */}
-        <div className="p-5 border-b border-emerald-900/80 bg-emerald-900/30">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-8 w-8 rounded-lg bg-emerald-500 text-emerald-950 flex items-center justify-center font-bold">
-              <Store size={18} />
+      <aside className={`seller-sidebar${sidebarOpen ? " open" : ""}`}>
+        <div className="seller-sidebar-header">
+          <Link to="/seller/dashboard" className="seller-brand">
+            <div className="seller-brand-icon">
+              <Store size={20} />
             </div>
             <div>
-              <h2 className="text-white font-bold text-base leading-tight tracking-tight">
-                Seller Center
-              </h2>
-              <span className="text-[11px] text-emerald-400 uppercase tracking-widest font-semibold">
-                Nepal Cozy Care
-              </span>
+              <div className="seller-brand-title">Seller Portal</div>
+              <div className="seller-brand-sub">Nepal Cozy Care</div>
             </div>
-          </div>
+          </Link>
+
           {shop && (
-            <div className="mt-3 p-2 bg-emerald-900/50 rounded-md border border-emerald-800/60">
-              <div className="flex items-center gap-2">
+            <div className="seller-shop-pill">
+              <div className="seller-shop-avatar">
                 {shop.logo ? (
                   <img
                     src={shop.logo.startsWith("http") ? shop.logo : `${API}/storage/${shop.logo}`}
                     alt={shop.name}
-                    className="w-7 h-7 rounded object-cover border border-emerald-700"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded bg-emerald-800 text-emerald-200 flex items-center justify-center text-xs font-bold">
-                    {shop.name.charAt(0)}
-                  </div>
+                  shop.name.charAt(0)
                 )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-white truncate">{shop.name}</p>
-                  <p className="text-[10px] text-emerald-400 capitalize flex items-center gap-1">
-                    <ShieldCheck size={10} className="text-emerald-300" />
-                    {shop.status}
-                  </p>
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div className="seller-shop-name">{shop.name}</div>
+                <div className="seller-shop-badge">
+                  <ShieldCheck size={11} />
+                  <span>{shop.status}</span>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Navigation list */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="seller-sidebar-nav">
           {navItems.map((item) => {
             const active = isActive(item.path);
             const Icon = item.icon;
@@ -166,90 +135,85 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  active
-                    ? "bg-emerald-600 text-white shadow-sm font-semibold"
-                    : "text-emerald-200 hover:text-white hover:bg-emerald-900/60"
-                }`}
-                onClick={() => {
-                  if (typeof window !== "undefined" && window.innerWidth <= 1024) {
-                    setSidebarOpen(false);
-                  }
-                }}
+                className={`seller-nav-link${active ? " active" : ""}`}
+                onClick={() => setSidebarOpen(false)}
               >
-                <Icon size={18} className={active ? "text-white" : "text-emerald-400"} />
-                <span className="flex-1">{item.label}</span>
-                {active && <ChevronRight size={14} className="text-emerald-200" />}
+                <Icon size={18} />
+                <span>{item.label}</span>
+                {active && <ChevronRight size={14} className="seller-nav-link-arrow" />}
               </Link>
             );
           })}
         </nav>
 
-        {/* Public Storefront Link */}
         {shop?.slug && (
-          <div className="px-3 pb-3">
-            <Link
-              to={`/shops/${shop.slug}`}
-              target="_blank"
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-emerald-900 hover:bg-emerald-800 text-emerald-100 transition-colors border border-emerald-800"
-            >
-              <ExternalLink size={14} className="text-emerald-400" />
-              View My Public Shop
-            </Link>
-          </div>
+          <Link
+            to={`/shops/${shop.slug}`}
+            target="_blank"
+            className="seller-sidebar-public-link"
+          >
+            <ExternalLink size={14} />
+            <span>View Public Storefront</span>
+          </Link>
         )}
 
-        {/* User profile / Logout bottom */}
-        <div className="p-4 border-t border-emerald-900/80 bg-emerald-900/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-emerald-800 text-emerald-300 flex items-center justify-center">
-                <UserIcon size={16} />
-              </div>
-              <div className="truncate">
-                <p className="text-xs font-semibold text-white truncate">{userName}</p>
-                <p className="text-[10px] text-emerald-400 uppercase tracking-wider">Partner Seller</p>
-              </div>
+        <div className="seller-sidebar-footer">
+          <div className="seller-user-slot">
+            <div className="seller-user-avatar">
+              <UserIcon size={18} />
             </div>
-            <button
-              onClick={handleLogout}
-              title="Log Out"
-              className="p-1.5 rounded-md text-emerald-300 hover:text-red-400 hover:bg-emerald-900/80 transition-colors"
-            >
-              <LogOut size={16} />
-            </button>
+            <div className="seller-user-info">
+              <div className="seller-user-name">{userName}</div>
+              <div className="seller-user-role">Partner Vendor</div>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Log out"
+            className="seller-logout-btn"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="hidden lg:flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200 shadow-sm">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">Partner Seller Portal</h1>
-            <p className="text-xs text-slate-500">Manage your farm nursery products, inventory and customer order items</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="text-xs font-medium text-slate-600 hover:text-emerald-700 transition-colors px-3 py-1.5 rounded border border-slate-200 hover:bg-slate-50"
+      {/* Main Area */}
+      <div className="seller-main">
+        <header className="seller-topbar">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="seller-logout-btn"
+              style={{ display: "none" }}
             >
-              Nepal Cozy Care Home
+              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <div className="seller-topbar-title">
+              <h1>Partner Merchant Dashboard</h1>
+              <p>Manage your live catalog, incoming customer orders, and shop details</p>
+            </div>
+          </div>
+
+          <div className="seller-topbar-actions">
+            <Link to="/" className="seller-topbar-btn seller-topbar-btn-secondary">
+              Main Store
             </Link>
             {shop?.slug && (
               <Link
                 to={`/shops/${shop.slug}`}
                 target="_blank"
-                className="text-xs font-medium text-white bg-emerald-700 hover:bg-emerald-800 transition-colors px-3.5 py-1.5 rounded-md flex items-center gap-1.5 shadow-sm"
+                className="seller-topbar-btn seller-topbar-btn-primary"
               >
-                <ExternalLink size={13} />
-                Public Storefront
+                <ExternalLink size={14} />
+                <span>Live Shop</span>
               </Link>
             )}
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8">{children}</main>
+        <div className="seller-page-content">{children}</div>
       </div>
     </div>
   );

@@ -9,8 +9,12 @@ import {
   Mail,
   Calendar,
   AlertCircle,
+  Clock,
+  ShieldCheck,
+  UserCheck,
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import "../../components/admin/admin.css";
 import type { Shop } from "../../types/shop";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -52,7 +56,7 @@ export default function ManageSellerApplications() {
   };
 
   const handleApprove = async (shop: Shop) => {
-    if (!window.confirm(`Approve seller application for "${shop.name}"? This will grant seller permissions to ${shop.email}.`)) {
+    if (!window.confirm(`Approve seller application for "${shop.name}"? This will grant nursery seller permissions to ${shop.email}.`)) {
       return;
     }
     setProcessingId(shop.id);
@@ -120,185 +124,220 @@ export default function ManageSellerApplications() {
     );
   });
 
+  const pendingCount = shops.filter((s) => s.status === "pending").length;
+  const approvedCount = shops.filter((s) => s.status === "approved").length;
+  const rejectedCount = shops.filter((s) => s.status === "rejected").length;
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="admin-page">
+        {/* Page Header */}
+        <div className="admin-page-header">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold mb-2">
+            <div className="admin-header-badge">
               <Store size={14} />
-              Super Admin Marketplace Oversight
+              <span>Super Admin Marketplace Oversight</span>
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Partner Seller Applications</h2>
-            <p className="text-xs text-slate-500">
-              Review and approve nurseries and farm businesses wanting to sell on Nepal Cozy Care.
+            <h2>Partner Seller Applications</h2>
+            <p>
+              Review, verify, and approve nursery farm businesses wanting to sell on Nepal Cozy Care.
             </p>
           </div>
         </div>
 
+        {/* Feedback Alert */}
         {actionFeedback && (
-          <div
-            className={`p-4 rounded-xl text-xs flex items-center gap-2 ${
-              actionFeedback.type === "success"
-                ? "bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium"
-                : "bg-rose-50 border border-rose-200 text-rose-800"
-            }`}
-          >
-            {actionFeedback.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            {actionFeedback.text}
+          <div className={`admin-feedback-alert ${actionFeedback.type}`}>
+            {actionFeedback.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <span>{actionFeedback.text}</span>
           </div>
         )}
 
-        {/* Filter bar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
-            {["pending", "approved", "rejected", "suspended", "all"].map((st) => (
+        {/* Overview Stats */}
+        <div className="admin-stats-row">
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Applications Shown</div>
+            <div className="admin-stat-value">{filteredShops.length}</div>
+            <div className="admin-stat-change">Total in current view</div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Pending Review</div>
+            <div className="admin-stat-value" style={{ color: "#ca8a04" }}>{pendingCount}</div>
+            <div className="admin-stat-change" style={{ color: "#ca8a04" }}>
+              <Clock size={13} /> Requires action
+            </div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Approved Partners</div>
+            <div className="admin-stat-value" style={{ color: "#059669" }}>{approvedCount}</div>
+            <div className="admin-stat-change" style={{ color: "#059669" }}>
+              <ShieldCheck size={13} /> Live on platform
+            </div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Rejected / Changes Needed</div>
+            <div className="admin-stat-value" style={{ color: "#dc2626" }}>{rejectedCount}</div>
+            <div className="admin-stat-change">Awaiting applicant update</div>
+          </div>
+        </div>
+
+        {/* Filter Toolbar */}
+        <div className="admin-toolbar">
+          <div className="admin-tab-group">
+            {[
+              { key: "pending", label: "Pending" },
+              { key: "approved", label: "Approved" },
+              { key: "rejected", label: "Rejected" },
+              { key: "suspended", label: "Suspended" },
+              { key: "all", label: "All Applications" },
+            ].map((tab) => (
               <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
-                  statusFilter === st
-                    ? "bg-emerald-800 text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                }`}
+                key={tab.key}
+                type="button"
+                onClick={() => setStatusFilter(tab.key)}
+                className={`admin-tab-btn ${statusFilter === tab.key ? "active" : ""}`}
               >
-                {st === "all" ? "All Applications" : st}
+                {tab.label}
               </button>
             ))}
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+          <div className="admin-search" style={{ maxWidth: "320px" }}>
+            <Search size={16} />
             <input
               type="text"
-              placeholder="Search applicant, shop, city..."
+              placeholder="Search applicant, nursery, city..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
 
         {/* Applications List */}
-        <div className="space-y-4">
+        <div className="admin-applications-list">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 text-xs bg-white rounded-xl border border-slate-200">
-              Loading applications...
+            <div className="admin-card">
+              <div className="admin-loading">Loading seller applications...</div>
             </div>
           ) : filteredShops.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 bg-white rounded-xl border border-slate-200">
-              <Store className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm font-semibold">No applications found</p>
-              <p className="text-xs text-slate-400 mt-1">
-                There are no seller applications matching this status.
-              </p>
+            <div className="admin-card">
+              <div className="admin-empty-state">
+                <Store size={44} style={{ color: "#94a3b8", margin: "0 auto 0.75rem", display: "block" }} />
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#1e293b", margin: "0 0 0.35rem" }}>
+                  No applications found
+                </h3>
+                <p style={{ color: "#64748b", margin: 0, fontSize: "0.85rem" }}>
+                  There are currently no partner seller applications matching the "{statusFilter}" filter.
+                </p>
+              </div>
             </div>
           ) : (
             filteredShops.map((shop) => (
-              <div
-                key={shop.id}
-                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col lg:flex-row lg:items-start justify-between gap-6"
-              >
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center flex-shrink-0 text-base">
+              <div key={shop.id} className="admin-application-card">
+                <div className="admin-application-content">
+                  {/* Head */}
+                  <div className="admin-application-head">
+                    <div className="admin-application-logo">
                       {shop.logo ? (
                         <img
                           src={shop.logo.startsWith("http") ? shop.logo : `${API}/storage/${shop.logo}`}
                           alt={shop.name}
-                          className="w-full h-full object-cover rounded-xl"
                         />
                       ) : (
                         shop.name.charAt(0)
                       )}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-slate-900">{shop.name}</h3>
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            shop.status === "approved"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : shop.status === "pending"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-rose-100 text-rose-800"
-                          }`}
-                        >
+                    <div className="admin-application-title-wrap">
+                      <h3>
+                        <span>{shop.name}</span>
+                        <span className={`admin-badge admin-badge-${shop.status}`}>
                           {shop.status}
                         </span>
-                      </div>
-                      <p className="text-xs text-slate-600 mt-0.5">{shop.short_description}</p>
+                      </h3>
+                      <p>{shop.short_description || "Partner Nursery & Botanical Specialist"}</p>
                     </div>
                   </div>
 
+                  {/* Description if present */}
                   {shop.description && (
-                    <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-600 border border-slate-100">
-                      <p className="font-semibold text-slate-800 mb-0.5">Nursery Background:</p>
-                      <p className="whitespace-pre-line">{shop.description}</p>
+                    <div className="admin-application-box">
+                      <strong style={{ display: "block", color: "#0f172a", marginBottom: "0.25rem" }}>
+                        Nursery Background & Qualifications:
+                      </strong>
+                      <span>{shop.description}</span>
                     </div>
                   )}
 
+                  {/* Rejection feedback if present */}
                   {shop.rejection_reason && (
-                    <div className="p-3 bg-rose-50 rounded-xl text-xs text-rose-800 border border-rose-200">
-                      <span className="font-bold">Rejection Feedback: </span>
-                      {shop.rejection_reason}
+                    <div
+                      className="admin-application-box"
+                      style={{ background: "#fef2f2", borderColor: "#fecaca", color: "#991b1b" }}
+                    >
+                      <strong>Rejection Feedback Given: </strong>
+                      <span>{shop.rejection_reason}</span>
                     </div>
                   )}
 
-                  {/* Metadata & User */}
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 pt-1">
-                    <span className="flex items-center gap-1 font-medium text-slate-700">
-                      <MapPin size={13} className="text-emerald-600" />
-                      {shop.address}, {shop.city}
+                  {/* Meta tags */}
+                  <div className="admin-application-meta">
+                    <span className="admin-application-meta-item">
+                      <MapPin size={14} style={{ color: "#047857" }} />
+                      <span>{shop.address ? `${shop.address}, ` : ""}{shop.city}</span>
                     </span>
-                    <span className="flex items-center gap-1 text-slate-700">
-                      <Phone size={13} className="text-emerald-600" />
-                      {shop.phone}
+                    <span className="admin-application-meta-item">
+                      <Phone size={14} style={{ color: "#047857" }} />
+                      <span>{shop.phone || "No phone provided"}</span>
                     </span>
-                    <span className="flex items-center gap-1 text-slate-700">
-                      <Mail size={13} className="text-emerald-600" />
-                      {shop.email}
+                    <span className="admin-application-meta-item">
+                      <Mail size={14} style={{ color: "#047857" }} />
+                      <span>{shop.email}</span>
                     </span>
                     {shop.establishment_year && (
-                      <span className="flex items-center gap-1">
-                        <Calendar size={13} className="text-slate-400" />
-                        Est. {shop.establishment_year}
+                      <span className="admin-application-meta-item">
+                        <Calendar size={14} style={{ color: "#94a3b8" }} />
+                        <span>Est. {shop.establishment_year}</span>
                       </span>
                     )}
                     {shop.user && (
-                      <span className="text-slate-500">
-                        Owner: <strong className="text-slate-800">{shop.user.name}</strong> (
-                        {shop.user.email})
+                      <span className="admin-application-meta-item">
+                        <UserCheck size={14} style={{ color: "#047857" }} />
+                        <span>
+                          Account: <strong>{shop.user.name}</strong> ({shop.user.email})
+                        </span>
                       </span>
                     )}
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center lg:flex-col justify-end gap-2 flex-shrink-0">
+                <div className="admin-application-actions">
                   {shop.status !== "approved" && (
                     <button
+                      type="button"
                       onClick={() => handleApprove(shop)}
                       disabled={processingId === shop.id}
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition disabled:opacity-50"
+                      className="admin-btn admin-btn-primary"
+                      style={{ whiteSpace: "nowrap" }}
                     >
-                      <CheckCircle2 size={15} />
-                      Approve & Grant Seller Access
+                      <CheckCircle2 size={16} />
+                      <span>Approve & Grant Access</span>
                     </button>
                   )}
 
                   {shop.status !== "rejected" && (
                     <button
+                      type="button"
                       onClick={() => {
                         setRejectingShop(shop);
                         setRejectReason("");
                       }}
                       disabled={processingId === shop.id}
-                      className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition disabled:opacity-50"
+                      className="admin-btn admin-btn-secondary"
+                      style={{ color: "#dc2626", borderColor: "#fecaca", whiteSpace: "nowrap" }}
                     >
-                      <XCircle size={15} />
-                      Reject Application
+                      <XCircle size={16} />
+                      <span>Reject Application</span>
                     </button>
                   )}
                 </div>
@@ -309,42 +348,48 @@ export default function ManageSellerApplications() {
 
         {/* Reject Modal */}
         {rejectingShop && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
-              <h3 className="text-base font-bold text-slate-900">
-                Reject Seller Application: {rejectingShop.name}
-              </h3>
-              <p className="text-xs text-slate-500">
-                Provide constructive feedback so the applicant can correct their business information or nursery documentation.
-              </p>
+          <div className="admin-modal-overlay">
+            <div className="admin-modal">
+              <div className="admin-modal-header">
+                <h3>Reject Application: {rejectingShop.name}</h3>
+                <button
+                  type="button"
+                  onClick={() => setRejectingShop(null)}
+                  className="admin-modal-close"
+                >
+                  ✕
+                </button>
+              </div>
 
-              <form onSubmit={handleRejectSubmit} className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Rejection Reason *
-                  </label>
+              <form onSubmit={handleRejectSubmit} className="admin-form">
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 1rem" }}>
+                  Provide constructive guidance so the applicant can submit valid nursery documents or correct their shop information.
+                </p>
+
+                <div className="admin-form-group">
+                  <label htmlFor="rejectReason">Rejection Reason / Guidance *</label>
                   <textarea
-                    rows={3}
+                    id="rejectReason"
+                    rows={4}
                     required
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    placeholder="e.g. Please provide a valid registration document or clearer photos of your nursery stock."
-                    className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="e.g. Please provide a registered nursery PAN or clearer photos of your live stock."
                   />
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className="admin-modal-footer">
                   <button
                     type="button"
                     onClick={() => setRejectingShop(null)}
-                    className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-semibold"
+                    className="admin-btn admin-btn-secondary"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={processingId === rejectingShop.id}
-                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg transition"
+                    className="admin-btn admin-btn-danger"
                   >
                     Confirm Rejection
                   </button>

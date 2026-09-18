@@ -7,8 +7,11 @@ import {
   Store,
   ShieldCheck,
   AlertCircle,
+  XCircle,
+  ShoppingBag,
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import "../../components/admin/admin.css";
 import type { Plant } from "../../types/plant";
 import type { Shop } from "../../types/shop";
 
@@ -140,59 +143,89 @@ export default function ManageMarketplaceProducts() {
     );
   });
 
+  const pendingCount = plants.filter((p) => p.approval_status === "pending").length;
+  const approvedCount = plants.filter((p) => p.approval_status === "approved" || !p.approval_status).length;
+  const rejectedCount = plants.filter((p) => p.approval_status === "rejected").length;
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="admin-page">
+        {/* Page Header */}
+        <div className="admin-page-header">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold mb-2">
+            <div className="admin-header-badge">
               <Package size={14} />
-              Marketplace Catalog Oversight
+              <span>Super Admin Marketplace Oversight</span>
             </div>
-            <h2 className="text-xl font-bold text-slate-900">All Marketplace Products</h2>
-            <p className="text-xs text-slate-500">
-              Identify owning shops, review submitted items, and manage platform-wide catalog approvals.
+            <h2>All Marketplace Products</h2>
+            <p>
+              Identify owning nurseries, review newly submitted plant stock, and manage platform-wide catalog approvals.
             </p>
           </div>
         </div>
 
+        {/* Feedback Alert */}
         {feedback && (
-          <div
-            className={`p-4 rounded-xl text-xs flex items-center gap-2 ${
-              feedback.type === "success"
-                ? "bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium"
-                : "bg-rose-50 border border-rose-200 text-rose-800"
-            }`}
-          >
-            {feedback.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            {feedback.text}
+          <div className={`admin-feedback-alert ${feedback.type}`}>
+            {feedback.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <span>{feedback.text}</span>
           </div>
         )}
 
-        {/* Filters */}
-        <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
-          <div className="flex flex-wrap gap-1.5 w-full lg:w-auto">
-            {["all", "pending", "approved", "rejected"].map((st) => (
+        {/* Stats Row */}
+        <div className="admin-stats-row">
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Total Catalog Items</div>
+            <div className="admin-stat-value">{plants.length}</div>
+            <div className="admin-stat-change">Across all partner sellers</div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Pending Approval</div>
+            <div className="admin-stat-value" style={{ color: "#ca8a04" }}>{pendingCount}</div>
+            <div className="admin-stat-change" style={{ color: "#ca8a04" }}>
+              <Clock size={13} /> Needs admin verification
+            </div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Approved & Public</div>
+            <div className="admin-stat-value" style={{ color: "#059669" }}>{approvedCount}</div>
+            <div className="admin-stat-change" style={{ color: "#059669" }}>
+              <CheckCircle2 size={13} /> Live in store
+            </div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Rejected / Edits Required</div>
+            <div className="admin-stat-value" style={{ color: "#dc2626" }}>{rejectedCount}</div>
+            <div className="admin-stat-change">Returned with guidance</div>
+          </div>
+        </div>
+
+        {/* Toolbar with Filters */}
+        <div className="admin-toolbar">
+          <div className="admin-tab-group">
+            {[
+              { key: "all", label: "All Statuses" },
+              { key: "pending", label: "Pending Review" },
+              { key: "approved", label: "Approved" },
+              { key: "rejected", label: "Rejected" },
+            ].map((tab) => (
               <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
-                  statusFilter === st
-                    ? "bg-emerald-800 text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-                }`}
+                key={tab.key}
+                type="button"
+                onClick={() => setStatusFilter(tab.key)}
+                className={`admin-tab-btn ${statusFilter === tab.key ? "active" : ""}`}
               >
-                {st === "all" ? "All Statuses" : st}
+                {tab.label}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2 w-full lg:w-auto">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
             <select
               value={shopFilter}
               onChange={(e) => setShopFilter(e.target.value)}
-              className="text-xs border border-slate-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700"
+              className="admin-select"
+              style={{ padding: "0.45rem 0.85rem", fontSize: "0.8rem", fontWeight: 600 }}
             >
               <option value="all">All Partner Nurseries</option>
               {shops.map((s) => (
@@ -202,177 +235,210 @@ export default function ManageMarketplaceProducts() {
               ))}
             </select>
 
-            <div className="relative flex-1 sm:w-60">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+            <div className="admin-search" style={{ maxWidth: "260px" }}>
+              <Search size={16} />
               <input
                 type="text"
-                placeholder="Search products or shops..."
+                placeholder="Search products or nursery..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
         </div>
 
         {/* Products Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="admin-table-container">
           {loading ? (
-            <div className="p-12 text-center text-slate-400 text-xs">Loading products...</div>
+            <div className="admin-loading">Loading marketplace catalog...</div>
           ) : filteredPlants.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 text-xs">No products match filters</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
-                  <tr>
-                    <th className="p-3">Product</th>
-                    <th className="p-3">Owning Nursery</th>
-                    <th className="p-3">Price</th>
-                    <th className="p-3">Stock</th>
-                    <th className="p-3">Approval Status</th>
-                    <th className="p-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredPlants.map((plant) => (
-                    <tr key={plant.id} className="hover:bg-slate-50/50">
-                      <td className="p-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
-                            {plant.image ? (
-                              <img
-                                src={
-                                  plant.image.startsWith("http")
-                                    ? plant.image
-                                    : `${API}/storage/${plant.image}`
-                                }
-                                alt={plant.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold">
-                                {plant.name.charAt(0)}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-900">{plant.name}</p>
-                            <span className="text-[11px] text-slate-400">
-                              {plant.category || "General"}
-                            </span>
-                            {plant.rejection_reason && (
-                              <p className="text-[10px] text-rose-600 mt-0.5">
-                                Reason: {plant.rejection_reason}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-1.5">
-                          <Store size={13} className="text-emerald-700" />
-                          <span className="font-semibold text-slate-900">
-                            {plant.shop?.name || "Nepal Cozy Care"}
-                          </span>
-                          {plant.shop?.is_verified && (
-                            <ShieldCheck size={12} className="text-emerald-600" />
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-3 font-semibold text-slate-900">
-                        Rs. {plant.price.toLocaleString()}
-                      </td>
-                      <td className="p-3 text-slate-700">{plant.stock ?? 0} units</td>
-                      <td className="p-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-                            plant.approval_status === "approved"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : plant.approval_status === "pending"
-                              ? "bg-amber-100 text-amber-800"
-                              : plant.approval_status === "rejected"
-                              ? "bg-rose-100 text-rose-800"
-                              : "bg-slate-100 text-slate-800"
-                          }`}
-                        >
-                          {plant.approval_status === "approved" && <CheckCircle2 size={10} />}
-                          {plant.approval_status === "pending" && <Clock size={10} />}
-                          {plant.approval_status === "rejected" && <AlertCircle size={10} />}
-                          {plant.approval_status || "approved"}
-                        </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {plant.approval_status !== "approved" && (
-                            <button
-                              onClick={() => handleApprove(plant)}
-                              disabled={processingId === plant.id}
-                              className="px-2.5 py-1 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition disabled:opacity-50"
-                            >
-                              Approve
-                            </button>
-                          )}
-                          {plant.approval_status !== "rejected" && (
-                            <button
-                              onClick={() => {
-                                setRejectingPlant(plant);
-                                setRejectReason("");
-                              }}
-                              disabled={processingId === plant.id}
-                              className="px-2.5 py-1 text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 rounded-lg transition disabled:opacity-50"
-                            >
-                              Reject
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="admin-empty-state">
+              <ShoppingBag size={40} style={{ color: "#94a3b8", margin: "0 auto 0.75rem", display: "block" }} />
+              <h4>No products match your filters</h4>
+              <p>Try switching the status tab or selecting a different partner nursery.</p>
             </div>
+          ) : (
+            <table className="admin-table admin-table-striped">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Owning Nursery</th>
+                  <th>Price</th>
+                  <th>Inventory</th>
+                  <th>Approval Status</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPlants.map((plant) => (
+                  <tr key={plant.id}>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                        <div
+                          style={{
+                            width: "44px",
+                            height: "44px",
+                            borderRadius: "10px",
+                            background: "#f1f5f9",
+                            overflow: "hidden",
+                            flexShrink: 0,
+                            border: "1px solid #e2e8f0",
+                          }}
+                        >
+                          {plant.image ? (
+                            <img
+                              src={
+                                plant.image.startsWith("http")
+                                  ? plant.image
+                                  : `${API}/storage/${plant.image}`
+                              }
+                              alt={plant.name}
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#94a3b8",
+                                fontWeight: 700,
+                              }}
+                            >
+                              {plant.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, color: "#0f172a" }}>{plant.name}</div>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                            {plant.category || "Indoor Foliage"}
+                          </span>
+                          {plant.rejection_reason && (
+                            <p style={{ margin: "0.2rem 0 0", fontSize: "0.72rem", color: "#dc2626" }}>
+                              Reason: {plant.rejection_reason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
+                        <Store size={14} style={{ color: "#047857" }} />
+                        <span style={{ fontWeight: 600, color: "#1e293b" }}>
+                          {plant.shop?.name || "Nepal Cozy Care"}
+                        </span>
+                        {plant.shop?.is_verified && (
+                          <span title="Verified Nursery" style={{ display: "inline-flex" }}>
+                            <ShieldCheck size={13} style={{ color: "#059669" }} />
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <strong style={{ color: "#0f172a" }}>Rs. {plant.price.toLocaleString()}</strong>
+                    </td>
+                    <td>
+                      <span style={{ color: (plant.stock ?? 0) < 5 ? "#dc2626" : "#334155", fontWeight: 600 }}>
+                        {plant.stock ?? 0}
+                      </span>{" "}
+                      <span style={{ fontSize: "0.75rem", color: "#64748b" }}>units</span>
+                    </td>
+                    <td>
+                      <span className={`admin-badge admin-badge-${plant.approval_status || "approved"}`}>
+                        {plant.approval_status === "approved" && <CheckCircle2 size={11} />}
+                        {plant.approval_status === "pending" && <Clock size={11} />}
+                        {plant.approval_status === "rejected" && <AlertCircle size={11} />}
+                        <span>{plant.approval_status || "approved"}</span>
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", justifyContent: "flex-end" }}>
+                        {plant.approval_status !== "approved" && (
+                          <button
+                            type="button"
+                            onClick={() => handleApprove(plant)}
+                            disabled={processingId === plant.id}
+                            className="admin-btn admin-btn-sm admin-btn-primary"
+                          >
+                            <CheckCircle2 size={13} />
+                            <span>Approve</span>
+                          </button>
+                        )}
+                        {plant.approval_status !== "rejected" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRejectingPlant(plant);
+                              setRejectReason("");
+                            }}
+                            disabled={processingId === plant.id}
+                            className="admin-btn admin-btn-sm"
+                            style={{
+                              background: "#fef2f2",
+                              color: "#dc2626",
+                              border: "1px solid #fecaca",
+                            }}
+                          >
+                            <XCircle size={13} />
+                            <span>Reject</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
 
         {/* Reject Modal */}
         {rejectingPlant && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
-              <h3 className="text-base font-bold text-slate-900">
-                Reject Product: {rejectingPlant.name}
-              </h3>
-              <p className="text-xs text-slate-500">
-                Provide feedback for the nursery on why this product was not approved (e.g. unclear photo, incorrect care guide, inappropriate pricing).
-              </p>
+          <div className="admin-modal-overlay">
+            <div className="admin-modal">
+              <div className="admin-modal-header">
+                <h3>Reject Product: {rejectingPlant.name}</h3>
+                <button
+                  type="button"
+                  onClick={() => setRejectingPlant(null)}
+                  className="admin-modal-close"
+                >
+                  ✕
+                </button>
+              </div>
 
-              <form onSubmit={handleRejectSubmit} className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Rejection Reason *
-                  </label>
+              <form onSubmit={handleRejectSubmit} className="admin-form">
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 1rem" }}>
+                  Provide constructive feedback for the nursery (e.g. unclear photo, incorrect plant category, or excessive pricing).
+                </p>
+
+                <div className="admin-form-group">
+                  <label htmlFor="prodRejectReason">Rejection Feedback *</label>
                   <textarea
-                    rows={3}
+                    id="prodRejectReason"
+                    rows={4}
                     required
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    placeholder="Enter reason..."
-                    className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="Enter clear reason..."
                   />
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className="admin-modal-footer">
                   <button
                     type="button"
                     onClick={() => setRejectingPlant(null)}
-                    className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-semibold"
+                    className="admin-btn admin-btn-secondary"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={processingId === rejectingPlant.id}
-                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg transition"
+                    className="admin-btn admin-btn-danger"
                   >
                     Confirm Rejection
                   </button>

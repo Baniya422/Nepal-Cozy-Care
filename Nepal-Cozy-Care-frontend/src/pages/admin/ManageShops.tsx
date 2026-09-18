@@ -8,8 +8,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Plus,
+  ShieldAlert,
+  Building2,
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import "../../components/admin/admin.css";
 import type { Shop } from "../../types/shop";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -201,242 +204,288 @@ export default function ManageShops() {
     );
   });
 
+  const verifiedCount = shops.filter((s) => s.is_verified).length;
+  const activeCount = shops.filter((s) => s.status === "approved").length;
+  const suspendedCount = shops.filter((s) => s.status === "suspended").length;
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="admin-page">
+        {/* Page Header */}
+        <div className="admin-page-header">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold mb-2">
-              <Store size={14} />
-              Super Admin Directory
+            <div className="admin-header-badge">
+              <Building2 size={14} />
+              <span>Super Admin Nursery Directory</span>
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Manage Marketplace Shops</h2>
-            <p className="text-xs text-slate-500">
-              Verify partner nurseries, manage store statuses, and suspend or reactivate shops.
+            <h2>Manage Marketplace Shops</h2>
+            <p>
+              Verify partner nurseries, manage store status, assign vendor shops, and oversee plant sellers.
             </p>
           </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
-              <input
-                type="text"
-                placeholder="Search shops..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
+          <div className="admin-header-actions">
             <button
               type="button"
               onClick={openCreateModal}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-sm transition whitespace-nowrap"
+              className="admin-btn admin-btn-primary"
             >
-              <Plus size={15} />
+              <Plus size={16} />
               <span>Assign & Create Shop</span>
             </button>
           </div>
         </div>
 
+        {/* Feedback Alert */}
         {actionFeedback && (
-          <div
-            className={`p-4 rounded-xl text-xs flex items-center gap-2 ${
-              actionFeedback.type === "success"
-                ? "bg-emerald-50 border border-emerald-200 text-emerald-800 font-medium"
-                : "bg-rose-50 border border-rose-200 text-rose-800"
-            }`}
-          >
-            {actionFeedback.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
-            {actionFeedback.text}
+          <div className={`admin-feedback-alert ${actionFeedback.type}`}>
+            {actionFeedback.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <span>{actionFeedback.text}</span>
           </div>
         )}
 
-        {/* Shops Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          {loading ? (
-            <div className="p-12 text-center text-slate-400 text-xs">Loading shops...</div>
-          ) : filteredShops.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 text-xs">No shops found</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
-                  <tr>
-                    <th className="p-3">Shop Name</th>
-                    <th className="p-3">Owner User</th>
-                    <th className="p-3">Location</th>
-                    <th className="p-3">Products</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Verified Badge</th>
-                    <th className="p-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredShops.map((shop) => (
-                    <tr key={shop.id} className="hover:bg-slate-50/50">
-                      <td className="p-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center flex-shrink-0">
-                            {shop.logo ? (
-                              <img
-                                src={
-                                  shop.logo.startsWith("http")
-                                    ? shop.logo
-                                    : `${API}/storage/${shop.logo}`
-                                }
-                                alt={shop.name}
-                                className="w-full h-full object-cover rounded-lg"
-                              />
-                            ) : (
-                              shop.name.charAt(0)
-                            )}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-slate-900">{shop.name}</span>
-                              {shop.slug === "nepal-cozy-care" && (
-                                <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-semibold">
-                                  Default Platform
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[11px] text-slate-400">{shop.email}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <span className="font-medium text-slate-700">{shop.user?.name || "N/A"}</span>
-                        <p className="text-[10px] text-slate-400">{shop.user?.email}</p>
-                      </td>
-                      <td className="p-3 text-slate-600">
-                        <span className="flex items-center gap-1">
-                          <MapPin size={12} className="text-emerald-600" />
-                          {shop.city}
-                        </span>
-                      </td>
-                      <td className="p-3 text-slate-700 font-semibold">
-                        {shop.plants_count ?? 0} plants
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            shop.status === "approved"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : shop.status === "pending"
-                              ? "bg-amber-100 text-amber-800"
-                              : shop.status === "suspended"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-rose-100 text-rose-800"
-                          }`}
-                        >
-                          {shop.status}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <button
-                          onClick={() => toggleVerify(shop)}
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold transition ${
-                            shop.is_verified
-                              ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
-                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                          }`}
-                        >
-                          <ShieldCheck
-                            size={14}
-                            className={shop.is_verified ? "text-emerald-600" : "text-slate-400"}
-                          />
-                          {shop.is_verified ? "Verified" : "Unverified"}
-                        </button>
-                      </td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <a
-                            href={`/seller/dashboard?admin_shop_id=${shop.id}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 px-2 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded text-[11px] font-semibold transition"
-                            title="Open Vendor Dashboard for this shop"
-                          >
-                            <Store size={13} />
-                            <span>Vendor View</span>
-                          </a>
-                          <a
-                            href={`/shops/${shop.slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded transition"
-                            title="Visit Public Storefront"
-                          >
-                            <ExternalLink size={15} />
-                          </a>
+        {/* Stats Row */}
+        <div className="admin-stats-row">
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Total Nurseries</div>
+            <div className="admin-stat-value">{shops.length}</div>
+            <div className="admin-stat-change">Registered sellers</div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Verified Badges</div>
+            <div className="admin-stat-value" style={{ color: "#059669" }}>{verifiedCount}</div>
+            <div className="admin-stat-change" style={{ color: "#059669" }}>
+              <ShieldCheck size={13} /> Trusted partners
+            </div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Active & Live</div>
+            <div className="admin-stat-value" style={{ color: "#0284c7" }}>{activeCount}</div>
+            <div className="admin-stat-change">Publicly listed</div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Suspended Stores</div>
+            <div className="admin-stat-value" style={{ color: "#7c3aed" }}>{suspendedCount}</div>
+            <div className="admin-stat-change">
+              <ShieldAlert size={13} /> Temporarily inactive
+            </div>
+          </div>
+        </div>
 
-                          {shop.slug !== "nepal-cozy-care" && (
-                            <>
-                              {shop.status === "suspended" ? (
-                                <button
-                                  onClick={() => handleReactivate(shop)}
-                                  className="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-lg transition"
-                                >
-                                  Reactivate
-                                </button>
-                              ) : shop.status === "approved" ? (
-                                <button
-                                  onClick={() => handleSuspend(shop)}
-                                  className="px-2.5 py-1 text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg transition"
-                                >
-                                  Suspend
-                                </button>
-                              ) : null}
-                            </>
+        {/* Search Toolbar */}
+        <div className="admin-toolbar">
+          <div className="admin-search" style={{ maxWidth: "360px" }}>
+            <Search size={16} />
+            <input
+              type="text"
+              placeholder="Search nursery by name, city, email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div style={{ fontSize: "0.82rem", color: "#64748b", fontWeight: 500 }}>
+            Showing {filteredShops.length} of {shops.length} nurseries
+          </div>
+        </div>
+
+        {/* Shops Table */}
+        <div className="admin-table-container">
+          {loading ? (
+            <div className="admin-loading">Loading marketplace shops...</div>
+          ) : filteredShops.length === 0 ? (
+            <div className="admin-empty-state">
+              <Store size={40} style={{ color: "#94a3b8", margin: "0 auto 0.75rem", display: "block" }} />
+              <h4>No shops found</h4>
+              <p>No marketplace nurseries match your search criteria.</p>
+            </div>
+          ) : (
+            <table className="admin-table admin-table-striped">
+              <thead>
+                <tr>
+                  <th>Shop / Nursery</th>
+                  <th>Owner Account</th>
+                  <th>Location</th>
+                  <th>Products</th>
+                  <th>Status</th>
+                  <th>Verified Status</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredShops.map((shop) => (
+                  <tr key={shop.id}>
+                    <td>
+                      <div className="admin-shop-cell">
+                        <div className="admin-shop-cell-avatar">
+                          {shop.logo ? (
+                            <img
+                              src={
+                                shop.logo.startsWith("http")
+                                  ? shop.logo
+                                  : `${API}/storage/${shop.logo}`
+                              }
+                              alt={shop.name}
+                            />
+                          ) : (
+                            shop.name.charAt(0)
                           )}
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                            <span className="admin-shop-cell-name">{shop.name}</span>
+                            {shop.slug === "nepal-cozy-care" && (
+                              <span
+                                style={{
+                                  background: "#f1f5f9",
+                                  color: "#334155",
+                                  fontSize: "0.65rem",
+                                  padding: "0.15rem 0.4rem",
+                                  borderRadius: "4px",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                Default Platform
+                              </span>
+                            )}
+                          </div>
+                          <span style={{ fontSize: "0.75rem", color: "#64748b" }}>{shop.email}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600, color: "#1e293b" }}>
+                        {shop.user?.name || "System Admin"}
+                      </div>
+                      <div style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                        {shop.user?.email || "cozycare@gmail.com"}
+                      </div>
+                    </td>
+                    <td>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", color: "#334155" }}>
+                        <MapPin size={13} style={{ color: "#047857" }} />
+                        <span>{shop.city || "Nepal"}</span>
+                      </span>
+                    </td>
+                    <td>
+                      <strong style={{ color: "#0f172a" }}>{shop.plants_count ?? 0}</strong>{" "}
+                      <span style={{ fontSize: "0.75rem", color: "#64748b" }}>plants</span>
+                    </td>
+                    <td>
+                      <span className={`admin-badge admin-badge-${shop.status}`}>
+                        {shop.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => toggleVerify(shop)}
+                        className={`admin-verify-btn ${shop.is_verified ? "verified" : "unverified"}`}
+                        title="Click to toggle verified partner badge"
+                      >
+                        <ShieldCheck
+                          size={13}
+                          style={{ color: shop.is_verified ? "#059669" : "#94a3b8" }}
+                        />
+                        <span>{shop.is_verified ? "Verified" : "Unverified"}</span>
+                      </button>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", justifyContent: "flex-end" }}>
+                        <a
+                          href={`/seller/dashboard?admin_shop_id=${shop.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="admin-btn admin-btn-sm"
+                          style={{
+                            background: "#ecfdf5",
+                            color: "#047857",
+                            border: "1px solid #a7f3d0",
+                            fontWeight: 600,
+                            textDecoration: "none",
+                          }}
+                          title="Open Vendor Dashboard for this shop"
+                        >
+                          <Store size={13} />
+                          <span>Vendor View</span>
+                        </a>
+
+                        <a
+                          href={`/shops/${shop.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="admin-action-btn admin-action-view"
+                          title="Visit Public Storefront"
+                        >
+                          <ExternalLink size={14} />
+                        </a>
+
+                        {shop.slug !== "nepal-cozy-care" && (
+                          <>
+                            {shop.status === "suspended" ? (
+                              <button
+                                type="button"
+                                onClick={() => handleReactivate(shop)}
+                                className="admin-btn admin-btn-sm admin-btn-primary"
+                              >
+                                Reactivate
+                              </button>
+                            ) : shop.status === "approved" ? (
+                              <button
+                                type="button"
+                                onClick={() => handleSuspend(shop)}
+                                className="admin-btn admin-btn-sm"
+                                style={{
+                                  background: "#fef2f2",
+                                  color: "#dc2626",
+                                  border: "1px solid #fecaca",
+                                }}
+                              >
+                                Suspend
+                              </button>
+                            ) : null}
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
 
         {/* Create & Assign Vendor Shop Modal */}
         {showCreateModal && (
-          <div
-            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setShowCreateModal(false)}
-          >
-            <div
-              className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+          <div className="admin-modal-overlay">
+            <div className="admin-modal admin-modal-large">
+              <div className="admin-modal-header">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Assign & Create Vendor Shop</h3>
-                  <p className="text-xs text-slate-500">Register a verified nursery shop directly to a user account.</p>
+                  <h3>Assign & Create Vendor Shop</h3>
+                  <p style={{ fontSize: "0.78rem", color: "#64748b", margin: "0.2rem 0 0" }}>
+                    Register a verified nursery shop directly to any user account.
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="text-slate-400 hover:text-slate-600 text-xl font-bold"
+                  className="admin-modal-close"
                 >
-                  &times;
+                  ✕
                 </button>
               </div>
 
-              <form onSubmit={handleCreateShopSubmit} className="space-y-3.5 text-xs">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Select Shop Owner (User) *
-                  </label>
+              <form onSubmit={handleCreateShopSubmit} className="admin-form">
+                <div className="admin-form-group">
+                  <label htmlFor="shopOwner">Select Shop Owner (User) *</label>
                   {loadingUsers ? (
-                    <div className="py-2 text-slate-400">Loading registered users...</div>
+                    <div style={{ color: "#64748b", fontSize: "0.85rem", padding: "0.5rem 0" }}>
+                      Loading registered users...
+                    </div>
                   ) : (
                     <select
+                      id="shopOwner"
                       value={selectedUserId}
                       onChange={(e) => handleUserSelectChange(e.target.value)}
                       required
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
                     >
                       {usersList.map((u) => (
                         <option key={u.id} value={u.id}>
@@ -447,89 +496,89 @@ export default function ManageShops() {
                   )}
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Shop / Nursery Name *</label>
+                <div className="admin-form-group">
+                  <label htmlFor="newShopName">Shop / Nursery Name *</label>
                   <input
+                    id="newShopName"
                     type="text"
                     required
                     value={newShopName}
                     onChange={(e) => setNewShopName(e.target.value)}
                     placeholder="e.g. Kathmandu Botanical Nursery"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">City / Region *</label>
+                <div className="admin-form-grid">
+                  <div className="admin-form-group">
+                    <label htmlFor="newShopCity">City / Region *</label>
                     <input
+                      id="newShopCity"
                       type="text"
                       required
                       value={newShopCity}
                       onChange={(e) => setNewShopCity(e.target.value)}
                       placeholder="e.g. Kathmandu"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Contact Phone</label>
+                  <div className="admin-form-group">
+                    <label htmlFor="newShopPhone">Contact Phone</label>
                     <input
+                      id="newShopPhone"
                       type="text"
                       value={newShopPhone}
                       onChange={(e) => setNewShopPhone(e.target.value)}
                       placeholder="98XXXXXXXX"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Physical Address</label>
+                <div className="admin-form-group">
+                  <label htmlFor="newShopAddress">Physical Address</label>
                   <input
+                    id="newShopAddress"
                     type="text"
                     value={newShopAddress}
                     onChange={(e) => setNewShopAddress(e.target.value)}
                     placeholder="e.g. Ward 4, Baluwatar"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Tagline / Summary</label>
+                <div className="admin-form-group">
+                  <label htmlFor="newShopShortDesc">Tagline / Short Summary</label>
                   <input
+                    id="newShopShortDesc"
                     type="text"
                     value={newShopShortDesc}
                     onChange={(e) => setNewShopShortDesc(e.target.value)}
-                    placeholder="e.g. Specialist in indoor foliage and rare succulents"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
+                    placeholder="e.g. Specialist in indoor foliage, organic potting soil, and exotic orchids"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="checkbox"
-                    id="newShopVerified"
-                    checked={newShopVerified}
-                    onChange={(e) => setNewShopVerified(e.target.checked)}
-                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                  />
-                  <label htmlFor="newShopVerified" className="text-slate-700 font-medium">
-                    Grant Verified Partner Badge immediately
+                <div className="admin-form-checkbox" style={{ margin: "0.75rem 0" }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={newShopVerified}
+                      onChange={(e) => setNewShopVerified(e.target.checked)}
+                    />
+                    <span style={{ fontWeight: 600, color: "#1e293b", fontSize: "0.85rem" }}>
+                      Grant Verified Partner Badge immediately
+                    </span>
                   </label>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <div className="admin-modal-footer">
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 font-semibold hover:bg-slate-50 transition"
+                    className="admin-btn admin-btn-secondary"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creatingShop}
-                    className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-semibold transition disabled:opacity-50"
+                    className="admin-btn admin-btn-primary"
                   >
                     {creatingShop ? "Creating..." : "Create & Activate Shop"}
                   </button>
