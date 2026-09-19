@@ -95,6 +95,9 @@ export default function ProductGrid({
                   src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
                   alt={plant.name}
                   className="plants-card-image"
+                  loading={index < 4 ? "eager" : "lazy"}
+                  decoding="async"
+                  fetchPriority={index === 0 ? "high" : "auto"}
                   onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
                   onClick={() => navigate(`/plants/${plant.id}`)}
                 />

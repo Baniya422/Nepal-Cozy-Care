@@ -10,8 +10,6 @@ import {
   Package,
   Sparkles,
 } from "lucide-react";
-import Navbar from "../../components/layout/Navbar";
-import Footer from "../../components/layout/Footer";
 import type { Shop } from "../../types/shop";
 import "../../styles/shops.css";
 
@@ -60,8 +58,6 @@ export default function ShopsDirectory() {
 
   return (
     <div className="shops-directory-page">
-      <Navbar />
-
       {/* Header Banner */}
       <section className="shops-hero">
         <div className="shops-hero-content">
@@ -264,7 +260,6 @@ export default function ShopsDirectory() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

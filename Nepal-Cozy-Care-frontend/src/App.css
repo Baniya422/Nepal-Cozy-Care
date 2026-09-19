@@ -30,3 +30,12 @@
 .read-the-docs {
   color: #888;
 }
+
+.route-loading {
+  min-height: 12rem;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+}

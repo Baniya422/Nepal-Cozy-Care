@@ -32,7 +32,7 @@ class StorePlantRequest extends FormRequest
             'care_instructions' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'image' => ['nullable', 'file', 'image', 'max:2048'],
+            'image' => ['nullable', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
             'is_active' => ['nullable'],
             'is_popular_item' => ['nullable', 'boolean'],
             'is_best_seller' => ['nullable', 'boolean'],

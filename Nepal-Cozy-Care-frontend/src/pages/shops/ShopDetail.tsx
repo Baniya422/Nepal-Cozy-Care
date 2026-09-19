@@ -13,8 +13,6 @@ import {
   ArrowLeft,
   Heart,
 } from "lucide-react";
-import Navbar from "../../components/layout/Navbar";
-import Footer from "../../components/layout/Footer";
 import type { Shop } from "../../types/shop";
 import type { Plant } from "../../types/plant";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
@@ -94,11 +92,9 @@ export default function ShopDetail() {
   if (loadingShop) {
     return (
       <div className="shop-detail-page">
-        <Navbar />
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "4rem", color: "#94a3b8" }}>
           Loading nursery profile...
         </div>
-        <Footer />
       </div>
     );
   }
@@ -106,7 +102,6 @@ export default function ShopDetail() {
   if (!shop) {
     return (
       <div className="shop-detail-page">
-        <Navbar />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "4rem", textAlign: "center" }}>
           <Store style={{ width: "64px", height: "64px", color: "#cbd5e1", marginBottom: "1rem" }} />
           <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a" }}>Nursery Not Found</h2>
@@ -121,7 +116,6 @@ export default function ShopDetail() {
             <ArrowLeft size={14} /> Back to Directory
           </Link>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -139,8 +133,6 @@ export default function ShopDetail() {
 
   return (
     <div className="shop-detail-page">
-      <Navbar />
-
       {/* Storefront Banner */}
       <section
         className="shop-storefront-hero"
@@ -391,7 +383,6 @@ export default function ShopDetail() {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 }

@@ -1,92 +1,111 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import './App.css'
-import Register from './pages/Register'
-import Login from './pages/Login'
-import { ProductDetail } from './pages/ProductDetail'
-import { PlantFinder } from './pages/PlantFinder'
-import Home from './pages/Home'
-import ShippingDelivery from './pages/ShippingDelivery'
-import Plants from './pages/Plants'
-import Pots from './pages/Pots'
-import Blogs from './pages/Blogs'
-import Contact from './pages/Contact'
-import Cart from './pages/Cart'
-import About from './pages/About'
-import CareTips from './pages/CareTips'
-import CareTipDetail from './pages/CareTipDetail'
-import TrackOrder from './pages/TrackOrder'
-import PlantHealthChecker from './pages/PlantHealthChecker'
-import PopularItemsPage from './pages/PopularItemsPage'
-import AdminDashboard from './pages/AdminDashboard'
-import ManagePlants from './pages/admin/ManagePlants'
-import ManageAccessories from './pages/admin/ManageAccessories'
-import ManageBlogs from './pages/admin/ManageBlogs'
-import ManageCareTips from './pages/admin/ManageCareTips'
-import ManageOrders from './pages/admin/ManageOrders'
-import ManageUsers from './pages/admin/ManageUsers'
-import Reports from './pages/admin/Reports'
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute'
-import BestSellersPage from './pages/BestSellersPage'
-import HelpCenter from './pages/HelpCenter'
-import Checkout from './pages/Checkout'
-import OurMission from './pages/OurMission'
-import MyAccount from './pages/MyAccount'
-import MyGarden from './pages/MyGarden'
-import BlogDetail from './pages/BlogDetail'
-import ManageSeasonalReminders from './pages/admin/ManageSeasonalReminders'
-import ManageContactMessages from './pages/admin/ManageContactMessages'
-import ManageGardenEntries from './pages/admin/ManageGardenEntries'
-import ForgotPassword from './pages/ForgotPassword'
-import ManageHomepage from './pages/admin/ManageHomepage'
-import ManagePageContent from './pages/admin/ManagePageContent'
-import AdminSettingsPage from './pages/admin/AdminSettings'
-import ManageSellerApplications from './pages/admin/ManageSellerApplications'
-import ManageShops from './pages/admin/ManageShops'
-import ManageMarketplaceProducts from './pages/admin/ManageMarketplaceProducts'
-import ShopsDirectory from './pages/shops/ShopsDirectory'
-import ShopDetail from './pages/shops/ShopDetail'
-import BecomeASeller from './pages/seller/BecomeASeller'
 import SellerProtectedRoute from './components/seller/SellerProtectedRoute'
-import SellerDashboard from './pages/seller/SellerDashboard'
-import SellerShop from './pages/seller/SellerShop'
-import SellerProducts from './pages/seller/SellerProducts'
-import SellerOrders from './pages/seller/SellerOrders'
-import SellerBlogs from './pages/seller/SellerBlogs'
-import SellerCareTips from './pages/seller/SellerCareTips'
+import Layout from './components/layout/Layout'
+import SellerLayout from './components/seller/SellerLayout'
+
+const Register = lazy(() => import('./pages/Register'))
+const Login = lazy(() => import('./pages/Login'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const ProductDetail = lazy(() =>
+  import('./pages/ProductDetail').then((module) => ({ default: module.ProductDetail }))
+)
+const PlantFinder = lazy(() =>
+  import('./pages/PlantFinder').then((module) => ({ default: module.PlantFinder }))
+)
+const Home = lazy(() => import('./pages/Home'))
+const ShippingDelivery = lazy(() => import('./pages/ShippingDelivery'))
+const Plants = lazy(() => import('./pages/Plants'))
+const Pots = lazy(() => import('./pages/Pots'))
+const Blogs = lazy(() => import('./pages/Blogs'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Cart = lazy(() => import('./pages/Cart'))
+const About = lazy(() => import('./pages/About'))
+const CareTips = lazy(() => import('./pages/CareTips'))
+const CareTipDetail = lazy(() => import('./pages/CareTipDetail'))
+const TrackOrder = lazy(() => import('./pages/TrackOrder'))
+const PlantHealthChecker = lazy(() => import('./pages/PlantHealthChecker'))
+const PopularItemsPage = lazy(() => import('./pages/PopularItemsPage'))
+const BestSellersPage = lazy(() => import('./pages/BestSellersPage'))
+const HelpCenter = lazy(() => import('./pages/HelpCenter'))
+const Checkout = lazy(() => import('./pages/Checkout'))
+const OurMission = lazy(() => import('./pages/OurMission'))
+const MyAccount = lazy(() => import('./pages/MyAccount'))
+const MyGarden = lazy(() => import('./pages/MyGarden'))
+const BlogDetail = lazy(() => import('./pages/BlogDetail'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const ManagePlants = lazy(() => import('./pages/admin/ManagePlants'))
+const ManageAccessories = lazy(() => import('./pages/admin/ManageAccessories'))
+const ManageBlogs = lazy(() => import('./pages/admin/ManageBlogs'))
+const ManageCareTips = lazy(() => import('./pages/admin/ManageCareTips'))
+const ManageOrders = lazy(() => import('./pages/admin/ManageOrders'))
+const ManageUsers = lazy(() => import('./pages/admin/ManageUsers'))
+const Reports = lazy(() => import('./pages/admin/Reports'))
+const ManageSeasonalReminders = lazy(() => import('./pages/admin/ManageSeasonalReminders'))
+const ManageContactMessages = lazy(() => import('./pages/admin/ManageContactMessages'))
+const ManageGardenEntries = lazy(() => import('./pages/admin/ManageGardenEntries'))
+const ManageHomepage = lazy(() => import('./pages/admin/ManageHomepage'))
+const ManagePageContent = lazy(() => import('./pages/admin/ManagePageContent'))
+const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettings'))
+const ManageSellerApplications = lazy(() => import('./pages/admin/ManageSellerApplications'))
+const ManageShops = lazy(() => import('./pages/admin/ManageShops'))
+const ManageMarketplaceProducts = lazy(() => import('./pages/admin/ManageMarketplaceProducts'))
+const ShopsDirectory = lazy(() => import('./pages/shops/ShopsDirectory'))
+const ShopDetail = lazy(() => import('./pages/shops/ShopDetail'))
+const BecomeASeller = lazy(() => import('./pages/seller/BecomeASeller'))
+const SellerDashboard = lazy(() => import('./pages/seller/SellerDashboard'))
+const SellerShop = lazy(() => import('./pages/seller/SellerShop'))
+const SellerProducts = lazy(() => import('./pages/seller/SellerProducts'))
+const SellerOrders = lazy(() => import('./pages/seller/SellerOrders'))
+const SellerBlogs = lazy(() => import('./pages/seller/SellerBlogs'))
+const SellerCareTips = lazy(() => import('./pages/seller/SellerCareTips'))
+
+function RouteLoading() {
+  return (
+    <div role="status" aria-live="polite" className="route-loading">
+      Loading page...
+    </div>
+  )
+}
+
 function App() {
   return (
-    <Routes>
-      {}
-      <Route path="/" element={<Home />} />
+    <Suspense fallback={<RouteLoading />}>
+      <Routes>
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      {}
-      <Route path="/plants" element={<Plants />} />
-      <Route path="/plants/:id" element={<ProductDetail />} />
-      <Route path="/pots" element={<Pots />} />
-      <Route path="/popular-items" element={<PopularItemsPage />} />
-      <Route path="/best-sellers" element={<BestSellersPage />} />
-      {}
-      <Route path="/plant-finder" element={<PlantFinder />} />
-      <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
-      <Route path="/care-tips" element={<CareTips />} />
-      <Route path="/care-tips/:id" element={<CareTipDetail />} />
-      <Route path="/blogs" element={<Blogs />} />
-      <Route path="/blogs/:id" element={<BlogDetail />} />
-      {}
-      <Route path="/shipping" element={<ShippingDelivery />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/mission" element={<OurMission />} />
-      <Route path="/help-center" element={<HelpCenter />} />
-      {}
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/account" element={<MyAccount />} />
-      <Route path="/my-garden" element={<MyGarden />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/track-order" element={<TrackOrder />} />
-      {}
+
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/plants" element={<Plants />} />
+        <Route path="/plants/:id" element={<ProductDetail />} />
+        <Route path="/pots" element={<Pots />} />
+        <Route path="/popular-items" element={<PopularItemsPage />} />
+        <Route path="/best-sellers" element={<BestSellersPage />} />
+        <Route path="/plant-finder" element={<PlantFinder />} />
+        <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
+        <Route path="/care-tips" element={<CareTips />} />
+        <Route path="/care-tips/:id" element={<CareTipDetail />} />
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/blogs/:id" element={<BlogDetail />} />
+        <Route path="/shipping" element={<ShippingDelivery />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/mission" element={<OurMission />} />
+        <Route path="/help-center" element={<HelpCenter />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/account" element={<MyAccount />} />
+        <Route path="/my-garden" element={<MyGarden />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/track-order" element={<TrackOrder />} />
+        <Route path="/shops" element={<ShopsDirectory />} />
+        <Route path="/shops/:slug" element={<ShopDetail />} />
+        <Route path="/become-a-seller" element={<BecomeASeller />} />
+      </Route>
+
       <Route
         path="/admin"
         element={
@@ -234,77 +253,26 @@ function App() {
         }
       />
 
-      {/* Public Marketplace Routes */}
-      <Route path="/shops" element={<ShopsDirectory />} />
-      <Route path="/shops/:slug" element={<ShopDetail />} />
-      <Route path="/become-a-seller" element={<BecomeASeller />} />
-
       {/* Seller Dashboard Routes */}
       <Route
         path="/seller"
         element={
           <SellerProtectedRoute>
-            <SellerDashboard />
+            <SellerLayout />
           </SellerProtectedRoute>
         }
-      />
-      <Route
-        path="/seller/dashboard"
-        element={
-          <SellerProtectedRoute>
-            <SellerDashboard />
-          </SellerProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/shop"
-        element={
-          <SellerProtectedRoute>
-            <SellerShop />
-          </SellerProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/products"
-        element={
-          <SellerProtectedRoute>
-            <SellerProducts />
-          </SellerProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/orders"
-        element={
-          <SellerProtectedRoute>
-            <SellerOrders />
-          </SellerProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/blogs"
-        element={
-          <SellerProtectedRoute>
-            <SellerBlogs />
-          </SellerProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/care-tips"
-        element={
-          <SellerProtectedRoute>
-            <SellerCareTips />
-          </SellerProtectedRoute>
-        }
-      />
-      <Route
-        path="/seller/settings"
-        element={
-          <SellerProtectedRoute>
-            <SellerShop />
-          </SellerProtectedRoute>
-        }
-      />
-    </Routes>
+      >
+        <Route index element={<SellerDashboard />} />
+        <Route path="dashboard" element={<SellerDashboard />} />
+        <Route path="shop" element={<SellerShop />} />
+        <Route path="products" element={<SellerProducts />} />
+        <Route path="orders" element={<SellerOrders />} />
+        <Route path="blogs" element={<SellerBlogs />} />
+        <Route path="care-tips" element={<SellerCareTips />} />
+        <Route path="settings" element={<SellerShop />} />
+      </Route>
+      </Routes>
+    </Suspense>
   )
 }
 export default App

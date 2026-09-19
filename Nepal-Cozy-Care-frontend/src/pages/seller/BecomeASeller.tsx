@@ -16,8 +16,6 @@ import {
   Check,
   Trash2,
 } from "lucide-react";
-import Navbar from "../../components/layout/Navbar";
-import Footer from "../../components/layout/Footer";
 import type { Shop } from "../../types/shop";
 import { compressImage } from "../../utils/imageCompressor";
 import "../../styles/shops.css";
@@ -159,8 +157,6 @@ export default function BecomeASeller() {
 
   return (
     <div className="become-seller-page">
-      <Navbar />
-
       {/* Hero Header */}
       <section className="seller-hero">
         <div className="seller-hero-inner">
@@ -587,7 +583,6 @@ export default function BecomeASeller() {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 }

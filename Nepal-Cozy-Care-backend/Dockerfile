@@ -5,6 +5,9 @@ FROM php:8.3-apache
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libzip-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
     zip \
     unzip \
     git \
@@ -14,12 +17,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install required PHP extensions
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_pgsql \
     pgsql \
     pdo_mysql \
     bcmath \
+    gd \
     zip \
     opcache
 

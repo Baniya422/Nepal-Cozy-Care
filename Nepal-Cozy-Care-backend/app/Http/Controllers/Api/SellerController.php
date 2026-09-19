@@ -8,11 +8,16 @@ use App\Models\CareTip;
 use App\Models\OrderItem;
 use App\Models\Plant;
 use App\Models\Shop;
+use App\Services\ImageCompressionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class SellerController extends Controller
 {
+    public function __construct(
+        protected ImageCompressionService $imageCompressionService
+    ) {}
+
     /**
      * Submit an application to become a seller / register a shop.
      */
@@ -322,15 +327,18 @@ class SellerController extends Controller
             'care_instructions' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable',
+            'image' => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120',
             'submit_for_review' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time().'_'.$image->getClientOriginalName();
-            $path = $image->storeAs('plants', $filename, 'public');
-            $validated['image'] = $path;
+            $validated['image'] = $this->imageCompressionService->store(
+                $request->file('image'),
+                'plants',
+                1200,
+                1200,
+                78
+            );
         }
 
         $submitForReview = filter_var($request->input('submit_for_review', true), FILTER_VALIDATE_BOOLEAN);
@@ -382,15 +390,18 @@ class SellerController extends Controller
             'care_instructions' => 'nullable|string',
             'price' => 'sometimes|required|numeric|min:0',
             'stock' => 'sometimes|required|integer|min:0',
-            'image' => 'nullable',
+            'image' => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120',
             'submit_for_review' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time().'_'.$image->getClientOriginalName();
-            $path = $image->storeAs('plants', $filename, 'public');
-            $validated['image'] = $path;
+            $validated['image'] = $this->imageCompressionService->store(
+                $request->file('image'),
+                'plants',
+                1200,
+                1200,
+                78
+            );
         }
 
         // If core details (name, price, category, description) change, resubmit for review

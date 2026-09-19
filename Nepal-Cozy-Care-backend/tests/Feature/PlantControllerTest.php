@@ -34,6 +34,27 @@ class PlantControllerTest extends TestCase
             ->assertJsonPath('data.plants.0.name', 'Aloe Vera');
     }
 
+    public function test_listing_view_returns_cacheable_lightweight_catalog_data()
+    {
+        Plant::create([
+            'name' => 'Fast Catalog Plant',
+            'category' => 'Indoor',
+            'description' => str_repeat('Long care description. ', 100),
+            'is_active' => true,
+            'price' => 450,
+            'stock' => 4,
+        ]);
+
+        $response = $this->getJson('/api/plants?view=listing&per_page=100');
+
+        $response->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=60, public, stale-while-revalidate=300')
+            ->assertJsonPath('data.plants.0.name', 'Fast Catalog Plant')
+            ->assertJsonPath('data.plants.0.avg_rating', 0)
+            ->assertJsonPath('data.plants.0.review_count', 0)
+            ->assertJsonMissingPath('data.plants.0.description');
+    }
+
     public function test_can_get_popular_plants()
     {
         Plant::create([

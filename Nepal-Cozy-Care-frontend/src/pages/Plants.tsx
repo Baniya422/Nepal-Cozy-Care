@@ -14,10 +14,56 @@ import type { Plant } from "../types/plant";
 import "../styles/plants.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const PLANT_CATALOG_CACHE_KEY = "cozycare:plant-catalog:v1";
+const PLANT_CATALOG_CACHE_TTL = 5 * 60 * 1000;
+
+type PlantCatalogCache = {
+  savedAt: number;
+  plants: Plant[];
+};
+
+type ApiPlant = Omit<Plant, "price" | "avg_rating"> & {
+  price: number | string;
+  avg_rating?: number | string;
+};
+
+type WishlistItem = {
+  plant?: { id?: number };
+  plant_id?: number;
+};
+
+function readCachedPlants(): Plant[] | null {
+  try {
+    const raw = sessionStorage.getItem(PLANT_CATALOG_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as PlantCatalogCache;
+    if (!Array.isArray(cached.plants) || Date.now() - cached.savedAt > PLANT_CATALOG_CACHE_TTL) {
+      sessionStorage.removeItem(PLANT_CATALOG_CACHE_KEY);
+      return null;
+    }
+    return cached.plants;
+  } catch {
+    return null;
+  }
+}
+
+function cachePlants(plants: Plant[]) {
+  try {
+    sessionStorage.setItem(
+      PLANT_CATALOG_CACHE_KEY,
+      JSON.stringify({ savedAt: Date.now(), plants } satisfies PlantCatalogCache)
+    );
+  } catch {
+    // Storage can be unavailable in privacy mode; the in-memory catalog still works.
+  }
+}
 
 export default function Plants() {
-  const [plants, setPlants] = useState<Plant[]>(DEFAULT_PLANT_CATALOG as Plant[]);
-  const [loading, setLoading] = useState(true);
+  const [plants, setPlants] = useState<Plant[]>(
+    () => readCachedPlants() ?? (DEFAULT_PLANT_CATALOG as Plant[])
+  );
+  // Render the local/cached catalog immediately while refreshing it in the background.
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
   const [wishlistBusyId, setWishlistBusyId] = useState<number | null>(null);
@@ -28,25 +74,30 @@ export default function Plants() {
   const [sortBy, setSortBy] = useState<UgaooSortOption>("featured");
 
   useEffect(() => {
-    fetchPlants();
-    fetchWishlist();
+    const controller = new AbortController();
+    void fetchPlants(controller.signal);
+    void fetchWishlist();
+    return () => controller.abort();
   }, []);
 
-  const fetchPlants = async () => {
+  const fetchPlants = async (signal?: AbortSignal) => {
     setError(null);
     try {
-      const response = await fetch(`${API}/api/plants?per_page=100`);
+      const response = await fetch(`${API}/api/plants?per_page=100&view=listing`, {
+        signal,
+        headers: { Accept: "application/json" },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       let plantsData = data.data?.plants || data.data?.data || [];
-      plantsData = plantsData.map((plant: any) => ({
+      plantsData = plantsData.map((plant: ApiPlant) => ({
         ...plant,
-        price: parseFloat(plant.price) || 0,
-        avg_rating: parseFloat(plant.avg_rating) || 0,
+        price: Number(plant.price) || 0,
+        avg_rating: Number(plant.avg_rating) || 0,
       }));
-      plantsData = plantsData.filter((plant: any) => {
+      plantsData = plantsData.filter((plant: Plant) => {
         const category = (plant.category || "").toLowerCase().trim();
         return (
           !category.includes("pot") &&
@@ -58,13 +109,17 @@ export default function Plants() {
       });
       if (plantsData.length > 0) {
         setPlants(plantsData);
+        cachePlants(plantsData);
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       console.warn("Using fallback catalog for plants list:", err);
       // Keep DEFAULT_PLANT_CATALOG as fallback
-      setPlants(DEFAULT_PLANT_CATALOG as Plant[]);
+      setPlants((current) =>
+        current.length > 0 ? current : (DEFAULT_PLANT_CATALOG as Plant[])
+      );
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   };
 
@@ -93,7 +148,7 @@ export default function Plants() {
       const data = await response.json();
       const wishlistItems = data.data?.wishlist ?? [];
       const ids = wishlistItems
-        .map((item: any) => item.plant?.id ?? item.plant_id)
+        .map((item: WishlistItem) => item.plant?.id ?? item.plant_id)
         .filter((id: unknown): id is number => typeof id === "number");
       setWishlistIds(ids);
     } catch (error) {
@@ -460,7 +515,7 @@ export default function Plants() {
             plants={filteredPlants}
             loading={loading}
             error={error}
-            fetchPlants={fetchPlants}
+            fetchPlants={() => void fetchPlants()}
             wishlistIds={wishlistIds}
             wishlistBusyId={wishlistBusyId}
             onToggleWishlist={handleToggleWishlist}

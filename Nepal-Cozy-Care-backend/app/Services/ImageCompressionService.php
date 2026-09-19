@@ -3,9 +3,52 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ImageCompressionService
 {
+    /**
+     * Compress an uploaded image and store it with a safe, unique filename.
+     */
+    public function store(
+        UploadedFile $file,
+        string $directory,
+        int $maxWidth = 1600,
+        int $maxHeight = 1600,
+        int $quality = 82
+    ): string {
+        $compressedPath = $this->compress($file, $maxWidth, $maxHeight, $quality);
+        $isTemporary = $compressedPath !== $file->getRealPath();
+        $extension = $isTemporary && str_ends_with($compressedPath, '.webp')
+            ? 'webp'
+            : strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $baseName = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) ?: 'image';
+        $filename = $baseName.'-'.Str::uuid().'.'.$extension;
+
+        try {
+            if ($isTemporary) {
+                $path = trim($directory, '/').'/'.$filename;
+                if (! Storage::disk('public')->put($path, file_get_contents($compressedPath))) {
+                    throw new \RuntimeException('The optimized image could not be stored.');
+                }
+
+                return $path;
+            }
+
+            $path = $file->storeAs($directory, $filename, 'public');
+            if (! $path) {
+                throw new \RuntimeException('The image could not be stored.');
+            }
+
+            return $path;
+        } finally {
+            if ($isTemporary && file_exists($compressedPath)) {
+                @unlink($compressedPath);
+            }
+        }
+    }
+
     /**
      * Compress and resize an uploaded image file using PHP GD.
      *

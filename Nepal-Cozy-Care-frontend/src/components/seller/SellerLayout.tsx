@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { createContext, Suspense, useContext, useState, useEffect } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Store,
@@ -22,10 +22,24 @@ import "./seller.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 interface SellerLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
+const SellerLayoutContext = createContext(false);
+
 export default function SellerLayout({ children }: SellerLayoutProps) {
+  const insideSellerLayout = useContext(SellerLayoutContext);
+
+  // Keep compatibility with seller pages that still wrap their own content.
+  // The route-level layout owns the persistent sidebar and topbar.
+  if (insideSellerLayout) {
+    return <>{children}</>;
+  }
+
+  return <SellerLayoutShell>{children}</SellerLayoutShell>;
+}
+
+function SellerLayoutShell({ children }: SellerLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,7 +68,16 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
         console.error("Failed to load seller shop info", err);
       }
     };
-    fetchShop();
+    void fetchShop();
+
+    const handleShopUpdated = (event: Event) => {
+      const updatedShop = (event as CustomEvent<Shop>).detail;
+      if (updatedShop) setShop(updatedShop);
+    };
+    window.addEventListener("cozycare:seller-shop-updated", handleShopUpdated);
+    return () => {
+      window.removeEventListener("cozycare:seller-shop-updated", handleShopUpdated);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -81,7 +104,8 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
   };
 
   return (
-    <div className="seller-layout">
+    <SellerLayoutContext.Provider value>
+      <div className="seller-layout">
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div
@@ -217,8 +241,15 @@ export default function SellerLayout({ children }: SellerLayoutProps) {
           </div>
         </header>
 
-        <div className="seller-page-content">{children}</div>
+        <div className="seller-page-content">
+          {children ?? (
+            <Suspense fallback={<div className="route-loading">Loading page...</div>}>
+              <Outlet />
+            </Suspense>
+          )}
+        </div>
       </div>
-    </div>
+      </div>
+    </SellerLayoutContext.Provider>
   );
 }

@@ -106,6 +106,9 @@ export default function SellerShop() {
 
       setStatusMsg({ type: "success", text: "Shop details updated successfully!" });
       setShop(json.data.shop);
+      window.dispatchEvent(
+        new CustomEvent("cozycare:seller-shop-updated", { detail: json.data.shop })
+      );
     } catch (err: any) {
       setStatusMsg({ type: "error", text: err.message || "Failed to save changes." });
     } finally {

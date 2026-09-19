@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Plus,
@@ -14,6 +14,7 @@ import {
 import SellerLayout from "../../components/seller/SellerLayout";
 import "../../components/seller/seller.css";
 import type { Plant } from "../../types/plant";
+import { compressImage } from "../../utils/imageCompressor";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -43,15 +44,9 @@ export default function SellerProducts() {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageProcessing, setImageProcessing] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-    if (searchParams.get("action") === "new") {
-      openAddModal();
-    }
-  }, [statusFilter]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -60,6 +55,7 @@ export default function SellerProducts() {
         url += `&status=${statusFilter}`;
       }
       const res = await fetch(url, {
+        signal,
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -67,13 +63,16 @@ export default function SellerProducts() {
         setPlants(json.data.plants || []);
       }
     } catch (err) {
-      console.error("Failed to load seller products", err);
+      if (!(err instanceof DOMException && err.name === "AbortError")) {
+        console.error("Failed to load seller products", err);
+      }
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
-  const openAddModal = () => {
+  const openAddModal = useCallback(() => {
+    setFeedback(null);
     setEditingPlant(null);
     setFormData({
       name: "",
@@ -89,9 +88,19 @@ export default function SellerProducts() {
     setImageFile(null);
     setImagePreview(null);
     setShowModal(true);
-  };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchProducts(controller.signal);
+    if (searchParams.get("action") === "new") {
+      openAddModal();
+    }
+    return () => controller.abort();
+  }, [fetchProducts, openAddModal, searchParams]);
 
   const openEditModal = (plant: Plant) => {
+    setFeedback(null);
     setEditingPlant(plant);
     setFormData({
       name: plant.name,
@@ -115,8 +124,47 @@ export default function SellerProducts() {
     setShowModal(true);
   };
 
+  const handleImageChange = async (file?: File) => {
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setFeedback({ type: "error", text: "Please choose a JPG, PNG, or WebP image." });
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setFeedback({ type: "error", text: "The image must be smaller than 10 MB." });
+      return;
+    }
+
+    setImageProcessing(true);
+    setFeedback(null);
+    try {
+      const compressed = await compressImage(file, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.78,
+      });
+      if (compressed.size > 5 * 1024 * 1024) {
+        throw new Error("The optimized image is still over 5 MB. Please choose a smaller photo.");
+      }
+      setImageFile(compressed);
+      setImagePreview((current) => {
+        if (current?.startsWith("blob:")) URL.revokeObjectURL(current);
+        return URL.createObjectURL(compressed);
+      });
+    } catch (error) {
+      setFeedback({
+        type: "error",
+        text: error instanceof Error ? error.message : "Could not prepare that image.",
+      });
+    } finally {
+      setImageProcessing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (imageProcessing) return;
     setSubmitting(true);
     setFeedback(null);
 
@@ -151,9 +199,30 @@ export default function SellerProducts() {
         body: data,
       });
 
-      const json = await res.json();
+      const json = await res.json().catch(() => null);
       if (!res.ok) {
-        throw new Error(json.message || "Failed to save product.");
+        const validationMessage = json?.errors
+          ? (Object.values(json.errors).flat().find(Boolean) as string | undefined)
+          : undefined;
+        throw new Error(
+          res.status === 413
+            ? "The image upload is too large. Please choose a smaller photo."
+            : validationMessage || json?.message || "Failed to save product. Please try again."
+        );
+      }
+
+      const savedPlant = json?.data?.plant as Plant | undefined;
+      if (savedPlant) {
+        const normalizedPlant = {
+          ...savedPlant,
+          price: Number(savedPlant.price),
+        };
+        setPlants((current) => {
+          const withoutSaved = current.filter((plant) => plant.id !== normalizedPlant.id);
+          const belongsInCurrentFilter =
+            statusFilter === "all" || normalizedPlant.approval_status === statusFilter;
+          return belongsInCurrentFilter ? [normalizedPlant, ...withoutSaved] : withoutSaved;
+        });
       }
 
       setFeedback({
@@ -163,9 +232,11 @@ export default function SellerProducts() {
           : "Product submitted for Super Admin review!",
       });
       setShowModal(false);
-      fetchProducts();
-    } catch (err: any) {
-      setFeedback({ type: "error", text: err.message || "Failed to submit product." });
+    } catch (err: unknown) {
+      setFeedback({
+        type: "error",
+        text: err instanceof Error ? err.message : "Failed to submit product.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -450,6 +521,22 @@ export default function SellerProducts() {
 
               <form onSubmit={handleSubmit}>
                 <div className="seller-modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {feedback?.type === "error" && (
+                    <div
+                      role="alert"
+                      style={{
+                        padding: "0.8rem 1rem",
+                        borderRadius: "8px",
+                        background: "#fef2f2",
+                        color: "#991b1b",
+                        border: "1px solid #fecaca",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {feedback.text}
+                    </div>
+                  )}
                   <div className="seller-form-grid">
                     <div className="seller-form-group">
                       <label htmlFor="pName">Plant Common Name *</label>
@@ -584,18 +671,19 @@ export default function SellerProducts() {
                       )}
                       <label className="seller-btn seller-btn-secondary" style={{ cursor: "pointer" }}>
                         <Upload size={14} />
-                        <span>{imagePreview ? "Change Photo" : "Upload Photo"}</span>
+                        <span>
+                          {imageProcessing
+                            ? "Optimizing Photo..."
+                            : imagePreview
+                            ? "Change Photo"
+                            : "Upload Photo"}
+                        </span>
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/webp"
+                          disabled={imageProcessing || submitting}
                           style={{ display: "none" }}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setImageFile(file);
-                              setImagePreview(URL.createObjectURL(file));
-                            }
-                          }}
+                          onChange={(e) => void handleImageChange(e.target.files?.[0])}
                         />
                       </label>
                     </div>
@@ -606,6 +694,7 @@ export default function SellerProducts() {
                     <textarea
                       id="pDesc"
                       rows={3}
+                      required
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Describe the plant's size, pot size, foliage beauty, and care tips for buyers..."
@@ -623,10 +712,13 @@ export default function SellerProducts() {
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || imageProcessing}
+                    aria-busy={submitting || imageProcessing}
                     className="seller-btn seller-btn-primary"
                   >
-                    {submitting
+                    {imageProcessing
+                      ? "Preparing Image..."
+                      : submitting
                       ? "Submitting..."
                       : editingPlant
                       ? "Update Product"

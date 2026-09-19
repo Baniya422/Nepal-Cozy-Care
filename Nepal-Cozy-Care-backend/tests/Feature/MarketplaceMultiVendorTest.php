@@ -9,6 +9,8 @@ use App\Models\Plant;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class MarketplaceMultiVendorTest extends TestCase
@@ -173,6 +175,29 @@ class MarketplaceMultiVendorTest extends TestCase
         $this->assertEquals($this->sellerShop->id, $plant->shop_id);
         $this->assertEquals(Plant::STATUS_PENDING, $plant->approval_status);
         $this->assertFalse((bool) $plant->is_active);
+    }
+
+    public function test_seller_can_create_product_with_an_optimized_image()
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->sellerUser, 'sanctum')
+            ->post('/api/seller/products', [
+                'name' => 'Quick Upload Fern',
+                'category' => 'Ferns',
+                'description' => 'A healthy fern uploaded by a marketplace vendor.',
+                'price' => 650,
+                'stock' => 8,
+                'submit_for_review' => true,
+                'image' => UploadedFile::fake()->image('fern-photo.jpg', 1800, 1400),
+            ], ['Accept' => 'application/json']);
+
+        $response->assertCreated();
+        $imagePath = $response->json('data.plant.image');
+
+        $this->assertNotEmpty($imagePath);
+        Storage::disk('public')->assertExists($imagePath);
+        $this->assertStringStartsWith('plants/', $imagePath);
     }
 
     public function test_super_admin_can_approve_marketplace_product()

@@ -111,6 +111,7 @@ Route::middleware(['auth:sanctum', 'seller'])->group(function () {
     Route::post('/seller/products', [SellerController::class, 'storeProduct']);
     Route::put('/seller/products/{id}', [SellerController::class, 'updateProduct']);
     Route::post('/seller/products/{id}', [SellerController::class, 'updateProduct']); // supports multipart
+    Route::delete('/seller/products/{id}', [SellerController::class, 'destroyProduct']);
     Route::get('/seller/orders', [SellerController::class, 'orders']);
 
     // Vendor Blogs & Care Tips

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, Store } from "lucide-react";
 import "./navbar.css";
 
@@ -18,8 +18,26 @@ const navItems = [
   { to: "/about", label: "About" },
 ];
 
+const readLocalAccessoryCartCount = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem("cart") || "[]");
+    if (!Array.isArray(stored)) return 0;
+    return stored.reduce((total, item) => total + Number(item?.quantity ?? 0), 0);
+  } catch {
+    return 0;
+  }
+};
+
+const readCurrentUser = () => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
 export default function Navbar() {
-  const location = useLocation();
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [currentUser, setCurrentUser] = useState<{ name?: string; email?: string; role?: string } | null>(() => {
@@ -35,16 +53,7 @@ export default function Navbar() {
 
   const isSuperAdmin = currentUser?.role === "super_admin" || currentUser?.role === "admin";
   const isSeller = currentUser?.role === "seller";
-  const readLocalAccessoryCartCount = () => {
-    try {
-      const stored = JSON.parse(localStorage.getItem("cart") || "[]");
-      if (!Array.isArray(stored)) return 0;
-      return stored.reduce((total, item) => total + Number(item?.quantity ?? 0), 0);
-    } catch {
-      return 0;
-    }
-  };
-  const refreshCartCount = async () => {
+  const refreshCartCount = useCallback(async () => {
     if (!token) {
       setCartCount(readLocalAccessoryCartCount());
       return;
@@ -74,21 +83,12 @@ export default function Navbar() {
     } catch {
       setCartCount(0);
     }
-  };
-  const readCurrentUser = () => {
-    try {
-      const stored = localStorage.getItem("user");
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  };
+  }, [token]);
 
   useEffect(() => {
-    setCurrentUser(readCurrentUser());
-    void refreshCartCount();
-    setMenuOpen(false);
-  }, [location.pathname, token]);
+    const timeoutId = window.setTimeout(() => void refreshCartCount(), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [refreshCartCount]);
 
   useEffect(() => {
     const handleCartUpdate = () => {
@@ -107,7 +107,7 @@ export default function Navbar() {
       window.removeEventListener("cozycare:cart-updated", handleCartUpdate as EventListener);
       window.removeEventListener("storage", handleStorage);
     };
-  }, [token]);
+  }, [refreshCartCount]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");

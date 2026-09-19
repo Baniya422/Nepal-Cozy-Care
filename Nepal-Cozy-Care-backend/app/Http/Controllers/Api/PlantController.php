@@ -7,16 +7,29 @@ use App\Http\Requests\StorePlantRequest;
 use App\Http\Requests\UpdatePlantRequest;
 use App\Models\Plant;
 use App\Models\Shop;
+use App\Services\ImageCompressionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class PlantController extends Controller
 {
+    public function __construct(
+        protected ImageCompressionService $imageCompressionService
+    ) {}
+
     public function index(Request $request)
     {
-        $query = Plant::query()
-            ->marketplaceApproved()
-            ->with('shop:id,name,slug,logo,is_verified,city,status')
+        $query = Plant::query()->marketplaceApproved();
+
+        if ($request->query('view') === 'listing') {
+            $query->select([
+                'id', 'shop_id', 'name', 'scientific_name', 'category', 'size',
+                'difficulty', 'light', 'water', 'rooms', 'price', 'stock', 'image',
+                'is_active', 'views', 'total_sold', 'is_best_seller', 'created_at',
+            ]);
+        }
+
+        $query->with('shop:id,name,slug,logo,is_verified,city,status')
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
 
@@ -98,7 +111,7 @@ class PlantController extends Controller
                     'last_page' => $paginator->lastPage(),
                 ],
             ],
-        ]);
+        ])->header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     }
 
     public function show($id)
@@ -130,10 +143,13 @@ class PlantController extends Controller
             $data['is_active'] = true;
         }
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time().'_'.$image->getClientOriginalName();
-            $path = $image->storeAs('plants', $filename, 'public');
-            $data['image'] = $path;
+            $data['image'] = $this->imageCompressionService->store(
+                $request->file('image'),
+                'plants',
+                1200,
+                1200,
+                78
+            );
         }
 
         if (empty($data['shop_id'])) {
@@ -160,10 +176,13 @@ class PlantController extends Controller
             $data['is_active'] = filter_var($data['is_active'], FILTER_VALIDATE_BOOLEAN);
         }
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time().'_'.$image->getClientOriginalName();
-            $path = $image->storeAs('plants', $filename, 'public');
-            $data['image'] = $path;
+            $data['image'] = $this->imageCompressionService->store(
+                $request->file('image'),
+                'plants',
+                1200,
+                1200,
+                78
+            );
         }
         $plant->update($data);
 
