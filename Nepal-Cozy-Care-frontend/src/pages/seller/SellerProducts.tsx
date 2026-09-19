@@ -228,7 +228,7 @@ export default function SellerProducts() {
         type: "success",
         text: editingPlant
           ? "Product updated and submitted for review!"
-          : "Product submitted for Super Admin review!",
+          : "Product submitted for review!",
       });
       setShowModal(false);
     } catch (err: unknown) {

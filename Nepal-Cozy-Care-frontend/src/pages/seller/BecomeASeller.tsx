@@ -240,7 +240,7 @@ export default function BecomeASeller() {
         <div className="seller-step-item">
           <div className="seller-step-number">2</div>
           <span className="seller-step-title">Fast Verification</span>
-          <span className="seller-step-desc">Super admin review within 24h</span>
+          <span className="seller-step-desc">Review within 24h</span>
         </div>
         <div className="seller-step-item">
           <div className="seller-step-number">3</div>
@@ -275,9 +275,9 @@ export default function BecomeASeller() {
         ) : existingShop?.status === "pending" ? (
           <div className="seller-status-card status-pending">
             <Clock className="seller-status-icon" style={{ color: "#d97706" }} />
-            <h2 className="seller-status-title">Application Under Super Admin Review</h2>
+            <h2 className="seller-status-title">Application is on Review</h2>
             <p className="seller-status-text">
-              Thank you for applying! Our admin team is currently verifying credentials for <strong>{existingShop.name}</strong>. You will receive an update once approved.
+              Thank you for applying! Our team is currently verifying credentials for <strong>{existingShop.name}</strong>. You will receive an update once approved.
             </p>
             <div style={{ marginTop: "1rem", fontSize: "0.8125rem", color: "#92400e" }}>
               Registered City: <strong>{existingShop.city}</strong> • Phone: <strong>{existingShop.phone}</strong>
