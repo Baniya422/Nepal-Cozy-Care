@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { Shop } from "../../types/shop";
+import { DEFAULT_PLANT_IMAGE, handleImageError, resolveImageUrl } from "../../utils/imageUrl";
 import "../../styles/shops.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -141,14 +142,10 @@ export default function ShopsDirectory() {
           <div className="shops-grid">
             {filteredShops.map((shop) => {
               const logoUrl = shop.logo
-                ? shop.logo.startsWith("http")
-                  ? shop.logo
-                  : `${API}/storage/${shop.logo}`
+                ? resolveImageUrl(shop.logo, DEFAULT_PLANT_IMAGE)
                 : null;
               const bannerUrl = shop.banner
-                ? shop.banner.startsWith("http")
-                  ? shop.banner
-                  : `${API}/storage/${shop.banner}`
+                ? resolveImageUrl(shop.banner, "/images/about-story.jpg")
                 : null;
 
               return (
@@ -160,6 +157,15 @@ export default function ShopsDirectory() {
                         src={bannerUrl}
                         alt={`${shop.name} banner`}
                         className="shop-card-banner-img"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (!target.getAttribute("data-fallback-applied")) {
+                            target.setAttribute("data-fallback-applied", "true");
+                            target.src = "/images/about-story.jpg";
+                          }
+                        }}
+                        loading="lazy"
+                        decoding="async"
                       />
                     )}
                     <div className="shop-card-banner-scrim" />
@@ -171,10 +177,13 @@ export default function ShopsDirectory() {
                           src={logoUrl}
                           alt={shop.name}
                           className="shop-card-avatar-img"
+                          onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
+                          loading="lazy"
+                          decoding="async"
                         />
                       ) : (
                         <div className="shop-card-avatar-fallback">
-                          {shop.name.charAt(0)}
+                          {shop.name ? shop.name.charAt(0).toUpperCase() : <Store size={22} />}
                         </div>
                       )}
                     </div>

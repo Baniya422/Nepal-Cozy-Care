@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendSellerApprovalEmail;
+use App\Jobs\SendSellerRejectionEmail;
+use App\Jobs\SendSellerVerificationEmail;
 use App\Models\Plant;
 use App\Models\Shop;
 use App\Models\User;
@@ -111,6 +114,13 @@ class AdminMarketplaceController extends Controller
             $user->update(['role' => User::ROLE_SELLER]);
         }
 
+        if ($shop->status === Shop::STATUS_APPROVED) {
+            SendSellerApprovalEmail::dispatch($shop->id)->afterResponse();
+        }
+        if ($shop->is_verified) {
+            SendSellerVerificationEmail::dispatch($shop->id)->afterResponse();
+        }
+
         return response()->json([
             'message' => "Vendor shop '{$shop->name}' created and assigned to '{$user->name}' successfully.",
             'data' => [
@@ -157,6 +167,8 @@ class AdminMarketplaceController extends Controller
             $owner->update(['role' => User::ROLE_SELLER]);
         }
 
+        SendSellerApprovalEmail::dispatch($shop->id)->afterResponse();
+
         return response()->json([
             'message' => "Shop '{$shop->name}' has been approved and seller access granted.",
             'data' => [
@@ -179,6 +191,8 @@ class AdminMarketplaceController extends Controller
             'status' => Shop::STATUS_REJECTED,
             'rejection_reason' => $validated['reason'],
         ]);
+
+        SendSellerRejectionEmail::dispatch($shop->id, $validated['reason'])->afterResponse();
 
         return response()->json([
             'message' => "Shop '{$shop->name}' has been rejected.",
@@ -224,6 +238,8 @@ class AdminMarketplaceController extends Controller
             'status' => Shop::STATUS_APPROVED,
         ]);
 
+        SendSellerApprovalEmail::dispatch($shop->id)->afterResponse();
+
         return response()->json([
             'message' => "Shop '{$shop->name}' has been reactivated.",
             'data' => [
@@ -241,6 +257,10 @@ class AdminMarketplaceController extends Controller
         $shop->update([
             'is_verified' => ! $shop->is_verified,
         ]);
+
+        if ($shop->is_verified) {
+            SendSellerVerificationEmail::dispatch($shop->id)->afterResponse();
+        }
 
         return response()->json([
             'message' => $shop->is_verified ? "Shop '{$shop->name}' is now verified." : "Verification removed for '{$shop->name}'.",

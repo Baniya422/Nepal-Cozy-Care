@@ -12,6 +12,8 @@ import {
   Search,
   ArrowLeft,
   Heart,
+  Camera,
+  CheckCircle2,
 } from "lucide-react";
 import type { Shop } from "../../types/shop";
 import type { Plant } from "../../types/plant";
@@ -29,6 +31,7 @@ export default function ShopDetail() {
   const [loadingPlants, setLoadingPlants] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [logoError, setLogoError] = useState(false);
   const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
 
   useEffect(() => {
@@ -36,6 +39,7 @@ export default function ShopDetail() {
 
     const fetchShop = async () => {
       setLoadingShop(true);
+      setLogoError(false);
       try {
         const res = await fetch(`${API}/api/shops/${slug}`);
         if (res.ok) {
@@ -120,15 +124,8 @@ export default function ShopDetail() {
     );
   }
 
-  const logoUrl = shop.logo
-    ? shop.logo.startsWith("http")
-      ? shop.logo
-      : `${API}/storage/${shop.logo}`
-    : null;
   const bannerUrl = shop.banner
-    ? shop.banner.startsWith("http")
-      ? shop.banner
-      : `${API}/storage/${shop.banner}`
+    ? resolveImageUrl(shop.banner, "/images/about-story.jpg")
     : null;
 
   return (
@@ -156,97 +153,147 @@ export default function ShopDetail() {
       {/* Shop Info Card Overlapping Banner */}
       <div className="shop-profile-card-wrap">
         <div className="shop-profile-card">
-          <div className="shop-profile-top">
-            {/* Logo */}
-            <div className="shop-profile-avatar">
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt={shop.name}
-                  className="shop-profile-avatar-img"
-                />
-              ) : (
-                <div className="shop-profile-avatar-fallback">
-                  {shop.name.charAt(0)}
+          <div className="shop-profile-layout">
+            {/* Left Column: Identity, Details, and Story */}
+            <div className="shop-profile-main-col">
+              <div className="shop-profile-top">
+                {/* Logo */}
+                <div className="shop-profile-avatar">
+                  {shop.logo && !logoError ? (
+                    <img
+                      src={resolveImageUrl(shop.logo, DEFAULT_PLANT_IMAGE)}
+                      alt={shop.name}
+                      className="shop-profile-avatar-img"
+                      onError={() => setLogoError(true)}
+                    />
+                  ) : (
+                    <div className="shop-profile-avatar-fallback">
+                      {shop.name ? shop.name.charAt(0).toUpperCase() : <Store size={26} />}
+                    </div>
+                  )}
+                </div>
+
+                <div className="shop-profile-info">
+                  <div className="shop-profile-title-row">
+                    <h1 className="shop-profile-name">
+                      {shop.name}
+                    </h1>
+                    {shop.is_verified && (
+                      <span className="shop-chip verified-chip">
+                        <ShieldCheck size={14} />
+                        Verified Partner Nursery
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="shop-profile-tagline">
+                    {shop.short_description ||
+                      "Specialized in healthy house plants, seasonal flowering varieties & gardening essentials."}
+                  </p>
+
+                  {/* Quick Meta Chips */}
+                  <div className="shop-chips-row">
+                    {shop.city && (
+                      <span className="shop-chip">
+                        <MapPin size={13} style={{ color: "#059669" }} />
+                        {shop.address ? `${shop.address}, ` : ""}
+                        {shop.city}
+                      </span>
+                    )}
+                    {shop.establishment_year && (
+                      <span className="shop-chip">
+                        <Calendar size={13} style={{ color: "#64748b" }} />
+                        Est. {shop.establishment_year}
+                      </span>
+                    )}
+                    <span className="shop-chip" style={{ color: "#047857", background: "#ecfdf5" }}>
+                      <Package size={13} />
+                      {shop.plants_count ?? plants.length} Available Items
+                    </span>
+                    {shop.phone && (
+                      <a href={`tel:${shop.phone}`} className="shop-chip contact-chip">
+                        <Phone size={13} />
+                        {shop.phone}
+                      </a>
+                    )}
+                    {shop.email && (
+                      <a href={`mailto:${shop.email}`} className="shop-chip contact-chip">
+                        <Mail size={13} />
+                        {shop.email}
+                      </a>
+                    )}
+                    {shop.website && (
+                      <a
+                        href={shop.website.startsWith("http") ? shop.website : `https://${shop.website}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="shop-chip contact-chip"
+                      >
+                        <Globe size={13} />
+                        {shop.website}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Description Story */}
+              {shop.description && (
+                <div className="shop-story-section">
+                  <h3 className="shop-story-heading">
+                    About The Nursery
+                  </h3>
+                  <p className="shop-story-text">
+                    {shop.description}
+                  </p>
                 </div>
               )}
             </div>
 
-            <div className="shop-profile-info">
-              <div className="shop-profile-title-row">
-                <h1 className="shop-profile-name">
-                  {shop.name}
-                </h1>
-                {shop.is_verified && (
-                  <span className="shop-chip verified-chip">
-                    <ShieldCheck size={14} />
-                    Verified Partner Nursery
+            {/* Right Column: Storefront Showcase & Store Image Section */}
+            <aside className="shop-profile-showcase-col" aria-label="Nursery Storefront">
+              <div className="shop-storefront-frame">
+                <img
+                  src={
+                    shop.banner
+                      ? resolveImageUrl(shop.banner, "/images/about-story.jpg")
+                      : "/images/about-story.jpg"
+                  }
+                  alt={`${shop.name} Storefront`}
+                  className="shop-storefront-img"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.getAttribute("data-fallback-applied")) {
+                      target.setAttribute("data-fallback-applied", "true");
+                      target.src = "/images/about-story.jpg";
+                    }
+                  }}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="shop-storefront-overlay">
+                  <span className="shop-storefront-badge">
+                    <Camera size={13} />
+                    Storefront & Nursery
                   </span>
-                )}
+                </div>
               </div>
 
-              <p className="shop-profile-tagline">
-                {shop.short_description ||
-                  "Specialized in healthy house plants, seasonal flowering varieties & gardening essentials."}
-              </p>
-
-              {/* Quick Meta Chips */}
-              <div className="shop-chips-row">
-                {shop.city && (
-                  <span className="shop-chip">
-                    <MapPin size={13} style={{ color: "#059669" }} />
-                    {shop.address ? `${shop.address}, ` : ""}
-                    {shop.city}
+              <div className="shop-storefront-meta">
+                <div className="shop-storefront-stat">
+                  <span className="shop-stat-label">Nursery Base</span>
+                  <span className="shop-stat-val">{shop.city ? `${shop.city}, Nepal` : "Nepal"}</span>
+                </div>
+                <div className="shop-storefront-stat">
+                  <span className="shop-stat-label">Fulfillment</span>
+                  <span className="shop-stat-val shop-stat-highlight">
+                    <CheckCircle2 size={12} style={{ display: "inline", marginRight: "4px" }} />
+                    Direct Dispatch
                   </span>
-                )}
-                {shop.establishment_year && (
-                  <span className="shop-chip">
-                    <Calendar size={13} style={{ color: "#64748b" }} />
-                    Est. {shop.establishment_year}
-                  </span>
-                )}
-                <span className="shop-chip" style={{ color: "#047857", background: "#ecfdf5" }}>
-                  <Package size={13} />
-                  {shop.plants_count ?? plants.length} Available Items
-                </span>
-                {shop.phone && (
-                  <a href={`tel:${shop.phone}`} className="shop-chip contact-chip">
-                    <Phone size={13} />
-                    {shop.phone}
-                  </a>
-                )}
-                {shop.email && (
-                  <a href={`mailto:${shop.email}`} className="shop-chip contact-chip">
-                    <Mail size={13} />
-                    {shop.email}
-                  </a>
-                )}
-                {shop.website && (
-                  <a
-                    href={shop.website.startsWith("http") ? shop.website : `https://${shop.website}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="shop-chip contact-chip"
-                  >
-                    <Globe size={13} />
-                    {shop.website}
-                  </a>
-                )}
+                </div>
               </div>
-            </div>
+            </aside>
           </div>
-
-          {/* Description Story */}
-          {shop.description && (
-            <div className="shop-story-section">
-              <h3 className="shop-story-heading">
-                About The Nursery
-              </h3>
-              <p className="shop-story-text">
-                {shop.description}
-              </p>
-            </div>
-          )}
         </div>
       </div>
 

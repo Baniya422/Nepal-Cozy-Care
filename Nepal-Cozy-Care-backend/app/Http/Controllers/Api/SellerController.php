@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendSellerApplicationEmails;
 use App\Models\Blog;
 use App\Models\CareTip;
 use App\Models\OrderItem;
@@ -96,6 +97,8 @@ class SellerController extends Controller
         } else {
             $shop = Shop::create($validated);
         }
+
+        SendSellerApplicationEmails::dispatch($shop->id)->afterResponse();
 
         return response()->json([
             'message' => 'Seller application submitted successfully! It is now pending super admin approval.',

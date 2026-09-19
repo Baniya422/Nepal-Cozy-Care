@@ -2,6 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\SellerApplicationReceivedAdmin;
+use App\Mail\SellerApplicationReceivedVendor;
+use App\Mail\SellerShopApproved;
+use App\Mail\SellerShopRejected;
+use App\Mail\SellerShopVerified;
+use App\Models\AdminSetting;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -10,6 +16,7 @@ use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -69,8 +76,21 @@ class MarketplaceMultiVendorTest extends TestCase
         ]);
     }
 
-    public function test_customer_can_apply_to_become_a_seller()
+    public function test_customer_can_apply_to_become_a_seller_and_emails_are_sent()
     {
+        Mail::fake();
+        AdminSetting::query()->firstOrCreate([])->update([
+            'mail_enabled' => true,
+            'mail_host' => 'smtp.example.com',
+            'mail_port' => 587,
+            'mail_username' => 'mailer@example.com',
+            'mail_password' => 'secret',
+            'mail_encryption' => 'tls',
+            'mail_from_address' => 'noreply@nepalcozycare.com',
+            'mail_from_name' => 'Nepal Cozy Care',
+            'contact_recipient' => 'admin@nepalcozycare.com',
+        ]);
+
         $response = $this->actingAs($this->customer, 'sanctum')
             ->postJson('/api/seller/apply', [
                 'name' => 'Pokhara Green House',
@@ -90,11 +110,32 @@ class MarketplaceMultiVendorTest extends TestCase
             'status' => Shop::STATUS_PENDING,
             'user_id' => $this->customer->id,
         ]);
+
+        Mail::assertSent(SellerApplicationReceivedVendor::class, function ($mail) {
+            return $mail->hasTo('pokhara@greenhouse.com') && $mail->shop->name === 'Pokhara Green House';
+        });
+
+        Mail::assertSent(SellerApplicationReceivedAdmin::class, function ($mail) {
+            return $mail->hasTo('admin@nepalcozycare.com') && $mail->shop->name === 'Pokhara Green House';
+        });
     }
 
-    public function test_super_admin_can_approve_seller_application_and_grant_role()
+    public function test_super_admin_can_approve_seller_application_and_sends_email()
     {
-        $applicant = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
+        Mail::fake();
+        AdminSetting::query()->firstOrCreate([])->update([
+            'mail_enabled' => true,
+            'mail_host' => 'smtp.example.com',
+            'mail_port' => 587,
+            'mail_username' => 'mailer@example.com',
+            'mail_password' => 'secret',
+            'mail_encryption' => 'tls',
+            'mail_from_address' => 'noreply@nepalcozycare.com',
+            'mail_from_name' => 'Nepal Cozy Care',
+            'contact_recipient' => 'admin@nepalcozycare.com',
+        ]);
+
+        $applicant = User::factory()->create(['role' => User::ROLE_CUSTOMER, 'email' => 'bonsai_owner@example.com']);
         $shop = Shop::create([
             'user_id' => $applicant->id,
             'name' => 'Bhaktapur Bonsai',
@@ -112,10 +153,66 @@ class MarketplaceMultiVendorTest extends TestCase
         $response->assertStatus(200);
         $this->assertEquals(Shop::STATUS_APPROVED, $shop->fresh()->status);
         $this->assertEquals(User::ROLE_SELLER, $applicant->fresh()->role);
+
+        Mail::assertSent(SellerShopApproved::class, function ($mail) {
+            return $mail->hasTo('bonsai@bhaktapur.com') && $mail->shop->name === 'Bhaktapur Bonsai';
+        });
     }
 
-    public function test_super_admin_can_reject_seller_application_with_reason()
+    public function test_super_admin_can_verify_vendor_shop_and_sends_email()
     {
+        Mail::fake();
+        AdminSetting::query()->firstOrCreate([])->update([
+            'mail_enabled' => true,
+            'mail_host' => 'smtp.example.com',
+            'mail_port' => 587,
+            'mail_username' => 'mailer@example.com',
+            'mail_password' => 'secret',
+            'mail_encryption' => 'tls',
+            'mail_from_address' => 'noreply@nepalcozycare.com',
+            'mail_from_name' => 'Nepal Cozy Care',
+            'contact_recipient' => 'admin@nepalcozycare.com',
+        ]);
+
+        $applicant = User::factory()->create(['role' => User::ROLE_SELLER]);
+        $shop = Shop::create([
+            'user_id' => $applicant->id,
+            'name' => 'Kathmandu Flora Studio',
+            'slug' => 'kathmandu-flora-studio',
+            'email' => 'flora@ktm.com',
+            'phone' => '9822222222',
+            'address' => 'Baluwatar',
+            'city' => 'Kathmandu',
+            'status' => Shop::STATUS_APPROVED,
+            'is_verified' => false,
+        ]);
+
+        $response = $this->actingAs($this->superAdmin, 'sanctum')
+            ->postJson("/api/admin/shops/{$shop->id}/verify");
+
+        $response->assertStatus(200);
+        $this->assertTrue($shop->fresh()->is_verified);
+
+        Mail::assertSent(SellerShopVerified::class, function ($mail) {
+            return $mail->hasTo('flora@ktm.com') && $mail->shop->name === 'Kathmandu Flora Studio';
+        });
+    }
+
+    public function test_super_admin_can_reject_seller_application_with_reason_and_sends_email()
+    {
+        Mail::fake();
+        AdminSetting::query()->firstOrCreate([])->update([
+            'mail_enabled' => true,
+            'mail_host' => 'smtp.example.com',
+            'mail_port' => 587,
+            'mail_username' => 'mailer@example.com',
+            'mail_password' => 'secret',
+            'mail_encryption' => 'tls',
+            'mail_from_address' => 'noreply@nepalcozycare.com',
+            'mail_from_name' => 'Nepal Cozy Care',
+            'contact_recipient' => 'admin@nepalcozycare.com',
+        ]);
+
         $applicant = User::factory()->create(['role' => User::ROLE_CUSTOMER]);
         $shop = Shop::create([
             'user_id' => $applicant->id,
@@ -136,6 +233,10 @@ class MarketplaceMultiVendorTest extends TestCase
         $response->assertStatus(200);
         $this->assertEquals(Shop::STATUS_REJECTED, $shop->fresh()->status);
         $this->assertEquals('Incomplete business credentials provided.', $shop->fresh()->rejection_reason);
+
+        Mail::assertSent(SellerShopRejected::class, function ($mail) {
+            return $mail->hasTo('spam@example.com') && $mail->reason === 'Incomplete business credentials provided.';
+        });
     }
 
     public function test_seller_cannot_access_super_admin_endpoints()
