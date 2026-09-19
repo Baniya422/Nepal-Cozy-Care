@@ -37,9 +37,12 @@ export function resolveImageUrl(
     return trimmed;
   }
 
-  // Already prefixed with /storage/
+  // Already prefixed with /storage/ or storage/
   if (trimmed.startsWith("/storage/")) {
     return `${API}${trimmed}`;
+  }
+  if (trimmed.startsWith("storage/")) {
+    return `${API}/${trimmed}`;
   }
 
   // Frontend public image paths

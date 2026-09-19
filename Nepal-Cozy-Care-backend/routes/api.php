@@ -170,6 +170,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/shops', [AdminMarketplaceController::class, 'shops']);
     Route::post('/admin/shops', [AdminMarketplaceController::class, 'storeShop']);
     Route::get('/admin/shops/{id}', [AdminMarketplaceController::class, 'showShop']);
+    Route::put('/admin/shops/{id}', [AdminMarketplaceController::class, 'updateShop']);
+    Route::post('/admin/shops/{id}', [AdminMarketplaceController::class, 'updateShop']);
     Route::post('/admin/shops/{id}/approve', [AdminMarketplaceController::class, 'approveShop']);
     Route::post('/admin/shops/{id}/reject', [AdminMarketplaceController::class, 'rejectShop']);
     Route::post('/admin/shops/{id}/suspend', [AdminMarketplaceController::class, 'suspendShop']);

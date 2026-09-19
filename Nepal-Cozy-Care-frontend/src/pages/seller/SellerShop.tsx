@@ -106,9 +106,18 @@ export default function SellerShop() {
       }
 
       setStatusMsg({ type: "success", text: "Shop details updated successfully!" });
-      setShop(json.data.shop);
+      const updatedShop = json.data.shop as Shop;
+      setShop(updatedShop);
+      setLogoFile(null);
+      setBannerFile(null);
+      if (updatedShop.logo) {
+        setLogoPreview(resolveImageUrl(updatedShop.logo, DEFAULT_PLANT_IMAGE) + `?t=${Date.now()}`);
+      }
+      if (updatedShop.banner) {
+        setBannerPreview(resolveImageUrl(updatedShop.banner, DEFAULT_PLANT_IMAGE) + `?t=${Date.now()}`);
+      }
       window.dispatchEvent(
-        new CustomEvent("cozycare:seller-shop-updated", { detail: json.data.shop })
+        new CustomEvent("cozycare:seller-shop-updated", { detail: updatedShop })
       );
     } catch (err: any) {
       setStatusMsg({ type: "error", text: err.message || "Failed to save changes." });

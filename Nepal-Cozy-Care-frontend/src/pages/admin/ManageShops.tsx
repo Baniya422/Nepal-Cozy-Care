@@ -10,6 +10,9 @@ import {
   Plus,
   ShieldAlert,
   Building2,
+  Edit,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
@@ -45,9 +48,94 @@ export default function ManageShops() {
   const [newShopVerified, setNewShopVerified] = useState(true);
   const [creatingShop, setCreatingShop] = useState(false);
 
+  // Edit Shop Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingShop, setEditingShop] = useState<Shop | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    short_description: "",
+    description: "",
+    establishment_year: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    website: "",
+    is_verified: false,
+    status: "approved",
+  });
+  const [editLogoFile, setEditLogoFile] = useState<File | null>(null);
+  const [editBannerFile, setEditBannerFile] = useState<File | null>(null);
+  const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null);
+  const [editBannerPreview, setEditBannerPreview] = useState<string | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
+
   useEffect(() => {
     fetchShops();
   }, []);
+
+  const openEditModal = (shop: Shop) => {
+    setEditingShop(shop);
+    setEditFormData({
+      name: shop.name || "",
+      short_description: shop.short_description || "",
+      description: shop.description || "",
+      establishment_year: shop.establishment_year?.toString() || "",
+      email: shop.email || "",
+      phone: shop.phone || "",
+      address: shop.address || "",
+      city: shop.city || "Kathmandu",
+      website: shop.website || "",
+      is_verified: !!shop.is_verified,
+      status: shop.status || "approved",
+    });
+    setEditLogoFile(null);
+    setEditBannerFile(null);
+    setEditLogoPreview(shop.logo ? resolveImageUrl(shop.logo, DEFAULT_PLANT_IMAGE) : null);
+    setEditBannerPreview(shop.banner ? resolveImageUrl(shop.banner, DEFAULT_PLANT_IMAGE) : null);
+    setShowEditModal(true);
+  };
+
+  const handleEditShopSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingShop) return;
+
+    setSavingEdit(true);
+    setActionFeedback(null);
+    try {
+      const token = localStorage.getItem("token");
+      const data = new FormData();
+      Object.entries(editFormData).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) {
+          data.append(k, String(v));
+        }
+      });
+      if (editLogoFile) data.append("logo", editLogoFile);
+      if (editBannerFile) data.append("banner", editBannerFile);
+
+      const res = await fetch(`${API}/api/admin/shops/${editingShop.id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: data,
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Failed to update shop details.");
+      }
+
+      setActionFeedback({ type: "success", text: json.message || "Shop updated successfully!" });
+      setShowEditModal(false);
+      fetchShops();
+    } catch (err: any) {
+      setActionFeedback({ type: "error", text: err.message });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const openCreateModal = async () => {
     setShowCreateModal(true);
@@ -388,6 +476,22 @@ export default function ManageShops() {
                     </td>
                     <td style={{ textAlign: "right" }}>
                       <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", justifyContent: "flex-end" }}>
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(shop)}
+                          className="admin-btn admin-btn-sm"
+                          style={{
+                            background: "#f0fdf4",
+                            color: "#166534",
+                            border: "1px solid #bbf7d0",
+                            fontWeight: 600,
+                          }}
+                          title="Edit Nursery Details, Logo & Banner"
+                        >
+                          <Edit size={13} />
+                          <span>Edit</span>
+                        </button>
+
                         <a
                           href={`/seller/dashboard?admin_shop_id=${shop.id}`}
                           target="_blank"
@@ -579,6 +683,283 @@ export default function ManageShops() {
                     className="admin-btn admin-btn-primary"
                   >
                     {creatingShop ? "Creating..." : "Create & Activate Shop"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Shop Modal */}
+        {showEditModal && editingShop && (
+          <div className="admin-modal-overlay">
+            <div className="admin-modal admin-modal-large" style={{ maxWidth: "800px", maxHeight: "90vh", overflowY: "auto" }}>
+              <div className="admin-modal-header">
+                <div>
+                  <h3>Edit Nursery & Storefront Details</h3>
+                  <p style={{ fontSize: "0.78rem", color: "#64748b", margin: "0.2rem 0 0" }}>
+                    Update branding, banner, logo, and contact info for <strong>{editingShop.name}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="admin-modal-close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleEditShopSubmit} className="admin-form">
+                {/* Visual Imagery Section */}
+                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "1.25rem", marginBottom: "1rem" }}>
+                  <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.75rem 0", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    <ImageIcon size={16} style={{ color: "#059669" }} />
+                    Storefront Brand Imagery
+                  </h4>
+
+                  {/* Banner Upload */}
+                  <div style={{ marginBottom: "1.25rem" }}>
+                    <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#334155", display: "block", marginBottom: "0.4rem" }}>
+                      Storefront Banner Image (Recommended: 1200x350)
+                    </label>
+                    <div style={{ height: "130px", background: "#f1f5f9", borderRadius: "8px", overflow: "hidden", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", border: "1px dashed #cbd5e1" }}>
+                      {editBannerPreview ? (
+                        <img
+                          src={editBannerPreview}
+                          alt="Banner Preview"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
+                        />
+                      ) : (
+                        <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>No banner image uploaded</span>
+                      )}
+                      <label
+                        style={{
+                          position: "absolute",
+                          bottom: "8px",
+                          right: "8px",
+                          background: "rgba(255,255,255,0.95)",
+                          color: "#1e293b",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          padding: "0.35rem 0.75rem",
+                          borderRadius: "6px",
+                          boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                        }}
+                      >
+                        <Upload size={13} />
+                        <span>{editBannerPreview ? "Change Banner" : "Upload Banner"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setEditBannerFile(file);
+                              setEditBannerPreview(URL.createObjectURL(file));
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Logo Upload */}
+                  <div>
+                    <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#334155", display: "block", marginBottom: "0.4rem" }}>
+                      Shop Logo (Recommended: Square 400x400)
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                      <div style={{ width: "64px", height: "64px", borderRadius: "10px", background: "#ffffff", border: "2px solid #e2e8f0", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        {editLogoPreview ? (
+                          <img
+                            src={editLogoPreview}
+                            alt="Logo Preview"
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
+                          />
+                        ) : (
+                          <Store size={24} style={{ color: "#94a3b8" }} />
+                        )}
+                      </div>
+                      <div>
+                        <label className="admin-btn admin-btn-secondary admin-btn-sm" style={{ cursor: "pointer", display: "inline-flex" }}>
+                          <Upload size={13} />
+                          <span>{editLogoPreview ? "Change Logo" : "Upload Logo"}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: "none" }}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setEditLogoFile(file);
+                                setEditLogoPreview(URL.createObjectURL(file));
+                              }
+                            }}
+                          />
+                        </label>
+                        <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0.3rem 0 0" }}>
+                          Supports PNG, JPG, or WEBP up to 5MB.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Basic Info */}
+                <div className="admin-form-group">
+                  <label htmlFor="editName">Shop / Nursery Name *</label>
+                  <input
+                    id="editName"
+                    type="text"
+                    required
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label htmlFor="editShortDesc">Tagline / Short Summary</label>
+                  <input
+                    id="editShortDesc"
+                    type="text"
+                    value={editFormData.short_description}
+                    onChange={(e) => setEditFormData({ ...editFormData, short_description: e.target.value })}
+                    placeholder="e.g. Specialized in rare house plants and organic potting supplies"
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label htmlFor="editDescription">Full Nursery Story & About</label>
+                  <textarea
+                    id="editDescription"
+                    rows={3}
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                    placeholder="Detailed information about the nursery history, varieties, and fulfillment..."
+                  />
+                </div>
+
+                <div className="admin-form-grid">
+                  <div className="admin-form-group">
+                    <label htmlFor="editCity">City / Region *</label>
+                    <input
+                      id="editCity"
+                      type="text"
+                      required
+                      value={editFormData.city}
+                      onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                    />
+                  </div>
+                  <div className="admin-form-group">
+                    <label htmlFor="editAddress">Physical Address</label>
+                    <input
+                      id="editAddress"
+                      type="text"
+                      value={editFormData.address}
+                      onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-grid">
+                  <div className="admin-form-group">
+                    <label htmlFor="editEmail">Official Contact Email *</label>
+                    <input
+                      id="editEmail"
+                      type="email"
+                      required
+                      value={editFormData.email}
+                      onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                    />
+                  </div>
+                  <div className="admin-form-group">
+                    <label htmlFor="editPhone">Contact Phone</label>
+                    <input
+                      id="editPhone"
+                      type="text"
+                      value={editFormData.phone}
+                      onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-grid">
+                  <div className="admin-form-group">
+                    <label htmlFor="editWebsite">Website (Optional)</label>
+                    <input
+                      id="editWebsite"
+                      type="text"
+                      value={editFormData.website}
+                      onChange={(e) => setEditFormData({ ...editFormData, website: e.target.value })}
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                  <div className="admin-form-group">
+                    <label htmlFor="editEstablishment">Establishment Year</label>
+                    <input
+                      id="editEstablishment"
+                      type="number"
+                      min={1900}
+                      max={new Date().getFullYear()}
+                      value={editFormData.establishment_year}
+                      onChange={(e) => setEditFormData({ ...editFormData, establishment_year: e.target.value })}
+                      placeholder="e.g. 2018"
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-grid" style={{ marginTop: "0.5rem" }}>
+                  <div className="admin-form-group">
+                    <label htmlFor="editStatus">Shop Status</label>
+                    <select
+                      id="editStatus"
+                      value={editFormData.status}
+                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
+                    >
+                      <option value="approved">Approved (Live)</option>
+                      <option value="pending">Pending Review</option>
+                      <option value="suspended">Suspended</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-form-checkbox" style={{ display: "flex", alignItems: "center", marginTop: "1.75rem" }}>
+                    <label style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={editFormData.is_verified}
+                        onChange={(e) => setEditFormData({ ...editFormData, is_verified: e.target.checked })}
+                      />
+                      <span style={{ fontWeight: 600, color: "#065f46", fontSize: "0.85rem", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+                        <ShieldCheck size={15} style={{ color: "#059669" }} />
+                        Verified Partner Nursery Badge
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="admin-modal-footer" style={{ marginTop: "1.5rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="admin-btn admin-btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEdit}
+                    className="admin-btn admin-btn-primary"
+                  >
+                    {savingEdit ? "Saving Changes..." : "Save Shop Changes"}
                   </button>
                 </div>
               </form>

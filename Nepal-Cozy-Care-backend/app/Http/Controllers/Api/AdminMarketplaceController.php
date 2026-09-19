@@ -271,6 +271,70 @@ class AdminMarketplaceController extends Controller
     }
 
     /**
+     * Update an existing shop's profile, logo, or banner (Admin).
+     */
+    public function updateShop(Request $request, $id)
+    {
+        $shop = Shop::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:shops,slug,'.$shop->id,
+            'short_description' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'establishment_year' => 'nullable|integer|min:1900|max:'.date('Y'),
+            'email' => 'sometimes|required|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'city' => 'sometimes|required|string|max:100',
+            'website' => 'nullable|string|max:255',
+            'is_verified' => 'nullable',
+            'status' => 'nullable|string|in:pending,approved,suspended,rejected',
+            'logo' => 'nullable',
+            'banner' => 'nullable',
+        ]);
+
+        if (isset($validated['is_verified'])) {
+            $validated['is_verified'] = filter_var($validated['is_verified'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if ($request->hasFile('logo')) {
+            $logoFile = $request->file('logo');
+            $filename = time().'_logo_'.$logoFile->getClientOriginalName();
+            $path = $logoFile->storeAs('shops/logos', $filename, 'public');
+            $validated['logo'] = $path;
+        }
+
+        if ($request->hasFile('banner')) {
+            $bannerFile = $request->file('banner');
+            $filename = time().'_banner_'.$bannerFile->getClientOriginalName();
+            $path = $bannerFile->storeAs('shops/banners', $filename, 'public');
+            $validated['banner'] = $path;
+        }
+
+        $wasVerified = $shop->is_verified;
+        $wasStatus = $shop->status;
+
+        $shop->update($validated);
+        $freshShop = $shop->fresh(['user', 'approvedBy']);
+
+        if (! $wasVerified && $freshShop->is_verified) {
+            SendSellerVerificationEmail::dispatch($freshShop->id)->afterResponse();
+        }
+
+        if ($wasStatus !== Shop::STATUS_APPROVED && $freshShop->status === Shop::STATUS_APPROVED) {
+            SendSellerApprovalEmail::dispatch($freshShop->id)->afterResponse();
+        }
+
+        return response()->json([
+            'message' => "Shop '{$freshShop->name}' updated successfully.",
+            'data' => [
+                'shop' => $freshShop,
+            ],
+        ]);
+    }
+
+    /**
      * List all marketplace products for Super Admin oversight.
      */
     public function products(Request $request)
