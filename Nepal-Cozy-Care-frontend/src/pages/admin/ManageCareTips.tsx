@@ -16,6 +16,7 @@ import {
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 import "../../styles/adminCareTips.css";
+import { handleImageError, resolveImageUrl } from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 interface CareTip {
   id: number;
@@ -216,7 +217,7 @@ export default function ManageCareTips() {
       status: tip.status,
     });
     setSelectedImage(null);
-    setImagePreview(tip.image ? `${API}/storage/${tip.image}` : null);
+    setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : null);
     setSubmitError(null);
     setShowModal(true);
   };
@@ -383,8 +384,10 @@ export default function ManageCareTips() {
                       <div className="admin-care-tip-cell">
                         <div className="admin-care-tip-thumb">
                           <img
-                            src={tip.image ? `${API}/storage/${tip.image}` : FALLBACK_IMAGE}
+                            src={resolveImageUrl(tip.image, FALLBACK_IMAGE)}
                             alt={tip.title}
+                            onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
+                            loading="lazy"
                           />
                         </div>
                         <div className="admin-care-tip-copy">
@@ -475,8 +478,9 @@ export default function ManageCareTips() {
                 <div className="admin-care-tip-preview-hero">
                   <div className="admin-care-tip-preview-media">
                     <img
-                      src={previewTip.image ? `${API}/storage/${previewTip.image}` : FALLBACK_IMAGE}
+                      src={resolveImageUrl(previewTip.image, FALLBACK_IMAGE)}
                       alt={previewTip.title}
+                      onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
                     />
                   </div>
                   <div className="admin-care-tip-preview-copy">
@@ -663,7 +667,11 @@ export default function ManageCareTips() {
                   <div className="admin-image-upload">
                     {imagePreview && (
                       <div className="admin-image-preview admin-care-tip-image-preview">
-                        <img src={imagePreview} alt="Preview" />
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
+                        />
                       </div>
                     )}
                     <label className="admin-file-input">
@@ -680,7 +688,11 @@ export default function ManageCareTips() {
                   </div>
                   <div className="admin-care-tip-live-card">
                     <div className="admin-care-tip-live-media">
-                      <img src={imagePreview || FALLBACK_IMAGE} alt="Care tip preview" />
+                      <img
+                        src={imagePreview || FALLBACK_IMAGE}
+                        alt="Care tip preview"
+                        onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
+                      />
                     </div>
                     <div className="admin-care-tip-live-copy">
                       <span className="admin-care-tip-category-pill">

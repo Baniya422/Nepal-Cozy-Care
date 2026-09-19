@@ -11,6 +11,7 @@ import {
 import SellerLayout from "../../components/seller/SellerLayout";
 import "../../components/seller/seller.css";
 import type { Shop } from "../../types/shop";
+import { DEFAULT_PLANT_IMAGE, handleImageError, resolveImageUrl } from "../../utils/imageUrl";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -63,10 +64,10 @@ export default function SellerShop() {
           website: s.website || "",
         });
         if (s.logo) {
-          setLogoPreview(s.logo.startsWith("http") ? s.logo : `${API}/storage/${s.logo}`);
+          setLogoPreview(resolveImageUrl(s.logo, DEFAULT_PLANT_IMAGE));
         }
         if (s.banner) {
-          setBannerPreview(s.banner.startsWith("http") ? s.banner : `${API}/storage/${s.banner}`);
+          setBannerPreview(resolveImageUrl(s.banner, DEFAULT_PLANT_IMAGE));
         }
       }
     } catch (err) {
@@ -196,7 +197,11 @@ export default function SellerShop() {
                 </label>
                 <div className="seller-banner-upload-box">
                   {bannerPreview ? (
-                    <img src={bannerPreview} alt="Banner Preview" />
+                    <img
+                      src={bannerPreview}
+                      alt="Banner Preview"
+                      onError={(event) => handleImageError(event, DEFAULT_PLANT_IMAGE)}
+                    />
                   ) : (
                     <span style={{ fontSize: "0.82rem", color: "#94a3b8" }}>No banner uploaded yet</span>
                   )}
@@ -244,7 +249,11 @@ export default function SellerShop() {
                 <div className="seller-logo-upload-wrap">
                   <div className="seller-logo-avatar-box">
                     {logoPreview ? (
-                      <img src={logoPreview} alt="Logo Preview" />
+                      <img
+                        src={logoPreview}
+                        alt="Logo Preview"
+                        onError={(event) => handleImageError(event, DEFAULT_PLANT_IMAGE)}
+                      />
                     ) : (
                       shop?.name?.charAt(0) || <Store size={26} />
                     )}

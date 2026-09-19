@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { ShoppingBag, Search, MapPin, Phone, User, Calendar } from "lucide-react";
 import SellerLayout from "../../components/seller/SellerLayout";
 import "../../components/seller/seller.css";
+import {
+  DEFAULT_PLANT_IMAGE,
+  handleImageError,
+  resolveImageUrl,
+} from "../../utils/imageUrl";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -167,12 +172,10 @@ export default function SellerOrders() {
                   >
                     {item.product_image ? (
                       <img
-                        src={
-                          item.product_image.startsWith("http")
-                            ? item.product_image
-                            : `${API}/storage/${item.product_image}`
-                        }
+                        src={resolveImageUrl(item.product_image, DEFAULT_PLANT_IMAGE)}
                         alt={item.product_name}
+                        onError={(event) => handleImageError(event, DEFAULT_PLANT_IMAGE)}
+                        loading="lazy"
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     ) : (

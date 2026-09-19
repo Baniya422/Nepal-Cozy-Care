@@ -17,6 +17,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 import type { Shop } from "../../types/shop";
+import { DEFAULT_PLANT_IMAGE, handleImageError, resolveImageUrl } from "../../utils/imageUrl";
 import "./seller.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -137,8 +138,9 @@ function SellerLayoutShell({ children }: SellerLayoutProps) {
               <div className="seller-shop-avatar">
                 {shop.logo ? (
                   <img
-                    src={shop.logo.startsWith("http") ? shop.logo : `${API}/storage/${shop.logo}`}
+                    src={resolveImageUrl(shop.logo, DEFAULT_PLANT_IMAGE)}
                     alt={shop.name}
+                    onError={(event) => handleImageError(event, DEFAULT_PLANT_IMAGE)}
                   />
                 ) : (
                   shop.name.charAt(0)

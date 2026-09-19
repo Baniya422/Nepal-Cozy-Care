@@ -14,6 +14,11 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 import type { Plant } from "../../types/plant";
 import type { Shop } from "../../types/shop";
+import {
+  DEFAULT_PLANT_IMAGE,
+  handleImageError,
+  resolveImageUrl,
+} from "../../utils/imageUrl";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -287,12 +292,11 @@ export default function ManageMarketplaceProducts() {
                         >
                           {plant.image ? (
                             <img
-                              src={
-                                plant.image.startsWith("http")
-                                  ? plant.image
-                                  : `${API}/storage/${plant.image}`
-                              }
+                              src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
                               alt={plant.name}
+                              onError={(event) => handleImageError(event, DEFAULT_PLANT_IMAGE)}
+                              loading="lazy"
+                              decoding="async"
                               style={{ width: "100%", height: "100%", objectFit: "cover" }}
                             />
                           ) : (

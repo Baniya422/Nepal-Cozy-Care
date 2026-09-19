@@ -14,6 +14,11 @@ import {
 } from "lucide-react";
 import SellerLayout from "../../components/seller/SellerLayout";
 import "../../components/seller/seller.css";
+import {
+  DEFAULT_BLOG_IMAGE,
+  handleImageError,
+  resolveImageUrl,
+} from "../../utils/imageUrl";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -99,13 +104,7 @@ export default function SellerBlogs() {
       is_published: blog.is_published,
     });
     setImageFile(null);
-    setImagePreview(
-      blog.image
-        ? blog.image.startsWith("http")
-          ? blog.image
-          : `${API}/storage/${blog.image}`
-        : null
-    );
+    setImagePreview(blog.image ? resolveImageUrl(blog.image, DEFAULT_BLOG_IMAGE) : null);
     setShowModal(true);
   };
 
@@ -337,12 +336,10 @@ export default function SellerBlogs() {
                           >
                             {b.image ? (
                               <img
-                                src={
-                                  b.image.startsWith("http")
-                                    ? b.image
-                                    : `${API}/storage/${b.image}`
-                                }
+                                src={resolveImageUrl(b.image, DEFAULT_BLOG_IMAGE)}
                                 alt={b.title}
+                                onError={(event) => handleImageError(event, DEFAULT_BLOG_IMAGE)}
+                                loading="lazy"
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               />
                             ) : (
@@ -512,6 +509,7 @@ export default function SellerBlogs() {
                           <img
                             src={imagePreview}
                             alt="Cover Preview"
+                            onError={(event) => handleImageError(event, DEFAULT_BLOG_IMAGE)}
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           />
                         </div>

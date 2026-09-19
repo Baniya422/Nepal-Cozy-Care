@@ -14,6 +14,11 @@ import {
 } from "lucide-react";
 import SellerLayout from "../../components/seller/SellerLayout";
 import "../../components/seller/seller.css";
+import {
+  DEFAULT_CARE_TIP_IMAGE,
+  handleImageError,
+  resolveImageUrl,
+} from "../../utils/imageUrl";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -103,11 +108,7 @@ export default function SellerCareTips() {
     });
     setImageFile(null);
     setImagePreview(
-      tip.image
-        ? tip.image.startsWith("http")
-          ? tip.image
-          : `${API}/storage/${tip.image}`
-        : null
+      tip.image ? resolveImageUrl(tip.image, DEFAULT_CARE_TIP_IMAGE) : null
     );
     setShowModal(true);
   };
@@ -348,12 +349,10 @@ export default function SellerCareTips() {
                           >
                             {tip.image ? (
                               <img
-                                src={
-                                  tip.image.startsWith("http")
-                                    ? tip.image
-                                    : `${API}/storage/${tip.image}`
-                                }
+                                src={resolveImageUrl(tip.image, DEFAULT_CARE_TIP_IMAGE)}
                                 alt={tip.title}
+                                onError={(event) => handleImageError(event, DEFAULT_CARE_TIP_IMAGE)}
+                                loading="lazy"
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               />
                             ) : (
@@ -549,6 +548,7 @@ export default function SellerCareTips() {
                           <img
                             src={imagePreview}
                             alt="Tip Preview"
+                            onError={(event) => handleImageError(event, DEFAULT_CARE_TIP_IMAGE)}
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           />
                         </div>

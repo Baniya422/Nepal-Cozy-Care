@@ -19,6 +19,11 @@ import {
 import AdminLayout from "../../components/admin/AdminLayout";
 import { CURATED_BLOGS } from "../../features/blogs/curatedBlogs";
 import "../../components/admin/admin.css";
+import {
+  DEFAULT_BLOG_IMAGE,
+  handleImageError,
+  resolveImageUrl,
+} from "../../utils/imageUrl";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -215,13 +220,7 @@ export default function ManageBlogs() {
       image: blog.image || "/images/blog-hero-lush.jpg",
     });
     setSelectedImageFile(null);
-    setImagePreview(
-      blog.image
-        ? blog.image.startsWith("http") || blog.image.startsWith("/")
-          ? blog.image
-          : `${API}/storage/${blog.image}`
-        : "/images/blog-hero-lush.jpg"
-    );
+    setImagePreview(resolveImageUrl(blog.image, DEFAULT_BLOG_IMAGE));
     setViewMode("editor");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -804,7 +803,12 @@ export default function ManageBlogs() {
                   {/* Thumbnail Preview */}
                   {imagePreview && (
                     <div style={{ marginBottom: "1rem", borderRadius: "10px", overflow: "hidden", border: "1px solid #cbd5e1", height: "160px" }}>
-                      <img src={imagePreview} alt="Cover Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img
+                        src={imagePreview}
+                        alt="Cover Preview"
+                        onError={(event) => handleImageError(event, DEFAULT_BLOG_IMAGE)}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
                     </div>
                   )}
 
@@ -1092,14 +1096,10 @@ export default function ManageBlogs() {
                               }}
                             >
                               <img
-                                src={
-                                  blog.image
-                                    ? blog.image.startsWith("http") || blog.image.startsWith("/")
-                                      ? blog.image
-                                      : `${API}/storage/${blog.image}`
-                                    : "/images/blog-hero-lush.jpg"
-                                }
+                                src={resolveImageUrl(blog.image, DEFAULT_BLOG_IMAGE)}
                                 alt={blog.title}
+                                onError={(event) => handleImageError(event, DEFAULT_BLOG_IMAGE)}
+                                loading="lazy"
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               />
                             </div>

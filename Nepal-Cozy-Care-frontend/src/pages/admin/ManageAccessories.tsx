@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Eye, Edit, Trash2, X, Upload } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
+import { DEFAULT_POT_IMAGE, handleImageError, resolveImageUrl } from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 interface Accessory {
   id: number;
@@ -167,10 +168,7 @@ export default function ManageAccessories() {
       is_active: accessory.is_active,
     });
     if (accessory.image) {
-      const imageUrl = accessory.image.startsWith("http")
-        ? accessory.image
-        : `${API}/storage/${accessory.image}`;
-      setImagePreview(imageUrl);
+      setImagePreview(resolveImageUrl(accessory.image, DEFAULT_POT_IMAGE));
     } else {
       setImagePreview(null);
     }
@@ -374,7 +372,11 @@ export default function ManageAccessories() {
                   <div className="admin-image-upload">
                     {imagePreview && (
                       <div className="admin-image-preview">
-                        <img src={imagePreview} alt="Preview" />
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          onError={(event) => handleImageError(event, DEFAULT_POT_IMAGE)}
+                        />
                       </div>
                     )}
                     <label className="admin-file-input">

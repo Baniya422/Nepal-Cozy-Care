@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { Edit, Plus, Search, Trash2, Upload, X } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
+import {
+  DEFAULT_CARE_TIP_IMAGE,
+  handleImageError,
+  resolveImageUrl,
+} from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 type Reminder = {
   id: number;
@@ -142,7 +147,9 @@ export default function ManageSeasonalReminders() {
       status: reminder.status,
     });
     setSelectedImage(null);
-    setImagePreview(reminder.image ? `${API}/storage/${reminder.image}` : null);
+    setImagePreview(
+      reminder.image ? resolveImageUrl(reminder.image, DEFAULT_CARE_TIP_IMAGE) : null
+    );
     setShowModal(true);
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -421,7 +428,11 @@ export default function ManageSeasonalReminders() {
                   <div className="admin-image-upload">
                     {imagePreview ? (
                       <div className="admin-image-preview">
-                        <img src={imagePreview} alt="Preview" />
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          onError={(event) => handleImageError(event, DEFAULT_CARE_TIP_IMAGE)}
+                        />
                       </div>
                     ) : null}
                     <label className="admin-file-input">

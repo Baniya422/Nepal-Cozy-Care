@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Eye, Edit, Trash2, X, Upload } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
+import {
+  DEFAULT_PLANT_IMAGE,
+  handleImageError,
+  resolveImageUrl,
+} from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 interface Plant {
   id: number;
@@ -248,7 +253,7 @@ export default function ManagePlants() {
       is_best_seller: plant.is_best_seller || false,
     });
     setSelectedImage(null);
-    setImagePreview(plant.image ? `${API}/storage/${plant.image}` : null);
+    setImagePreview(plant.image ? resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE) : null);
     setShowModal(true);
   };
   const handleAddNew = () => {
@@ -344,11 +349,11 @@ export default function ManagePlants() {
                       <div className="admin-plant-image">
                         {plant.image ? (
                           <img
-                            src={`${API}/storage/${plant.image}`}
+                            src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
                             alt={plant.name}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/images/placeholder-plant.jpg";
-                            }}
+                            onError={(event) => handleImageError(event, DEFAULT_PLANT_IMAGE)}
+                            loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <div className="admin-image-placeholder">No Image</div>
