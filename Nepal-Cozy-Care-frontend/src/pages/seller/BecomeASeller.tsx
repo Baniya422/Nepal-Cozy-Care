@@ -64,6 +64,18 @@ export default function BecomeASeller() {
           const data = await res.json();
           if (data.data?.has_shop) {
             setExistingShop(data.data.shop);
+            if (data.data.shop.status === "approved" || data.data.role === "seller") {
+              try {
+                const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+                if (storedUser && storedUser.role !== "seller" && storedUser.role !== "admin" && storedUser.role !== "super_admin") {
+                  storedUser.role = data.data.role || "seller";
+                  localStorage.setItem("user", JSON.stringify(storedUser));
+                  window.dispatchEvent(new Event("storage"));
+                }
+              } catch {
+                // ignore
+              }
+            }
             setFormData({
               name: data.data.shop.name || "",
               short_description: data.data.shop.short_description || "",
@@ -264,7 +276,22 @@ export default function BecomeASeller() {
               Your nursery <strong>{existingShop.name}</strong> is live and verified on the Cozy Care marketplace. You can now manage your catalog, prices, and orders in the partner portal.
             </p>
             <div className="seller-status-actions">
-              <Link to="/seller/dashboard" className="seller-status-btn-primary">
+              <Link
+                to="/seller/dashboard"
+                className="seller-status-btn-primary"
+                onClick={() => {
+                  try {
+                    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+                    if (storedUser && storedUser.role !== "seller" && storedUser.role !== "admin" && storedUser.role !== "super_admin") {
+                      storedUser.role = "seller";
+                      localStorage.setItem("user", JSON.stringify(storedUser));
+                      window.dispatchEvent(new Event("storage"));
+                    }
+                  } catch {
+                    // ignore
+                  }
+                }}
+              >
                 Open Seller Dashboard <ArrowRight size={16} />
               </Link>
               <Link to={`/shops/${existingShop.slug}`} className="seller-status-btn-secondary">
