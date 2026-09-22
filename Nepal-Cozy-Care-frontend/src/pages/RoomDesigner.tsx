@@ -51,6 +51,42 @@ export type BuiltInItemKind =
   | 'monstera'
   | 'snake'
   | 'palm'
+  | 'rubber'
+  | 'fiddle'
+  | 'pothos'
+  | 'zz'
+  | 'peacelily'
+  | 'aloe'
+  | 'jade'
+  | 'spider'
+  | 'fern'
+  | 'calathea'
+  | 'cactus'
+  | 'anthurium'
+  | 'dracaena'
+  | 'bonsai'
+  | 'stringofpearls'
+
+export const BOTANICAL_KINDS = new Set([
+  'monstera',
+  'snake',
+  'palm',
+  'rubber',
+  'fiddle',
+  'pothos',
+  'zz',
+  'peacelily',
+  'aloe',
+  'jade',
+  'spider',
+  'fern',
+  'calathea',
+  'cactus',
+  'anthurium',
+  'dracaena',
+  'bonsai',
+  'stringofpearls',
+])
 
 export interface RoomItem {
   id: string
@@ -98,9 +134,27 @@ export interface CatalogItem {
 }
 
 export const builtInCatalog: CatalogItem[] = [
+  // 18 Botanical Houseplants
   { kind: 'monstera', name: 'Monstera Deliciosa', category: 'plants', icon: '🌿', color: '#276749', description: 'Lush fenestrated Swiss Cheese plant', width: 1.1, depth: 1.1 },
-  { kind: 'snake', name: 'Snake Plant', category: 'plants', icon: '🪴', color: '#477c3c', description: 'Architectural upright variegated Sansevieria', width: 0.65, depth: 0.65 },
-  { kind: 'palm', name: 'Areca Palm', category: 'plants', icon: '🌴', color: '#3f7d4b', description: 'Graceful feather-leaf indoor palm', width: 1.3, depth: 1.3 },
+  { kind: 'snake', name: 'Snake Plant Laurentii', category: 'plants', icon: '🪴', color: '#477c3c', description: 'Architectural upright variegated Sansevieria', width: 0.65, depth: 0.65 },
+  { kind: 'palm', name: 'Areca Butterfly Palm', category: 'plants', icon: '🌴', color: '#3f7d4b', description: 'Graceful feather-leaf indoor palm', width: 1.3, depth: 1.3 },
+  { kind: 'rubber', name: 'Rubber Tree Burgundy', category: 'plants', icon: '🌳', color: '#354339', description: 'Glossy dark burgundy-green ficus tree', width: 1.0, depth: 1.0 },
+  { kind: 'fiddle', name: 'Fiddle Leaf Fig', category: 'plants', icon: '🎻', color: '#ded5c7', description: 'Sculptural indoor tree with violin foliage', width: 1.15, depth: 1.15 },
+  { kind: 'pothos', name: 'Golden Pothos Devil’s Ivy', category: 'plants', icon: '🌱', color: '#f4ede2', description: 'Cascading vine with heart-shaped leaves', width: 0.8, depth: 0.8 },
+  { kind: 'zz', name: 'ZZ Plant Fortune Gem', category: 'plants', icon: '🪴', color: '#2b332d', description: 'Reflective glossy emerald stems, indestructible', width: 0.8, depth: 0.8 },
+  { kind: 'peacelily', name: 'Peace Lily Sensation', category: 'plants', icon: '🕊️', color: '#ffffff', description: 'Deep foliage with elegant white spathes', width: 0.85, depth: 0.85 },
+  { kind: 'aloe', name: 'Organic Aloe Vera', category: 'plants', icon: '🌵', color: '#d48c66', description: 'Rosette succulent with healing gel spear leaves', width: 0.7, depth: 0.7 },
+  { kind: 'jade', name: 'Lucky Jade Money Tree', category: 'plants', icon: '🍀', color: '#4a5b50', description: 'Gnarled bonsai succulent with plump jade discs', width: 0.75, depth: 0.75 },
+  { kind: 'spider', name: 'Variegated Spider Plant', category: 'plants', icon: '🕷️', color: '#ede8dd', description: 'Ribbon fountain with dangling baby plantlets', width: 0.8, depth: 0.8 },
+  { kind: 'fern', name: 'Boston Sword Fern', category: 'plants', icon: '🌿', color: '#7a8b7b', description: 'Dense feathery cascading arching sword fronds', width: 0.9, depth: 0.9 },
+  { kind: 'calathea', name: 'Calathea Medallion', category: 'plants', icon: '🦚', color: '#453831', description: 'Round medallion leaves with purple undersides', width: 0.85, depth: 0.85 },
+  { kind: 'cactus', name: 'Desert Saguaro Cactus', category: 'plants', icon: '🌵', color: '#e09867', description: 'Multi-armed columnar desert succulent', width: 0.7, depth: 0.7 },
+  { kind: 'anthurium', name: 'Red Flamingo Anthurium', category: 'plants', icon: '🌺', color: '#fdfaf5', description: 'Glossy heart leaves with scarlet spathe flowers', width: 0.75, depth: 0.75 },
+  { kind: 'dracaena', name: 'Dragon Tree Marginata', category: 'plants', icon: '🎋', color: '#d1c4b4', description: 'Slender canes with spiky crimson crowns', width: 0.85, depth: 0.85 },
+  { kind: 'bonsai', name: 'Ginseng Ficus Bonsai', category: 'plants', icon: '🪴', color: '#3d3028', description: 'Sculpted gnarled trunk with foliage cloud pads', width: 0.85, depth: 0.85 },
+  { kind: 'stringofpearls', name: 'String of Pearls', category: 'plants', icon: '📿', color: '#eae4d9', description: 'Trailing succulent beads cascading down', width: 0.7, depth: 0.7 },
+
+  // Furniture Archetypes
   { kind: 'bed', name: 'King Platform Bed', category: 'furniture', icon: '🛏️', color: '#c4b5a5', description: 'Plush upholstered headboard with duvet & pillows', width: 2.15, depth: 2.2 },
   { kind: 'nightstand', name: 'Bedside Nightstand', category: 'furniture', icon: '🪑', color: '#3d2c20', description: 'Hardwood bedside drawer with warm lamp', width: 0.6, depth: 0.55 },
   { kind: 'desk', name: 'Executive Work Desk', category: 'furniture', icon: '🖥️', color: '#3d2b1f', description: 'Modern desk with laptop, pad & mug', width: 1.65, depth: 0.85 },
@@ -130,6 +184,21 @@ export const itemBaseSizes: Record<string, [number, number]> = {
   monstera: [1.1, 1.1],
   snake: [0.65, 0.65],
   palm: [1.3, 1.3],
+  rubber: [1.0, 1.0],
+  fiddle: [1.15, 1.15],
+  pothos: [0.8, 0.8],
+  zz: [0.8, 0.8],
+  peacelily: [0.85, 0.85],
+  aloe: [0.7, 0.7],
+  jade: [0.75, 0.75],
+  spider: [0.8, 0.8],
+  fern: [0.9, 0.9],
+  calathea: [0.85, 0.85],
+  cactus: [0.7, 0.7],
+  anthurium: [0.75, 0.75],
+  dracaena: [0.85, 0.85],
+  bonsai: [0.85, 0.85],
+  stringofpearls: [0.7, 0.7],
 }
 
 /**
@@ -422,7 +491,7 @@ function SceneObject({
     }
   }
 
-  const isBotanical = item.kind === 'monstera' || item.kind === 'snake' || item.kind === 'palm'
+  const isBotanical = BOTANICAL_KINDS.has(item.kind)
   const scale = item.scale || 1
 
   return (
