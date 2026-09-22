@@ -38,6 +38,7 @@ const MyGarden = lazy(() => import('./pages/MyGarden'))
 const BlogDetail = lazy(() => import('./pages/BlogDetail'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const ManagePlants = lazy(() => import('./pages/admin/ManagePlants'))
+const ManageDecorations = lazy(() => import('./pages/admin/ManageDecorations'))
 const ManageAccessories = lazy(() => import('./pages/admin/ManageAccessories'))
 const ManageBlogs = lazy(() => import('./pages/admin/ManageBlogs'))
 const ManageCareTips = lazy(() => import('./pages/admin/ManageCareTips'))
@@ -145,6 +146,14 @@ function App() {
         element={
           <AdminProtectedRoute>
             <ManagePlants />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/decorations"
+        element={
+          <AdminProtectedRoute>
+            <ManageDecorations />
           </AdminProtectedRoute>
         }
       />

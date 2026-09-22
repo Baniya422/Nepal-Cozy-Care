@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CareTipController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ContentTemplateController;
+use App\Http\Controllers\Api\DecorationController;
 use App\Http\Controllers\Api\GardenEntryController;
 use App\Http\Controllers\Api\HelpCenterTemplateController;
 use App\Http\Controllers\Api\HomepageContentController;
@@ -90,6 +91,7 @@ Route::get('/help-center/template', [HelpCenterTemplateController::class, 'show'
 Route::get('/plant-finder/template', [PlantFinderTemplateController::class, 'show']);
 Route::get('/plant-health/template', [PlantHealthTemplateController::class, 'show']);
 Route::post('/plant-health/ai-diagnose', [PlantHealthAiController::class, 'diagnose']);
+Route::get('/decorations', [DecorationController::class, 'index']);
 // Public Shop Marketplace Routes
 Route::get('/shops', [ShopController::class, 'index']);
 Route::get('/shops/{slug}', [ShopController::class, 'show']);
@@ -154,7 +156,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::put('/blogs/{id}', [BlogController::class, 'update']);
     Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
-    Route::get('/admin/care-tips', [CareTipController::class, 'adminIndex']);
+    Route::get('/care-tips', [CareTipController::class, 'adminIndex']);
     Route::post('/care-tips', [CareTipController::class, 'store']);
     Route::put('/care-tips/{id}', [CareTipController::class, 'update']);
     Route::delete('/care-tips/{id}', [CareTipController::class, 'destroy']);
@@ -165,6 +167,17 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/contact-messages', [ContactMessageController::class, 'adminIndex']);
     Route::put('/contact-messages/{id}/status', [ContactMessageController::class, 'updateStatus']);
     Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy']);
+
+    // 3D Decoration Catalogue Management
+    Route::get('/admin/decorations', [DecorationController::class, 'adminIndex']);
+    Route::post('/admin/decorations', [DecorationController::class, 'store']);
+    Route::get('/admin/decorations/{id}', [DecorationController::class, 'show']);
+    Route::put('/admin/decorations/{id}', [DecorationController::class, 'update']);
+    Route::post('/admin/decorations/{id}', [DecorationController::class, 'update']);
+    Route::post('/admin/decorations/{id}/publish', [DecorationController::class, 'publish']);
+    Route::post('/admin/decorations/{id}/archive', [DecorationController::class, 'archive']);
+    Route::delete('/admin/decorations/{id}', [DecorationController::class, 'destroy']);
+    Route::get('/admin/image-to-3d/status', [DecorationController::class, 'imageTo3dStatus']);
 
     // Super Admin Marketplace Management
     Route::get('/admin/shops', [AdminMarketplaceController::class, 'shops']);

@@ -905,3 +905,263 @@
   color: #6b7280;
   margin: 0;
 }
+
+/* =========================================================
+   3D LIVE ROOM STUDIO PREVIEW & TOGGLE
+   ========================================================= */
+
+.pf-preview-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pf-view-toggle {
+  display: flex;
+  align-items: center;
+  background: rgba(235, 243, 237, 0.9);
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.pf-view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pf-view-toggle-btn.active {
+  background: #2d6a4f;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(45, 106, 79, 0.25);
+}
+
+.pf-interactive-room-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.pf-3d-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #e4ebe7;
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(45, 106, 79, 0.1) inset;
+}
+
+.pf-3d-stage canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.pf-room-overlay-tags {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  right: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pf-overlay-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(45, 106, 79, 0.15);
+  border-radius: 8px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.pf-overlay-badge.primary {
+  background: #1b4332;
+  color: #ffffff;
+  border-color: #1b4332;
+}
+
+.pf-overlay-badge.light {
+  background: #fff8eb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.pf-overlay-badge.matches {
+  background: #e8f5ec;
+  color: #2d6a4f;
+  border-color: #b7e4c7;
+}
+
+.pf-stage-hint {
+  position: absolute;
+  bottom: 0.85rem;
+  right: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(27, 67, 50, 0.85);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pf-preview-footer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.pf-preview-disclaimer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f7f4;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e1ebe3;
+}
+
+.pf-quick-studio-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+  transition: all 0.2s ease;
+}
+
+.pf-quick-studio-btn:hover {
+  background: linear-gradient(135deg, #143527 0%, #245741 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(45, 106, 79, 0.35);
+}
+
+/* =========================================================
+   STUDIO CALL TO ACTION BANNER (RESULTS)
+   ========================================================= */
+
+.pf-studio-cta-banner {
+  background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 1.85rem 2.25rem;
+  margin: 2rem auto 1rem;
+  max-width: 900px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: 0 20px 40px -10px rgba(27, 67, 50, 0.35);
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .pf-studio-cta-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+}
+
+.pf-studio-cta-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pf-studio-cta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.pf-studio-cta-banner h3 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  margin: 0.2rem 0 0;
+  color: #ffffff;
+}
+
+.pf-studio-cta-banner p {
+  font-size: 0.92rem;
+  color: #d8f3dc;
+  margin: 0;
+  line-height: 1.45;
+  max-width: 520px;
+}
+
+.pf-studio-cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: #e6a827;
+  color: #1b4332;
+  border: none;
+  border-radius: 12px;
+  padding: 0.9rem 1.65rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(230, 168, 39, 0.35);
+  transition: all 0.25s ease;
+}
+
+.pf-studio-cta-button:hover {
+  background: #f3b638;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(230, 168, 39, 0.45);
+}
+
