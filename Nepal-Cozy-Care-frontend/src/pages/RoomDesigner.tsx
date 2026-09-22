@@ -17,6 +17,7 @@ import {
   Sparkles,
   Info,
   Layers,
+  Sprout,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -114,6 +115,8 @@ export interface RoomItem {
   modelUrl?: string | null
   baseWidth?: number
   baseDepth?: number
+  plantKind?: string
+  potStyle?: string
 }
 
 export interface RoomState {
@@ -553,9 +556,17 @@ function SceneObject({
       {item.modelUrl ? (
         <CustomGLBItem modelUrl={item.modelUrl} color={item.color} scale={1} />
       ) : isBotanical ? (
-        <Botanical kind={item.kind as BuiltInItemKind} potColor={item.color} />
+        item.potStyle && item.potStyle !== 'default' ? (
+          <Furniture kind={item.potStyle} color={item.color} plantKind={item.kind} />
+        ) : (
+          <Botanical kind={item.kind as BuiltInItemKind} potColor={item.color} />
+        )
       ) : (
-        <Furniture kind={item.kind as BuiltInItemKind} color={item.color} />
+        <Furniture
+          kind={item.kind as BuiltInItemKind}
+          color={item.color}
+          plantKind={item.plantKind}
+        />
       )}
 
       {/* Selection / Collision Indicator Halo */}
@@ -1422,8 +1433,120 @@ export default function RoomDesigner() {
               <div className="selected-tools">
                 <div className="selected-badge">
                   <strong>{selected.name || selected.kind}</strong>
-                  <span className="badge-tag">{selected.kind}</span>
+                  <span className="badge-tag">
+                    {selected.plantKind
+                      ? `Pot + ${selected.plantKind}`
+                      : selected.potStyle
+                      ? `${selected.kind} (${selected.potStyle.replace('pot_', '')})`
+                      : selected.kind}
+                  </span>
                 </div>
+
+                {/* Pot-Specific: Choose Plant to grow inside this pot */}
+                {selected.kind.startsWith('pot_') && (
+                  <div className="pot-plant-selector-wrap" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                    <label className="select-label">
+                      <span>
+                        <Sprout size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                        Plant in this pot
+                      </span>
+                      <select
+                        aria-label="Select plant for pot"
+                        value={selected.plantKind || 'none'}
+                        onChange={(e) =>
+                          updateSelected((item) => ({
+                            ...item,
+                            plantKind: e.target.value === 'none' ? undefined : e.target.value,
+                          }))
+                        }
+                      >
+                        <option value="none">🪴 Empty Planter (No Plant)</option>
+                        <option value="monstera">🌿 Monstera Deliciosa</option>
+                        <option value="snake">🪴 Snake Plant Laurentii</option>
+                        <option value="palm">🌴 Areca Butterfly Palm</option>
+                        <option value="rubber">🌳 Rubber Tree Burgundy</option>
+                        <option value="fiddle">🎻 Fiddle Leaf Fig</option>
+                        <option value="pothos">🌱 Golden Pothos Devil's Ivy</option>
+                        <option value="zz">🪴 ZZ Plant Fortune Gem</option>
+                        <option value="peacelily">🕊️ Peace Lily Sensation</option>
+                        <option value="aloe">🌵 Organic Aloe Vera</option>
+                        <option value="jade">🍀 Lucky Jade Money Tree</option>
+                        <option value="spider">🕷️ Variegated Spider Plant</option>
+                        <option value="fern">🌿 Boston Sword Fern</option>
+                        <option value="calathea">🦚 Calathea Medallion</option>
+                        <option value="cactus">🌵 Desert Saguaro Cactus</option>
+                        <option value="anthurium">🌺 Red Flamingo Anthurium</option>
+                        <option value="dracaena">🎋 Dragon Tree Marginata</option>
+                        <option value="bonsai">🪴 Ginseng Ficus Bonsai</option>
+                        <option value="stringofpearls">📿 Trailing String of Pearls</option>
+                      </select>
+                    </label>
+                  </div>
+                )}
+
+                {/* Plant-Specific: Choose Pot Style & Plant Variety */}
+                {BOTANICAL_KINDS.has(selected.kind) && (
+                  <div className="plant-pot-customizer-wrap" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                    <label className="select-label">
+                      <span>🏺 Planter Pot Style</span>
+                      <select
+                        aria-label="Select pot style"
+                        value={selected.potStyle || 'default'}
+                        onChange={(e) =>
+                          updateSelected((item) => ({
+                            ...item,
+                            potStyle: e.target.value === 'default' ? undefined : e.target.value,
+                          }))
+                        }
+                      >
+                        <option value="default">🪴 Standard Planter</option>
+                        <option value="pot_terracotta">🏺 Classic Terracotta Pot</option>
+                        <option value="pot_ceramic">⚱️ Modern Fluted Ceramic</option>
+                        <option value="pot_geometric">💎 Geometric Hex Planter</option>
+                        <option value="pot_hanging">🪴 Boho Macrame Hanging Pot</option>
+                        <option value="pot_stand">🪑 Mid-Century Wood Stand</option>
+                        <option value="pot_marble">🏛️ Calacatta Marble Pot</option>
+                      </select>
+                    </label>
+
+                    <label className="select-label" style={{ marginTop: '6px' }}>
+                      <span>🌿 Plant Variety</span>
+                      <select
+                        aria-label="Change plant species"
+                        value={selected.kind}
+                        onChange={(e) =>
+                          updateSelected((item) => {
+                            const match = builtInCatalog.find((c) => c.kind === e.target.value)
+                            return {
+                              ...item,
+                              kind: e.target.value,
+                              name: match?.name || e.target.value,
+                            }
+                          })
+                        }
+                      >
+                        <option value="monstera">🌿 Monstera Deliciosa</option>
+                        <option value="snake">🪴 Snake Plant Laurentii</option>
+                        <option value="palm">🌴 Areca Butterfly Palm</option>
+                        <option value="rubber">🌳 Rubber Tree Burgundy</option>
+                        <option value="fiddle">🎻 Fiddle Leaf Fig</option>
+                        <option value="pothos">🌱 Golden Pothos Devil's Ivy</option>
+                        <option value="zz">🪴 ZZ Plant Fortune Gem</option>
+                        <option value="peacelily">🕊️ Peace Lily Sensation</option>
+                        <option value="aloe">🌵 Organic Aloe Vera</option>
+                        <option value="jade">🍀 Lucky Jade Money Tree</option>
+                        <option value="spider">🕷️ Variegated Spider Plant</option>
+                        <option value="fern">🌿 Boston Sword Fern</option>
+                        <option value="calathea">🦚 Calathea Medallion</option>
+                        <option value="cactus">🌵 Desert Saguaro Cactus</option>
+                        <option value="anthurium">🌺 Red Flamingo Anthurium</option>
+                        <option value="dracaena">🎋 Dragon Tree Marginata</option>
+                        <option value="bonsai">🪴 Ginseng Ficus Bonsai</option>
+                        <option value="stringofpearls">📿 Trailing String of Pearls</option>
+                      </select>
+                    </label>
+                  </div>
+                )}
 
                 {/* Color customizer */}
                 <div className="color-control item-color-control">

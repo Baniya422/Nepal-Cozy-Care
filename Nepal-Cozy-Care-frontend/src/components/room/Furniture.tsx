@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import { RoundedBox } from '@react-three/drei'
 import { getSurfaceTexture } from './materials'
+import { BotanicalFoliage } from './Botanical'
 
 interface FurnitureProps {
   kind:
@@ -20,9 +21,10 @@ interface FurnitureProps {
     | string
   color: string
   scale?: number
+  plantKind?: string
 }
 
-export default function Furniture({ kind, color }: FurnitureProps) {
+export default function Furniture({ kind, color, plantKind }: FurnitureProps) {
   const fabricTex = useMemo(() => getSurfaceTexture('fabric'), [])
   const woodTex = useMemo(() => getSurfaceTexture('wood'), [])
   const ceramicTex = useMemo(() => getSurfaceTexture('ceramic'), [])
@@ -820,6 +822,12 @@ export default function Furniture({ kind, color }: FurnitureProps) {
           <cylinderGeometry args={[0.28, 0.28, 0.02, 32]} />
           <meshStandardMaterial color="#2d2118" roughness={0.95} />
         </mesh>
+        {/* Custom Plant inside pot */}
+        {plantKind && plantKind !== 'none' && (
+          <group position={[0, 0.51, 0]}>
+            <BotanicalFoliage kind={plantKind} />
+          </group>
+        )}
       </group>
     )
   }
@@ -847,6 +855,12 @@ export default function Furniture({ kind, color }: FurnitureProps) {
           <cylinderGeometry args={[0.235, 0.235, 0.02, 32]} />
           <meshStandardMaterial color="#382c23" roughness={0.9} />
         </mesh>
+        {/* Custom Plant inside pot */}
+        {plantKind && plantKind !== 'none' && (
+          <group position={[0, 0.60, 0]}>
+            <BotanicalFoliage kind={plantKind} />
+          </group>
+        )}
       </group>
     )
   }
@@ -872,6 +886,12 @@ export default function Furniture({ kind, color }: FurnitureProps) {
           <cylinderGeometry args={[0.25, 0.25, 0.02, 6]} />
           <meshStandardMaterial color="#2c2017" roughness={0.95} />
         </mesh>
+        {/* Custom Plant inside pot */}
+        {plantKind && plantKind !== 'none' && (
+          <group position={[0, 0.53, 0]}>
+            <BotanicalFoliage kind={plantKind} />
+          </group>
+        )}
       </group>
     )
   }
@@ -903,6 +923,12 @@ export default function Furniture({ kind, color }: FurnitureProps) {
           <cylinderGeometry args={[0.02, 0.04, 0.16, 12]} />
           <meshStandardMaterial color="#d4c7b2" roughness={0.95} />
         </mesh>
+        {/* Custom Plant inside hanging pot */}
+        {plantKind && plantKind !== 'none' && (
+          <group position={[0, 0.01, 0]}>
+            <BotanicalFoliage kind={plantKind} />
+          </group>
+        )}
       </group>
     )
   }
@@ -945,6 +971,12 @@ export default function Furniture({ kind, color }: FurnitureProps) {
           <cylinderGeometry args={[0.205, 0.205, 0.02, 32]} />
           <meshStandardMaterial color="#2d2118" roughness={0.95} />
         </mesh>
+        {/* Custom Plant inside stand pot */}
+        {plantKind && plantKind !== 'none' && (
+          <group position={[0, 0.77, 0]}>
+            <BotanicalFoliage kind={plantKind} />
+          </group>
+        )}
       </group>
     )
   }
@@ -973,6 +1005,12 @@ export default function Furniture({ kind, color }: FurnitureProps) {
           <cylinderGeometry args={[0.245, 0.245, 0.02, 32]} />
           <meshStandardMaterial color="#2b1f16" roughness={0.95} />
         </mesh>
+        {/* Custom Plant inside marble pot */}
+        {plantKind && plantKind !== 'none' && (
+          <group position={[0, 0.55, 0]}>
+            <BotanicalFoliage kind={plantKind} />
+          </group>
+        )}
       </group>
     )
   }
