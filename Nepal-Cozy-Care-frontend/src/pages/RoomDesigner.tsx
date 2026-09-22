@@ -1,9 +1,10 @@
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { ContactShadows, Grid, OrbitControls, RoundedBox } from '@react-three/drei'
+import { ContactShadows, Environment, Grid, OrbitControls, RoundedBox, SoftShadows } from '@react-three/drei'
 import { Download, Move3D, Redo2, RotateCw, Save, Trash2, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import '../styles/roomDesigner.css'
+import '../styles/roomDesignerRealistic.css'
 
 type ItemKind = 'sofa' | 'table' | 'chair' | 'shelf' | 'monstera' | 'snake' | 'palm'
 type RoomItem = { id: string; kind: ItemKind; x: number; z: number; rotation: number; color: string }
@@ -25,15 +26,16 @@ function Plant({ kind }: { kind: ItemKind }) {
   const leaves = kind === 'palm' ? 9 : kind === 'snake' ? 7 : 6
   const height = kind === 'palm' ? 1.7 : kind === 'snake' ? 1.05 : 1.25
   return <group>
-    <mesh position={[0, .24, 0]} castShadow><cylinderGeometry args={[.3, .22, .48, 24]} /><meshStandardMaterial color="#b9784b" /></mesh>
+    <mesh position={[0, .24, 0]} castShadow><cylinderGeometry args={[.31, .23, .48, 32]} /><meshStandardMaterial color="#a9623c" roughness={.62} metalness={.03} /></mesh>
+    <mesh position={[0, .46, 0]} castShadow><cylinderGeometry args={[.28, .28, .06, 32]} /><meshStandardMaterial color="#3b2d22" roughness={1} /></mesh>
     <mesh position={[0, .55, 0]} castShadow><cylinderGeometry args={[.045, .06, height, 10]} /><meshStandardMaterial color="#3d6b3f" /></mesh>
     {Array.from({ length: leaves }).map((_, index) => {
       const angle = (index / leaves) * Math.PI * 2
       const y = .75 + (index % 3) * .25
       const radius = kind === 'snake' ? .18 : .42
       return <mesh key={index} position={[Math.cos(angle) * radius, y, Math.sin(angle) * radius]} rotation={[0, -angle, kind === 'snake' ? .05 : .55]} castShadow>
-        <sphereGeometry args={[kind === 'snake' ? .1 : .22, 12, 8]} />
-        <meshStandardMaterial color={index % 2 ? '#3f8150' : '#69a85d'} roughness={.7} />
+        <sphereGeometry args={[kind === 'snake' ? .1 : .22, 20, 14]} />
+        <meshStandardMaterial color={index % 2 ? '#2f7543' : '#69a85d'} roughness={.56} metalness={.02} />
       </mesh>
     })}
   </group>
@@ -41,12 +43,14 @@ function Plant({ kind }: { kind: ItemKind }) {
 
 function Furniture({ kind, color }: { kind: ItemKind; color: string }) {
   if (kind === 'sofa') return <group>
-    <RoundedBox args={[2.2, .55, .85]} radius={.12} position={[0, .42, 0]} castShadow><meshStandardMaterial color={color} /></RoundedBox>
-    <RoundedBox args={[2.2, .75, .22]} radius={.08} position={[0, .82, .32]} castShadow><meshStandardMaterial color={color} /></RoundedBox>
-    {[-.95, .95].map(x => <RoundedBox key={x} args={[.22, .62, .92]} radius={.07} position={[x, .52, 0]} castShadow><meshStandardMaterial color={color} /></RoundedBox>)}
+    <RoundedBox args={[2.25, .43, .9]} radius={.13} position={[0, .38, 0]} castShadow><meshStandardMaterial color="#5c5048" roughness={.9} /></RoundedBox>
+    {[-.55,.55].map(x => <RoundedBox key={`seat${x}`} args={[1.02, .22, .72]} radius={.1} position={[x, .65, -.05]} castShadow><meshStandardMaterial color={color} roughness={.96} /></RoundedBox>)}
+    {[-.55,.55].map(x => <RoundedBox key={`back${x}`} args={[1.02, .72, .2]} radius={.1} position={[x, 1.02, .34]} rotation={[-.12,0,0]} castShadow><meshStandardMaterial color={color} roughness={.96} /></RoundedBox>)}
+    {[-1.05, 1.05].map(x => <RoundedBox key={x} args={[.2, .63, .94]} radius={.08} position={[x, .56, 0]} castShadow><meshStandardMaterial color={color} roughness={.94} /></RoundedBox>)}
+    {[-.82,.82].map(x => <mesh key={`leg${x}`} position={[x,.13,.27]} castShadow><cylinderGeometry args={[.035,.045,.26,16]} /><meshStandardMaterial color="#302c29" metalness={.65} roughness={.3}/></mesh>)}
   </group>
   if (kind === 'table') return <group>
-    <RoundedBox args={[1.5, .12, .8]} radius={.06} position={[0, .62, 0]} castShadow><meshStandardMaterial color={color} /></RoundedBox>
+    <RoundedBox args={[1.5, .12, .8]} radius={.06} position={[0, .62, 0]} castShadow><meshPhysicalMaterial color={color} roughness={.32} clearcoat={.28} /></RoundedBox>
     {[-.58, .58].flatMap(x => [-.28, .28].map(z => <mesh key={`${x}${z}`} position={[x, .3, z]} castShadow><cylinderGeometry args={[.04, .04, .6, 10]} /><meshStandardMaterial color="#463529" /></mesh>))}
   </group>
   if (kind === 'shelf') return <group>
@@ -57,6 +61,37 @@ function Furniture({ kind, color }: { kind: ItemKind; color: string }) {
     <RoundedBox args={[.8, .2, .8]} radius={.08} position={[0, .62, 0]} castShadow><meshStandardMaterial color={color} /></RoundedBox>
     <RoundedBox args={[.8, .85, .16]} radius={.06} position={[0, 1.02, .32]} castShadow><meshStandardMaterial color={color} /></RoundedBox>
     {[-.3, .3].flatMap(x => [-.28, .28].map(z => <mesh key={`${x}${z}`} position={[x, .3, z]} castShadow><cylinderGeometry args={[.035, .045, .6, 8]} /><meshStandardMaterial color="#5d4635" /></mesh>))}
+  </group>
+}
+
+function FloorBoards({ room }: { room: RoomState }) {
+  const boards = Math.ceil(room.width / .42)
+  return <group position={[0,.012,0]}>
+    {Array.from({length:boards}).map((_,index) => {
+      const x = -room.width / 2 + .21 + index * .42
+      return <mesh key={index} position={[x,0,0]} rotation={[-Math.PI/2,0,0]} receiveShadow>
+        <planeGeometry args={[.405,room.depth]} />
+        <meshStandardMaterial color={room.floorColor} roughness={.72 + (index % 3) * .05} metalness={.01} />
+      </mesh>
+    })}
+  </group>
+}
+
+function RoomArchitecture({ room }: { room: RoomState }) {
+  return <group>
+    <FloorBoards room={room} />
+    <mesh position={[room.width * .18,1.65,-room.depth/2 + .055]}><planeGeometry args={[Math.min(2.8,room.width*.45),1.65]} /><meshPhysicalMaterial color="#9fc4d2" roughness={.08} transmission={.16} transparent opacity={.78} /></mesh>
+    {[-1,0,1].map(v => <mesh key={`wf${v}`} position={[room.width*.18 + v*Math.min(.92,room.width*.15),1.65,-room.depth/2 + .025]} castShadow><boxGeometry args={[.055,1.76,.08]} /><meshStandardMaterial color="#f5f0e7" roughness={.55}/></mesh>)}
+    {[-.82,.82].map(v => <mesh key={`wh${v}`} position={[room.width*.18,1.65+v,-room.depth/2 + .025]} castShadow><boxGeometry args={[Math.min(2.9,room.width*.46),.055,.08]} /><meshStandardMaterial color="#f5f0e7" roughness={.55}/></mesh>)}
+    <group position={[-room.width*.22,1.55,-room.depth/2+.11]}>
+      <RoundedBox args={[1.25,.88,.07]} radius={.025} castShadow><meshStandardMaterial color="#d6c2a0" roughness={.8}/></RoundedBox>
+      <mesh position={[0,0,.045]}><planeGeometry args={[1.08,.71]} /><meshStandardMaterial color="#6f8c70" roughness={.95}/></mesh>
+      <mesh position={[-.2,.06,.051]}><circleGeometry args={[.22,32]} /><meshStandardMaterial color="#e6d8b5" /></mesh>
+    </group>
+    <mesh position={[0,2.65,0]} castShadow><cylinderGeometry args={[.025,.025,1.05,12]} /><meshStandardMaterial color="#2d332f" metalness={.8}/></mesh>
+    <mesh position={[0,2.12,0]} rotation={[Math.PI,0,0]} castShadow><coneGeometry args={[.42,.35,32,1,true]} /><meshStandardMaterial color="#d8c39d" roughness={.55} side={THREE.DoubleSide}/></mesh>
+    <pointLight position={[0,2.02,0]} intensity={1.8} distance={5} color="#ffdba5" castShadow />
+    <mesh position={[0,.025,.55]} rotation={[-Math.PI/2,0,0]} receiveShadow><planeGeometry args={[3.1,2.1]} /><meshStandardMaterial color="#d8c8ad" roughness={1}/></mesh>
   </group>
 }
 
@@ -79,18 +114,23 @@ function SceneItem({ item, selected, room, onSelect, onMove }: { item: RoomItem;
 
 function RoomScene({ room, selectedId, setSelectedId, moveItem }: { room: RoomState; selectedId: string | null; setSelectedId: (id: string | null) => void; moveItem: (id: string, x: number, z: number) => void }) {
   return <>
-    <color attach="background" args={['#f2f6f0']} />
-    <ambientLight intensity={1.6} />
-    <directionalLight position={[5, 8, 4]} intensity={2.2} castShadow shadow-mapSize={[1024, 1024]} />
+    <color attach="background" args={['#dfe8e4']} />
+    <fog attach="fog" args={['#dfe8e4',10,24]} />
+    <SoftShadows size={18} samples={18} focus={.45} />
+    <ambientLight intensity={.38} />
+    <hemisphereLight args={['#dff1ff','#73614f',1.15]} />
+    <directionalLight position={[5, 8, 4]} intensity={2.7} color="#fff3dc" castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-.0002} />
     <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow onPointerDown={() => setSelectedId(null)}>
-      <planeGeometry args={[room.width, room.depth]} /><meshStandardMaterial color={room.floorColor} roughness={.85} />
+      <planeGeometry args={[room.width, room.depth]} /><meshStandardMaterial color="#57493e" roughness={.9} />
     </mesh>
-    <mesh position={[0, 1.5, -room.depth / 2]} receiveShadow><boxGeometry args={[room.width, 3, .12]} /><meshStandardMaterial color={room.wallColor} /></mesh>
-    <mesh position={[-room.width / 2, 1.5, 0]} receiveShadow><boxGeometry args={[.12, 3, room.depth]} /><meshStandardMaterial color={room.wallColor} /></mesh>
-    <Grid args={[room.width, room.depth]} position={[0, .012, 0]} cellColor="#ffffff" sectionColor="#ffffff" cellSize={.5} fadeDistance={18} infiniteGrid={false} />
+    <mesh position={[0, 1.5, -room.depth / 2]} receiveShadow><boxGeometry args={[room.width, 3, .12]} /><meshStandardMaterial color={room.wallColor} roughness={.92} /></mesh>
+    <mesh position={[-room.width / 2, 1.5, 0]} receiveShadow><boxGeometry args={[.12, 3, room.depth]} /><meshStandardMaterial color={room.wallColor} roughness={.92} /></mesh>
+    <RoomArchitecture room={room} />
+    <Grid args={[room.width, room.depth]} position={[0, .018, 0]} cellColor="#ffffff" sectionColor="#ffffff" cellSize={.5} fadeDistance={12} infiniteGrid={false} cellThickness={.18} sectionThickness={.35} />
     {room.items.map(item => <SceneItem key={item.id} item={item} room={room} selected={selectedId === item.id} onSelect={() => setSelectedId(item.id)} onMove={(x, z) => moveItem(item.id, x, z)} />)}
-    <ContactShadows position={[0, .02, 0]} opacity={.28} scale={14} blur={2.5} far={5} />
-    <OrbitControls makeDefault minPolarAngle={.45} maxPolarAngle={1.45} minDistance={5} maxDistance={14} target={[0, .7, 0]} />
+    <ContactShadows position={[0, .025, 0]} opacity={.42} scale={14} blur={2.2} far={5} color="#253328" />
+    <Environment preset="apartment" environmentIntensity={.52} />
+    <OrbitControls makeDefault enableDamping dampingFactor={.055} minPolarAngle={.45} maxPolarAngle={1.43} minDistance={4.8} maxDistance={13} target={[0, .85, 0]} />
   </>
 }
 
@@ -140,7 +180,7 @@ export default function RoomDesigner() {
           <button type="button" onClick={save}><Save size={17} /> {saved ? 'Saved!' : 'Save'}</button>
           <button type="button" onClick={screenshot}><Download size={17} /> Image</button>
         </div>
-        <Canvas shadows dpr={[1, 1.6]} gl={{ preserveDrawingBuffer: true, antialias: true }} camera={{ position: [7, 6.5, 8], fov: 43 }}>
+        <Canvas shadows="soft" dpr={[1, 1.8]} gl={{ preserveDrawingBuffer: true, antialias: true, toneMapping: THREE.ACESFilmicToneMapping }} onCreated={({gl}) => { gl.toneMappingExposure = 1.08 }} camera={{ position: [7, 5.2, 8], fov: 39 }}>
           <RoomScene room={room} selectedId={selectedId} setSelectedId={setSelectedId} moveItem={moveItem} />
         </Canvas>
         {!room.items.length && <div className="empty-room-note">Choose an item to begin your room</div>}

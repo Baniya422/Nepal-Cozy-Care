@@ -1,0 +1,33 @@
+.designer-stage {
+  border-color: #bacabd;
+  background: #dfe8e4;
+  box-shadow: 0 28px 70px #183b2938;
+}
+
+.designer-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(120deg, #ffffff3d 0%, transparent 28%, transparent 72%, #173b2c14 100%);
+  mix-blend-mode: soft-light;
+}
+
+.stage-toolbar,
+.empty-room-note {
+  z-index: 5;
+}
+
+.catalog-grid button,
+.designer-panel,
+.stage-toolbar button {
+  backdrop-filter: blur(12px);
+}
+
+.designer-intro {
+  background:
+    radial-gradient(circle at 25% 5%, #ffffff 0, transparent 35%),
+    radial-gradient(circle at 75% 30%, #dcebdd 0, transparent 38%),
+    #edf1e9;
+}
