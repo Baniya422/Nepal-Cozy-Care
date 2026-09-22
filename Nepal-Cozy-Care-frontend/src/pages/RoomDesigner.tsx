@@ -66,6 +66,20 @@ export type BuiltInItemKind =
   | 'dracaena'
   | 'bonsai'
   | 'stringofpearls'
+  | 'pot_terracotta'
+  | 'pot_ceramic'
+  | 'pot_geometric'
+  | 'pot_hanging'
+  | 'pot_stand'
+  | 'pot_marble'
+  | 'decor_lamp'
+  | 'decor_rug'
+  | 'decor_mirror'
+  | 'decor_shelf_hanging'
+  | 'decor_clock'
+  | 'decor_basket'
+  | 'decor_watering_can'
+  | 'decor_art_frame'
 
 export const BOTANICAL_KINDS = new Set([
   'monstera',
@@ -166,6 +180,24 @@ export const builtInCatalog: CatalogItem[] = [
   { kind: 'table', name: 'Coffee Table', category: 'furniture', icon: '▰', color: '#7a5238', description: 'Beveled oak table with shelf & books', width: 1.5, depth: 0.85 },
   { kind: 'chair', name: 'Nordic Armchair', category: 'furniture', icon: '🪑', color: '#d1a36d', description: 'Curved wrap-around accent armchair', width: 0.85, depth: 0.85 },
   { kind: 'shelf', name: 'Botanical Shelf', category: 'furniture', icon: '▥', color: '#5e4331', description: '5-tier oak and steel plant display', width: 1.4, depth: 0.48 },
+
+  // Pots & Planters
+  { kind: 'pot_terracotta', name: 'Terracotta Planter', category: 'pots', icon: '🏺', color: '#d48057', description: 'Handcrafted clay pot with rolled rim and saucer', width: 0.65, depth: 0.65 },
+  { kind: 'pot_ceramic', name: 'Fluted Ceramic Pot', category: 'pots', icon: '⚱️', color: '#f5f2eb', description: 'Modern fluted matte cylinder with brass base', width: 0.6, depth: 0.6 },
+  { kind: 'pot_geometric', name: 'Geometric Hex Planter', category: 'pots', icon: '💎', color: '#3d4841', description: 'Faceted origami silhouette with gold collar', width: 0.65, depth: 0.65 },
+  { kind: 'pot_hanging', name: 'Macrame Hanging Planter', category: 'pots', icon: '🪴', color: '#e8dfcf', description: 'Woven jute cord hanging bowl with tassel', width: 0.6, depth: 0.6 },
+  { kind: 'pot_stand', name: 'Planter on Wooden Stand', category: 'pots', icon: '🪑', color: '#2c3e35', description: 'Mid-century elevated planter in 4-leg wood stand', width: 0.65, depth: 0.65 },
+  { kind: 'pot_marble', name: 'Calacatta Marble Pot', category: 'pots', icon: '🏛️', color: '#fafafa', description: 'Luxury polished marble cylinder with brass inlay', width: 0.65, depth: 0.65 },
+
+  // Decor & Accessories
+  { kind: 'decor_lamp', name: 'Arc Brass Floor Lamp', category: 'decorations', icon: '💡', color: '#cca258', description: 'Sweeping arch floor lamp with warm illuminated dome', width: 0.85, depth: 0.85 },
+  { kind: 'decor_rug', name: 'Boho Woven Area Rug', category: 'decorations', icon: '🧶', color: '#e8decb', description: 'Textured woven wool floor rug with fringe', width: 2.4, depth: 1.6 },
+  { kind: 'decor_mirror', name: 'Arched Full Floor Mirror', category: 'decorations', icon: '🪞', color: '#cda45e', description: 'Full-length arched gold brass dressing mirror', width: 0.85, depth: 0.45 },
+  { kind: 'decor_shelf_hanging', name: 'Hanging Rope Wall Shelf', category: 'decorations', icon: '🪵', color: '#7c5335', description: 'Natural pine slab held by suspended jute ropes', width: 0.75, depth: 0.3 },
+  { kind: 'decor_clock', name: 'Modern Wall Clock', category: 'decorations', icon: '⏱️', color: '#2d3748', description: 'Minimalist wood & brass sweeping dial clock', width: 0.6, depth: 0.1 },
+  { kind: 'decor_basket', name: 'Seagrass Belly Basket', category: 'decorations', icon: '🧺', color: '#c29f6d', description: 'Braided natural fiber storage basket with handles', width: 0.6, depth: 0.6 },
+  { kind: 'decor_watering_can', name: 'Brass Watering Can', category: 'decorations', icon: '🫖', color: '#c99c54', description: 'Vintage slender gooseneck spout watering pitcher', width: 0.45, depth: 0.3 },
+  { kind: 'decor_art_frame', name: 'Botanical Art Canvas', category: 'decorations', icon: '🖼️', color: '#3d2c20', description: 'Gallery-framed Swiss Cheese monstera art print', width: 0.9, depth: 0.1 },
 ]
 
 export const itemBaseSizes: Record<string, [number, number]> = {
@@ -199,6 +231,20 @@ export const itemBaseSizes: Record<string, [number, number]> = {
   dracaena: [0.85, 0.85],
   bonsai: [0.85, 0.85],
   stringofpearls: [0.7, 0.7],
+  pot_terracotta: [0.65, 0.65],
+  pot_ceramic: [0.6, 0.6],
+  pot_geometric: [0.65, 0.65],
+  pot_hanging: [0.6, 0.6],
+  pot_stand: [0.65, 0.65],
+  pot_marble: [0.65, 0.65],
+  decor_lamp: [0.85, 0.85],
+  decor_rug: [2.4, 1.6],
+  decor_mirror: [0.85, 0.45],
+  decor_shelf_hanging: [0.75, 0.3],
+  decor_clock: [0.6, 0.1],
+  decor_basket: [0.6, 0.6],
+  decor_watering_can: [0.45, 0.3],
+  decor_art_frame: [0.9, 0.1],
 }
 
 /**
@@ -1078,7 +1124,7 @@ export default function RoomDesigner() {
             <span className="panel-step">01</span>
             <div>
               <h2>Add to room</h2>
-              <p>Choose plants, furniture, and custom decor.</p>
+              <p>Choose plants, furniture, pots, and custom decor.</p>
             </div>
           </div>
 
@@ -1157,11 +1203,20 @@ export default function RoomDesigner() {
             <button
               type="button"
               role="tab"
+              aria-selected={activeTab === 'pots'}
+              className={`catalog-tab ${activeTab === 'pots' ? 'active' : ''}`}
+              onClick={() => setActiveTab('pots')}
+            >
+              🏺 Pots
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={activeTab === 'decorations'}
               className={`catalog-tab ${activeTab === 'decorations' ? 'active' : ''}`}
               onClick={() => setActiveTab('decorations')}
             >
-              🏺 Decor & Pots
+              ✨ Decor
             </button>
           </div>
 

@@ -797,6 +797,403 @@ export default function Furniture({ kind, color }: FurnitureProps) {
     )
   }
 
+  if (kind === 'pot_terracotta') {
+    return (
+      <group>
+        {/* Drainage Saucer */}
+        <mesh position={[0, 0.02, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.32, 0.28, 0.04, 32]} />
+          <meshStandardMaterial map={ceramicTex} roughness={0.7} color={color || '#d48057'} />
+        </mesh>
+        {/* Tapered Terracotta Body */}
+        <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.3, 0.21, 0.5, 32]} />
+          <meshStandardMaterial map={ceramicTex} roughness={0.75} color={color || '#d48057'} />
+        </mesh>
+        {/* Rolled Collar Rim */}
+        <mesh position={[0, 0.52, 0]} castShadow>
+          <torusGeometry args={[0.295, 0.025, 12, 36]} />
+          <meshStandardMaterial map={ceramicTex} roughness={0.72} color={color || '#d48057'} />
+        </mesh>
+        {/* Soil Bed */}
+        <mesh position={[0, 0.5, 0]}>
+          <cylinderGeometry args={[0.28, 0.28, 0.02, 32]} />
+          <meshStandardMaterial color="#2d2118" roughness={0.95} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'pot_ceramic') {
+    return (
+      <group>
+        {/* Brass Accent Base Tray */}
+        <mesh position={[0, 0.015, 0]} castShadow>
+          <cylinderGeometry args={[0.26, 0.26, 0.03, 32]} />
+          <meshStandardMaterial color="#cda45e" metalness={0.85} roughness={0.25} />
+        </mesh>
+        {/* Fluted Vertical Ceramic Cylinder */}
+        <mesh position={[0, 0.32, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.25, 0.23, 0.58, 36]} />
+          <meshPhysicalMaterial
+            map={ceramicTex}
+            color={color || '#f5f2eb'}
+            roughness={0.25}
+            clearcoat={0.6}
+          />
+        </mesh>
+        {/* Soil Surface with decorative pebbles */}
+        <mesh position={[0, 0.59, 0]}>
+          <cylinderGeometry args={[0.235, 0.235, 0.02, 32]} />
+          <meshStandardMaterial color="#382c23" roughness={0.9} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'pot_geometric') {
+    return (
+      <group>
+        {/* Faceted Hexagonal Modern Planter */}
+        <mesh position={[0, 0.28, 0]} rotation={[0, Math.PI / 6, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.28, 0.18, 0.54, 6]} />
+          <meshStandardMaterial
+            color={color || '#3d4841'}
+            roughness={0.4}
+            metalness={0.1}
+          />
+        </mesh>
+        {/* Hexagonal Rim */}
+        <mesh position={[0, 0.54, 0]} rotation={[0, Math.PI / 6, 0]} castShadow>
+          <cylinderGeometry args={[0.29, 0.28, 0.03, 6]} />
+          <meshStandardMaterial color="#cca258" metalness={0.8} roughness={0.3} />
+        </mesh>
+        <mesh position={[0, 0.52, 0]} rotation={[0, Math.PI / 6, 0]}>
+          <cylinderGeometry args={[0.25, 0.25, 0.02, 6]} />
+          <meshStandardMaterial color="#2c2017" roughness={0.95} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'pot_hanging') {
+    return (
+      <group position={[0, 1.1, 0]}>
+        {/* Ceiling Hook & Brass Ring */}
+        <mesh position={[0, 0.9, 0]}>
+          <torusGeometry args={[0.04, 0.008, 8, 20]} />
+          <meshStandardMaterial color="#cca258" metalness={0.85} roughness={0.25} />
+        </mesh>
+        {/* 3 Braided Macrame Cords */}
+        {[0, 2.09, 4.18].map((angle, idx) => (
+          <group key={idx} rotation={[0, angle, 0]}>
+            <mesh position={[0.08, 0.45, 0]} rotation={[0, 0, -0.16]} castShadow>
+              <cylinderGeometry args={[0.006, 0.006, 0.95, 8]} />
+              <meshStandardMaterial color="#d4c7b2" roughness={0.9} />
+            </mesh>
+          </group>
+        ))}
+        {/* Hanging Ceramic Bowl */}
+        <mesh position={[0, 0, 0]} castShadow receiveShadow>
+          <sphereGeometry args={[0.24, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.65]} />
+          <meshStandardMaterial map={ceramicTex} color={color || '#e8dfcf'} roughness={0.4} side={THREE.DoubleSide} />
+        </mesh>
+        {/* Bottom Macrame Tassel Fringe */}
+        <mesh position={[0, -0.22, 0]} castShadow>
+          <cylinderGeometry args={[0.02, 0.04, 0.16, 12]} />
+          <meshStandardMaterial color="#d4c7b2" roughness={0.95} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'pot_stand') {
+    return (
+      <group>
+        {/* 4 Wooden Stand Legs */}
+        {[
+          [-0.19, -0.19],
+          [0.19, -0.19],
+          [-0.19, 0.19],
+          [0.19, 0.19],
+        ].map(([lx, lz], idx) => (
+          <mesh key={idx} position={[lx, 0.35, lz]} castShadow>
+            <cylinderGeometry args={[0.016, 0.016, 0.7, 14]} />
+            <meshStandardMaterial map={woodTex} color="#543c2b" roughness={0.6} />
+          </mesh>
+        ))}
+        {/* Wooden Cross Brace Bars */}
+        <mesh position={[0, 0.28, 0]} castShadow>
+          <boxGeometry args={[0.38, 0.03, 0.04]} />
+          <meshStandardMaterial map={woodTex} color="#543c2b" roughness={0.6} />
+        </mesh>
+        <mesh position={[0, 0.28, 0]} castShadow>
+          <boxGeometry args={[0.04, 0.03, 0.38]} />
+          <meshStandardMaterial map={woodTex} color="#543c2b" roughness={0.6} />
+        </mesh>
+        {/* Ceramic Planter seated in stand */}
+        <mesh position={[0, 0.54, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.22, 0.21, 0.48, 32]} />
+          <meshPhysicalMaterial
+            map={ceramicTex}
+            color={color || '#2c3e35'}
+            roughness={0.3}
+            clearcoat={0.5}
+          />
+        </mesh>
+        <mesh position={[0, 0.76, 0]}>
+          <cylinderGeometry args={[0.205, 0.205, 0.02, 32]} />
+          <meshStandardMaterial color="#2d2118" roughness={0.95} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'pot_marble') {
+    return (
+      <group>
+        {/* Solid Luxury White Marble Planter */}
+        <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.26, 0.26, 0.56, 36]} />
+          <meshPhysicalMaterial
+            map={ceramicTex}
+            color="#fafafa"
+            roughness={0.15}
+            clearcoat={0.8}
+            clearcoatRoughness={0.1}
+          />
+        </mesh>
+        {/* Inset Gold Brass Accent Ring */}
+        <mesh position={[0, 0.28, 0]}>
+          <torusGeometry args={[0.262, 0.012, 12, 36]} />
+          <meshStandardMaterial color="#cca258" metalness={0.9} roughness={0.2} />
+        </mesh>
+        {/* Soil Bed */}
+        <mesh position={[0, 0.54, 0]}>
+          <cylinderGeometry args={[0.245, 0.245, 0.02, 32]} />
+          <meshStandardMaterial color="#2b1f16" roughness={0.95} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'decor_lamp') {
+    return (
+      <group>
+        {/* Heavy Marble / Brass Floor Base */}
+        <mesh position={[0, 0.03, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.24, 0.26, 0.06, 32]} />
+          <meshStandardMaterial color="#cca258" metalness={0.85} roughness={0.25} />
+        </mesh>
+        {/* Sweeping Arc Brass Stem */}
+        <mesh position={[-0.25, 1.15, 0]} rotation={[0, 0, -0.32]} castShadow>
+          <cylinderGeometry args={[0.016, 0.018, 1.9, 14]} />
+          <meshStandardMaterial color="#cca258" metalness={0.85} roughness={0.25} />
+        </mesh>
+        <mesh position={[-0.45, 1.98, 0]} rotation={[0, 0, -1.2]} castShadow>
+          <cylinderGeometry args={[0.014, 0.016, 0.65, 14]} />
+          <meshStandardMaterial color="#cca258" metalness={0.85} roughness={0.25} />
+        </mesh>
+        {/* Spun Metal Lamp Dome Shade */}
+        <group position={[-0.72, 1.82, 0]}>
+          <mesh rotation={[Math.PI, 0, 0]} castShadow>
+            <sphereGeometry args={[0.22, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
+            <meshStandardMaterial color={color || '#cca258'} metalness={0.85} roughness={0.25} side={THREE.DoubleSide} />
+          </mesh>
+          {/* Glowing Bulb & Light */}
+          <mesh position={[0, -0.04, 0]}>
+            <sphereGeometry args={[0.05, 16, 16]} />
+            <meshBasicMaterial color="#fffbe8" />
+          </mesh>
+          <pointLight color="#ffe8b8" intensity={1.4} distance={4} />
+        </group>
+      </group>
+    )
+  }
+
+  if (kind === 'decor_rug') {
+    return (
+      <group position={[0, 0.005, 0]}>
+        {/* Woven Wool Area Rug Plane */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[2.4, 1.6]} />
+          <meshStandardMaterial
+            map={fabricTex}
+            bumpMap={fabricTex}
+            bumpScale={0.015}
+            color={color || '#e8decb'}
+            roughness={0.96}
+          />
+        </mesh>
+        {/* Fringed End Borders */}
+        {[-1.2, 1.2].map((x, idx) => (
+          <mesh key={idx} position={[x, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.06, 1.6]} />
+            <meshStandardMaterial map={fabricTex} color="#d4c5ab" roughness={0.98} />
+          </mesh>
+        ))}
+      </group>
+    )
+  }
+
+  if (kind === 'decor_mirror') {
+    return (
+      <group>
+        {/* Arched Gold Brass Frame */}
+        <RoundedBox args={[0.85, 1.75, 0.04]} radius={0.12} position={[0, 0.9, 0]} rotation={[-0.08, 0, 0]} castShadow>
+          <meshStandardMaterial color={color || '#cda45e'} metalness={0.85} roughness={0.25} />
+        </RoundedBox>
+        {/* Reflective Mirror Glass */}
+        <mesh position={[0, 0.9, 0.023]} rotation={[-0.08, 0, 0]}>
+          <planeGeometry args={[0.76, 1.65]} />
+          <meshPhysicalMaterial
+            color="#edf2f7"
+            roughness={0.02}
+            metalness={0.95}
+            clearcoat={1}
+          />
+        </mesh>
+        {/* Rear Kickstand Leg */}
+        <mesh position={[0, 0.8, -0.3]} rotation={[0.25, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.014, 0.014, 1.4, 10]} />
+          <meshStandardMaterial color="#2d3748" roughness={0.6} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'decor_shelf_hanging') {
+    return (
+      <group position={[0, 1.2, 0]}>
+        {/* Wall Hanging Ring */}
+        <mesh position={[0, 0.6, 0]}>
+          <torusGeometry args={[0.035, 0.008, 8, 16]} />
+          <meshStandardMaterial color="#2d3748" metalness={0.8} roughness={0.3} />
+        </mesh>
+        {/* 2 Hanging Jute Ropes */}
+        {[-0.32, 0.32].map((rx, idx) => (
+          <mesh key={idx} position={[rx * 0.5, 0.3, 0]} rotation={[0, 0, rx > 0 ? -0.25 : 0.25]} castShadow>
+            <cylinderGeometry args={[0.006, 0.006, 0.65, 8]} />
+            <meshStandardMaterial color="#c29f6d" roughness={0.9} />
+          </mesh>
+        ))}
+        {/* Pine Wood Plank Shelf */}
+        <RoundedBox args={[0.75, 0.035, 0.28]} radius={0.008} position={[0, 0, 0]} castShadow receiveShadow>
+          <meshStandardMaterial map={woodTex} color={color || '#7c5335'} roughness={0.55} />
+        </RoundedBox>
+        {/* Mini Succulent on Shelf */}
+        <group position={[0.18, 0.06, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.045, 0.035, 0.06, 16]} />
+            <meshStandardMaterial map={ceramicTex} color="#fafafa" roughness={0.3} />
+          </mesh>
+          <mesh position={[0, 0.05, 0]}>
+            <sphereGeometry args={[0.04, 10, 10]} />
+            <meshStandardMaterial color="#4a7c4e" roughness={0.5} />
+          </mesh>
+        </group>
+      </group>
+    )
+  }
+
+  if (kind === 'decor_clock') {
+    return (
+      <group position={[0, 1.7, 0]}>
+        {/* Clock Dial Rim */}
+        <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.3, 0.3, 0.03, 36]} />
+          <meshStandardMaterial map={woodTex} color={color || '#2d3748'} roughness={0.6} />
+        </mesh>
+        {/* Dial Face */}
+        <mesh position={[0, 0, 0.016]}>
+          <circleGeometry args={[0.27, 36]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.3} />
+        </mesh>
+        {/* Center Brass Cap */}
+        <mesh position={[0, 0, 0.024]}>
+          <cylinderGeometry args={[0.015, 0.015, 0.01, 16]} />
+          <meshStandardMaterial color="#cca258" metalness={0.9} roughness={0.2} />
+        </mesh>
+        {/* Hour & Minute Hands */}
+        <mesh position={[0, 0.06, 0.022]} rotation={[0, 0, 0.4]}>
+          <boxGeometry args={[0.01, 0.14, 0.004]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.4} />
+        </mesh>
+        <mesh position={[0.07, 0, 0.022]} rotation={[0, 0, -1.2]}>
+          <boxGeometry args={[0.008, 0.19, 0.004]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.4} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'decor_basket') {
+    return (
+      <group>
+        {/* Braided Woven Seagrass Belly Basket */}
+        <mesh position={[0, 0.22, 0]} castShadow receiveShadow>
+          <sphereGeometry args={[0.26, 24, 18, 0, Math.PI * 2, 0.35, Math.PI * 0.7]} />
+          <meshStandardMaterial map={fabricTex} color={color || '#c29f6d'} roughness={0.95} side={THREE.DoubleSide} />
+        </mesh>
+        {/* Bottom Base */}
+        <mesh position={[0, 0.03, 0]} castShadow>
+          <cylinderGeometry args={[0.16, 0.18, 0.06, 20]} />
+          <meshStandardMaterial map={fabricTex} color="#b8935f" roughness={0.95} />
+        </mesh>
+        {/* 2 Loop Handles on sides */}
+        {[-0.24, 0.24].map((hx, idx) => (
+          <mesh key={idx} position={[hx, 0.36, 0]} rotation={[0, 0, hx > 0 ? -0.3 : 0.3]} castShadow>
+            <torusGeometry args={[0.045, 0.01, 8, 16, Math.PI]} />
+            <meshStandardMaterial color="#a8824f" roughness={0.95} />
+          </mesh>
+        ))}
+      </group>
+    )
+  }
+
+  if (kind === 'decor_watering_can') {
+    return (
+      <group>
+        {/* Cylindrical Brass Reservoir Tank */}
+        <mesh position={[0, 0.14, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.11, 0.11, 0.24, 24]} />
+          <meshStandardMaterial color={color || '#c99c54'} metalness={0.85} roughness={0.25} />
+        </mesh>
+        {/* Top Handle Loop */}
+        <mesh position={[-0.04, 0.26, 0]} rotation={[0, 0, -0.2]} castShadow>
+          <torusGeometry args={[0.1, 0.01, 10, 24, Math.PI]} />
+          <meshStandardMaterial color="#c99c54" metalness={0.85} roughness={0.25} />
+        </mesh>
+        {/* Long Slender Curved Pouring Spout */}
+        <mesh position={[0.16, 0.18, 0]} rotation={[0, 0, -0.75]} castShadow>
+          <cylinderGeometry args={[0.008, 0.016, 0.32, 14]} />
+          <meshStandardMaterial color="#c99c54" metalness={0.85} roughness={0.25} />
+        </mesh>
+      </group>
+    )
+  }
+
+  if (kind === 'decor_art_frame') {
+    return (
+      <group position={[0, 1.7, 0]}>
+        {/* Solid Oak Wood Frame */}
+        <RoundedBox args={[0.9, 1.15, 0.03]} radius={0.01} castShadow>
+          <meshStandardMaterial map={woodTex} color={color || '#3d2c20'} roughness={0.6} />
+        </RoundedBox>
+        {/* White Beveled Matting */}
+        <mesh position={[0, 0, 0.016]}>
+          <planeGeometry args={[0.82, 1.07]} />
+          <meshStandardMaterial color="#fafaf8" roughness={0.9} />
+        </mesh>
+        {/* Botanical Art Canvas Print */}
+        <mesh position={[0, 0, 0.018]}>
+          <planeGeometry args={[0.65, 0.85]} />
+          <meshStandardMaterial map={leafTex} color="#276749" roughness={0.65} />
+        </mesh>
+      </group>
+    )
+  }
+
   // Plant Shelf / Bookcase Unit
   return (
     <group>
