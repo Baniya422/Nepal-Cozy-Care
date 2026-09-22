@@ -1,4 +1,4 @@
-import { Sparkles, ArrowDown, RotateCcw } from "lucide-react";
+import { Sparkles, ArrowDown, RotateCcw, Box, ArrowRight } from "lucide-react";
 import PlantFinderPlantCard from "./PlantFinderPlantCard";
 import type { Plant } from "../types";
 
@@ -8,6 +8,8 @@ type PlantFinderResultsProps = {
   morePlants: Plant[];
   onPlantClick: (id: number) => void;
   onStartOver?: () => void;
+  onContinueToStudio?: () => void;
+  roomTitle?: string;
 };
 
 export default function PlantFinderResults({
@@ -16,6 +18,8 @@ export default function PlantFinderResults({
   morePlants,
   onPlantClick,
   onStartOver,
+  onContinueToStudio,
+  roomTitle = "Custom Room",
 }: PlantFinderResultsProps) {
   return (
     <div id="plantfinder-results-section" className="pf-results-wrapper">
@@ -31,6 +35,32 @@ export default function PlantFinderResults({
           <p className="pf-results-desc">
             Smart botanical suggestions tailored specifically to your room, light, and routine.
           </p>
+
+          {/* 3D Room Studio Action Banner */}
+          {onContinueToStudio && (
+            <div className="pf-studio-cta-banner">
+              <div className="pf-studio-cta-content">
+                <div className="pf-studio-cta-badge">
+                  <Box size={16} />
+                  <span>3D Architectural Studio</span>
+                </div>
+                <h3>Experience Your {roomTitle} in 3D</h3>
+                <p>
+                  Place these recommended plants into a real 3D room, rearrange furniture, and see how daylight illuminates your space.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="pf-studio-cta-button"
+                onClick={onContinueToStudio}
+                title="Continue designing this room in the 3D Studio"
+              >
+                <span>Continue Designing in 3D Studio</span>
+                <ArrowRight size={17} />
+              </button>
+            </div>
+          )}
+
           {onStartOver && (
             <button
               type="button"

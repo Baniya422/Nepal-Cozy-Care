@@ -1,45 +1,65 @@
-.designer-stage {
-  border-color: #bacabd;
-  background: #dfe8e4;
-  box-shadow: 0 28px 70px #183b2938;
+/* Architectural Polish & Accessibility Enhancements */
+.room-designer-page button:focus-visible,
+.room-designer-page input:focus-visible,
+.room-designer-page select:focus-visible {
+  outline: 3px solid #c99c54;
+  outline-offset: 2px;
 }
 
-.designer-stage::after {
-  content: "";
+/* Accessible Cursor Rules */
+.room-designer-page,
+.room-designer-page button,
+.room-designer-page select,
+.room-designer-page input {
+  cursor: auto;
+}
+
+.room-designer-page button,
+.catalog-grid button,
+.stage-toolbar button,
+.catalog-tab,
+.starter-btn {
+  cursor: pointer;
+}
+
+/* Reduced Motion & Touch Devices */
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+  .room-cursor {
+    display: none !important;
+  }
+  .catalog-grid button,
+  .starter-btn,
+  .stage-toolbar button {
+    transition: none !important;
+  }
+  .catalog-grid button:hover,
+  .starter-btn:hover {
+    transform: none !important;
+  }
+}
+
+/* WebGL fallback container */
+.webgl-fallback {
   position: absolute;
   inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(120deg, #ffffff3d 0%, transparent 28%, transparent 72%, #173b2c14 100%);
-  mix-blend-mode: soft-light;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-align: center;
+  background: #edf3ee;
+  color: #173b2c;
 }
 
-.stage-toolbar,
-.empty-room-note {
-  z-index: 5;
+.webgl-fallback h3 {
+  font-family: Georgia, serif;
+  font-size: 1.4rem;
+  margin-bottom: 8px;
 }
 
-.catalog-grid button,
-.designer-panel,
-.stage-toolbar button {
-  backdrop-filter: blur(12px);
+.webgl-fallback p {
+  font-size: 0.9rem;
+  color: #4d6857;
+  max-width: 400px;
 }
-
-.designer-intro {
-  background:
-    radial-gradient(circle at 25% 5%, #ffffff 0, transparent 35%),
-    radial-gradient(circle at 75% 30%, #dcebdd 0, transparent 38%),
-    #edf1e9;
-}
-
-/* Keep the native pointer as an accessible fallback; decorative tracking stays optional. */
-.room-designer-page,.room-designer-page button {cursor:auto}
-.room-designer-page button {cursor:pointer}
-.room-cursor {width:22px;height:22px;left:-11px;top:-11px;background:transparent;backdrop-filter:none;opacity:.4}
-.studio-notice {min-height:26px;text-align:center;color:#49634e;font-size:.85rem}
-.room-panel select,.position-controls input {width:100%;padding:8px;border:1px solid #ccd6ca;border-radius:8px;background:white;color:#183b2b;margin-top:6px}
-.position-controls {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:.75rem}
-.designer-stage::after {display:none}
-.room-designer-page button:focus-visible,.room-designer-page input:focus-visible,.room-designer-page select:focus-visible {outline:3px solid #b48135;outline-offset:3px}
-@media(prefers-reduced-motion:reduce),(pointer:coarse){.room-cursor{display:none}.catalog-grid button{transition:none}.catalog-grid button:hover{transform:none}}
-@media(max-width:720px){.stage-toolbar{flex-wrap:wrap}.stage-toolbar button{font-size:.7rem}.stage-toolbar button svg{width:15px}}

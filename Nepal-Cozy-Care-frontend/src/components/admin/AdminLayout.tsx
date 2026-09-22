@@ -24,6 +24,7 @@ import {
   Building2,
   PackageCheck,
   ExternalLink,
+  Box,
 } from "lucide-react";
 import "./admin.css";
 interface AdminLayoutProps {
@@ -51,6 +52,7 @@ const menuGroups = [
     items: [
       { path: "/admin/orders", icon: ShoppingCart, label: "Orders" },
       { path: "/admin/plants", icon: Leaf, label: "Manage Plants" },
+      { path: "/admin/decorations", icon: Box, label: "3D Decorations" },
       { path: "/admin/accessories", icon: Package, label: "Accessories" },
     ],
   },
