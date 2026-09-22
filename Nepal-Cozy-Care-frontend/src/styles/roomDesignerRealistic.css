@@ -31,3 +31,15 @@
     radial-gradient(circle at 75% 30%, #dcebdd 0, transparent 38%),
     #edf1e9;
 }
+
+/* Keep the native pointer as an accessible fallback; decorative tracking stays optional. */
+.room-designer-page,.room-designer-page button {cursor:auto}
+.room-designer-page button {cursor:pointer}
+.room-cursor {width:22px;height:22px;left:-11px;top:-11px;background:transparent;backdrop-filter:none;opacity:.4}
+.studio-notice {min-height:26px;text-align:center;color:#49634e;font-size:.85rem}
+.room-panel select,.position-controls input {width:100%;padding:8px;border:1px solid #ccd6ca;border-radius:8px;background:white;color:#183b2b;margin-top:6px}
+.position-controls {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:.75rem}
+.designer-stage::after {display:none}
+.room-designer-page button:focus-visible,.room-designer-page input:focus-visible,.room-designer-page select:focus-visible {outline:3px solid #b48135;outline-offset:3px}
+@media(prefers-reduced-motion:reduce),(pointer:coarse){.room-cursor{display:none}.catalog-grid button{transition:none}.catalog-grid button:hover{transform:none}}
+@media(max-width:720px){.stage-toolbar{flex-wrap:wrap}.stage-toolbar button{font-size:.7rem}.stage-toolbar button svg{width:15px}}
