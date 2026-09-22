@@ -27,6 +27,7 @@ const CareTips = lazy(() => import('./pages/CareTips'))
 const CareTipDetail = lazy(() => import('./pages/CareTipDetail'))
 const TrackOrder = lazy(() => import('./pages/TrackOrder'))
 const PlantHealthChecker = lazy(() => import('./pages/PlantHealthChecker'))
+const RoomDesigner = lazy(() => import('./pages/RoomDesigner'))
 const PopularItemsPage = lazy(() => import('./pages/PopularItemsPage'))
 const BestSellersPage = lazy(() => import('./pages/BestSellersPage'))
 const HelpCenter = lazy(() => import('./pages/HelpCenter'))
@@ -87,6 +88,7 @@ function App() {
         <Route path="/best-sellers" element={<BestSellersPage />} />
         <Route path="/plant-finder" element={<PlantFinder />} />
         <Route path="/plant-health-checker" element={<PlantHealthChecker />} />
+        <Route path="/room-designer" element={<RoomDesigner />} />
         <Route path="/care-tips" element={<CareTips />} />
         <Route path="/care-tips/:id" element={<CareTipDetail />} />
         <Route path="/blogs" element={<Blogs />} />

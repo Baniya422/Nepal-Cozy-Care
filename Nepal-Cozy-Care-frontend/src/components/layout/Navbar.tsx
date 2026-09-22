@@ -13,6 +13,7 @@ const navItems = [
   { to: "/care-tips", label: "Care Tips" },
   { to: "/blogs", label: "Blogs" },
   { to: "/plant-finder", label: "Plant Finder" },
+  { to: "/room-designer", label: "Room Designer" },
   { to: "/my-garden", label: "My Garden" },
   { to: "/mission", label: "Mission" },
   { to: "/about", label: "About" },
