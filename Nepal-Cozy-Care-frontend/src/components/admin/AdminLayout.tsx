@@ -26,6 +26,14 @@ import {
   ExternalLink,
   Box,
   Tag,
+  House,
+  Info,
+  Sparkles,
+  Send,
+  Truck,
+  HelpCircle,
+  Compass,
+  Stethoscope,
 } from "lucide-react";
 import "./admin.css";
 import { useFeatureFlags } from "../../context/FeatureFlagsContext";
@@ -68,12 +76,27 @@ const getMenuGroups = (vendorMarketplaceEnabled: boolean) => [
   },
 
   {
-    group: "Website & Content",
+    group: "Website Pages",
     items: [
-      { path: "/admin/page-content", icon: Globe, label: "Website Pages (CMS)" },
+      { path: "/admin/page-content", icon: Globe, label: "All Pages Hub" },
+      { path: "/admin/homepage", icon: House, label: "Homepage" },
+      { path: "/admin/pages/about", icon: Info, label: "About Us" },
+      { path: "/admin/pages/mission", icon: Sparkles, label: "Our Mission" },
+      { path: "/admin/pages/contact", icon: Send, label: "Contact & Support" },
+      { path: "/admin/pages/shipping", icon: Truck, label: "Shipping & Delivery" },
+      { path: "/admin/pages/help-center", icon: HelpCircle, label: "Help Center & FAQs" },
+      { path: "/admin/pages/navigation", icon: Compass, label: "Navbar & Menus" },
+    ],
+  },
+  {
+    group: "Content & Interactive",
+    items: [
       { path: "/admin/blogs", icon: BookOpen, label: "Care Blogs" },
+      { path: "/admin/pages/blogs-hub", icon: BookOpen, label: "Blogs Hub Header" },
       { path: "/admin/care-tips", icon: Lightbulb, label: "Care Tips" },
       { path: "/admin/seasonal-reminders", icon: CloudSun, label: "Seasonal Reminders" },
+      { path: "/admin/pages/plant-finder", icon: Sparkles, label: "Plant Finder Quiz" },
+      { path: "/admin/pages/plant-health", icon: Stethoscope, label: "Plant Health Doctor" },
     ],
   },
   {

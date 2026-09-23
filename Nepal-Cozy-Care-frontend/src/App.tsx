@@ -52,6 +52,15 @@ const ManageContactMessages = lazy(() => import('./pages/admin/ManageContactMess
 const ManageGardenEntries = lazy(() => import('./pages/admin/ManageGardenEntries'))
 const ManageHomepage = lazy(() => import('./pages/admin/ManageHomepage'))
 const ManagePageContent = lazy(() => import('./pages/admin/ManagePageContent'))
+const ManageAboutPage = lazy(() => import('./pages/admin/pages/ManageAboutPage'))
+const ManageMissionPage = lazy(() => import('./pages/admin/pages/ManageMissionPage'))
+const ManageContactPage = lazy(() => import('./pages/admin/pages/ManageContactPage'))
+const ManageShippingPage = lazy(() => import('./pages/admin/pages/ManageShippingPage'))
+const ManageHelpCenterPage = lazy(() => import('./pages/admin/pages/ManageHelpCenterPage'))
+const ManageBlogsHubPage = lazy(() => import('./pages/admin/pages/ManageBlogsHubPage'))
+const ManageNavigationPage = lazy(() => import('./pages/admin/pages/ManageNavigationPage'))
+const ManagePlantFinderAdmin = lazy(() => import('./pages/admin/pages/ManagePlantFinderAdmin'))
+const ManagePlantHealthAdmin = lazy(() => import('./pages/admin/pages/ManagePlantHealthAdmin'))
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettings'))
 const ManageSellerApplications = lazy(() => import('./pages/admin/ManageSellerApplications'))
 const ManageShops = lazy(() => import('./pages/admin/ManageShops'))
@@ -165,6 +174,78 @@ function App() {
         element={
           <AdminProtectedRoute>
             <ManagePageContent />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/about"
+        element={
+          <AdminProtectedRoute>
+            <ManageAboutPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/mission"
+        element={
+          <AdminProtectedRoute>
+            <ManageMissionPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/contact"
+        element={
+          <AdminProtectedRoute>
+            <ManageContactPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/shipping"
+        element={
+          <AdminProtectedRoute>
+            <ManageShippingPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/help-center"
+        element={
+          <AdminProtectedRoute>
+            <ManageHelpCenterPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/blogs-hub"
+        element={
+          <AdminProtectedRoute>
+            <ManageBlogsHubPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/navigation"
+        element={
+          <AdminProtectedRoute>
+            <ManageNavigationPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/plant-finder"
+        element={
+          <AdminProtectedRoute>
+            <ManagePlantFinderAdmin />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/plant-health"
+        element={
+          <AdminProtectedRoute>
+            <ManagePlantHealthAdmin />
           </AdminProtectedRoute>
         }
       />
