@@ -1,8 +1,8 @@
-import { useNavigate, Link } from "react-router-dom";
-import { Heart, Star, Store, ShieldCheck } from "lucide-react";
-import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
 import type { Plant } from "../../types/plant";
-import { useFeatureFlags } from "../../context/FeatureFlagsContext";
+import { useAddToCart } from "../../hooks/useAddToCart";
+import ProductCard from "../common/ProductCard";
+
+const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 interface ProductGridProps {
   plants: Plant[];
@@ -16,6 +16,7 @@ interface ProductGridProps {
   badgeLabel?: (plant: Plant, index: number) => string | null;
   showSoldCount?: boolean;
 }
+
 export default function ProductGrid({
   plants,
   loading,
@@ -28,27 +29,30 @@ export default function ProductGrid({
   badgeLabel,
   showSoldCount = false,
 }: ProductGridProps) {
-  const navigate = useNavigate();
-  const { vendor_marketplace_enabled } = useFeatureFlags();
+  const { cartBusyId, addToCart } = useAddToCart(API);
+
   if (error) {
     return (
-      <div className="plants-error" style={{
-        padding: '2rem',
-        textAlign: 'center',
-        background: '#fee2e2',
-        borderRadius: '8px',
-        margin: '2rem 0'
-      }}>
-        <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{error}</p>
+      <div
+        className="plants-error"
+        style={{
+          padding: "2rem",
+          textAlign: "center",
+          background: "#fee2e2",
+          borderRadius: "8px",
+          margin: "2rem 0",
+        }}
+      >
+        <p style={{ color: "#dc2626", marginBottom: "1rem" }}>{error}</p>
         <button
           onClick={fetchPlants}
           style={{
-            padding: '0.5rem 1rem',
-            background: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
+            padding: "0.5rem 1rem",
+            background: "#dc2626",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
           }}
         >
           Retry
@@ -56,115 +60,54 @@ export default function ProductGrid({
       </div>
     );
   }
+
   if (plants.length === 0 && !loading) {
     return (
-      <div className="plants-no-results" style={{
-        padding: '2rem',
-        textAlign: 'center',
-        color: '#6b7280'
-      }}>
+      <div
+        className="plants-no-results"
+        style={{
+          padding: "3rem 2rem",
+          textAlign: "center",
+          color: "#6b7280",
+        }}
+      >
         <p>{emptyMessage}</p>
       </div>
     );
   }
+
   return (
     <div className="plants-grid">
-      {loading ? (
-        Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="plants-card skeleton-card">
-            <div className="plants-card-image-wrapper skeleton-image">
-              <div className="skeleton-shimmer"></div>
-            </div>
-            <div className="plants-card-content">
-              <div className="skeleton-text skeleton-title"></div>
-              <div className="skeleton-text skeleton-category"></div>
-              <div className="skeleton-text skeleton-price"></div>
-              <div className="skeleton-text skeleton-rating"></div>
-              <div className="skeleton-text skeleton-button"></div>
-            </div>
-          </div>
-        ))
-      ) : (
-        plants.map((plant, index) => {
-          const rating = Math.max(0, Math.min(5, Number(plant.avg_rating ?? 0)));
-          const badge = badgeLabel?.(plant, index) ?? null;
-
-          return (
-            <div key={plant.id} className="plants-card">
-              <div className="plants-card-image-wrapper">
-                {badge ? <span className="plants-card-badge">{badge}</span> : null}
-                <img
-                  src={resolveImageUrl(plant.image, DEFAULT_PLANT_IMAGE)}
-                  alt={plant.name}
-                  className="plants-card-image"
-                  loading={index < 4 ? "eager" : "lazy"}
-                  decoding="async"
-                  fetchPriority={index === 0 ? "high" : "auto"}
-                  onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)}
-                  onClick={() => navigate(`/plants/${plant.id}`)}
+      {loading
+        ? Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="product-card skeleton-card">
+              <div className="product-image-wrapper skeleton-box" />
+              <div className="product-info">
+                <div className="skeleton-line" style={{ width: "70%", height: "1.2rem" }} />
+                <div className="skeleton-line" style={{ width: "50%", height: "0.9rem" }} />
+                <div
+                  className="skeleton-line"
+                  style={{ width: "40%", height: "1.1rem", marginTop: "0.5rem" }}
                 />
-                <button
-                  type="button"
-                  className={`plants-wishlist-btn ${
-                    wishlistIds.includes(plant.id) ? "active" : ""
-                  }`}
-                  onClick={() => onToggleWishlist(plant.id)}
-                  aria-label={
-                    wishlistIds.includes(plant.id)
-                      ? "Remove from wishlist"
-                      : "Add to wishlist"
-                  }
-                  aria-pressed={wishlistIds.includes(plant.id)}
-                  disabled={wishlistBusyId === plant.id}
-                >
-                  <Heart
-                    size={20}
-                    fill={wishlistIds.includes(plant.id) ? "currentColor" : "none"}
-                  />
-                </button>
-              </div>
-              <div className="plants-card-content">
-                <h3 className="plants-card-name">{plant.name}</h3>
-                <p className="plants-card-category">{plant.category || "Indoor Plant"}</p>
-                {vendor_marketplace_enabled && plant.shop && (
-                  <Link
-                    to={`/shops/${plant.shop.slug}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800 hover:text-emerald-950 transition mb-1"
-                  >
-                    <Store size={12} className="text-emerald-600" />
-                    <span>Sold by {plant.shop.name}</span>
-                    {plant.shop.is_verified && (
-                      <ShieldCheck size={11} className="text-emerald-600" />
-                    )}
-                  </Link>
-                )}
-                <p className="plants-card-price">Rs {Number(plant.price).toFixed(2)}</p>
-                <div className="plants-card-rating">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={15}
-                      fill={i < Math.round(rating) ? "currentColor" : "none"}
-                      className={i < Math.round(rating) ? "star-filled" : "star-empty"}
-                    />
-                  ))}
-                  <span className="plants-rating-count">({plant.review_count ?? 0})</span>
-                </div>
-                {showSoldCount ? (
-                  <p className="plants-card-sales">Sold: {plant.total_sold ?? 0} units</p>
-                ) : null}
-                <button
-                  className="plants-view-btn"
-                  onClick={() => navigate(`/plants/${plant.id}`)}
-                >
-                  View All
-                </button>
               </div>
             </div>
-          );
-        })
-      )}
+          ))
+        : plants.map((plant, index) => {
+            return (
+              <ProductCard
+                key={plant.id}
+                product={plant}
+                index={index}
+                badge={badgeLabel ? badgeLabel(plant, index) : undefined}
+                isWishlisted={wishlistIds.includes(plant.id)}
+                isWishlistBusy={wishlistBusyId === plant.id}
+                onToggleWishlist={onToggleWishlist}
+                onAddToCart={(_id, name) => void addToCart({ id: plant.id, name })}
+                isCartBusy={cartBusyId === plant.id}
+                showSoldCount={showSoldCount}
+              />
+            );
+          })}
     </div>
   );
 }

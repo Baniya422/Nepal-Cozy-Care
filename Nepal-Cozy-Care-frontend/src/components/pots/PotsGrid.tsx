@@ -1,5 +1,4 @@
-import { Heart, ShoppingCart } from "lucide-react";
-import { resolveImageUrl, handleImageError, DEFAULT_POT_IMAGE } from "../../utils/imageUrl";
+import ProductCard from "../common/ProductCard";
 
 type Pot = {
   id: number;
@@ -11,6 +10,7 @@ type Pot = {
   description?: string;
   is_active?: boolean;
 };
+
 interface PotsGridProps {
   filteredPots: Pot[];
   pots: Pot[];
@@ -19,6 +19,7 @@ interface PotsGridProps {
   toggleWishlist: (potId: number) => void;
   handleAddToCart: (pot: Pot) => void;
 }
+
 export default function PotsGrid({
   filteredPots,
   pots,
@@ -30,70 +31,35 @@ export default function PotsGrid({
   if (loading) {
     return (
       <main className="pots-main">
-        <div className="pots-loading">Loading pots...</div>
+        <div className="pots-loading">Loading accessories & pots...</div>
       </main>
     );
   }
+
   return (
     <main className="pots-main">
       <div className="pots-info">
         <p>
-          Showing {filteredPots.length} of {pots.length} pots
+          Showing {filteredPots.length} of {pots.length} items
         </p>
       </div>
+
       {filteredPots.length === 0 ? (
         <div className="pots-empty">
-          <p>No pots found matching your criteria.</p>
+          <p>No pots or accessories found matching your criteria.</p>
         </div>
       ) : (
-        <div className="pots-grid">
-          {filteredPots.map((pot) => (
-            <div key={pot.id} className="pot-card">
-              <div className="pot-image-container">
-                <div className="pot-image-placeholder">
-                  <img
-                    src={resolveImageUrl(pot.image, DEFAULT_POT_IMAGE)}
-                    alt={pot.name}
-                    onError={(e) => handleImageError(e, DEFAULT_POT_IMAGE)}
-                  />
-                </div>
-                <button
-                  className={`wishlist-btn ${
-                    wishlistIds.includes(pot.id) ? "active" : ""
-                  }`}
-                  onClick={() => toggleWishlist(pot.id)}
-                  title="Add to wishlist"
-                >
-                  <Heart
-                    size={20}
-                    fill={wishlistIds.includes(pot.id) ? "currentColor" : "none"}
-                  />
-                </button>
-                {pot.stock <= 10 && pot.stock > 0 && (
-                  <div className="stock-warning">Low Stock</div>
-                )}
-                {pot.stock === 0 && <div className="out-of-stock">Out of Stock</div>}
-              </div>
-              <div className="pot-info">
-                <h3 className="pot-name">{pot.name}</h3>
-                <p className="pot-category">{pot.category}</p>
-                <p className="pot-stock">
-                  {pot.stock > 0 ? `In stock: ${pot.stock}` : "Out of stock"}
-                </p>
-                <div className="pot-footer">
-                  <span className="pot-price">Rs. {Number(pot.price).toFixed(2)}</span>
-                  <button
-                    className="add-to-cart-btn"
-                    onClick={() => handleAddToCart(pot)}
-                    disabled={pot.stock === 0}
-                    title={pot.stock === 0 ? "Out of stock" : "Add to cart"}
-                  >
-                    <ShoppingCart size={18} />
-                    Add
-                  </button>
-                </div>
-              </div>
-            </div>
+        <div className="plants-grid">
+          {filteredPots.map((pot, index) => (
+            <ProductCard
+              key={pot.id}
+              product={pot}
+              index={index}
+              isWishlisted={wishlistIds.includes(pot.id)}
+              onToggleWishlist={toggleWishlist}
+              onAddToCart={() => handleAddToCart(pot)}
+              defaultFallbackImage="/images/pot1.jpg"
+            />
           ))}
         </div>
       )}

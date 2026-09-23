@@ -1,5 +1,6 @@
 import Layout from "../components/layout/Layout";
 import CuratedCatalogPage from "../features/catalog/components/CuratedCatalogPage";
+import { bestSellersFallbackPlants } from "../features/homepage/content";
 
 export default function BestSellersPage() {
   return (
@@ -11,6 +12,7 @@ export default function BestSellersPage() {
         initialSort="best_selling"
         emptyMessage="No best-selling plants match your selected filters."
         showSalesRanking
+        fallbackPlants={bestSellersFallbackPlants}
       />
     </Layout>
   );

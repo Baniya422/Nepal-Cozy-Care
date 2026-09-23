@@ -1,54 +1,18 @@
+import { Link } from "react-router-dom";
+import { Sun, Droplets, Thermometer, Sprout } from "lucide-react";
 interface Plant {
-  survival_guide?: string;
-  care_instructions?: string;
-  description?: string;
-  water?: string;
-  light?: string;
-  temperature?: string;
-  humidity?: string;
-  fertilizer?: string;
-  name: string;
+  survival_guide?: string; care_instructions?: string; description?: string;
+  water?: string; light?: string; temperature?: string; humidity?: string; fertilizer?: string; name: string;
 }
-interface InfoSectionsProps {
-  plant: Plant;
-}
-export default function InfoSections({ plant }: InfoSectionsProps) {
-  return (
-    <div className="info-sections">
-      <div className="info-card">
-        <h3>Survival guide</h3>
-        <p>
-          {plant.survival_guide ||
-            `This plant thrives in bright, indirect light and prefers well-draining soil.
-            Water when the top inch of soil feels dry. Avoid overwatering as it can lead
-            to root rot. Ideal temperature range is 18-24°C. Fertilize monthly during
-            growing season with balanced liquid fertilizer.`}
-        </p>
-      </div>
-      <div className="info-card">
-        <h3>How to care</h3>
-        <ul>
-          <li>Water: {plant.water || 'When soil is dry'}</li>
-          <li>Light: {plant.light || 'Bright indirect'}</li>
-          <li>Temperature: {plant.temperature || '18-24°C'}</li>
-          <li>Humidity: {plant.humidity || 'Moderate to high'}</li>
-          <li>Fertilizer: {plant.fertilizer || 'Monthly in spring/summer'}</li>
-        </ul>
-        {plant.care_instructions && (
-          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#666' }}>
-            {plant.care_instructions}
-          </p>
-        )}
-      </div>
-      <div className="info-card">
-        <h3>About Product</h3>
-        <p>
-          {plant.description ||
-            `This beautiful ${plant.name} is perfect for indoor spaces.
-            It purifies air and adds a touch of nature to your home or office.
-            Easy to care for and suitable for beginners.`}
-        </p>
-      </div>
+export default function InfoSections({ plant }: { plant: Plant }) {
+  const care = [[Sun, "Light", plant.light], [Droplets, "Water", plant.water], [Thermometer, "Temperature", plant.temperature], [Sprout, "Plant food", plant.fertilizer]] as const;
+  return <section className="pd-details" id="plant-details">
+    <div className="pd-details-heading"><span className="pd-eyebrow">GET TO KNOW YOUR GREEN</span><h2>A happy plant starts here.</h2><p>A little understanding goes a long way. Find the right spot and care routine for your {plant.name}.</p><Link to="/care-tips">Explore our care guides <span aria-hidden="true">↗</span></Link></div>
+    <div className="pd-accordions">
+      <details open><summary>About this plant</summary><p>{plant.description || "More information about this plant is coming soon. Contact us if you need help choosing."}</p></details>
+      <details open><summary>Your care essentials</summary><div className="pd-care-grid">{care.map(([Icon, label, value]) => <div key={label}><Icon size={20}/><span>{label}<strong>{value || "Ask us for guidance"}</strong></span></div>)}</div>{plant.humidity && <p>Humidity: {plant.humidity}</p>}{plant.care_instructions && <p>{plant.care_instructions}</p>}</details>
+      {plant.survival_guide && <details><summary>Settling into a new home</summary><p>{plant.survival_guide}</p></details>}
+      <details><summary>Before you order</summary><p>Plants are living things, so their size, leaf count and shape can vary. Check the listed size and description for what is included.</p><p>Need delivery or order help? <Link to="/contact">Talk to Cozy Care</Link>.</p></details>
     </div>
-  );
+  </section>;
 }

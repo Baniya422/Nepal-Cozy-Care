@@ -147,28 +147,44 @@ export function resolveHomepageImage(path: string, apiBaseUrl: string): string {
 export type HomepageFallbackPlant = {
   id: number;
   name: string;
+  subtitle?: string;
   price: number;
   image: string;
   avg_rating: number;
+  review_count?: number;
+  badge?: string;
+  discount_percent?: number;
 };
 
 export const popularFallbackPlants: HomepageFallbackPlant[] = [
-  { id: 1, name: "Monstera Deliciosa", price: 1450, image: "/images/mos.jpg", avg_rating: 4.8 },
-  { id: 2, name: "Fiddle Leaf Fig Tree", price: 2200, image: "/images/fiddle.jpg", avg_rating: 4.9 },
-  { id: 3, name: "Golden Pothos Devil's Ivy", price: 600, image: "/images/pothos.jpg", avg_rating: 4.7 },
-  { id: 4, name: "Areca Butterfly Palm", price: 1750, image: "/images/palm.jpg", avg_rating: 4.8 },
+  { id: 1, name: "Monstera Deliciosa", subtitle: "Iconic Swiss cheese plant for living spaces", price: 1450, image: "/images/mos.jpg", avg_rating: 4.8, review_count: 183, badge: "BESTSELLER", discount_percent: 20 },
+  { id: 9, name: "ZZ Plant", subtitle: "Low-maintenance, beginner-friendly foliage", price: 1199, image: "/images/zzplant.jpg", avg_rating: 4.8, review_count: 145, badge: "BESTSELLER", discount_percent: 17 },
+  { id: 3, name: "Money Plant Variegated", subtitle: "Variegated leaves attract luck & fresh air", price: 600, image: "/images/pothos.jpg", avg_rating: 4.9, review_count: 101, badge: "TRENDING", discount_percent: 20 },
+  { id: 2, name: "Fiddle Leaf Fig Tree", subtitle: "Stately indoor tree with violin-shaped leaves", price: 2200, image: "/images/fiddle.jpg", avg_rating: 4.8, review_count: 92, badge: "FEATURED", discount_percent: 15 },
+  { id: 7, name: "Peace Lily Bloom", subtitle: "Air-purifying tropical stunner with white blooms", price: 950, image: "/images/lily.jpg", avg_rating: 4.8, review_count: 111, badge: "BESTSELLER", discount_percent: 13 },
+  { id: 5, name: "Snake Plant Laurentii", subtitle: "Hardy air purifier thrives on neglect", price: 850, image: "/images/snake.jpg", avg_rating: 4.9, review_count: 164, badge: "POPULAR", discount_percent: 15 },
+  { id: 6, name: "Rubber Plant Burgundy", subtitle: "Glossy deep-burgundy statement foliage", price: 1150, image: "/images/rubber.jpg", avg_rating: 4.8, review_count: 78, badge: "FEATURED", discount_percent: 20 },
+  { id: 4, name: "Areca Butterfly Palm", subtitle: "Tropical feathery fronds for natural humidity", price: 1750, image: "/images/palm.jpg", avg_rating: 4.8, review_count: 89, badge: "BESTSELLER", discount_percent: 15 },
 ];
 
 export const shopFallbackPlants: HomepageFallbackPlant[] = [
-  { id: 5, name: "Snake Plant Laurentii", price: 850, image: "/images/snake.jpg", avg_rating: 4.9 },
-  { id: 6, name: "Rubber Plant Burgundy", price: 1150, image: "/images/rubber.jpg", avg_rating: 4.8 },
-  { id: 7, name: "Peace Lily Bloom", price: 950, image: "/images/lily.jpg", avg_rating: 4.6 },
-  { id: 8, name: "Aloe Vera Medicinal", price: 450, image: "/images/alovera.jpg", avg_rating: 4.7 },
+  { id: 5, name: "Snake Plant Laurentii", subtitle: "Hardy air purifier thrives on neglect", price: 850, image: "/images/snake.jpg", avg_rating: 4.9, review_count: 164, badge: "BESTSELLER", discount_percent: 15 },
+  { id: 6, name: "Rubber Plant Burgundy", subtitle: "Glossy deep-burgundy statement foliage", price: 1150, image: "/images/rubber.jpg", avg_rating: 4.8, review_count: 78, badge: "POPULAR", discount_percent: 20 },
+  { id: 7, name: "Peace Lily Bloom", subtitle: "Long-lasting indoor blooms & shade lover", price: 950, image: "/images/lily.jpg", avg_rating: 4.8, review_count: 111, badge: "BESTSELLER", discount_percent: 13 },
+  { id: 8, name: "Aloe Vera Medicinal", subtitle: "Soothing natural gel succulent for sunny windows", price: 450, image: "/images/alovera.jpg", avg_rating: 4.7, review_count: 54, badge: "EASY CARE", discount_percent: 18 },
+  { id: 1, name: "Monstera Deliciosa", subtitle: "Iconic Swiss cheese plant for living spaces", price: 1450, image: "/images/mos.jpg", avg_rating: 4.8, review_count: 183, badge: "BESTSELLER", discount_percent: 20 },
+  { id: 9, name: "ZZ Plant", subtitle: "Low-maintenance, beginner-friendly foliage", price: 1199, image: "/images/zzplant.jpg", avg_rating: 4.8, review_count: 145, badge: "BESTSELLER", discount_percent: 17 },
+  { id: 3, name: "Golden Pothos Devil's Ivy", subtitle: "Cascading indoor vine for shelves & hangers", price: 600, image: "/images/pothos.jpg", avg_rating: 4.8, review_count: 101, badge: "TRENDING", discount_percent: 20 },
+  { id: 4, name: "Areca Butterfly Palm", subtitle: "Tropical feathery fronds for natural humidity", price: 1750, image: "/images/palm.jpg", avg_rating: 4.8, review_count: 89, badge: "BESTSELLER", discount_percent: 15 },
 ];
 
 export const bestSellersFallbackPlants: HomepageFallbackPlant[] = [
-  { id: 1, name: "Monstera Deliciosa", price: 1450, image: "/images/mos.jpg", avg_rating: 4.9 },
-  { id: 3, name: "Golden Pothos Devil's Ivy", price: 600, image: "/images/pothos.jpg", avg_rating: 4.8 },
-  { id: 4, name: "Areca Butterfly Palm", price: 1750, image: "/images/palm.jpg", avg_rating: 4.8 },
-  { id: 5, name: "Snake Plant Laurentii", price: 850, image: "/images/snake.jpg", avg_rating: 4.9 },
+  { id: 9, name: "ZZ Plant", subtitle: "Low-maintenance, beginner-friendly foliage", price: 1199, image: "/images/zzplant.jpg", avg_rating: 4.8, review_count: 183, badge: "BESTSELLER", discount_percent: 17 },
+  { id: 3, name: "Money Plant Variegated", subtitle: "Variegated leaves attract luck & fresh air", price: 499, image: "/images/pothos.jpg", avg_rating: 4.9, review_count: 101, badge: "BESTSELLER", discount_percent: 17 },
+  { id: 7, name: "Peace Lily Bloom", subtitle: "Long-lasting indoor blooms & shade lover", price: 699, image: "/images/lily.jpg", avg_rating: 4.8, review_count: 111, badge: "BESTSELLER", discount_percent: 13 },
+  { id: 1, name: "Monstera Deliciosa", subtitle: "Iconic Swiss cheese plant for living spaces", price: 1450, image: "/images/mos.jpg", avg_rating: 4.9, review_count: 195, badge: "BESTSELLER", discount_percent: 20 },
+  { id: 4, name: "Areca Butterfly Palm", subtitle: "Tropical feathery fronds for natural humidity", price: 1750, image: "/images/palm.jpg", avg_rating: 4.8, review_count: 89, badge: "BESTSELLER", discount_percent: 15 },
+  { id: 5, name: "Snake Plant Laurentii", subtitle: "Hardy air purifier thrives on neglect", price: 850, image: "/images/snake.jpg", avg_rating: 4.9, review_count: 164, badge: "POPULAR", discount_percent: 15 },
+  { id: 2, name: "Fiddle Leaf Fig Tree", subtitle: "Stately indoor tree with violin-shaped leaves", price: 2200, image: "/images/fiddle.jpg", avg_rating: 4.9, review_count: 92, badge: "FEATURED", discount_percent: 15 },
+  { id: 6, name: "Rubber Plant Burgundy", subtitle: "Glossy deep-burgundy statement foliage", price: 1150, image: "/images/rubber.jpg", avg_rating: 4.8, review_count: 78, badge: "POPULAR", discount_percent: 20 },
 ];

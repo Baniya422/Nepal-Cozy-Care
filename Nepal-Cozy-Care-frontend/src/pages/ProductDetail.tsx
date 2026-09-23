@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Breadcrumb from '../components/product-detail/Breadcrumb';
@@ -8,6 +8,7 @@ import InfoSections from '../components/product-detail/InfoSections';
 import WhyChooseUs from '../components/product-detail/WhyChooseUs';
 import SEO from '../components/common/SEO';
 import '../styles/productDetail.css';
+import { useWishlist } from '../hooks/useWishlist';
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 interface Plant {
   id: number;
@@ -45,33 +46,49 @@ export function ProductDetail() {
   const [plant, setPlant] = useState<Plant | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const purchaseLock = useRef(false);
+  const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
   useEffect(() => {
-    fetchPlant();
-  }, [id]);
-  const fetchPlant = async () => {
-    try {
-      const response = await fetch(`${API}/api/plants/${id}`);
-      const data = await response.json();
-      if (data.data?.plant) {
-        const plantData = data.data.plant;
-        plantData.price = parseFloat(plantData.price) || 0;
-        plantData.avg_rating = parseFloat(plantData.avg_rating) || 0;
-        setPlant(plantData);
+    const controller = new AbortController();
+    setLoading(true);
+    setPlant(null);
+    setQuantity(1);
+    setMessage("");
+    setLoadError(false);
+    const fetchPlant = async () => {
+      try {
+        const response = await fetch(`${API}/api/plants/${id}`, { signal: controller.signal });
+        if (response.status === 404) return;
+        if (!response.ok) throw new Error("Unable to load product");
+        const data = await response.json();
+        if (data.data?.plant) {
+          const item = data.data.plant;
+          setPlant({ ...item, price: Number(item.price) || 0, stock: Math.max(0, Number(item.stock) || 0), avg_rating: Number(item.avg_rating) || 0 });
+        }
+      } catch {
+        if (!controller.signal.aborted) setLoadError(true);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching plant:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    void fetchPlant();
+    return () => controller.abort();
+  }, [id, retry]);
   const handleAddToCart = async () => {
-    if (!plant) return false;
+    if (!plant || plant.stock < quantity || purchaseLock.current) return false;
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Please login to add items to cart.");
       navigate('/login');
       return false;
     }
+    purchaseLock.current = true;
+    setBusy(true);
+    setMessage("");
     try {
       const response = await fetch(`${API}/api/cart`, {
         method: 'POST',
@@ -83,16 +100,19 @@ export function ProductDetail() {
       });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.message || 'Failed to add item to cart.');
+        setMessage(data.message || 'Failed to add item to cart. Please try again.');
         return false;
       }
       window.dispatchEvent(new Event("cozycare:cart-updated"));
-      alert(`Added ${quantity} ${plant.name} to cart!`);
+      setMessage(`Added ${quantity} ${plant.name} to your cart.`);
       return true;
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Something went wrong while adding to cart.');
+      setMessage('Could not add to cart. Please check your connection and try again.');
       return false;
+    } finally {
+      purchaseLock.current = false;
+      setBusy(false);
     }
   };
   const handleBuyNow = async () => {
@@ -121,7 +141,8 @@ export function ProductDetail() {
         <div className="product-page">
           <div className="product-container">
             <div className="product-not-found">
-              <h2>Product Not Found</h2>
+              <h2>{loadError ? "We could not load this plant" : "Product not found"}</h2>
+              {loadError && <button className="btn-primary" onClick={() => setRetry(value => value + 1)}>Try again</button>}
               <button onClick={() => navigate('/plants')} className="btn-primary">
                 Browse Plants
               </button>
@@ -144,8 +165,19 @@ export function ProductDetail() {
         <div className="product-container">
           <Breadcrumb productName={plant.name} />
           <div className="product-main">
-            <ProductImage image={plant.image} name={plant.name} />
+            <ProductImage key={plant.id} image={plant.image} name={plant.name} saved={wishlistIds.includes(plant.id)} busy={wishlistBusyId === plant.id} onWishlist={() => void toggleWishlist(plant.id)} />
             <ProductInfo
+              stock={plant.stock}
+              scientificName={plant.scientific_name}
+              description={plant.description}
+              category={plant.category}
+              light={plant.light}
+              water={plant.water}
+              difficulty={plant.difficulty}
+              rating={plant.avg_rating}
+              reviewCount={plant.review_count}
+              busy={busy}
+              message={message}
               name={plant.name}
               price={plant.price}
               size={plant.size}
@@ -163,3 +195,5 @@ export function ProductDetail() {
     </Layout>
   );
 }
+
+

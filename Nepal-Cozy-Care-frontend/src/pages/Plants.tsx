@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, X } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import ProductGrid from "../components/plants/ProductGrid";
+import Pagination from "../components/common/Pagination";
 import UgaooFilterDrawer, {
   defaultFilterValues,
   type UgaooFilterValues,
@@ -12,6 +14,7 @@ import UgaooSortDropdown, {
 import { DEFAULT_PLANT_CATALOG } from "../features/plant-finder/data";
 import type { Plant } from "../types/plant";
 import SEO from "../components/common/SEO";
+import CategoryBubbles from "../components/plants/CategoryBubbles";
 import "../styles/plants.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -73,6 +76,36 @@ export default function Plants() {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<UgaooFilterValues>(defaultFilterValues);
   const [sortBy, setSortBy] = useState<UgaooSortOption>("featured");
+  const [searchParams] = useSearchParams();
+  const PAGE_SIZE = 16;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Sync URL search params to filters
+  useEffect(() => {
+    const typeParam = searchParams.get("type");
+    const sizeParam = searchParams.get("size");
+    const lightParam = searchParams.get("light");
+    const locationParam = searchParams.get("location");
+
+    if (typeParam || sizeParam || lightParam || locationParam) {
+      setFilters({
+        ...defaultFilterValues,
+        plantTypes: typeParam ? [typeParam] : [],
+        sizes: sizeParam ? [sizeParam.toUpperCase()] : [],
+        lights: lightParam ? [lightParam] : [],
+        locations: locationParam ? [locationParam] : [],
+      });
+      setCurrentPage(1);
+    } else {
+      setFilters(defaultFilterValues);
+      setCurrentPage(1);
+    }
+  }, [searchParams]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, sortBy]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -224,18 +257,48 @@ export default function Plants() {
 
     // Plant Types
     if (filters.plantTypes.length > 0) {
-      result = result.filter((p) =>
-        filters.plantTypes.some((type) =>
-          (p.category || "").toLowerCase().includes(type.toLowerCase())
-        )
-      );
+      result = result.filter((p) => {
+        const cat = (p.category || "").toLowerCase();
+        const name = (p.name || "").toLowerCase();
+        const desc = (p.description || "").toLowerCase();
+        return filters.plantTypes.some((type) => {
+          const t = type.toLowerCase().trim();
+          if (t === "indoor" || t === "indoor plants") {
+            return cat.includes("indoor") || !cat.includes("outdoor");
+          }
+          if (t === "outdoor" || t === "outdoor plants") {
+            return cat.includes("outdoor");
+          }
+          if (t === "bundle" || t === "bundles") {
+            return cat.includes("bundle") || name.includes("bundle") || cat.includes("pack") || desc.includes("bundle");
+          }
+          if (t === "succulent" || t === "succulents" || t.includes("cacti")) {
+            return cat.includes("succulent") || cat.includes("cacti") || name.includes("succulent") || name.includes("cactus");
+          }
+          if (t === "hanging" || t === "hanging plants") {
+            return cat.includes("hanging") || name.includes("hanging") || desc.includes("hanging");
+          }
+          if (t === "fruit" || t === "fruit plants") {
+            return cat.includes("fruit") || name.includes("fruit") || desc.includes("fruit");
+          }
+          return cat.includes(t) || name.includes(t);
+        });
+      });
     }
 
     // Sizes
     if (filters.sizes.length > 0) {
-      result = result.filter((p) =>
-        filters.sizes.some((s) => (p.size || "").toLowerCase() === s.toLowerCase())
-      );
+      result = result.filter((p) => {
+        const pSize = (p.size || "").toLowerCase();
+        const name = (p.name || "").toLowerCase();
+        return filters.sizes.some((s) => {
+          const cleanS = s.toLowerCase().trim();
+          if (cleanS === "xl") {
+            return pSize === "xl" || pSize === "large" || name.includes("xl") || name.includes("extra large");
+          }
+          return pSize === cleanS;
+        });
+      });
     }
 
     // Price Range
@@ -248,14 +311,19 @@ export default function Plants() {
 
     // Light
     if (filters.lights.length > 0) {
-      result = result.filter((p) =>
-        filters.lights.some((l) =>
-          (p.light || "").toLowerCase().includes(l.toLowerCase())
-        )
-      );
+      result = result.filter((p) => {
+        const pLight = (p.light || "").toLowerCase();
+        return filters.lights.some((l) => {
+          const cleanL = l.toLowerCase().trim();
+          if (cleanL === "low" || cleanL === "low-light") {
+            return pLight.includes("low");
+          }
+          return pLight.includes(cleanL);
+        });
+      });
     }
 
-    // Ideal Location / Rooms
+    // Ideal Location / Rooms (Balcony, Workspace, Living Room, Bedroom, Kitchen, Bathroom)
     if (filters.locations.length > 0) {
       result = result.filter((p) => {
         const rooms = Array.isArray(p.rooms)
@@ -263,9 +331,27 @@ export default function Plants() {
           : typeof p.rooms === "string"
           ? [p.rooms]
           : [];
-        return filters.locations.some((loc) =>
-          rooms.some((r: string) => r.toLowerCase().includes(loc.toLowerCase()))
-        );
+        const desc = (p.description || "").toLowerCase();
+        const name = (p.name || "").toLowerCase();
+        return filters.locations.some((loc) => {
+          const cleanLoc = loc.toLowerCase().replace("-", " ").trim();
+          if (cleanLoc === "workspace" || cleanLoc === "office") {
+            return (
+              rooms.some((r: string) => {
+                const cr = r.toLowerCase();
+                return cr.includes("office") || cr.includes("desk") || cr.includes("workspace") || cr.includes("work");
+              }) ||
+              desc.includes("office") ||
+              desc.includes("desk") ||
+              desc.includes("workspace")
+            );
+          }
+          return (
+            rooms.some((r: string) => r.toLowerCase().replace("-", " ").includes(cleanLoc)) ||
+            desc.includes(cleanLoc) ||
+            name.includes(cleanLoc)
+          );
+        });
       });
     }
 
@@ -349,6 +435,12 @@ export default function Plants() {
     return result;
   }, [plants, filters, sortBy]);
 
+  // Paginated plants (16 items per page = 4 rows of 4)
+  const paginatedPlants = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredPlants.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredPlants, currentPage]);
+
   // Remove individual filter chip
   const removeFilterChip = (type: keyof UgaooFilterValues, val?: string) => {
     setFilters((prev) => {
@@ -385,6 +477,8 @@ export default function Plants() {
             </p>
           </div>
         </div>
+
+        <CategoryBubbles />
 
         {/* ================= UGAOO ACTION BAR (Screenshots 1 & 4) ================= */}
         <div className="ugaoo-action-bar-container">
@@ -518,13 +612,23 @@ export default function Plants() {
         {/* ================= MAIN PRODUCTS GRID ================= */}
         <main className="ugaoo-plants-main">
           <ProductGrid
-            plants={filteredPlants}
+            plants={paginatedPlants}
             loading={loading}
             error={error}
             fetchPlants={() => void fetchPlants()}
             wishlistIds={wishlistIds}
             wishlistBusyId={wishlistBusyId}
             onToggleWishlist={handleToggleWishlist}
+          />
+
+          <Pagination
+            currentPage={currentPage}
+            totalItems={filteredPlants.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 380, behavior: "smooth" });
+            }}
           />
         </main>
 

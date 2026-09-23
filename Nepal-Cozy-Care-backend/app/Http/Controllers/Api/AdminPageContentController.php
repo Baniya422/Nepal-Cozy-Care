@@ -20,6 +20,7 @@ class AdminPageContentController extends Controller
         'contact_page' => ['name' => 'Contact', 'url' => '/contact'],
         'shipping_page' => ['name' => 'Shipping & Delivery', 'url' => '/shipping'],
         'blogs_page' => ['name' => 'Care Blogs Hub', 'url' => '/blogs'],
+        'navigation_menu' => ['name' => 'Navigation & Dropdown Menus', 'url' => '/'],
     ];
 
     public function index()
@@ -174,6 +175,41 @@ class AdminPageContentController extends Controller
     public static function defaultPayload(string $key): array
     {
         return match ($key) {
+            'navigation_menu' => [
+                'plants_dropdown' => [
+                    ['id' => 'indoor', 'label' => 'Indoor Plants', 'path' => '/plants?type=indoor', 'is_active' => true],
+                    ['id' => 'xl_plants', 'label' => 'XL plants', 'path' => '/plants?size=xl', 'is_active' => true],
+                    ['id' => 'bundles', 'label' => 'Bundles', 'path' => '/plants?type=bundles', 'is_active' => true],
+                    ['id' => 'low_light', 'label' => 'Low Light Plants', 'path' => '/plants?light=low-light', 'is_active' => true],
+                    ['id' => 'cacti_succulents', 'label' => 'Cacti and Succulents', 'path' => '/plants?type=succulents', 'is_active' => true],
+                    ['id' => 'hanging', 'label' => 'Hanging Plants', 'path' => '/plants?type=hanging', 'is_active' => true],
+                    ['id' => 'fruit', 'label' => 'Fruit Plants', 'path' => '/plants?type=fruit', 'is_active' => true],
+                ],
+                'location_dropdown' => [
+                    ['id' => 'balcony', 'label' => 'Balcony', 'path' => '/plants?location=balcony', 'is_active' => true],
+                    ['id' => 'workspace', 'label' => 'Workspace', 'path' => '/plants?location=workspace', 'is_active' => true],
+                    ['id' => 'living_room', 'label' => 'Living Room', 'path' => '/plants?location=living-room', 'is_active' => true],
+                    ['id' => 'bedroom', 'label' => 'Bedroom', 'path' => '/plants?location=bedroom', 'is_active' => true],
+                    ['id' => 'kitchen', 'label' => 'Kitchen', 'path' => '/plants?location=kitchen', 'is_active' => true],
+                    ['id' => 'bathroom', 'label' => 'Bathroom', 'path' => '/plants?location=bathroom', 'is_active' => true],
+                ],
+                'care_tips_dropdown' => [
+                    ['id' => 'potting_soil', 'label' => 'Potting Mix & Fertilizers', 'path' => '/pots?category=soil', 'is_active' => true],
+                    ['id' => 'tools', 'label' => 'Garden Tools', 'path' => '/pots?category=tools', 'is_active' => true],
+                    ['id' => 'watering', 'label' => 'Watering Tools and Accessories', 'path' => '/pots?category=watering', 'is_active' => true],
+                    ['id' => 'decor', 'label' => 'Garden Decor & Accessories', 'path' => '/pots?category=pots', 'is_active' => true],
+                    ['id' => 'pest_control', 'label' => 'Pest Control', 'path' => '/care-tips', 'is_active' => true],
+                    ['id' => 'doctor_green', 'label' => 'Video Consultation - Doctor Green', 'path' => '/plant-health-checker', 'is_active' => true],
+                ],
+                'accessories_dropdown' => [
+                    ['id' => 'pots_planters', 'label' => 'Pots & Planters', 'path' => '/pots?category=pots', 'is_active' => true],
+                    ['id' => 'soil_media', 'label' => 'Soil & Media', 'path' => '/pots?category=soil', 'is_active' => true],
+                    ['id' => 'watering_tools', 'label' => 'Watering Tools', 'path' => '/pots?category=watering', 'is_active' => true],
+                    ['id' => 'garden_tools', 'label' => 'Garden Tools', 'path' => '/pots?category=tools', 'is_active' => true],
+                    ['id' => 'garden_decor', 'label' => 'Garden Decor', 'path' => '/pots?category=decor', 'is_active' => true],
+                    ['id' => 'plant_care_acc', 'label' => 'Plant Care', 'path' => '/pots?category=care', 'is_active' => true],
+                ],
+            ],
             'blogs_page' => PageContentDefaults::blogs(),
             'contact_page' => [
                 'hero' => [
