@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AdminSetting;
 use App\Services\MailSettingsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -27,20 +28,35 @@ class AdminSettingsController extends Controller
 
     public function publicFeatures(): JsonResponse
     {
-        $settings = AdminSetting::current();
+        try {
+            $settings = AdminSetting::current();
 
-        return response()->json([
-            'message' => null,
-            'data' => [
-                'vendor_marketplace_enabled' => (bool) $settings->vendor_marketplace_enabled,
-                'esewa_enabled' => (bool) $settings->esewa_enabled,
-                'free_delivery_threshold' => (float) ($settings->free_delivery_threshold ?? 2000.0),
-                'free_delivery_radius_km' => (float) ($settings->free_delivery_radius_km ?? 10.0),
-                'standard_delivery_fee' => (float) ($settings->standard_delivery_fee ?? 100.0),
-                'dispatch_configured' => $settings->dispatch_latitude !== null && $settings->dispatch_longitude !== null,
-                'dispatch_address' => $settings->dispatch_address,
-            ],
-        ]);
+            return response()->json([
+                'message' => null,
+                'data' => [
+                    'vendor_marketplace_enabled' => (bool) $settings->vendor_marketplace_enabled,
+                    'esewa_enabled' => (bool) $settings->esewa_enabled,
+                    'free_delivery_threshold' => (float) ($settings->free_delivery_threshold ?? 2000.0),
+                    'free_delivery_radius_km' => (float) ($settings->free_delivery_radius_km ?? 10.0),
+                    'standard_delivery_fee' => (float) ($settings->standard_delivery_fee ?? 100.0),
+                    'dispatch_configured' => $settings->dispatch_latitude !== null && $settings->dispatch_longitude !== null,
+                    'dispatch_address' => $settings->dispatch_address,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => null,
+                'data' => [
+                    'vendor_marketplace_enabled' => true,
+                    'esewa_enabled' => false,
+                    'free_delivery_threshold' => 2000.0,
+                    'free_delivery_radius_km' => 10.0,
+                    'standard_delivery_fee' => 100.0,
+                    'dispatch_configured' => false,
+                    'dispatch_address' => 'Kathmandu, Nepal',
+                ],
+            ]);
+        }
     }
 
     public function updateLaunch(Request $request): JsonResponse

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,15 +25,19 @@ export function EditorCard({
   title,
   description,
   badge,
+  id,
   children,
 }: {
   title: string;
   description?: string;
   badge?: string;
+  id?: string;
   children: ReactNode;
 }) {
+  const sectionId = id || `sec-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return (
     <section
+      id={sectionId}
       className="admin-editor-card"
       style={{
         background: "#ffffff",
@@ -40,6 +45,7 @@ export function EditorCard({
         boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
         border: "1px solid #e2e8f0",
         padding: "1.6rem",
+        scrollMarginTop: "140px",
       }}
     >
       <div
@@ -442,6 +448,7 @@ export function PageEditorShell({
   loading,
   statusMessage,
   onSave,
+  sections,
   children,
 }: {
   title: string;
@@ -452,9 +459,81 @@ export function PageEditorShell({
   loading: boolean;
   statusMessage: { type: "success" | "error"; text: string } | null;
   onSave: () => void;
+  sections?: { id: string; label: string }[];
   children: ReactNode;
 }) {
   const navigate = useNavigate();
+  const [navSections, setNavSections] = useState<{ id: string; label: string }[]>(sections || []);
+  const [activeSectionId, setActiveSectionId] = useState<string>("");
+
+  useEffect(() => {
+    if (sections && sections.length > 0) {
+      setNavSections(sections);
+      return;
+    }
+    const scan = () => {
+      const cards = document.querySelectorAll<HTMLElement>(".admin-editor-card");
+      if (cards.length === 0) return false;
+      const discovered: { id: string; label: string }[] = [];
+      cards.forEach((card, idx) => {
+        const heading = card.querySelector("h3");
+        const headingTitle = heading?.textContent?.trim() || `Section ${idx + 1}`;
+        if (!card.id) {
+          card.id = `sec-${idx}-${headingTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+        }
+        discovered.push({ id: card.id, label: headingTitle });
+      });
+      setNavSections(discovered);
+      return true;
+    };
+
+    scan();
+    const t1 = setTimeout(scan, 80);
+    const t2 = setTimeout(scan, 250);
+    const t3 = setTimeout(scan, 600);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [sections, loading]);
+
+  useEffect(() => {
+    if (navSections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSectionId(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "-120px 0px -60% 0px",
+        threshold: 0.1,
+      }
+    );
+    navSections.forEach((s) => {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [navSections]);
+
+  const scrollToSection = (secId: string) => {
+    setActiveSectionId(secId);
+    const el = document.getElementById(secId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.style.transition = "box-shadow 0.3s ease, border-color 0.3s ease";
+      el.style.borderColor = "#10b981";
+      el.style.boxShadow = "0 0 0 3px rgba(16, 185, 129, 0.3)";
+      setTimeout(() => {
+        el.style.borderColor = "#e2e8f0";
+        el.style.boxShadow = "0 2px 10px rgba(0,0,0,0.03)";
+      }, 1600);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -490,7 +569,7 @@ export function PageEditorShell({
             alignItems: "center",
             flexWrap: "wrap",
             gap: "1.25rem",
-            marginBottom: "1.75rem",
+            marginBottom: "1.5rem",
             background: "#ffffff",
             padding: "1.5rem 1.75rem",
             borderRadius: "14px",
@@ -566,6 +645,121 @@ export function PageEditorShell({
             </button>
           </div>
         </div>
+
+        {/* Sticky Quick-Jump Section Navigation Bar */}
+        {navSections.length > 0 && (
+          <div
+            style={{
+              position: "sticky",
+              top: "76px",
+              zIndex: 30,
+              background: "rgba(255, 255, 255, 0.98)",
+              backdropFilter: "blur(12px)",
+              borderRadius: "12px",
+              padding: "0.65rem 1rem",
+              marginBottom: "1.5rem",
+              border: "1px solid #cbd5e1",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.05)",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.65rem",
+              overflowX: "auto",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.45rem",
+                fontSize: "0.82rem",
+                fontWeight: 700,
+                color: "#1b4e54",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                whiteSpace: "nowrap",
+                paddingRight: "0.75rem",
+                borderRight: "1px solid #e2e8f0",
+              }}
+            >
+              <Layers size={15} color="#10b981" />
+              <span>Sections</span>
+              <span
+                style={{
+                  background: "#e8f3ef",
+                  color: "#1b4e54",
+                  fontSize: "0.74rem",
+                  padding: "0.1rem 0.45rem",
+                  borderRadius: "999px",
+                  fontWeight: 800,
+                }}
+              >
+                {navSections.length}
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                overflowX: "auto",
+                scrollbarWidth: "none",
+                padding: "0.1rem 0",
+              }}
+            >
+              {navSections.map((sec, idx) => {
+                const isCurrent = activeSectionId === sec.id;
+                return (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    onClick={() => scrollToSection(sec.id)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.4rem",
+                      padding: "0.45rem 0.95rem",
+                      borderRadius: "999px",
+                      border: isCurrent ? "1px solid #10b981" : "1px solid #cbd5e1",
+                      background: isCurrent ? "#10b981" : "#ffffff",
+                      color: isCurrent ? "#ffffff" : "#1e293b",
+                      fontSize: "0.83rem",
+                      fontWeight: isCurrent ? 700 : 600,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      transition: "all 0.15s ease",
+                      boxShadow: isCurrent ? "0 2px 8px rgba(16, 185, 129, 0.3)" : "0 1px 2px rgba(0, 0, 0, 0.04)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isCurrent) {
+                        e.currentTarget.style.borderColor = "#10b981";
+                        e.currentTarget.style.background = "#ecfdf5";
+                        e.currentTarget.style.color = "#065f46";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isCurrent) {
+                        e.currentTarget.style.borderColor = "#cbd5e1";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.color = "#1e293b";
+                      }
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        opacity: isCurrent ? 0.9 : 0.6,
+                      }}
+                    >
+                      #{idx + 1}
+                    </span>
+                    <span>{sec.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Status Toast Alert */}
         {statusMessage && (

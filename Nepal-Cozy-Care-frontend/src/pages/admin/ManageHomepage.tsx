@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { ExternalLink, Save, Upload } from "lucide-react";
+import { ExternalLink, Save, Upload, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
@@ -39,9 +39,10 @@ function Field({ label, value, onChange, multiline = false, hint }: FieldProps) 
   );
 }
 
-function SectionCard({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+function SectionCard({ id, title, description, children }: { id?: string; title: string; description?: string; children: ReactNode }) {
+  const sectionId = id || `sec-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return (
-    <section className="admin-editor-card">
+    <section id={sectionId} className="admin-editor-card" style={{ scrollMarginTop: "140px" }}>
       <div className="admin-editor-card-head">
         <h3>{title}</h3>
         {description ? <p>{description}</p> : null}
@@ -176,6 +177,34 @@ export default function ManageHomepage() {
   const updateInfo = (key: InfoKey, field: keyof InfoSectionContent, value: string) =>
     setContent((current) => ({ ...current, [key]: { ...current[key], [field]: value } }));
 
+  const HOMEPAGE_SECTIONS = [
+    { id: "sec-hero", label: "Hero Banner" },
+    { id: "sec-features", label: "Features" },
+    { id: "sec-smart-tools", label: "Smart Tools" },
+    { id: "sec-seasonal", label: "Seasonal" },
+    { id: "sec-products", label: "Products" },
+    { id: "sec-garden", label: "Greenhouse" },
+    { id: "sec-mission", label: "Mission" },
+    { id: "sec-about", label: "About" },
+  ];
+
+  const [activeSectionId, setActiveSectionId] = useState<string>("");
+
+  const scrollToSection = (secId: string) => {
+    setActiveSectionId(secId);
+    const el = document.getElementById(secId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.style.transition = "box-shadow 0.3s ease, border-color 0.3s ease";
+      el.style.borderColor = "#10b981";
+      el.style.boxShadow = "0 0 0 3px rgba(16, 185, 129, 0.3)";
+      setTimeout(() => {
+        el.style.borderColor = "";
+        el.style.boxShadow = "";
+      }, 1600);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="admin-page admin-editor-page">
@@ -194,9 +223,123 @@ export default function ManageHomepage() {
           </div>
         </div>
         {notice ? <div className={`admin-notice admin-notice-${notice.type}`}>{notice.text}</div> : null}
+
+        {/* Sticky Quick-Jump Section Navigation Bar */}
+        <div
+          style={{
+            position: "sticky",
+            top: "76px",
+            zIndex: 30,
+            background: "rgba(255, 255, 255, 0.98)",
+            backdropFilter: "blur(12px)",
+            borderRadius: "12px",
+            padding: "0.65rem 1rem",
+            marginBottom: "1.5rem",
+            border: "1px solid #cbd5e1",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.05)",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.65rem",
+            overflowX: "auto",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.45rem",
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              color: "#1b4e54",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              whiteSpace: "nowrap",
+              paddingRight: "0.75rem",
+              borderRight: "1px solid #e2e8f0",
+            }}
+          >
+            <Layers size={15} color="#10b981" />
+            <span>Sections</span>
+            <span
+              style={{
+                background: "#e8f3ef",
+                color: "#1b4e54",
+                fontSize: "0.74rem",
+                padding: "0.1rem 0.45rem",
+                borderRadius: "999px",
+                fontWeight: 800,
+              }}
+            >
+              {HOMEPAGE_SECTIONS.length}
+            </span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              padding: "0.1rem 0",
+            }}
+          >
+            {HOMEPAGE_SECTIONS.map((sec, idx) => {
+              const isCurrent = activeSectionId === sec.id;
+              return (
+                <button
+                  key={sec.id}
+                  type="button"
+                  onClick={() => scrollToSection(sec.id)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    padding: "0.45rem 0.95rem",
+                    borderRadius: "999px",
+                    border: isCurrent ? "1px solid #10b981" : "1px solid #cbd5e1",
+                    background: isCurrent ? "#10b981" : "#ffffff",
+                    color: isCurrent ? "#ffffff" : "#1e293b",
+                    fontSize: "0.83rem",
+                    fontWeight: isCurrent ? 700 : 600,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s ease",
+                    boxShadow: isCurrent ? "0 2px 8px rgba(16, 185, 129, 0.3)" : "0 1px 2px rgba(0, 0, 0, 0.04)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isCurrent) {
+                      e.currentTarget.style.borderColor = "#10b981";
+                      e.currentTarget.style.background = "#ecfdf5";
+                      e.currentTarget.style.color = "#065f46";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isCurrent) {
+                      e.currentTarget.style.borderColor = "#cbd5e1";
+                      e.currentTarget.style.background = "#ffffff";
+                      e.currentTarget.style.color = "#1e293b";
+                    }
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      opacity: isCurrent ? 0.9 : 0.6,
+                    }}
+                  >
+                    #{idx + 1}
+                  </span>
+                  <span>{sec.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {loading ? <div className="admin-loading">Loading homepage content...</div> : (
           <div className="admin-editor-stack">
-            <SectionCard title="Hero" description="The first section visitors see.">
+            <SectionCard id="sec-hero" title="Hero" description="The first section visitors see.">
               <ImageField label="Background image" value={content.hero.background_image} onChange={(value) => setContent((current) => ({ ...current, hero: { ...current.hero, background_image: value } }))} />
               <div className="admin-form-grid">
                 <Field label="Badge" value={content.hero.badge} onChange={(value) => updateHero("badge", value)} />
@@ -215,7 +358,7 @@ export default function ManageHomepage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Service Features">
+            <SectionCard id="sec-features" title="Service Features">
               <div className="admin-editor-card-grid">
                 {content.features.map((feature, index) => (
                   <div className="admin-editor-inline-card" key={index}>
@@ -226,7 +369,7 @@ export default function ManageHomepage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Smart Care Tools">
+            <SectionCard id="sec-smart-tools" title="Smart Care Tools">
               <div className="admin-form-grid">
                 <Field label="Kicker" value={content.smart_tools.kicker} onChange={(value) => updateSmart("kicker", value)} />
                 <Field label="Title" value={content.smart_tools.title} onChange={(value) => updateSmart("title", value)} />
@@ -244,7 +387,7 @@ export default function ManageHomepage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Seasonal Preview" description="The reminder cards themselves are managed under Seasonal Reminders.">
+            <SectionCard id="sec-seasonal" title="Seasonal Preview" description="The reminder cards themselves are managed under Seasonal Reminders.">
               <div className="admin-form-grid">
                 <Field label="Kicker" value={content.seasonal.kicker} onChange={(value) => updateSeasonal("kicker", value)} />
                 <Field label="Title" value={content.seasonal.title} onChange={(value) => updateSeasonal("title", value)} />
@@ -265,7 +408,7 @@ export default function ManageHomepage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Product Sections" description="Choose products and homepage flags under Manage Plants; edit the section labels here.">
+            <SectionCard id="sec-products" title="Product Sections" description="Choose products and homepage flags under Manage Plants; edit the section labels here.">
               <div className="admin-editor-card-grid">
                 {(Object.keys(content.product_sections) as ProductKey[]).map((key) => {
                   const section = content.product_sections[key];
@@ -282,7 +425,7 @@ export default function ManageHomepage() {
             </SectionCard>
 
             {(["garden", "mission"] as InfoKey[]).map((key) => (
-              <SectionCard title={key === "garden" ? "Greenhouse Section" : "Mission Section"} key={key}>
+              <SectionCard id={key === "garden" ? "sec-garden" : "sec-mission"} title={key === "garden" ? "Greenhouse Section" : "Mission Section"} key={key}>
                 <ImageField label="Image" value={content[key].image} onChange={(value) => updateInfo(key, "image", value)} />
                 <div className="admin-form-grid">
                   <Field label="Title" value={content[key].title} onChange={(value) => updateInfo(key, "title", value)} />
@@ -296,7 +439,7 @@ export default function ManageHomepage() {
               </SectionCard>
             ))}
 
-            <SectionCard title="About Section">
+            <SectionCard id="sec-about" title="About Section">
               <Field label="Title" value={content.about.title} onChange={(value) => setContent((current) => ({ ...current, about: { ...current.about, title: value } }))} />
               <Field label="Description" value={content.about.description} onChange={(value) => setContent((current) => ({ ...current, about: { ...current.about, description: value } }))} multiline />
               <div className="admin-form-grid">

@@ -26,6 +26,12 @@ export default function ManagePlantHealthAdmin() {
   const categories = Array.isArray(payload.symptom_categories) ? payload.symptom_categories : [];
   const healthyHabits = Array.isArray(payload.healthy_plant_habits) ? payload.healthy_plant_habits : [];
 
+  const HEALTH_SECTIONS = [
+    { id: "sec-symptoms", label: "Symptom Categories" },
+    { id: "sec-habits", label: "Healthy Habits" },
+    { id: "sec-fallback", label: "Default Guidance" },
+  ];
+
   return (
     <PageEditorShell
       title="Plant Health Doctor Configuration"
@@ -36,10 +42,11 @@ export default function ManagePlantHealthAdmin() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={HEALTH_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Symptom Categories */}
-        <EditorCard title="Diagnostic Symptom Categories" description="Symptom groups like Yellow Leaves, Drooping, Pests, and Browning." badge={`${categories.length} Categories`}>
+        <EditorCard id="sec-symptoms" title="Diagnostic Symptom Categories" description="Symptom groups like Yellow Leaves, Drooping, Pests, and Browning." badge={`${categories.length} Categories`}>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
             {categories.map((cat: any, cIdx: number) => {
               const symptoms = Array.isArray(cat.symptoms) ? cat.symptoms : [];
@@ -169,7 +176,7 @@ export default function ManagePlantHealthAdmin() {
         </EditorCard>
 
         {/* Healthy Plant Habits */}
-        <EditorCard title="Healthy Plant Habits & Advice" description="General care tips displayed in the health checker." badge={`${healthyHabits.length} Habits`}>
+        <EditorCard id="sec-habits" title="Healthy Plant Habits & Advice" description="General care tips displayed in the health checker." badge={`${healthyHabits.length} Habits`}>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
             {healthyHabits.map((habit: any, index: number) => (
               <div key={index} style={{ display: "flex", gap: "0.5rem" }}>
@@ -200,7 +207,7 @@ export default function ManagePlantHealthAdmin() {
         </EditorCard>
 
         {/* Default Diagnosis Guidance */}
-        <EditorCard title="Default Diagnosis Fallback Guidance" description="Shown when symptoms do not match a specific condition.">
+        <EditorCard id="sec-fallback" title="Default Diagnosis Fallback Guidance" description="Shown when symptoms do not match a specific condition.">
           <FormInput
             label="Default Diagnosis Title"
             value={payload.default_diagnosis?.title}

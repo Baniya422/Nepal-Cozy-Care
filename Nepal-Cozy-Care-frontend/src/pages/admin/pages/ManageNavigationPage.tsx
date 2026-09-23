@@ -142,6 +142,13 @@ export default function ManageNavigationPage() {
     </div>
   );
 
+  const NAV_SECTIONS = [
+    { id: "sec-plants", label: "Plants Menu" },
+    { id: "sec-location", label: "Shop by Room" },
+    { id: "sec-care", label: "Care Tips" },
+    { id: "sec-accessories", label: "Accessories" },
+  ];
+
   return (
     <PageEditorShell
       title="Navbar & Dropdown Menus Editor"
@@ -152,10 +159,12 @@ export default function ManageNavigationPage() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={NAV_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
         {/* Plants Mega Menu */}
         <EditorCard
+          id="sec-plants"
           title="Plants Dropdown Menu Links"
           description="Categories shown when hovering over the main 'Plants' navigation link."
           badge={`${plantsDropdown.length} Links`}
@@ -169,6 +178,7 @@ export default function ManageNavigationPage() {
 
         {/* Location / Room Dropdowns */}
         <EditorCard
+          id="sec-location"
           title="Shop by Room / Location Dropdown"
           description="Location archetypes like Living Room, Bedroom, Balcony, Office, and Terrace."
           badge={`${locationDropdown.length} Rooms`}
@@ -182,6 +192,7 @@ export default function ManageNavigationPage() {
 
         {/* Care Tips Dropdown */}
         <EditorCard
+          id="sec-care"
           title="Care Tips Dropdown Categories"
           description="Guides and advice categories shown under 'Care Tips'."
           badge={`${careTipsDropdown.length} Guides`}
@@ -195,6 +206,7 @@ export default function ManageNavigationPage() {
 
         {/* Accessories Dropdown */}
         <EditorCard
+          id="sec-accessories"
           title="Accessories Dropdown Items"
           description="Tools, soils, and planters shown under 'Accessories'."
           badge={`${accessoriesDropdown.length} Items`}

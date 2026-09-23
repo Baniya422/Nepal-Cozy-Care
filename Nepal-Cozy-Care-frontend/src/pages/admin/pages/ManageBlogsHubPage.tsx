@@ -33,6 +33,13 @@ export default function ManageBlogsHubPage() {
     { label: "Winter Garden", path: "/images/winter-garden.png" },
   ];
 
+  const BLOGS_SECTIONS = [
+    { id: "sec-preview", label: "Live Visual Preview" },
+    { id: "sec-headings", label: "Banner Headings" },
+    { id: "sec-photography", label: "Background Photo" },
+    { id: "sec-newsletter", label: "Newsletter CTA" },
+  ];
+
   return (
     <PageEditorShell
       title="Care Blogs Hub Page Editor"
@@ -43,10 +50,12 @@ export default function ManageBlogsHubPage() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={BLOGS_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
         {/* Live Visual Preview Banner */}
         <EditorCard
+          id="sec-preview"
           title="Live Visual Hero Preview"
           description="Instant visual preview of how the botanical blog header looks to public visitors."
           badge="Live Interactive Preview"
@@ -140,6 +149,7 @@ export default function ManageBlogsHubPage() {
 
         {/* Hero Banner Form Settings */}
         <EditorCard
+          id="sec-headings"
           title="Hero Banner Typography & Headings"
           description="Configure the primary headline, green highlight phrase, description, and trust badges."
           badge="Hero Section"
@@ -201,6 +211,7 @@ export default function ManageBlogsHubPage() {
 
         {/* Hero Background Image Settings */}
         <EditorCard
+          id="sec-photography"
           title="Hero Background Photography"
           description="Upload custom photography or pick from one of the curated botanical presets."
           badge="Photography"
@@ -245,6 +256,7 @@ export default function ManageBlogsHubPage() {
 
         {/* Newsletter Call-to-Action Settings */}
         <EditorCard
+          id="sec-newsletter"
           title="Community Newsletter CTA"
           description="Customize the botanical newsletter prompt at the bottom of the blog index."
           badge="Engagement"

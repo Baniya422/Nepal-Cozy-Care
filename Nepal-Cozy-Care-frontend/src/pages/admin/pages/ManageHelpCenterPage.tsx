@@ -27,6 +27,13 @@ export default function ManageHelpCenterPage() {
   const categories = Array.isArray(payload.categories) ? payload.categories : [];
   const topicCards = Array.isArray(payload.topic_cards) ? payload.topic_cards : [];
 
+  const HELP_SECTIONS = [
+    { id: "sec-desk", label: "Support Desk Info" },
+    { id: "sec-categories", label: "Help Categories" },
+    { id: "sec-topics", label: "Topic Highlights" },
+    { id: "sec-faqs", label: "FAQ Questions" },
+  ];
+
   return (
     <PageEditorShell
       title="Help Center & FAQs Editor"
@@ -37,10 +44,11 @@ export default function ManageHelpCenterPage() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={HELP_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Support Intro & Contact Channels */}
-        <EditorCard title="Support Desk & Contact Channels" description="Support intro, dedicated contact phone and email address.">
+        <EditorCard id="sec-desk" title="Support Desk & Contact Channels" description="Support intro, dedicated contact phone and email address.">
           <FormInput
             label="Support Intro Banner"
             multiline
@@ -63,7 +71,7 @@ export default function ManageHelpCenterPage() {
         </EditorCard>
 
         {/* Categories */}
-        <EditorCard title="Help Categories" description="Tabs used to filter FAQ questions." badge={`${categories.length} Categories`}>
+        <EditorCard id="sec-categories" title="Help Categories" description="Tabs used to filter FAQ questions." badge={`${categories.length} Categories`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem" }}>
             {categories.map((cat: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>
@@ -98,7 +106,7 @@ export default function ManageHelpCenterPage() {
         </EditorCard>
 
         {/* Topic Cards */}
-        <EditorCard title="Topic Highlights" description="Featured topic cards at top of Help Center." badge={`${topicCards.length} Topics`}>
+        <EditorCard id="sec-topics" title="Topic Highlights" description="Featured topic cards at top of Help Center." badge={`${topicCards.length} Topics`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
             {topicCards.map((topic: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>
@@ -145,7 +153,7 @@ export default function ManageHelpCenterPage() {
         </EditorCard>
 
         {/* FAQs */}
-        <EditorCard title="FAQ Questions & Answers" description="Accordion questions visible to visitors." badge={`${faqItems.length} FAQs`}>
+        <EditorCard id="sec-faqs" title="FAQ Questions & Answers" description="Accordion questions visible to visitors." badge={`${faqItems.length} FAQs`}>
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {faqItems.map((faq: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>

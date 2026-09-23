@@ -9,6 +9,7 @@ use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -327,6 +328,39 @@ class AdminController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Create a new administrator user with email and password
+     */
+    public function createAdmin(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role' => 'nullable|in:admin,super_admin',
+        ]);
+
+        $role = $validated['role'] ?? 'admin';
+
+        $admin = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $role,
+            'email_verified_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => "Administrator '{$admin->name}' created successfully with role '{$admin->role}'.",
+            'data' => [
+                'id' => $admin->id,
+                'name' => $admin->name,
+                'email' => $admin->email,
+                'role' => $admin->role,
+            ],
+        ], 201);
     }
 
     private function normalizeOrderStatus(?string $status): string

@@ -101,18 +101,23 @@ export default function ManageSuppliers() {
         fetch(`${API}/api/admin/suppliers`, {
           headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
         }),
-        fetch(`${API}/api/admin/suppliers/financial/summary`, {
+        fetch(`${API}/api/admin/suppliers/financial-summary`, {
           headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-        }),
+        }).catch(() => null),
       ]);
 
-      if (supRes.ok) {
+      if (supRes && supRes.ok) {
         const supData = await supRes.json();
-        setSuppliers(supData.data || []);
+        const list = Array.isArray(supData?.data)
+          ? supData.data
+          : Array.isArray(supData)
+          ? supData
+          : [];
+        setSuppliers(list);
       }
-      if (finRes.ok) {
+      if (finRes && finRes.ok) {
         const finData = await finRes.json();
-        setFinancials(finData.data || null);
+        setFinancials(finData?.data || null);
       }
     } catch (e) {
       console.error("Error loading supplier data:", e);
@@ -270,11 +275,12 @@ export default function ManageSuppliers() {
     }
   };
 
-  const filteredSuppliers = suppliers.filter(
+  const supplierList = Array.isArray(suppliers) ? suppliers : [];
+  const filteredSuppliers = supplierList.filter(
     (s) =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.contact_person && s.contact_person.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (s.phone && s.phone.includes(searchQuery))
+      s?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s?.contact_person && s.contact_person.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (s?.phone && s.phone.includes(searchQuery))
   );
 
   return (

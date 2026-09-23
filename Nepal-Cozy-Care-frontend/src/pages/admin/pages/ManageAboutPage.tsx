@@ -39,6 +39,17 @@ export default function ManageAboutPage() {
   const teamMembers = Array.isArray(team.members) ? team.members : [];
   const cta = payload.cta || {};
 
+  const ABOUT_SECTIONS = [
+    { id: "sec-hero", label: "Hero Banner" },
+    { id: "sec-stats", label: "Growth Metrics" },
+    { id: "sec-story", label: "Our Story" },
+    { id: "sec-mission", label: "Mission & Vision" },
+    { id: "sec-values", label: "Company Values" },
+    { id: "sec-why", label: "Why Choose Us" },
+    { id: "sec-team", label: "Team Members" },
+    { id: "sec-cta", label: "Call to Action" },
+  ];
+
   return (
     <PageEditorShell
       title="About Us Page Editor"
@@ -49,10 +60,11 @@ export default function ManageAboutPage() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={ABOUT_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Hero */}
-        <EditorCard title="Hero Banner" description="Top visual introduction of the About Us page." badge="Hero">
+        <EditorCard id="sec-hero" title="Hero Banner" description="Top visual introduction of the About Us page." badge="Hero">
           <FormInput label="Main Title" value={hero.title} onChange={(val) => handleFieldChange(["hero", "title"], val)} />
           <FormInput
             label="Subtitle / Lead Narrative"
@@ -92,7 +104,7 @@ export default function ManageAboutPage() {
         </EditorCard>
 
         {/* Stats */}
-        <EditorCard title="Key Growth Metrics" description="Counters showing community scale." badge={`${stats.length} Metrics`}>
+        <EditorCard id="sec-stats" title="Key Growth Metrics" description="Counters showing community scale." badge={`${stats.length} Metrics`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
             {stats.map((stat: any, index: number) => (
               <div
@@ -149,7 +161,7 @@ export default function ManageAboutPage() {
         </EditorCard>
 
         {/* Our Story */}
-        <EditorCard title="Our Story & Greenhouse Heritage" description="Detailed narrative paragraphs.">
+        <EditorCard id="sec-story" title="Our Story & Greenhouse Heritage" description="Detailed narrative paragraphs.">
           <FormInput label="Section Title" value={story.title} onChange={(val) => handleFieldChange(["story", "title"], val)} />
           <FormInput label="Subtitle" value={story.subtitle} onChange={(val) => handleFieldChange(["story", "subtitle"], val)} />
           <label style={{ display: "block", fontSize: "0.86rem", fontWeight: 600, color: "#334155", marginBottom: "0.4rem" }}>
@@ -196,7 +208,7 @@ export default function ManageAboutPage() {
         </EditorCard>
 
         {/* Mission Statement */}
-        <EditorCard title="Mission & Vision Pillars" description="Core commitments.">
+        <EditorCard id="sec-mission" title="Mission & Vision Pillars" description="Core commitments.">
           <FormInput label="Pillar Title" value={mission.title} onChange={(val) => handleFieldChange(["mission", "title"], val)} />
           <FormInput
             label="Core Vision Statement"
@@ -258,7 +270,7 @@ export default function ManageAboutPage() {
         </EditorCard>
 
         {/* Core Values */}
-        <EditorCard title="Company Values" description="Guiding principles of Cozy Care.">
+        <EditorCard id="sec-values" title="Company Values" description="Guiding principles of Cozy Care.">
           <FormInput label="Section Title" value={values.title} onChange={(val) => handleFieldChange(["values", "title"], val)} />
           <FormInput label="Subtitle" value={values.subtitle} onChange={(val) => handleFieldChange(["values", "subtitle"], val)} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1rem" }}>
@@ -325,7 +337,7 @@ export default function ManageAboutPage() {
         </EditorCard>
 
         {/* Why Choose Us */}
-        <EditorCard title="Why Choose Cozy Care" description="Differentiators and customer guarantees.">
+        <EditorCard id="sec-why" title="Why Choose Cozy Care" description="Differentiators and customer guarantees.">
           <FormInput
             label="Section Title"
             value={whyChooseUs.title}
@@ -400,7 +412,7 @@ export default function ManageAboutPage() {
         </EditorCard>
 
         {/* Team Section */}
-        <EditorCard title="Greenhouse & Horticulture Team" description="Profiles of the plant experts.">
+        <EditorCard id="sec-team" title="Greenhouse & Horticulture Team" description="Profiles of the plant experts.">
           <FormInput label="Section Title" value={team.title} onChange={(val) => handleFieldChange(["team", "title"], val)} />
           <FormInput label="Subtitle" value={team.subtitle} onChange={(val) => handleFieldChange(["team", "subtitle"], val)} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
@@ -474,7 +486,7 @@ export default function ManageAboutPage() {
         </EditorCard>
 
         {/* Bottom CTA */}
-        <EditorCard title="Bottom Call to Action Banner" description="Final encouragement banner at page end.">
+        <EditorCard id="sec-cta" title="Bottom Call to Action Banner" description="Final encouragement banner at page end.">
           <FormInput label="Banner Title" value={cta.title} onChange={(val) => handleFieldChange(["cta", "title"], val)} />
           <FormInput
             label="Banner Subtitle"

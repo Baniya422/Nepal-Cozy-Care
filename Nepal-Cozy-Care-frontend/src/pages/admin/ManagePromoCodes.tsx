@@ -55,7 +55,14 @@ export default function ManagePromoCodes() {
       });
       if (res.ok) {
         const data = await res.json();
-        setPromos(data.data || []);
+        const list = Array.isArray(data?.data?.promo_codes)
+          ? data.data.promo_codes
+          : Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+          ? data
+          : [];
+        setPromos(list);
       }
     } catch (e) {
       console.error("Error fetching promo codes:", e);
@@ -250,14 +257,14 @@ export default function ManagePromoCodes() {
                     Loading promo codes...
                   </td>
                 </tr>
-              ) : promos.length === 0 ? (
+              ) : !Array.isArray(promos) || promos.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: "center", padding: "2rem", color: "#6b7280" }}>
                     No promo codes found. Create your first campaign above!
                   </td>
                 </tr>
               ) : (
-                promos.map((p) => (
+                (Array.isArray(promos) ? promos : []).map((p) => (
                   <tr key={p.id}>
                     <td>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>

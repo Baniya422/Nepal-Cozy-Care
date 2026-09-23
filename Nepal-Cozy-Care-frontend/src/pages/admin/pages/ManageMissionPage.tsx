@@ -37,6 +37,14 @@ export default function ManageMissionPage() {
   const impact = payload.impact || {};
   const impactGoals = Array.isArray(impact.goals) ? impact.goals : [];
 
+  const MISSION_SECTIONS = [
+    { id: "sec-hero", label: "Hero Header" },
+    { id: "sec-narrative", label: "Botanical Narrative" },
+    { id: "sec-pillars", label: "Four Pillars" },
+    { id: "sec-steps", label: "Lifetime Guarantee" },
+    { id: "sec-vision", label: "Vision & Impact" },
+  ];
+
   return (
     <PageEditorShell
       title="Our Mission Page Editor"
@@ -47,10 +55,11 @@ export default function ManageMissionPage() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={MISSION_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Hero */}
-        <EditorCard title="Mission Hero Header" description="The core purpose statement and showcase banner.">
+        <EditorCard id="sec-hero" title="Mission Hero Header" description="The core purpose statement and showcase banner.">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem" }}>
             <FormInput label="Eyebrow Kicker" value={hero.eyebrow} onChange={(val) => handleFieldChange(["hero", "eyebrow"], val)} />
             <FormInput label="Main Hero Title" value={hero.title} onChange={(val) => handleFieldChange(["hero", "title"], val)} />
@@ -100,7 +109,7 @@ export default function ManageMissionPage() {
         </EditorCard>
 
         {/* Narrative Story */}
-        <EditorCard title="Botanical Journey Narrative" description="Deep storytelling behind Cozy Care's founding.">
+        <EditorCard id="sec-narrative" title="Botanical Journey Narrative" description="Deep storytelling behind Cozy Care's founding.">
           <FormInput label="Kicker Eyebrow" value={story.eyebrow} onChange={(val) => handleFieldChange(["story", "eyebrow"], val)} />
           <FormInput label="Story Headline" value={story.title} onChange={(val) => handleFieldChange(["story", "title"], val)} />
           <FormInput
@@ -148,7 +157,7 @@ export default function ManageMissionPage() {
         </EditorCard>
 
         {/* 4 Pillars of Care */}
-        <EditorCard title="Four Pillars of Cozy Care" description="Detailed roadmap pillars." badge={`${pillars.length} Pillars`}>
+        <EditorCard id="sec-pillars" title="Four Pillars of Cozy Care" description="Detailed roadmap pillars." badge={`${pillars.length} Pillars`}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "1rem" }}>
             <FormInput
               label="Pillars Section Eyebrow"
@@ -202,7 +211,7 @@ export default function ManageMissionPage() {
         </EditorCard>
 
         {/* Support Steps */}
-        <EditorCard title="Lifetime Care Guarantee Steps" description="The step-by-step customer care journey.">
+        <EditorCard id="sec-steps" title="Lifetime Care Guarantee Steps" description="The step-by-step customer care journey.">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem", marginBottom: "1rem" }}>
             <FormInput
               label="Support Section Eyebrow"
@@ -256,7 +265,7 @@ export default function ManageMissionPage() {
         </EditorCard>
 
         {/* Vision & Impact Goals */}
-        <EditorCard title="Vision Quote & Measurable Impact Goals" description="Target metrics and founders vision statement.">
+        <EditorCard id="sec-vision" title="Vision Quote & Measurable Impact Goals" description="Target metrics and founders vision statement.">
           <FormInput label="Vision Quote" multiline rows={2} value={vision.quote} onChange={(val) => handleFieldChange(["vision", "quote"], val)} />
           <FormInput label="Vision Author / Attrib" value={vision.author} onChange={(val) => handleFieldChange(["vision", "author"], val)} />
           <FormInput label="Impact Section Eyebrow" value={impact.eyebrow} onChange={(val) => handleFieldChange(["impact", "eyebrow"], val)} />

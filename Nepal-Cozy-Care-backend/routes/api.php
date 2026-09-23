@@ -159,6 +159,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/suppliers', [SupplierController::class, 'index']);
     Route::post('/admin/suppliers', [SupplierController::class, 'store']);
     Route::get('/admin/suppliers/financial-summary', [SupplierController::class, 'financialSummary']);
+    Route::get('/admin/suppliers/financial/summary', [SupplierController::class, 'financialSummary']);
     Route::get('/admin/suppliers/audit-logs', [SupplierController::class, 'auditLogs']);
     Route::get('/admin/suppliers/{id}', [SupplierController::class, 'show']);
     Route::put('/admin/suppliers/{id}', [SupplierController::class, 'update']);
@@ -177,6 +178,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);
     Route::get('/admin/reports', [AdminController::class, 'reports']);
     Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::post('/admin/users/create-admin', [AdminController::class, 'createAdmin']);
+    Route::post('/admin/users', [AdminController::class, 'createAdmin']);
     Route::put('/admin/users/{id}/role', [AdminController::class, 'updateUserRole']);
     Route::get('/admin/plants', [PlantController::class, 'adminIndex']);
     Route::post('/plants', [PlantController::class, 'store']);

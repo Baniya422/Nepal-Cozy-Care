@@ -35,6 +35,13 @@ export default function ManageContactPage() {
   const contactMethodOptions = Array.isArray(form.contact_method_options) ? form.contact_method_options : [];
   const bannerImages = Array.isArray(payload.banner_images) ? payload.banner_images : [];
 
+  const CONTACT_SECTIONS = [
+    { id: "sec-hero", label: "Hero & Support Cards" },
+    { id: "sec-channels", label: "Contact Channels" },
+    { id: "sec-form", label: "Inquiry Form" },
+    { id: "sec-gallery", label: "Photo Gallery" },
+  ];
+
   return (
     <PageEditorShell
       title="Contact & Support Page Editor"
@@ -45,10 +52,11 @@ export default function ManageContactPage() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={CONTACT_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Contact Hero */}
-        <EditorCard title="Contact Hero & Support Cards" description="Introductory banner and support categories." badge={`${cards.length} Cards`}>
+        <EditorCard id="sec-hero" title="Contact Hero & Support Cards" description="Introductory banner and support categories." badge={`${cards.length} Cards`}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "1rem" }}>
             <FormInput label="Eyebrow Kicker" value={hero.eyebrow} onChange={(val) => handleFieldChange(["hero", "eyebrow"], val)} />
             <FormInput label="Hero Title" value={hero.title} onChange={(val) => handleFieldChange(["hero", "title"], val)} />
@@ -98,7 +106,7 @@ export default function ManageContactPage() {
         </EditorCard>
 
         {/* Contact Information & Channels */}
-        <EditorCard title="Contact Channels & Office Info" description="Phone numbers, email, physical nursery address, and hours.">
+        <EditorCard id="sec-channels" title="Contact Channels & Office Info" description="Phone numbers, email, physical nursery address, and hours.">
           <FormInput label="Section Title" value={info.title} onChange={(val) => handleFieldChange(["info", "title"], val)} />
           <FormInput
             label="Section Subtitle"
@@ -193,7 +201,7 @@ export default function ManageContactPage() {
         </EditorCard>
 
         {/* Inquiry Form Configuration */}
-        <EditorCard title="Customer Inquiry Form Configuration" description="Form headings, subject dropdown choices, and contact methods.">
+        <EditorCard id="sec-form" title="Customer Inquiry Form Configuration" description="Form headings, subject dropdown choices, and contact methods.">
           <FormInput label="Form Headline" value={form.title} onChange={(val) => handleFieldChange(["form", "title"], val)} />
           <FormInput
             label="Form Subtitle"
@@ -274,7 +282,7 @@ export default function ManageContactPage() {
         </EditorCard>
 
         {/* Nepal Banner Images */}
-        <EditorCard title="Nepal Landscape & Heritage Photo Gallery" description="Images displayed at the bottom of the contact page." badge={`${bannerImages.length} Photos`}>
+        <EditorCard id="sec-gallery" title="Nepal Landscape & Heritage Photo Gallery" description="Images displayed at the bottom of the contact page." badge={`${bannerImages.length} Photos`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
             {bannerImages.map((imgItem: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>

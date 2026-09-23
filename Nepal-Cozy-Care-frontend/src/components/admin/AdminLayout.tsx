@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  ChevronDown,
   Globe,
   Settings,
   Store,
@@ -42,7 +43,25 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const getMenuGroups = (vendorMarketplaceEnabled: boolean) => [
+interface SubMenuItem {
+  path: string;
+  label: string;
+  icon: any;
+}
+
+interface MenuItem {
+  path: string;
+  icon: any;
+  label: string;
+  subItems?: SubMenuItem[];
+}
+
+interface MenuGroup {
+  group: string;
+  items: MenuItem[];
+}
+
+const getMenuGroups = (vendorMarketplaceEnabled: boolean): MenuGroup[] => [
   {
     group: "Overview",
     items: [
@@ -74,29 +93,30 @@ const getMenuGroups = (vendorMarketplaceEnabled: boolean) => [
       { path: "/admin/accessories", icon: Package, label: "Accessories" },
     ],
   },
-
   {
-    group: "Website Pages",
+    group: "Website & Content",
     items: [
-      { path: "/admin/page-content", icon: Globe, label: "All Pages Hub" },
-      { path: "/admin/homepage", icon: House, label: "Homepage" },
-      { path: "/admin/pages/about", icon: Info, label: "About Us" },
-      { path: "/admin/pages/mission", icon: Sparkles, label: "Our Mission" },
-      { path: "/admin/pages/contact", icon: Send, label: "Contact & Support" },
-      { path: "/admin/pages/shipping", icon: Truck, label: "Shipping & Delivery" },
-      { path: "/admin/pages/help-center", icon: HelpCircle, label: "Help Center & FAQs" },
-      { path: "/admin/pages/navigation", icon: Compass, label: "Navbar & Menus" },
-    ],
-  },
-  {
-    group: "Content & Interactive",
-    items: [
+      {
+        path: "/admin/page-content",
+        icon: Globe,
+        label: "Website Pages (CMS)",
+        subItems: [
+          { path: "/admin/page-content", icon: Globe, label: "Visual Directory Hub" },
+          { path: "/admin/homepage", icon: House, label: "Homepage Builder" },
+          { path: "/admin/pages/about", icon: Info, label: "About Us" },
+          { path: "/admin/pages/mission", icon: Sparkles, label: "Our Mission" },
+          { path: "/admin/pages/contact", icon: Send, label: "Contact & Support" },
+          { path: "/admin/pages/shipping", icon: Truck, label: "Shipping & Delivery" },
+          { path: "/admin/pages/help-center", icon: HelpCircle, label: "Help Center & FAQs" },
+          { path: "/admin/pages/blogs-hub", icon: BookOpen, label: "Care Blogs Hub Header" },
+          { path: "/admin/pages/navigation", icon: Compass, label: "Navbar & Menus" },
+          { path: "/admin/pages/plant-finder", icon: Sparkles, label: "Plant Finder Quiz" },
+          { path: "/admin/pages/plant-health", icon: Stethoscope, label: "Plant Health Doctor" },
+        ],
+      },
       { path: "/admin/blogs", icon: BookOpen, label: "Care Blogs" },
-      { path: "/admin/pages/blogs-hub", icon: BookOpen, label: "Blogs Hub Header" },
       { path: "/admin/care-tips", icon: Lightbulb, label: "Care Tips" },
       { path: "/admin/seasonal-reminders", icon: CloudSun, label: "Seasonal Reminders" },
-      { path: "/admin/pages/plant-finder", icon: Sparkles, label: "Plant Finder Quiz" },
-      { path: "/admin/pages/plant-health", icon: Stethoscope, label: "Plant Health Doctor" },
     ],
   },
   {
@@ -118,9 +138,26 @@ const getMenuGroups = (vendorMarketplaceEnabled: boolean) => [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { vendor_marketplace_enabled } = useFeatureFlags();
   const menuGroups = getMenuGroups(vendor_marketplace_enabled);
-  const allMenuItems = menuGroups.flatMap((g) => g.items);
+  const allMenuItems = menuGroups.flatMap((g) => [
+    ...g.items,
+    ...(g.items.flatMap((i) => i.subItems || [])),
+  ]);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isCmsRouteActive =
+    location.pathname.startsWith("/admin/page-content") ||
+    location.pathname.startsWith("/admin/homepage") ||
+    location.pathname.startsWith("/admin/pages/");
+
+  const [cmsDropdownOpen, setCmsDropdownOpen] = useState(() => isCmsRouteActive);
+
+  useEffect(() => {
+    if (isCmsRouteActive) {
+      setCmsDropdownOpen(true);
+    }
+  }, [isCmsRouteActive]);
+
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== "undefined") {
       return window.innerWidth > 1024;
@@ -147,6 +184,36 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return location.pathname.startsWith(path);
   };
 
+  const sidebarRef = useRef<HTMLElement | null>(null);
+
+  // Restore sidebar scroll position synchronously before browser paint
+  useLayoutEffect(() => {
+    const saved = sessionStorage.getItem("cozy_admin_sidebar_scroll");
+    if (saved && sidebarRef.current) {
+      sidebarRef.current.scrollTop = Number(saved);
+    }
+  }, [location.pathname]);
+
+  // Keep the active link visible in viewport if it is outside
+  useEffect(() => {
+    if (sidebarRef.current) {
+      const activeEl = sidebarRef.current.querySelector<HTMLElement>(
+        ".admin-sidebar-link.active, .admin-sidebar-sublink.active"
+      );
+      if (activeEl) {
+        const sidebarRect = sidebarRef.current.getBoundingClientRect();
+        const activeRect = activeEl.getBoundingClientRect();
+        if (activeRect.top < sidebarRect.top || activeRect.bottom > sidebarRect.bottom) {
+          activeEl.scrollIntoView({ block: "nearest", behavior: "auto" });
+        }
+      }
+    }
+  }, [location.pathname]);
+
+  const handleSidebarScroll = (e: React.UIEvent<HTMLElement>) => {
+    sessionStorage.setItem("cozy_admin_sidebar_scroll", String(e.currentTarget.scrollTop));
+  };
+
   // Close sidebar on mobile route change
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth <= 1024) {
@@ -155,6 +222,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [location.pathname]);
 
   const handleNavClick = () => {
+    if (sidebarRef.current) {
+      sessionStorage.setItem("cozy_admin_sidebar_scroll", String(sidebarRef.current.scrollTop));
+    }
     if (typeof window !== "undefined" && window.innerWidth <= 1024) {
       setSidebarOpen(false);
     }
@@ -170,11 +240,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           aria-hidden="true"
         />
       )}
-      <aside className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}>
+      <aside
+        ref={sidebarRef}
+        onScroll={handleSidebarScroll}
+        className={`admin-sidebar ${sidebarOpen ? "open" : "closed"}`}
+      >
         <div className="admin-sidebar-header">
           <Link to="/admin" className="admin-logo" onClick={handleNavClick}>
             <Leaf size={26} />
-            <span>Cozy Care Super Admin</span>
+            <span>Cozy Care admin dashboard</span>
           </Link>
           <button
             type="button"
@@ -189,18 +263,65 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {menuGroups.map((group) => (
             <div key={group.group} className="admin-sidebar-group">
               <div className="admin-sidebar-group-title">{group.group}</div>
-              {group.items.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={handleNavClick}
-                  className={`admin-sidebar-link ${isActive(item.path) ? "active" : ""}`}
-                >
-                  <item.icon size={18} />
-                  <span>{item.label}</span>
-                  {isActive(item.path) && <ChevronRight size={15} className="admin-link-arrow" />}
-                </Link>
-              ))}
+              {group.items.map((item) => {
+                if (item.subItems && item.subItems.length > 0) {
+                  return (
+                    <div key={item.path} className="admin-sidebar-dropdown-group">
+                      <button
+                        type="button"
+                        onClick={() => setCmsDropdownOpen((prev) => !prev)}
+                        className={`admin-sidebar-link admin-sidebar-dropdown-toggle ${
+                          isCmsRouteActive ? "active" : ""
+                        }`}
+                        aria-expanded={cmsDropdownOpen}
+                      >
+                        <item.icon size={18} />
+                        <span>{item.label}</span>
+                        <ChevronDown
+                          size={15}
+                          className="admin-link-arrow"
+                          style={{
+                            transform: cmsDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                            transition: "transform 0.2s ease",
+                          }}
+                        />
+                      </button>
+                      {cmsDropdownOpen && (
+                        <div className="admin-sidebar-submenu">
+                          {item.subItems.map((sub) => {
+                            const isSubActive = location.pathname === sub.path;
+                            const SubIcon = sub.icon;
+                            return (
+                              <Link
+                                key={sub.path}
+                                to={sub.path}
+                                onClick={handleNavClick}
+                                className={`admin-sidebar-sublink ${isSubActive ? "active" : ""}`}
+                              >
+                                {SubIcon && <SubIcon size={14} />}
+                                <span>{sub.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={handleNavClick}
+                    className={`admin-sidebar-link ${isActive(item.path) ? "active" : ""}`}
+                  >
+                    <item.icon size={18} />
+                    <span>{item.label}</span>
+                    {isActive(item.path) && <ChevronRight size={15} className="admin-link-arrow" />}
+                  </Link>
+                );
+              })}
             </div>
           ))}
         </nav>
@@ -234,7 +355,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
               <div className="admin-user-info">
                 <span className="admin-user-name">{adminName}</span>
-                <span className="admin-user-role">Super Admin</span>
+                <span className="admin-user-role">Admin</span>
               </div>
               <button className="admin-logout-btn" onClick={handleLogout}>
                 <LogOut size={18} />
@@ -242,7 +363,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
         </header>
-        {}
         <main className="admin-content">{children}</main>
       </div>
     </div>

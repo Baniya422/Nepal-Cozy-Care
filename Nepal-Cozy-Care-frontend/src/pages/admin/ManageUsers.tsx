@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Eye, Shield, Store, CheckCircle2, AlertCircle } from "lucide-react";
+import { Search, Eye, EyeOff, Shield, Store, CheckCircle2, AlertCircle, UserPlus, X } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 
@@ -41,6 +41,16 @@ export default function ManageUsers() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
+  // Create Admin Modal State
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminRole, setAdminRole] = useState<"admin" | "super_admin">("admin");
+  const [showPassword, setShowPassword] = useState(false);
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
+  const [createAdminFeedback, setCreateAdminFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   // Assign Vendor & Role Modal State
   const [editingRoleUser, setEditingRoleUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("customer");
@@ -57,6 +67,44 @@ export default function ManageUsers() {
     avg_orders: 0,
     new_this_month: 0,
   });
+
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatingAdmin(true);
+    setCreateAdminFeedback(null);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/admin/users/create-admin`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: adminName,
+          email: adminEmail,
+          password: adminPassword,
+          role: adminRole,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to create administrator");
+      setCreateAdminFeedback({ type: "success", text: data.message || "Administrator created successfully!" });
+      setAdminName("");
+      setAdminEmail("");
+      setAdminPassword("");
+      void fetchUsers();
+      setTimeout(() => {
+        setShowCreateAdminModal(false);
+        setCreateAdminFeedback(null);
+      }, 1400);
+    } catch (err: any) {
+      setCreateAdminFeedback({ type: "error", text: err.message || "Failed to create administrator" });
+    } finally {
+      setCreatingAdmin(false);
+    }
+  };
 
   useEffect(() => {
     void fetchUsers();
@@ -159,11 +207,35 @@ export default function ManageUsers() {
   return (
     <AdminLayout>
       <div className="admin-page">
-        <div className="admin-page-header">
+        <div className="admin-page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
           <div>
             <h2>Users Management</h2>
-            <p>View and manage registered users</p>
+            <p>View and manage registered users and administrators</p>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowCreateAdminModal(true);
+              setCreateAdminFeedback(null);
+            }}
+            className="admin-btn admin-btn-primary"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              background: "#10b981",
+              color: "#ffffff",
+              border: "none",
+              padding: "0.6rem 1.25rem",
+              borderRadius: "8px",
+              fontWeight: 600,
+              fontSize: "0.9rem",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(16, 185, 129, 0.3)",
+            }}
+          >
+            <UserPlus size={18} /> + Create Admin
+          </button>
         </div>
         {error && (
           <div className="admin-card" style={{ marginBottom: "1rem" }}>
@@ -515,6 +587,182 @@ export default function ManageUsers() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {showCreateAdminModal && (
+          <div className="admin-modal-overlay" onClick={() => setShowCreateAdminModal(false)}>
+            <div className="admin-modal" style={{ maxWidth: "520px" }} onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <Shield size={20} color="#10b981" /> Create New Administrator
+                </h3>
+                <button
+                  type="button"
+                  className="admin-modal-close"
+                  onClick={() => setShowCreateAdminModal(false)}
+                  style={{ background: "none", border: "none", cursor: "pointer" }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {createAdminFeedback && (
+                <div
+                  style={{
+                    margin: "1rem 1.25rem 0",
+                    padding: "0.75rem 1rem",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.88rem",
+                    background: createAdminFeedback.type === "success" ? "#ecfdf5" : "#fef2f2",
+                    color: createAdminFeedback.type === "success" ? "#065f46" : "#991b1b",
+                    border: `1px solid ${createAdminFeedback.type === "success" ? "#a7f3d0" : "#fecaca"}`,
+                  }}
+                >
+                  {createAdminFeedback.type === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+                  <span>{createAdminFeedback.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleCreateAdmin} style={{ padding: "1.25rem" }}>
+                <div style={{ marginBottom: "1rem" }}>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "#334155" }}>
+                    Full Name <span style={{ color: "#ef4444" }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Roshan Baniya"
+                    value={adminName}
+                    onChange={(e) => setAdminName(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "6px",
+                      border: "1px solid #cbd5e1",
+                      fontSize: "0.9rem",
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "1rem" }}>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "#334155" }}>
+                    Email Address <span style={{ color: "#ef4444" }}>*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. admin@nepalcozycare.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "6px",
+                      border: "1px solid #cbd5e1",
+                      fontSize: "0.9rem",
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "1rem" }}>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "#334155" }}>
+                    Password <span style={{ color: "#ef4444" }}>*</span>
+                  </label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      minLength={6}
+                      placeholder="Minimum 6 characters"
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "0.65rem 2.5rem 0.65rem 0.85rem",
+                        borderRadius: "6px",
+                        border: "1px solid #cbd5e1",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "0.75rem",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "#64748b",
+                      }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "1.25rem" }}>
+                  <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "#334155" }}>
+                    Admin Privileges / Role
+                  </label>
+                  <select
+                    value={adminRole}
+                    onChange={(e) => setAdminRole(e.target.value as "admin" | "super_admin")}
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "6px",
+                      border: "1px solid #cbd5e1",
+                      fontSize: "0.9rem",
+                      background: "#ffffff",
+                    }}
+                  >
+                    <option value="admin">Cozy Care Admin (Orders, Catalog, CMS, Messages)</option>
+                    <option value="super_admin">Super Admin (Full System & User Management)</option>
+                  </select>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1.5rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateAdminModal(false)}
+                    style={{
+                      padding: "0.6rem 1.1rem",
+                      borderRadius: "6px",
+                      border: "1px solid #cbd5e1",
+                      background: "#ffffff",
+                      fontSize: "0.88rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creatingAdmin}
+                    style={{
+                      padding: "0.6rem 1.4rem",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: "#10b981",
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: "0.88rem",
+                      cursor: creatingAdmin ? "not-allowed" : "pointer",
+                      opacity: creatingAdmin ? 0.7 : 1,
+                    }}
+                  >
+                    {creatingAdmin ? "Creating..." : "Create Administrator"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

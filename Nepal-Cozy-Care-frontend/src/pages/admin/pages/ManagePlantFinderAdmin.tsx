@@ -28,6 +28,14 @@ export default function ManagePlantFinderAdmin() {
   const locationOptions = Array.isArray(payload.location_options) ? payload.location_options : [];
   const nonPlantCategories = Array.isArray(payload.non_plant_categories) ? payload.non_plant_categories : [];
 
+  const FINDER_SECTIONS = [
+    { id: "sec-rooms", label: "Room Options" },
+    { id: "sec-light", label: "Light Conditions" },
+    { id: "sec-experience", label: "Care Experience" },
+    { id: "sec-humidity", label: "Atmosphere" },
+    { id: "sec-exclusions", label: "Excluded Categories" },
+  ];
+
   return (
     <PageEditorShell
       title="Plant Finder Tool Configuration"
@@ -38,10 +46,11 @@ export default function ManagePlantFinderAdmin() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={FINDER_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Room Options */}
-        <EditorCard title="Room Quiz Options" description="Rooms available in the plant matching quiz." badge={`${roomOptions.length} Rooms`}>
+        <EditorCard id="sec-rooms" title="Room Quiz Options" description="Rooms available in the plant matching quiz." badge={`${roomOptions.length} Rooms`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem" }}>
             {roomOptions.map((opt: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>
@@ -81,7 +90,7 @@ export default function ManagePlantFinderAdmin() {
         </EditorCard>
 
         {/* Light Options */}
-        <EditorCard title="Light Conditions" description="Lighting levels selectable by quiz users." badge={`${lightOptions.length} Conditions`}>
+        <EditorCard id="sec-light" title="Light Conditions" description="Lighting levels selectable by quiz users." badge={`${lightOptions.length} Conditions`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem" }}>
             {lightOptions.map((opt: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>
@@ -121,7 +130,7 @@ export default function ManagePlantFinderAdmin() {
         </EditorCard>
 
         {/* Experience Levels */}
-        <EditorCard title="Care Experience Levels" description="Skill levels to match plant maintenance requirements." badge={`${experienceOptions.length} Levels`}>
+        <EditorCard id="sec-experience" title="Care Experience Levels" description="Skill levels to match plant maintenance requirements." badge={`${experienceOptions.length} Levels`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem" }}>
             {experienceOptions.map((opt: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>
@@ -161,7 +170,7 @@ export default function ManagePlantFinderAdmin() {
         </EditorCard>
 
         {/* Location / Humidity */}
-        <EditorCard title="Humidity / Atmosphere Conditions" description="Atmospheric environment options." badge={`${locationOptions.length} Conditions`}>
+        <EditorCard id="sec-humidity" title="Humidity / Atmosphere Conditions" description="Atmospheric environment options." badge={`${locationOptions.length} Conditions`}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem" }}>
             {locationOptions.map((opt: any, index: number) => (
               <div key={index} style={{ background: "#f8fafc", padding: "1rem", borderRadius: "10px", position: "relative", border: "1px solid #e2e8f0" }}>
@@ -201,7 +210,7 @@ export default function ManagePlantFinderAdmin() {
         </EditorCard>
 
         {/* Excluded Non-Plant Categories */}
-        <EditorCard title="Excluded Non-Plant Categories" description="Product categories to exclude from Plant Finder recommendations.">
+        <EditorCard id="sec-exclusions" title="Excluded Non-Plant Categories" description="Product categories to exclude from Plant Finder recommendations.">
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
             {nonPlantCategories.map((cat: string, index: number) => (
               <div

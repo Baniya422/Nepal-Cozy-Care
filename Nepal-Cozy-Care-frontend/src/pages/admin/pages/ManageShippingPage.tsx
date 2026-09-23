@@ -35,6 +35,14 @@ export default function ManageShippingPage() {
   const testimonials = payload.testimonials || {};
   const testimonialItems = Array.isArray(testimonials.items) ? testimonials.items : [];
 
+  const SHIPPING_SECTIONS = [
+    { id: "sec-hero", label: "Hero Banner" },
+    { id: "sec-packaging", label: "Packaging Protection" },
+    { id: "sec-options", label: "Delivery Tiers" },
+    { id: "sec-benefits", label: "Care Guarantees" },
+    { id: "sec-reviews", label: "Customer Reviews" },
+  ];
+
   return (
     <PageEditorShell
       title="Shipping & Delivery Page Editor"
@@ -45,10 +53,11 @@ export default function ManageShippingPage() {
       loading={loading}
       statusMessage={statusMessage}
       onSave={handleSave}
+      sections={SHIPPING_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Hero */}
-        <EditorCard title="Hero Banner & Title Lines" description="Header banner for Shipping & Delivery.">
+        <EditorCard id="sec-hero" title="Hero Banner & Title Lines" description="Header banner for Shipping & Delivery.">
           <ImageUploader
             label="Hero Background Image"
             value={hero.background_image}
@@ -93,7 +102,7 @@ export default function ManageShippingPage() {
         </EditorCard>
 
         {/* Packaging Protection / About */}
-        <EditorCard title="Packaging Protection & Safe Transit Guarantee" description="How plants are protected and secured during shipment.">
+        <EditorCard id="sec-packaging" title="Packaging Protection & Safe Transit Guarantee" description="How plants are protected and secured during shipment.">
           <FormInput label="Badge Text" value={about.badge} onChange={(val) => handleFieldChange(["about", "badge"], val)} />
           <FormInput label="Section Title" value={about.title} onChange={(val) => handleFieldChange(["about", "title"], val)} />
           <FormInput
@@ -120,7 +129,7 @@ export default function ManageShippingPage() {
         </EditorCard>
 
         {/* Delivery Options */}
-        <EditorCard title="Delivery Tiers & Rates" description="Shipping speeds and valley options." badge={`${deliveryOptions.length} Tiers`}>
+        <EditorCard id="sec-options" title="Delivery Tiers & Rates" description="Shipping speeds and valley options." badge={`${deliveryOptions.length} Tiers`}>
           <FormInput label="Delivery Eyebrow" value={delivery.badge} onChange={(val) => handleFieldChange(["delivery", "badge"], val)} />
           <FormInput label="Delivery Headline" value={delivery.title} onChange={(val) => handleFieldChange(["delivery", "title"], val)} />
           <FormInput
@@ -182,7 +191,7 @@ export default function ManageShippingPage() {
         </EditorCard>
 
         {/* Benefits / Guarantees */}
-        <EditorCard title="Customer Care & Guarantee Badges" description="Features displayed below delivery options.">
+        <EditorCard id="sec-benefits" title="Customer Care & Guarantee Badges" description="Features displayed below delivery options.">
           <FormInput label="Badge" value={benefits.badge} onChange={(val) => handleFieldChange(["benefits", "badge"], val)} />
           <FormInput label="Headline" value={benefits.title} onChange={(val) => handleFieldChange(["benefits", "title"], val)} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
@@ -226,7 +235,7 @@ export default function ManageShippingPage() {
         </EditorCard>
 
         {/* Testimonials */}
-        <EditorCard title="Customer Reviews & Testimonials" description="Verified shipping feedback." badge={`${testimonialItems.length} Reviews`}>
+        <EditorCard id="sec-reviews" title="Customer Reviews & Testimonials" description="Verified shipping feedback." badge={`${testimonialItems.length} Reviews`}>
           <FormInput label="Badge" value={testimonials.badge} onChange={(val) => handleFieldChange(["testimonials", "badge"], val)} />
           <FormInput label="Headline" value={testimonials.title} onChange={(val) => handleFieldChange(["testimonials", "title"], val)} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
