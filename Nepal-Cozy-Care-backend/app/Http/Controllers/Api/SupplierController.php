@@ -506,6 +506,9 @@ class SupplierController extends Controller
 
         // 6. Recorded Order Operating Expenses (Delivery, packaging, handling)
         $totalRecordedExpenses = (float) OrderExpense::sum('amount');
+        $deliveryExpenses = (float) OrderExpense::where('expense_type', 'delivery')->sum('amount');
+        $packagingExpenses = (float) OrderExpense::where('expense_type', 'packaging')->sum('amount');
+        $otherExpenses = (float) OrderExpense::whereNotIn('expense_type', ['delivery', 'packaging'])->sum('amount');
 
         // 7. Orders with incomplete cost data
         $incompleteOrdersCount = Order::where('status', '!=', 'cancelled')
@@ -528,14 +531,27 @@ class SupplierController extends Controller
             'message' => 'Financial summary generated successfully.',
             'data' => [
                 'customer_cash_collected' => round($cashCollected, 2),
+                'cash_collected_customer' => round($cashCollected, 2),
                 'outstanding_customer_payments' => round($outstandingCustomerPayments, 2),
+                'outstanding_customer_receivables' => round($outstandingCustomerPayments, 2),
                 'total_supplier_costs' => round($totalSupplierCosts, 2),
+                'total_supplier_cost' => round($totalSupplierCosts, 2),
                 'total_supplier_payments_made' => round($totalSupplierPaymentsMade, 2),
+                'total_supplier_paid' => round($totalSupplierPaymentsMade, 2),
                 'supplier_balances_owed' => $totalSupplierBalances,
+                'outstanding_supplier_payable' => $totalSupplierBalances,
                 'total_recorded_expenses' => round($totalRecordedExpenses, 2),
+                'expenses_by_type' => [
+                    'delivery' => round($deliveryExpenses, 2),
+                    'packaging' => round($packagingExpenses, 2),
+                    'other' => round($otherExpenses, 2),
+                ],
                 'estimated_order_earnings' => $estimatedOrderEarnings,
+                'estimated_gross_earnings' => $estimatedOrderEarnings,
                 'realized_cash_earnings' => $realizedCashEarnings,
+                'cash_realized_earnings' => $realizedCashEarnings,
                 'incomplete_orders_count' => $incompleteOrdersCount,
+                'orders_with_incomplete_costs_count' => $incompleteOrdersCount,
                 'has_incomplete_earnings' => $incompleteOrdersCount > 0,
             ],
         ]);

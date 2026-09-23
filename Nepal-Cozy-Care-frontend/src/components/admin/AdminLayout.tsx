@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, Component, type ErrorInfo, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -35,9 +35,94 @@ import {
   HelpCircle,
   Compass,
   Stethoscope,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import "./admin.css";
 import { useFeatureFlags } from "../../context/FeatureFlagsContext";
+
+class AdminErrorBoundary extends Component<
+  { children: ReactNode; resetKey?: string },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode; resetKey?: string }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Admin error caught by boundary:", error, errorInfo);
+  }
+
+  componentDidUpdate(prevProps: { resetKey?: string }) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            padding: "2.5rem 2rem",
+            maxWidth: "600px",
+            margin: "3rem auto",
+            background: "#ffffff",
+            borderRadius: "14px",
+            border: "1px solid #fee2e2",
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: "52px",
+              height: "52px",
+              borderRadius: "50%",
+              background: "#fef2f2",
+              color: "#dc2626",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.25rem auto",
+            }}
+          >
+            <AlertCircle size={28} />
+          </div>
+          <h2 style={{ fontSize: "1.25rem", color: "#991b1b", marginBottom: "0.5rem", fontWeight: 700 }}>
+            Unable to display this view
+          </h2>
+          <p style={{ color: "#6b7280", fontSize: "0.875rem", marginBottom: "1.5rem", lineHeight: 1.5 }}>
+            {this.state.error?.message || "An unexpected error occurred while rendering this section."}
+          </p>
+          <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
+            <button
+              type="button"
+              className="admin-btn admin-btn--primary"
+              onClick={() => this.setState({ hasError: false, error: null })}
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}
+            >
+              <RefreshCw size={15} /> Try Again
+            </button>
+            <button
+              type="button"
+              className="admin-btn admin-btn--secondary"
+              onClick={() => window.location.reload()}
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -363,7 +448,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
         </header>
-        <main className="admin-content">{children}</main>
+        <main className="admin-content">
+          <AdminErrorBoundary resetKey={location.pathname}>
+            {children}
+          </AdminErrorBoundary>
+        </main>
       </div>
     </div>
   );

@@ -16,6 +16,8 @@ import "../../components/admin/admin.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
+const fmtNpr = (v: any) => Number(v ?? 0).toLocaleString();
+
 interface Supplier {
   id: number;
   name: string;
@@ -117,7 +119,23 @@ export default function ManageSuppliers() {
       }
       if (finRes && finRes.ok) {
         const finData = await finRes.json();
-        setFinancials(finData?.data || null);
+        const raw = finData?.data || finData || {};
+        setFinancials({
+          cash_collected_customer: Number(raw.cash_collected_customer ?? raw.customer_cash_collected ?? 0),
+          outstanding_customer_receivables: Number(raw.outstanding_customer_receivables ?? raw.outstanding_customer_payments ?? 0),
+          total_supplier_cost: Number(raw.total_supplier_cost ?? raw.total_supplier_costs ?? 0),
+          total_supplier_paid: Number(raw.total_supplier_paid ?? raw.total_supplier_payments_made ?? 0),
+          outstanding_supplier_payable: Number(raw.outstanding_supplier_payable ?? raw.supplier_balances_owed ?? 0),
+          total_recorded_expenses: Number(raw.total_recorded_expenses ?? 0),
+          expenses_by_type: {
+            delivery: Number(raw.expenses_by_type?.delivery ?? 0),
+            packaging: Number(raw.expenses_by_type?.packaging ?? 0),
+            other: Number(raw.expenses_by_type?.other ?? 0),
+          },
+          estimated_gross_earnings: Number(raw.estimated_gross_earnings ?? raw.estimated_order_earnings ?? 0),
+          cash_realized_earnings: Number(raw.cash_realized_earnings ?? raw.realized_cash_earnings ?? 0),
+          orders_with_incomplete_costs_count: Number(raw.orders_with_incomplete_costs_count ?? raw.incomplete_orders_count ?? 0),
+        });
       }
     } catch (e) {
       console.error("Error loading supplier data:", e);
@@ -349,9 +367,9 @@ export default function ManageSuppliers() {
             </div>
             <div className="admin-stat-content">
               <span className="admin-stat-label">Customer Cash Collected (COD)</span>
-              <span className="admin-stat-value">NPR {financials.cash_collected_customer.toLocaleString()}</span>
+              <span className="admin-stat-value">NPR {fmtNpr(financials.cash_collected_customer)}</span>
               <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                Unpaid Receivables: NPR {financials.outstanding_customer_receivables.toLocaleString()}
+                Unpaid Receivables: NPR {fmtNpr(financials.outstanding_customer_receivables)}
               </span>
             </div>
           </div>
@@ -362,9 +380,9 @@ export default function ManageSuppliers() {
             </div>
             <div className="admin-stat-content">
               <span className="admin-stat-label">Wholesale Plant Costs</span>
-              <span className="admin-stat-value">NPR {financials.total_supplier_cost.toLocaleString()}</span>
+              <span className="admin-stat-value">NPR {fmtNpr(financials.total_supplier_cost)}</span>
               <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                Paid: NPR {financials.total_supplier_paid.toLocaleString()} | Due: NPR {financials.outstanding_supplier_payable.toLocaleString()}
+                Paid: NPR {fmtNpr(financials.total_supplier_paid)} | Due: NPR {fmtNpr(financials.outstanding_supplier_payable)}
               </span>
             </div>
           </div>
@@ -375,9 +393,9 @@ export default function ManageSuppliers() {
             </div>
             <div className="admin-stat-content">
               <span className="admin-stat-label">Recorded Operations Expenses</span>
-              <span className="admin-stat-value">NPR {financials.total_recorded_expenses.toLocaleString()}</span>
+              <span className="admin-stat-value">NPR {fmtNpr(financials.total_recorded_expenses)}</span>
               <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                Delivery: NPR {financials.expenses_by_type.delivery.toLocaleString()} | Packaging: NPR {financials.expenses_by_type.packaging.toLocaleString()}
+                Delivery: NPR {fmtNpr(financials.expenses_by_type?.delivery)} | Packaging: NPR {fmtNpr(financials.expenses_by_type?.packaging)}
               </span>
             </div>
           </div>
@@ -388,11 +406,11 @@ export default function ManageSuppliers() {
             </div>
             <div className="admin-stat-content">
               <span className="admin-stat-label">Realized Cash Earnings</span>
-              <span className="admin-stat-value" style={{ color: financials.cash_realized_earnings >= 0 ? "#059669" : "#dc2626" }}>
-                NPR {financials.cash_realized_earnings.toLocaleString()}
+              <span className="admin-stat-value" style={{ color: (financials.cash_realized_earnings ?? 0) >= 0 ? "#059669" : "#dc2626" }}>
+                NPR {fmtNpr(financials.cash_realized_earnings)}
               </span>
               <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                Estimated Order Earnings: NPR {financials.estimated_gross_earnings.toLocaleString()}
+                Estimated Order Earnings: NPR {fmtNpr(financials.estimated_gross_earnings)}
               </span>
             </div>
           </div>
