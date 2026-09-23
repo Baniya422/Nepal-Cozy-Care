@@ -134,15 +134,19 @@ class BlogController extends Controller
             $slug = $slug.'-'.Str::random(6);
         }
         $isPublished = (bool) ($validated['is_published'] ?? false);
+        $image = $validated['image'] ?? null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image')->store('blogs', 'public');
+        }
         $blog = Blog::create([
-            'user_id' => $request->user()->id ?? null,
+            'user_id' => $request->user()?->id ?? 1,
             'title' => $validated['title'],
             'slug' => $slug,
             'excerpt' => $validated['excerpt'] ?? null,
             'content' => $validated['content'],
-            'image' => $validated['image'] ?? null,
-            'author' => $validated['author'] ?? 'Cozy Care',
-            'category' => $validated['category'] ?? 'General',
+            'image' => $image,
+            'author' => $validated['author'] ?? 'Cozy Care Botanist',
+            'category' => $validated['category'] ?? 'Indoor Plants',
             'is_top_trend' => (bool) ($validated['is_top_trend'] ?? false),
             'is_top_story' => (bool) ($validated['is_top_story'] ?? false),
             'is_published' => $isPublished,
@@ -159,6 +163,9 @@ class BlogController extends Controller
     {
         $blog = Blog::findOrFail($id);
         $validated = $request->validated();
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('blogs', 'public');
+        }
         if (! empty($validated['title']) && empty($validated['slug'])) {
             $newSlug = Str::slug($validated['title']);
             if ($newSlug !== $blog->slug) {

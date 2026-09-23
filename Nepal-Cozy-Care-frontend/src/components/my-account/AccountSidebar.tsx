@@ -1,4 +1,4 @@
-import { ChevronRight, ShieldCheck, Store } from "lucide-react";
+import { ChevronRight, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { AccountSection, AccountUser, SectionConfig } from "./types";
 
@@ -64,7 +64,8 @@ export default function AccountSidebar({
                 <ChevronRight size={16} />
               </Link>
             )}
-            {isSeller && (
+            {/* Seller Dashboard link hidden for now - code preserved for later */}
+            {/* {isSeller && (
               <Link
                 to="/seller/dashboard"
                 className="account-nav-btn"
@@ -76,7 +77,7 @@ export default function AccountSidebar({
                 </span>
                 <ChevronRight size={16} />
               </Link>
-            )}
+            )} */}
           </div>
         )}
       </div>

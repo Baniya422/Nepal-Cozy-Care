@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, Store, ChevronRight, ChevronDown } from "lucide-react";
-import { useFeatureFlags } from "../../context/FeatureFlagsContext";
+import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, ChevronRight, ChevronDown } from "lucide-react";
+import { useSiteBranding } from "../../context/BrandingContext";
+// import { useFeatureFlags } from "../../context/FeatureFlagsContext"; // preserved for later
 import "./navbar.css";
 import "./nav-dropdown.css";
 
@@ -60,7 +61,7 @@ export const defaultNavMenuConfig: NavigationMenuConfig = {
 const navItems = [
   { to: "/", label: "Home" },
   { to: "/plants", label: "Plants", hasDropdown: "plants" },
-  { to: "/shops", label: "Shops" },
+  // { to: "/shops", label: "Shops" }, // Hidden for now, preserved for later
   { to: "/pots", label: "Accessories", hasDropdown: "accessories" },
   { to: "/care-tips", label: "Care Tips", hasDropdown: "care_tips" },
   { to: "/blogs", label: "Blogs" },
@@ -93,7 +94,8 @@ const readCurrentUser = () => {
 export default function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const { vendor_marketplace_enabled } = useFeatureFlags();
+  const { branding } = useSiteBranding();
+  // const { vendor_marketplace_enabled } = useFeatureFlags(); // preserved for later
   const [currentUser, setCurrentUser] = useState<{ name?: string; email?: string; role?: string } | null>(() => {
     try {
       const stored = localStorage.getItem("user");
@@ -149,8 +151,7 @@ export default function Navbar() {
   const [mobileLocationExpanded, setMobileLocationExpanded] = useState(false);
 
   const isSuperAdmin = currentUser?.role === "super_admin" || currentUser?.role === "admin";
-  const isSeller = currentUser?.role === "seller";
-  const visibleNavItems = navItems.filter((item) => vendor_marketplace_enabled || item.to !== "/shops");
+  const visibleNavItems = navItems.filter((item) => item.to !== "/shops");
 
   // Fetch dynamic menu settings from backend
   useEffect(() => {
@@ -267,13 +268,30 @@ export default function Navbar() {
   return (
     <header className="site-header">
       <div className="site-header__bar">
-        <Link to="/" className="site-brand" aria-label="Cozy Care home">
-          <span className="site-brand__mark">
-            <Leaf size={18} />
-          </span>
+        <Link to="/" className="site-brand" aria-label={`${branding.site_name} home`}>
+          {branding.logo_url ? (
+            <img
+              src={branding.logo_url}
+              alt={branding.site_name}
+              className="site-brand__img"
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <span className="site-brand__mark">
+              <Leaf size={18} />
+            </span>
+          )}
           <span className="site-brand__copy">
-            <span className="site-brand__name">Cozy Care</span>
-            <span className="site-brand__tag">Nepal Plant Studio</span>
+            <span className="site-brand__name">{branding.site_name}</span>
+            {branding.site_tagline ? (
+              <span className="site-brand__tag">{branding.site_tagline}</span>
+            ) : null}
           </span>
         </Link>
 
@@ -531,7 +549,8 @@ export default function Navbar() {
             </button>
             {token ? (
               <>
-                {vendor_marketplace_enabled && !isSuperAdmin && !isSeller && (
+                {/* "Become a Seller" Partner link - hidden for now, code preserved for later */}
+                {/* {vendor_marketplace_enabled && !isSuperAdmin && !isSeller && (
                   <Link
                     to="/become-a-seller"
                     className="site-ghost-btn"
@@ -542,8 +561,9 @@ export default function Navbar() {
                     <Store size={14} />
                     <span>Partner</span>
                   </Link>
-                )}
-                {isSeller && (
+                )} */}
+                {/* Vendor Hub link - hidden for now, code preserved for later */}
+                {/* {isSeller && (
                   <Link
                     to="/seller/dashboard"
                     className="site-ghost-btn"
@@ -551,7 +571,7 @@ export default function Navbar() {
                   >
                     <span>Vendor Hub</span>
                   </Link>
-                )}
+                )} */}
                 {isSuperAdmin ? (
                   <Link
                     to="/admin"

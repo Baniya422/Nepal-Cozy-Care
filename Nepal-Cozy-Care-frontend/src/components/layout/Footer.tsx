@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, ChevronDown } from "lucide-react";
+import { useSiteBranding } from "../../context/BrandingContext";
 import "./footer.css";
 
 export default function Footer() {
+  const { branding } = useSiteBranding();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
   const toggleSection = (key: string) => {
@@ -19,9 +21,9 @@ export default function Footer() {
       <div className="footer-inner">
         {/* Brand Column */}
         <div className="footer-brand-col">
-          <div className="footer-brand">Cozy Care</div>
+          <div className="footer-brand">{branding.site_name}</div>
           <p className="footer-text">
-            A smart plant care & e-commerce platform that helps you track watering, get expert tips, and shop plants & accessories.
+            {branding.footer_description}
           </p>
         </div>
 

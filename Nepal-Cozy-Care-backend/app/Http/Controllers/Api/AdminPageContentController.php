@@ -21,6 +21,8 @@ class AdminPageContentController extends Controller
         'shipping_page' => ['name' => 'Shipping & Delivery', 'url' => '/shipping'],
         'blogs_page' => ['name' => 'Care Blogs Hub', 'url' => '/blogs'],
         'navigation_menu' => ['name' => 'Navigation & Dropdown Menus', 'url' => '/'],
+        'category_bubbles' => ['name' => 'Catalog Category Circles', 'url' => '/plants'],
+        'site_branding' => ['name' => 'Website Logo & Branding', 'url' => '/'],
     ];
 
     public function index()
@@ -28,7 +30,10 @@ class AdminPageContentController extends Controller
         $pages = [];
         foreach (self::CONTENT_PAGES as $key => $meta) {
             $template = ContentTemplate::query()->where('key', $key)->first();
-            $payload = $template?->payload ?? self::defaultPayload($key);
+            $default = self::defaultPayload($key);
+            $payload = (! empty($template?->payload) && is_array($template->payload))
+                ? array_replace_recursive($default, $template->payload)
+                : $default;
             $pages[] = $this->pageResponse(
                 $key,
                 $meta['name'],
@@ -159,17 +164,23 @@ class AdminPageContentController extends Controller
 
     private function helpPayload(?Model $model): array
     {
-        return $this->modelPayload($model, $this->helpFields());
+        $payload = $this->modelPayload($model, $this->helpFields());
+        $default = PageContentDefaults::helpCenter();
+        return array_replace_recursive($default, array_filter($payload));
     }
 
     private function finderPayload(?Model $model): array
     {
-        return $this->modelPayload($model, $this->finderFields());
+        $payload = $this->modelPayload($model, $this->finderFields());
+        $default = PageContentDefaults::plantFinder();
+        return array_replace_recursive($default, array_filter($payload));
     }
 
     private function healthPayload(?Model $model): array
     {
-        return $this->modelPayload($model, $this->healthFields());
+        $payload = $this->modelPayload($model, $this->healthFields());
+        $default = PageContentDefaults::plantHealth();
+        return array_replace_recursive($default, array_filter($payload));
     }
 
     public static function defaultPayload(string $key): array
@@ -209,6 +220,28 @@ class AdminPageContentController extends Controller
                     ['id' => 'garden_decor', 'label' => 'Garden Decor', 'path' => '/pots?category=decor', 'is_active' => true],
                     ['id' => 'plant_care_acc', 'label' => 'Plant Care', 'path' => '/pots?category=care', 'is_active' => true],
                 ],
+            ],
+            'category_bubbles' => [
+                'title' => 'Plants',
+                'subtitle' => 'Transform your living spaces with hand-nurtured houseplants and outdoor flora',
+                'categories' => [
+                    ['id' => 'plants', 'label' => 'Plants', 'path' => '/plants', 'image' => 'plants', 'is_active' => true],
+                    ['id' => 'pots', 'label' => 'Pots & Planters', 'path' => '/pots', 'image' => 'pots', 'is_active' => true],
+                    ['id' => 'best_sellers', 'label' => 'Best Sellers', 'path' => '/best-sellers', 'image' => 'plants', 'is_active' => true],
+                    ['id' => 'popular', 'label' => 'Popular Items', 'path' => '/popular-items', 'image' => 'pots', 'is_active' => true],
+                    ['id' => 'soil', 'label' => 'Soil & Media', 'path' => '/pots?category=soil', 'image' => 'soil', 'is_active' => true],
+                    ['id' => 'fertiliser', 'label' => 'Fertilisers', 'path' => '/pots?category=fertilizer', 'image' => 'fertiliser', 'is_active' => true],
+                    ['id' => 'tools', 'label' => 'Garden Tools', 'path' => '/pots?category=tools', 'image' => 'tools', 'is_active' => true],
+                    ['id' => 'watering', 'label' => 'Watering', 'path' => '/pots?category=watering', 'image' => 'watering', 'is_active' => true],
+                    ['id' => 'care', 'label' => 'Plant Care', 'path' => '/care-tips', 'image' => 'care', 'is_active' => true],
+                ],
+            ],
+            'site_branding' => [
+                'site_name' => 'Cozy Care',
+                'site_tagline' => 'Nepal Plant Studio',
+                'logo_url' => '',
+                'admin_dashboard_title' => 'Cozy Care admin dashboard',
+                'footer_description' => 'A smart plant care & e-commerce platform that helps you track watering, get expert tips, and shop plants & accessories.',
             ],
             'blogs_page' => PageContentDefaults::blogs(),
             'contact_page' => [

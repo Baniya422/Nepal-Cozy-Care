@@ -41,11 +41,9 @@ export default function About() {
         }
       } catch (templateError) {
         if (isMounted) {
-          setError(
-            templateError instanceof Error
-              ? templateError.message
-              : "Could not load about page content."
-          );
+          applyAboutPageTemplate(null);
+          setTemplateRevision((current) => current + 1);
+          setError(null);
         }
       } finally {
         if (isMounted) {

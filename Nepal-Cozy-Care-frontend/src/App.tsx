@@ -59,6 +59,8 @@ const ManageShippingPage = lazy(() => import('./pages/admin/pages/ManageShipping
 const ManageHelpCenterPage = lazy(() => import('./pages/admin/pages/ManageHelpCenterPage'))
 const ManageBlogsHubPage = lazy(() => import('./pages/admin/pages/ManageBlogsHubPage'))
 const ManageNavigationPage = lazy(() => import('./pages/admin/pages/ManageNavigationPage'))
+const ManageCategoryBubblesPage = lazy(() => import('./pages/admin/pages/ManageCategoryBubblesPage'))
+const ManageBrandingPage = lazy(() => import('./pages/admin/pages/ManageBrandingPage'))
 const ManagePlantFinderAdmin = lazy(() => import('./pages/admin/pages/ManagePlantFinderAdmin'))
 const ManagePlantHealthAdmin = lazy(() => import('./pages/admin/pages/ManagePlantHealthAdmin'))
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettings'))
@@ -230,6 +232,22 @@ function App() {
         element={
           <AdminProtectedRoute>
             <ManageNavigationPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/category-bubbles"
+        element={
+          <AdminProtectedRoute>
+            <ManageCategoryBubblesPage />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pages/branding"
+        element={
+          <AdminProtectedRoute>
+            <ManageBrandingPage />
           </AdminProtectedRoute>
         }
       />

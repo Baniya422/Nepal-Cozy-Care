@@ -80,6 +80,28 @@ export default function Plants() {
   const PAGE_SIZE = 16;
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [headerMeta, setHeaderMeta] = useState(() => {
+    try {
+      const cached = localStorage.getItem("cozycare_cache_category_bubbles_meta");
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return {
+      title: "Plants",
+      subtitle: "Transform your living spaces with hand-nurtured houseplants and outdoor flora",
+    };
+  });
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      try {
+        const cached = localStorage.getItem("cozycare_cache_category_bubbles_meta");
+        if (cached) setHeaderMeta(JSON.parse(cached));
+      } catch {}
+    };
+    window.addEventListener("cozycare:content-updated", handleUpdate);
+    return () => window.removeEventListener("cozycare:content-updated", handleUpdate);
+  }, []);
+
   // Sync URL search params to filters
   useEffect(() => {
     const typeParam = searchParams.get("type");
@@ -471,9 +493,9 @@ export default function Plants() {
         {/* ================= HERO HEADER ================= */}
         <div className="ugaoo-plants-hero">
           <div className="ugaoo-plants-hero-inner">
-            <h1 className="ugaoo-page-heading">Plants</h1>
+            <h1 className="ugaoo-page-heading">{headerMeta.title}</h1>
             <p className="ugaoo-page-subtext">
-              Transform your living spaces with hand-nurtured houseplants and outdoor flora
+              {headerMeta.subtitle}
             </p>
           </div>
         </div>

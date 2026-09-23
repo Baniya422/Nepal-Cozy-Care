@@ -18,7 +18,7 @@ class StoreBlogRequest extends FormRequest
             'slug' => ['nullable', 'string', 'max:255', 'unique:blogs,slug'],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
-            'image' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable'],
             'author' => ['nullable', 'string', 'max:100'],
             'category' => ['nullable', 'string', 'max:50'],
             'is_published' => ['nullable', 'boolean'],

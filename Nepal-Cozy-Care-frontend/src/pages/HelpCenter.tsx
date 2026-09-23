@@ -71,7 +71,6 @@ export default function HelpCenter() {
   const [supportEmail, setSupportEmail] = useState(DEFAULT_SUPPORT_EMAIL);
   useEffect(() => {
     let isMounted = true;
-    let hasCachedTemplate = false;
     const applyTemplate = (data: HelpCenterTemplatePayload) => {
       const fetchedCategories = Array.isArray(data.categories) ? data.categories : [];
       const categories =
@@ -99,7 +98,6 @@ export default function HelpCenter() {
     const cachedTemplate = readCachedTemplate();
     if (cachedTemplate && isMounted) {
       applyTemplate(cachedTemplate);
-      hasCachedTemplate = true;
       setTemplateLoading(false);
     }
     const loadTemplate = async () => {
@@ -125,24 +123,25 @@ export default function HelpCenter() {
         }
       } catch (error) {
         if (isMounted) {
-          if (!hasCachedTemplate) {
-            setTemplateError(
-              error instanceof DOMException && error.name === "AbortError"
-                ? "Help center template request timed out. Check backend server."
-                : error instanceof Error
-                  ? error.message
-                  : "Could not load help content."
-            );
-            setTemplateLoading(false);
-          }
+          setTemplateError(null);
+          setTemplateLoading(false);
         }
       } finally {
         window.clearTimeout(timeoutId);
       }
     };
     void loadTemplate();
+
+    const handleContentUpdate = (e: any) => {
+      if (!e.detail || e.detail.key === "help_center") {
+        void loadTemplate();
+      }
+    };
+    window.addEventListener("cozycare:content-updated", handleContentUpdate);
+
     return () => {
       isMounted = false;
+      window.removeEventListener("cozycare:content-updated", handleContentUpdate);
     };
   }, []);
   const filteredFAQs = useMemo(() => {

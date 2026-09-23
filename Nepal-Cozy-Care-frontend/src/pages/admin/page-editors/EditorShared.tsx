@@ -12,6 +12,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import { compressImage } from "../../../utils/imageCompressor";
+import {
+  defaultContactContent,
+  defaultShippingContent,
+  defaultOurMissionContent,
+  defaultAboutContent,
+  defaultBlogsContent,
+} from "../../../features/page-content/templates";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -269,30 +276,59 @@ export function usePageContentEditor({ pageKey, pageName }: UsePageEditorOptions
   useEffect(() => {
     let isMounted = true;
     const loadContent = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
       setLoading(true);
       setStatusMessage(null);
+      const getLocalFallback = (): Record<string, any> => {
+        switch (pageKey) {
+          case "contact_page":
+            return defaultContactContent;
+          case "shipping_page":
+            return defaultShippingContent;
+          case "our_mission":
+            return defaultOurMissionContent;
+          case "about_page":
+            return defaultAboutContent;
+          case "blogs_page":
+            return defaultBlogsContent;
+          default:
+            return {};
+        }
+      };
       try {
-        const response = await fetch(`${API}/api/admin/page-content`, {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const pageList = data.data?.pages || [];
-          const found = pageList.find((p: any) => p.key === pageKey);
-          if (found && isMounted && found.payload) {
-            setPayload(JSON.parse(JSON.stringify(found.payload)));
+        if (token) {
+          const response = await fetch(`${API}/api/admin/page-content`, {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const pageList = data.data?.pages || [];
+            const found = pageList.find((p: any) => p.key === pageKey);
+            if (found && isMounted && found.payload && Object.keys(found.payload).length > 0) {
+              setPayload(JSON.parse(JSON.stringify(found.payload)));
+              return;
+            }
           }
+        }
+        // Fallback: public template endpoint
+        const tmplRes = await fetch(`${API}/api/content-templates/${pageKey}`, {
+          headers: { Accept: "application/json" },
+        });
+        if (tmplRes.ok) {
+          const tmplData = await tmplRes.json();
+          if (tmplData.data?.payload && Object.keys(tmplData.data.payload).length > 0 && isMounted) {
+            setPayload(JSON.parse(JSON.stringify(tmplData.data.payload)));
+            return;
+          }
+        }
+        if (isMounted) {
+          setPayload(JSON.parse(JSON.stringify(getLocalFallback())));
         }
       } catch (err: any) {
         if (isMounted) {
-          setStatusMessage({ type: "error", text: "Failed to load content." });
+          setPayload(JSON.parse(JSON.stringify(getLocalFallback())));
         }
       } finally {
         if (isMounted) setLoading(false);

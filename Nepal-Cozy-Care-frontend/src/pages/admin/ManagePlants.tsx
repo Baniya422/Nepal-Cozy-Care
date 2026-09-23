@@ -165,13 +165,15 @@ export default function ManagePlants() {
     formDataToSend.append("is_best_seller", formData.is_best_seller ? "1" : "0");
     if (selectedImage) {
       formDataToSend.append("image", selectedImage);
+    } else if (formData.image) {
+      formDataToSend.append("image", formData.image);
     }
-    console.log("Submitting plant data with image:", selectedImage?.name);
+    console.log("Submitting plant data with image:", selectedImage?.name || formData.image);
     console.log("API URL:", API);
     try {
       const url = editingPlant
-        ? `${API}/api/plants/${editingPlant.id}`
-        : `${API}/api/plants`;
+        ? `${API}/api/admin/plants/${editingPlant.id}`
+        : `${API}/api/admin/plants`;
       const method = editingPlant ? "POST" : "POST";
       console.log("Request URL:", url);
       console.log("Request method:", method);
@@ -215,10 +217,16 @@ export default function ManagePlants() {
     if (!confirm("Are you sure you want to delete this plant?")) return;
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${API}/api/plants/${id}`, {
+      let res = await fetch(`${API}/api/admin/plants/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) {
+        res = await fetch(`${API}/api/plants/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
       if (res.ok) {
         fetchPlants();
       } else {
@@ -238,17 +246,17 @@ export default function ManagePlants() {
       care_instructions: plant.care_instructions || "",
       price: plant.price.toString(),
       stock: plant.stock.toString(),
-      category: plant.category || "Indoor",
+      category: plant.category || "Indoor Plants",
       size: plant.size || "Medium",
-      light: plant.light || "",
-      water: plant.water || "",
-      temperature: plant.temperature || "",
-      humidity: plant.humidity || "",
-      fertilizer: plant.fertilizer || "",
-      difficulty: plant.difficulty || "Easy",
+      light: plant.light || "Bright Indirect",
+      water: plant.water || "Once a week",
+      temperature: plant.temperature || "18-24°C",
+      humidity: plant.humidity || "Normal Humidity",
+      fertilizer: plant.fertilizer || "Monthly in spring/summer",
+      difficulty: plant.difficulty || "Beginner Friendly",
       is_active: plant.is_active,
       image: plant.image || "",
-      rooms: plant.rooms || [],
+      rooms: plant.rooms && plant.rooms.length > 0 ? plant.rooms : ["Living Room"],
       is_popular_item: plant.is_popular_item || false,
       is_best_seller: plant.is_best_seller || false,
     });
@@ -270,17 +278,17 @@ export default function ManagePlants() {
       care_instructions: "",
       price: "",
       stock: "",
-      category: "Indoor",
+      category: "Indoor Plants",
       size: "Medium",
-      light: "",
-      water: "",
-      temperature: "",
-      humidity: "",
-      fertilizer: "",
-      difficulty: "Easy",
+      light: "Bright Indirect",
+      water: "Once a week",
+      temperature: "18-24°C",
+      humidity: "Normal Humidity",
+      fertilizer: "Monthly in spring/summer",
+      difficulty: "Beginner Friendly",
       is_active: true,
       image: "",
-      rooms: [],
+      rooms: ["Living Room"],
       is_popular_item: false,
       is_best_seller: false,
     });
@@ -457,15 +465,21 @@ export default function ManagePlants() {
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     >
-                      <option value="Indoor">Indoor</option>
-                      <option value="Outdoor">Outdoor</option>
-                      <option value="Succulent">Succulent</option>
-                      <option value="Flowering">Flowering</option>
-                      <option value="Pots">Pots</option>
-                      <option value="Tools">Tools</option>
-                      <option value="Soil">Soil</option>
-                      <option value="Fertilizers">Fertilizers</option>
+                      <option value="Indoor Plants">Indoor Plants</option>
+                      <option value="Air Purifying Plants">Air Purifying Plants</option>
+                      <option value="Low Light Plants">Low Light Plants</option>
+                      <option value="Pet Friendly Plants">Pet Friendly Plants</option>
+                      <option value="Succulents & Cacti">Succulents & Cacti</option>
+                      <option value="Flowering Plants">Flowering Plants</option>
+                      <option value="Hanging Plants">Hanging Plants</option>
+                      <option value="Outdoor / Balcony Plants">Outdoor / Balcony Plants</option>
+                      <option value="Pots & Planters">Pots & Planters</option>
+                      <option value="Plant Care & Tools">Plant Care & Tools</option>
+                      <option value="Soil & Media">Soil & Media</option>
                       <option value="Accessories">Accessories</option>
+                      <option value="Indoor">Indoor (Legacy)</option>
+                      <option value="Outdoor">Outdoor (Legacy)</option>
+                      <option value="Succulent">Succulent (Legacy)</option>
                     </select>
                   </div>
                   <div className="admin-form-group">
@@ -481,18 +495,18 @@ export default function ManagePlants() {
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Difficulty</label>
+                    <label>Care Difficulty (Plant Finder Quiz)</label>
                     <select
                       value={formData.difficulty}
                       onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                     >
-                      <option value="Easy">Easy</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Hard">Hard</option>
+                      <option value="Beginner Friendly">🌱 Beginner Friendly (Easy & forgiving)</option>
+                      <option value="Moderate Care">🪴 Moderate Care (Regular weekly attention)</option>
+                      <option value="Green Thumb Enthusiast">🌿 Green Thumb Enthusiast (Advanced care)</option>
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Price *</label>
+                    <label>Price (NPR) *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -502,7 +516,7 @@ export default function ManagePlants() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Stock *</label>
+                    <label>Stock Quantity *</label>
                     <input
                       type="number"
                       value={formData.stock}
@@ -511,16 +525,16 @@ export default function ManagePlants() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Light Requirements</label>
+                    <label>Light Requirements (Plant Finder Quiz)</label>
                     <select
                       value={formData.light}
                       onChange={(e) => setFormData({ ...formData, light: e.target.value })}
                     >
                       <option value="">Select light type</option>
-                      <option value="Bright Light">Bright Light</option>
-                      <option value="Medium Light">Medium Light</option>
-                      <option value="Low Light">Low Light</option>
-                      <option value="Indirect Light">Indirect Light</option>
+                      <option value="Bright Indirect">☀️ Bright Indirect Light (Near sunny window)</option>
+                      <option value="Medium Light">⛅ Medium Light (Soft ambient room sun)</option>
+                      <option value="Low Light">🌙 Low Light / Shade (Dim inner room or corridor)</option>
+                      <option value="Direct Sunlight">🌤️ Direct Sunlight (Open terrace or sunny sill)</option>
                     </select>
                   </div>
                   <div className="admin-form-group">
@@ -539,15 +553,15 @@ export default function ManagePlants() {
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Humidity Level</label>
+                    <label>Humidity Level (Plant Finder Quiz)</label>
                     <select
                       value={formData.humidity}
                       onChange={(e) => setFormData({ ...formData, humidity: e.target.value })}
                     >
                       <option value="">Select humidity</option>
-                      <option value="Dry">Dry (Low Humidity)</option>
-                      <option value="Normal">Normal Humidity</option>
-                      <option value="Humid">Humid (High Humidity)</option>
+                      <option value="Normal Humidity">🍃 Normal Humidity (Typical room air 40%-60%)</option>
+                      <option value="High Humidity">💧 High Humidity (Bathrooms & misted areas 60%+)</option>
+                      <option value="Drier Air">🌵 Drier Air (Air-conditioned rooms or heaters)</option>
                     </select>
                   </div>
                   <div className="admin-form-group">
@@ -570,28 +584,35 @@ export default function ManagePlants() {
                   </div>
                 </div>
                 <div className="admin-form-group">
-                  <label>Suitable Rooms (Multi-select)</label>
+                  <label>Suitable Rooms (Plant Finder Quiz Match)</label>
                   <div className="admin-checkbox-group">
-                    {["Bedroom", "Living Room", "Kitchen", "Bathroom", "Office", "Balcony"].map((room) => (
-                      <label key={room} className="admin-checkbox-label">
+                    {[
+                      { key: "Living Room", label: "🛋️ Living Room" },
+                      { key: "Bedroom", label: "🛏️ Bedroom" },
+                      { key: "Home Office", label: "💻 Home Office" },
+                      { key: "Balcony / Terrace", label: "🌿 Balcony / Terrace" },
+                      { key: "Kitchen", label: "🍳 Kitchen" },
+                      { key: "Bathroom", label: "🚿 Bathroom" },
+                    ].map((room) => (
+                      <label key={room.key} className="admin-checkbox-label">
                         <input
                           type="checkbox"
-                          checked={formData.rooms.includes(room)}
+                          checked={formData.rooms.includes(room.key)}
                           onChange={(e) => {
                             if (e.target.checked) {
                               setFormData({
                                 ...formData,
-                                rooms: [...formData.rooms, room],
+                                rooms: [...formData.rooms, room.key],
                               });
                             } else {
                               setFormData({
                                 ...formData,
-                                rooms: formData.rooms.filter((r) => r !== room),
+                                rooms: formData.rooms.filter((r) => r !== room.key),
                               });
                             }
                           }}
                         />
-                        {room}
+                        {room.label}
                       </label>
                     ))}
                   </div>
@@ -624,27 +645,86 @@ export default function ManagePlants() {
                 </div>
                 <div className="admin-form-group">
                   <label>Plant Image</label>
-                  <div className="admin-image-upload">
-                    {imagePreview && (
-                      <div className="admin-image-preview">
-                        <img src={imagePreview} alt="Preview" />
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", background: "#f8fafc", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                      <div style={{ width: "90px", height: "80px", borderRadius: "8px", overflow: "hidden", border: "1px solid #cbd5e1", flexShrink: 0, background: "#f1f5f9" }}>
+                        <img
+                          src={imagePreview || resolveImageUrl(formData.image, DEFAULT_PLANT_IMAGE)}
+                          alt="Preview"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={(event) => handleImageError(event, DEFAULT_PLANT_IMAGE)}
+                        />
                       </div>
-                    )}
-                    <label className="admin-file-input">
-                      <Upload size={18} />
-                      <span>{selectedImage ? "Change Image" : "Upload Image"}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
-                    {selectedImage && (
-                      <small style={{ color: "#64748b", fontSize: "0.75rem", marginTop: "0.5rem", display: "block" }}>
-                        Selected: {selectedImage.name}
-                      </small>
-                    )}
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="text"
+                          value={formData.image}
+                          onChange={(e) => {
+                            setFormData((prev) => ({ ...prev, image: e.target.value }));
+                            setImagePreview(e.target.value);
+                            setSelectedImage(null);
+                          }}
+                          placeholder="Paste image URL (https://... or /images/...)"
+                          style={{ width: "100%", padding: "0.55rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.88rem", marginBottom: "0.5rem" }}
+                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                          <label
+                            className="admin-btn admin-btn-secondary"
+                            style={{ padding: "0.45rem 0.8rem", fontSize: "0.82rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+                          >
+                            <Upload size={14} />
+                            <span>{selectedImage ? `Selected: ${selectedImage.name}` : "Upload Computer File"}</span>
+                            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
+                          </label>
+                          {selectedImage && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedImage(null);
+                                setImagePreview(formData.image || null);
+                              }}
+                              style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer" }}
+                            >
+                              ✕ Remove file
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <small style={{ color: "#64748b", fontWeight: 600, display: "block", marginBottom: "0.35rem" }}>Popular High-Res Presets:</small>
+                      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                        {[
+                          { label: "Monstera", path: "/images/blog-leaf-macro.jpg" },
+                          { label: "Snake Plant", path: "/images/snake.jpg" },
+                          { label: "Rubber Tree", path: "/images/rubber.jpg" },
+                          { label: "Indoor Green", path: "/images/indoor-garden.jpg" },
+                          { label: "Lush Conservatory", path: "/images/blog-hero-lush.jpg" },
+                        ].map((preset) => (
+                          <button
+                            key={preset.path}
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({ ...prev, image: preset.path }));
+                              setImagePreview(preset.path);
+                              setSelectedImage(null);
+                            }}
+                            style={{
+                              padding: "0.3rem 0.6rem",
+                              borderRadius: "6px",
+                              border: formData.image === preset.path ? "1px solid #10b981" : "1px solid #e2e8f0",
+                              background: formData.image === preset.path ? "#ecfdf5" : "#ffffff",
+                              color: formData.image === preset.path ? "#065f46" : "#475569",
+                              fontSize: "0.78rem",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="admin-form-group admin-form-checkbox">

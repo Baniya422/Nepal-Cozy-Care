@@ -8,7 +8,10 @@ import {
   UserRound,
   Truck,
   AlertTriangle,
+  Palette,
+  CircleDot,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 
@@ -279,6 +282,68 @@ export default function AdminSettingsPage() {
           <div className="admin-loading">Loading settings...</div>
         ) : (
           <div className="admin-settings-grid">
+            {/* Website Logo, Name & Category Circles Quick Navigation */}
+            <div
+              style={{
+                gridColumn: "1 / -1",
+                background: "#f0fdf4",
+                border: "1px solid #bbf7d0",
+                borderRadius: "12px",
+                padding: "1.2rem 1.4rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "1rem",
+              }}
+            >
+              <div>
+                <strong style={{ color: "#166534", fontSize: "1rem", display: "block", marginBottom: "0.2rem" }}>
+                  Website Logo, Brand Name & Catalog Circles
+                </strong>
+                <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>
+                  Easily update the storefront logo image, store title (&quot;Cozy Care&quot;), subtitle (&quot;Nepal Plant Studio&quot;), or customize catalog category filter circles.
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <Link
+                  to="/admin/pages/branding"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.45rem",
+                    padding: "0.55rem 1rem",
+                    background: "#166534",
+                    color: "#ffffff",
+                    borderRadius: "8px",
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
+                >
+                  <Palette size={15} /> Website Logo & Name
+                </Link>
+                <Link
+                  to="/admin/pages/category-bubbles"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.45rem",
+                    padding: "0.55rem 1rem",
+                    background: "#ffffff",
+                    border: "1px solid #bbf7d0",
+                    color: "#166534",
+                    borderRadius: "8px",
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
+                >
+                  <CircleDot size={15} /> Category Filter Circles
+                </Link>
+              </div>
+            </div>
+
             {/* Launch Feature Flags & Dispatch Card */}
             <section className="admin-editor-card" style={{ gridColumn: "1 / -1" }}>
               <div className="admin-editor-card-head admin-editor-card-head-icon">

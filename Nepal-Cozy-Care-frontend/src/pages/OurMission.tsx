@@ -17,7 +17,6 @@ export default function OurMission() {
   const [, setTemplateRevision] = useState(0);
   useEffect(() => {
     let isMounted = true;
-    let hasCachedTemplate = false;
     const readCachedTemplate = (): OurMissionTemplatePayload | null => {
       try {
         const cached = localStorage.getItem(TEMPLATE_CACHE_KEY);
@@ -30,7 +29,6 @@ export default function OurMission() {
     const cachedTemplate = readCachedTemplate();
     if (cachedTemplate) {
       applyOurMissionTemplate(cachedTemplate);
-      hasCachedTemplate = true;
       setTemplateRevision((current) => current + 1);
       setLoading(false);
     }
@@ -59,24 +57,27 @@ export default function OurMission() {
         }
       } catch (templateError) {
         if (isMounted) {
-          if (!hasCachedTemplate) {
-            setError(
-              templateError instanceof DOMException && templateError.name === "AbortError"
-                ? "Mission template request timed out. Check backend server."
-                : templateError instanceof Error
-                  ? templateError.message
-                  : "Could not load mission page content."
-            );
-            setLoading(false);
-          }
+          applyOurMissionTemplate(null);
+          setTemplateRevision((current) => current + 1);
+          setError(null);
+          setLoading(false);
         }
       } finally {
         window.clearTimeout(timeoutId);
       }
     };
     void loadTemplate();
+
+    const handleContentUpdate = (e: any) => {
+      if (!e.detail || e.detail.key === "our_mission") {
+        void loadTemplate();
+      }
+    };
+    window.addEventListener("cozycare:content-updated", handleContentUpdate);
+
     return () => {
       isMounted = false;
+      window.removeEventListener("cozycare:content-updated", handleContentUpdate);
     };
   }, []);
   if (loading) {

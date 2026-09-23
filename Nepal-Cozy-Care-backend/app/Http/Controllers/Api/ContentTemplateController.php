@@ -14,13 +14,14 @@ class ContentTemplateController extends Controller
             ->where('is_active', true)
             ->latest('id')
             ->first();
-        if (! $template) {
-            $default = AdminPageContentController::defaultPayload($key);
+        $default = AdminPageContentController::defaultPayload($key);
+
+        if (! $template || empty($template->payload)) {
             if (! empty($default)) {
                 return response()->json([
                     'message' => 'Template loaded successfully.',
                     'data' => [
-                        'id' => 0,
+                        'id' => $template?->id ?? 0,
                         'name' => ucwords(str_replace('_', ' ', $key)),
                         'key' => $key,
                         'payload' => $default,
@@ -33,13 +34,15 @@ class ContentTemplateController extends Controller
             ], 404);
         }
 
+        $merged = ! empty($default) ? array_replace_recursive($default, $template->payload) : $template->payload;
+
         return response()->json([
             'message' => 'Template loaded successfully.',
             'data' => [
                 'id' => $template->id,
                 'name' => $template->name,
                 'key' => $template->key,
-                'payload' => $template->payload,
+                'payload' => $merged,
             ],
         ]);
     }

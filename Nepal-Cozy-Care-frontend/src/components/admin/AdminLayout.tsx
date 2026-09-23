@@ -37,9 +37,12 @@ import {
   Stethoscope,
   AlertCircle,
   RefreshCw,
+  Palette,
+  CircleDot,
 } from "lucide-react";
 import "./admin.css";
 import { useFeatureFlags } from "../../context/FeatureFlagsContext";
+import { useSiteBranding } from "../../context/BrandingContext";
 
 class AdminErrorBoundary extends Component<
   { children: ReactNode; resetKey?: string },
@@ -146,6 +149,10 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
+// Toggle to show/hide Marketplace & Vendors section in Admin Navigation.
+// Set to false for now as requested; code and routes remain preserved for future re-enablement.
+const SHOW_MARKETPLACE_VENDORS = false;
+
 const getMenuGroups = (vendorMarketplaceEnabled: boolean): MenuGroup[] => [
   {
     group: "Overview",
@@ -154,7 +161,7 @@ const getMenuGroups = (vendorMarketplaceEnabled: boolean): MenuGroup[] => [
       { path: "/admin/reports", icon: BarChart3, label: "Reports & Stats" },
     ],
   },
-  ...(vendorMarketplaceEnabled
+  ...(SHOW_MARKETPLACE_VENDORS && vendorMarketplaceEnabled
     ? [
         {
           group: "Marketplace & Vendors",
@@ -187,6 +194,8 @@ const getMenuGroups = (vendorMarketplaceEnabled: boolean): MenuGroup[] => [
         label: "Website Pages (CMS)",
         subItems: [
           { path: "/admin/page-content", icon: Globe, label: "Visual Directory Hub" },
+          { path: "/admin/pages/branding", icon: Palette, label: "Website Logo & Name" },
+          { path: "/admin/pages/category-bubbles", icon: CircleDot, label: "Catalog Category Circles" },
           { path: "/admin/homepage", icon: House, label: "Homepage Builder" },
           { path: "/admin/pages/about", icon: Info, label: "About Us" },
           { path: "/admin/pages/mission", icon: Sparkles, label: "Our Mission" },
@@ -222,6 +231,7 @@ const getMenuGroups = (vendorMarketplaceEnabled: boolean): MenuGroup[] => [
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { vendor_marketplace_enabled } = useFeatureFlags();
+  const { branding } = useSiteBranding();
   const menuGroups = getMenuGroups(vendor_marketplace_enabled);
   const allMenuItems = menuGroups.flatMap((g) => [
     ...g.items,
@@ -332,8 +342,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       >
         <div className="admin-sidebar-header">
           <Link to="/admin" className="admin-logo" onClick={handleNavClick}>
-            <Leaf size={26} />
-            <span>Cozy Care admin dashboard</span>
+            {branding.logo_url ? (
+              <img
+                src={branding.logo_url}
+                alt={branding.site_name}
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  flexShrink: 0,
+                }}
+              />
+            ) : (
+              <Leaf size={26} />
+            )}
+            <span>{branding.admin_dashboard_title || `${branding.site_name} admin dashboard`}</span>
           </Link>
           <button
             type="button"

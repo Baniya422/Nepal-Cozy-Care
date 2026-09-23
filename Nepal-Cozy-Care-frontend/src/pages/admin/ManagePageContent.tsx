@@ -12,6 +12,8 @@ import {
   House,
   Globe,
   HelpCircle,
+  Palette,
+  CircleDot,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
@@ -108,6 +110,28 @@ const DIRECTORY_PAGES: DirectoryCardMeta[] = [
     accentColor: "#3b82f6",
   },
   {
+    key: "site_branding",
+    name: "Website Logo & Name",
+    url: "/",
+    editorRoute: "/admin/pages/branding",
+    description: "Manage website logo image, store name ('Cozy Care'), subtitle ('Nepal Plant Studio'), and dashboard branding.",
+    sectionsCount: "Brand Identity",
+    icon: Palette,
+    badge: "Branding",
+    accentColor: "#164e43",
+  },
+  {
+    key: "category_bubbles",
+    name: "Category Circles (Bubbles)",
+    url: "/plants",
+    editorRoute: "/admin/pages/category-bubbles",
+    description: "Add, remove, reorder, and customize the circular category filters on catalog pages (/plants, /pots).",
+    sectionsCount: "Catalog Filter",
+    icon: CircleDot,
+    badge: "Catalog",
+    accentColor: "#0d9488",
+  },
+  {
     key: "navigation_menu",
     name: "Navbar & Dropdowns",
     url: "/plants",
@@ -151,6 +175,8 @@ const LEGACY_TAB_REDIRECTS: Record<string, string> = {
   help_center: "/admin/pages/help-center",
   blogs_page: "/admin/pages/blogs-hub",
   navigation_menu: "/admin/pages/navigation",
+  category_bubbles: "/admin/pages/category-bubbles",
+  site_branding: "/admin/pages/branding",
   plant_finder: "/admin/pages/plant-finder",
   plant_health: "/admin/pages/plant-health",
 };

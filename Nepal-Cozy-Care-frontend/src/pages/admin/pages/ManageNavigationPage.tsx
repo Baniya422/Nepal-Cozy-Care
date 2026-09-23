@@ -1,4 +1,5 @@
-import { Compass, Plus, Trash2 } from "lucide-react";
+import { Compass, Plus, Trash2, Palette, CircleDot } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   EditorCard,
   PageEditorShell,
@@ -162,6 +163,62 @@ export default function ManageNavigationPage() {
       sections={NAV_SECTIONS}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+        {/* Quick Links Banner */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: "#ecfdf5",
+            border: "1px solid #a7f3d0",
+            borderRadius: "12px",
+            padding: "1rem 1.25rem",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+          }}
+        >
+          <div style={{ fontSize: "0.9rem", color: "#065f46", fontWeight: 600 }}>
+            Looking to configure your <strong>Website Logo & Store Name</strong> or <strong>Catalog Category Circles</strong>?
+          </div>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            <Link
+              to="/admin/pages/branding"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                padding: "0.45rem 0.85rem",
+                background: "#065f46",
+                color: "#ffffff",
+                borderRadius: "6px",
+                fontSize: "0.82rem",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              <Palette size={14} /> Website Logo & Name
+            </Link>
+            <Link
+              to="/admin/pages/category-bubbles"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                padding: "0.45rem 0.85rem",
+                background: "#ffffff",
+                color: "#065f46",
+                border: "1px solid #a7f3d0",
+                borderRadius: "6px",
+                fontSize: "0.82rem",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              <CircleDot size={14} /> Category Circles (Bubbles)
+            </Link>
+          </div>
+        </div>
+
         {/* Plants Mega Menu */}
         <EditorCard
           id="sec-plants"

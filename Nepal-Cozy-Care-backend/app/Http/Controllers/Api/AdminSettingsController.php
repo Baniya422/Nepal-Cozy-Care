@@ -47,7 +47,7 @@ class AdminSettingsController extends Controller
             return response()->json([
                 'message' => null,
                 'data' => [
-                    'vendor_marketplace_enabled' => true,
+                    'vendor_marketplace_enabled' => false,
                     'esewa_enabled' => false,
                     'free_delivery_threshold' => 2000.0,
                     'free_delivery_radius_km' => 10.0,

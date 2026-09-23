@@ -37,6 +37,7 @@ interface CareTipFormData {
   category: "watering" | "fertilizing" | "pest_control" | "indoor" | "outdoor" | "seasonal";
   difficulty: "beginner" | "intermediate" | "advanced";
   status: "published" | "draft";
+  image: string;
 }
 const emptyForm: CareTipFormData = {
   title: "",
@@ -44,7 +45,8 @@ const emptyForm: CareTipFormData = {
   content: "",
   category: "watering",
   difficulty: "beginner",
-  status: "draft",
+  status: "published",
+  image: "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp",
 };
 const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
 export default function ManageCareTips() {
@@ -119,7 +121,7 @@ export default function ManageCareTips() {
     setSubmitError(null);
     const token = getToken();
     try {
-      let imagePath = null;
+      let imagePath = formData.image || null;
       if (selectedImage) {
         const formDataImage = new FormData();
         formDataImage.append("file", selectedImage);
@@ -133,12 +135,12 @@ export default function ManageCareTips() {
         });
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
-          imagePath = uploadData.data?.path || uploadData.path;
+          imagePath = uploadData.data?.path || uploadData.path || imagePath;
         } else {
           console.error("Image upload failed");
         }
       }
-      const url = editingTip ? `${API}/api/care-tips/${editingTip.id}` : `${API}/api/care-tips`;
+      const url = editingTip ? `${API}/api/admin/care-tips/${editingTip.id}` : `${API}/api/admin/care-tips`;
       const method = editingTip ? "PUT" : "POST";
       const requestBody: Record<string, unknown> = {
         title: formData.title,
@@ -163,7 +165,7 @@ export default function ManageCareTips() {
         closeEditor();
         await fetchCareTips();
       } else {
-        const error = await res.json();
+        const error = await res.json().catch(() => ({}));
         setSubmitError(error.message || "Failed to save care tip");
       }
     } catch (error) {
@@ -175,7 +177,7 @@ export default function ManageCareTips() {
     if (!confirm("Are you sure you want to delete this care tip?")) return;
     const token = getToken();
     try {
-      const res = await fetch(`${API}/api/care-tips/${id}`, {
+      const res = await fetch(`${API}/api/admin/care-tips/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -191,7 +193,7 @@ export default function ManageCareTips() {
   const handlePublish = async (id: number) => {
     const token = getToken();
     try {
-      const res = await fetch(`${API}/api/care-tips/${id}`, {
+      const res = await fetch(`${API}/api/admin/care-tips/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -215,9 +217,10 @@ export default function ManageCareTips() {
       category: (tip.category as CareTipFormData["category"]) || "watering",
       difficulty: (tip.difficulty as CareTipFormData["difficulty"]) || "beginner",
       status: tip.status,
+      image: tip.image || "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp",
     });
     setSelectedImage(null);
-    setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : null);
+    setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : FALLBACK_IMAGE);
     setSubmitError(null);
     setShowModal(true);
   };
@@ -225,7 +228,7 @@ export default function ManageCareTips() {
     setEditingTip(null);
     setFormData(emptyForm);
     setSelectedImage(null);
-    setImagePreview(null);
+    setImagePreview(FALLBACK_IMAGE);
     setSubmitError(null);
     setShowModal(true);
   };
@@ -664,21 +667,86 @@ export default function ManageCareTips() {
                 </div>
                 <div className="admin-form-group">
                   <label>Featured Image</label>
-                  <div className="admin-image-upload">
-                    {imagePreview && (
-                      <div className="admin-image-preview admin-care-tip-image-preview">
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", background: "#f8fafc", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                      <div style={{ width: "90px", height: "70px", borderRadius: "8px", overflow: "hidden", border: "1px solid #cbd5e1", flexShrink: 0 }}>
                         <img
-                          src={imagePreview}
+                          src={imagePreview || formData.image || FALLBACK_IMAGE}
                           alt="Preview"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
                         />
                       </div>
-                    )}
-                    <label className="admin-file-input">
-                      <Upload size={18} />
-                      <span>{selectedImage ? "Change Image" : "Upload Image"}</span>
-                      <input type="file" accept="image/*" onChange={handleImageChange} />
-                    </label>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="text"
+                          value={formData.image}
+                          onChange={(e) => {
+                            setFormData((prev) => ({ ...prev, image: e.target.value }));
+                            setImagePreview(e.target.value);
+                            setSelectedImage(null);
+                          }}
+                          placeholder="Paste image URL (https://... or /images/...)"
+                          style={{ width: "100%", padding: "0.55rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.88rem", marginBottom: "0.5rem" }}
+                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                          <label
+                            className="admin-btn admin-btn-secondary"
+                            style={{ padding: "0.45rem 0.8rem", fontSize: "0.82rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+                          >
+                            <Upload size={14} />
+                            <span>{selectedImage ? `Selected: ${selectedImage.name}` : "Upload Computer File"}</span>
+                            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
+                          </label>
+                          {selectedImage && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedImage(null);
+                                setImagePreview(formData.image || FALLBACK_IMAGE);
+                              }}
+                              style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer" }}
+                            >
+                              ✕ Remove file
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <small style={{ color: "#64748b", fontWeight: 600, display: "block", marginBottom: "0.35rem" }}>Quick Botanical Presets:</small>
+                      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                        {[
+                          { label: "Lush Soil", path: "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp" },
+                          { label: "Monstera Leaf", path: "/images/blog-leaf-macro.jpg" },
+                          { label: "Snake Plant", path: "/images/snake.jpg" },
+                          { label: "Winter Garden", path: "/images/winter-garden.png" },
+                          { label: "Indoor Care", path: "/images/about-plants.jpg" },
+                        ].map((preset) => (
+                          <button
+                            key={preset.path}
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({ ...prev, image: preset.path }));
+                              setImagePreview(preset.path);
+                              setSelectedImage(null);
+                            }}
+                            style={{
+                              padding: "0.3rem 0.6rem",
+                              borderRadius: "6px",
+                              border: formData.image === preset.path ? "1px solid #10b981" : "1px solid #e2e8f0",
+                              background: formData.image === preset.path ? "#ecfdf5" : "#ffffff",
+                              color: formData.image === preset.path ? "#065f46" : "#475569",
+                              fontSize: "0.78rem",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <section className="admin-care-tip-live-preview">

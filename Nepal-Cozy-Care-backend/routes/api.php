@@ -95,6 +95,8 @@ Route::get('/care-tips/categories', [CareTipController::class, 'categories']);
 Route::get('/care-tips/{id}', [CareTipController::class, 'show']);
 Route::get('/seasonal-reminders/current', [SeasonalReminderController::class, 'current']);
 Route::get('/content-templates/{key}', [ContentTemplateController::class, 'show']);
+Route::get('/category-bubbles', fn () => app(\App\Http\Controllers\Api\ContentTemplateController::class)->show('category_bubbles'));
+Route::get('/site-branding', fn () => app(\App\Http\Controllers\Api\ContentTemplateController::class)->show('site_branding'));
 Route::get('/help-center/template', [HelpCenterTemplateController::class, 'show']);
 Route::get('/plant-finder/template', [PlantFinderTemplateController::class, 'show']);
 Route::get('/plant-health/template', [PlantHealthTemplateController::class, 'show']);
@@ -143,6 +145,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('/admin/homepage', [HomepageContentController::class, 'update']);
     Route::get('/admin/page-content', [AdminPageContentController::class, 'index']);
     Route::put('/admin/page-content/{key}', [AdminPageContentController::class, 'update']);
+    Route::put('/admin/category-bubbles', fn (\Illuminate\Http\Request $request) => app(AdminPageContentController::class)->update($request, 'category_bubbles'));
+    Route::put('/admin/site-branding', fn (\Illuminate\Http\Request $request) => app(AdminPageContentController::class)->update($request, 'site_branding'));
     Route::get('/admin/settings', [AdminSettingsController::class, 'show']);
     Route::put('/admin/settings/launch', [AdminSettingsController::class, 'updateLaunch']);
     Route::put('/admin/settings/mail', [AdminSettingsController::class, 'updateMail']);
@@ -181,22 +185,42 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/admin/users/create-admin', [AdminController::class, 'createAdmin']);
     Route::post('/admin/users', [AdminController::class, 'createAdmin']);
     Route::put('/admin/users/{id}/role', [AdminController::class, 'updateUserRole']);
+    // Plants
     Route::get('/admin/plants', [PlantController::class, 'adminIndex']);
+    Route::post('/admin/plants', [PlantController::class, 'store']);
+    Route::put('/admin/plants/{id}', [PlantController::class, 'update']);
+    Route::post('/admin/plants/{id}', [PlantController::class, 'update']);
+    Route::delete('/admin/plants/{id}', [PlantController::class, 'destroy']);
     Route::post('/plants', [PlantController::class, 'store']);
     Route::put('/plants/{id}', [PlantController::class, 'update']);
     Route::delete('/plants/{id}', [PlantController::class, 'destroy']);
+
     Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
     Route::put('/orders/{id}/confirmation', [OrderController::class, 'updateConfirmation']);
     Route::get('/admin/garden-entries', [GardenEntryController::class, 'adminIndex']);
+
+    // Blogs
     Route::get('/admin/blogs', [BlogController::class, 'adminIndex']);
+    Route::post('/admin/blogs', [BlogController::class, 'store']);
+    Route::put('/admin/blogs/{id}', [BlogController::class, 'update']);
+    Route::post('/admin/blogs/{id}', [BlogController::class, 'update']);
+    Route::delete('/admin/blogs/{id}', [BlogController::class, 'destroy']);
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::put('/blogs/{id}', [BlogController::class, 'update']);
     Route::delete('/blogs/{id}', [BlogController::class, 'destroy']);
-    Route::get('/care-tips', [CareTipController::class, 'adminIndex']);
+
+    // Care Tips
+    Route::get('/admin/care-tips', [CareTipController::class, 'adminIndex']);
+    Route::post('/admin/care-tips', [CareTipController::class, 'store']);
+    Route::put('/admin/care-tips/{id}', [CareTipController::class, 'update']);
+    Route::post('/admin/care-tips/{id}', [CareTipController::class, 'update']);
+    Route::delete('/admin/care-tips/{id}', [CareTipController::class, 'destroy']);
+    Route::get('/care-tips/admin', [CareTipController::class, 'adminIndex']);
     Route::post('/care-tips', [CareTipController::class, 'store']);
     Route::put('/care-tips/{id}', [CareTipController::class, 'update']);
     Route::delete('/care-tips/{id}', [CareTipController::class, 'destroy']);
+
     Route::get('/admin/seasonal-reminders', [SeasonalReminderController::class, 'adminIndex']);
     Route::post('/seasonal-reminders', [SeasonalReminderController::class, 'store']);
     Route::put('/seasonal-reminders/{id}', [SeasonalReminderController::class, 'update']);

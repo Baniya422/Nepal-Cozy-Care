@@ -161,6 +161,8 @@ class PlantController extends Controller
                 1200,
                 78
             );
+        } elseif ($request->filled('image')) {
+            $data['image'] = $request->input('image');
         }
 
         if (empty($data['shop_id'])) {
@@ -194,6 +196,8 @@ class PlantController extends Controller
                 1200,
                 78
             );
+        } elseif ($request->filled('image')) {
+            $data['image'] = $request->input('image');
         }
         $plant->update($data);
 

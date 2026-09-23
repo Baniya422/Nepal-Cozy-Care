@@ -257,7 +257,7 @@ export default function ManageBlogs() {
         }
       }
 
-      const url = editingBlog ? `${API}/api/blogs/${editingBlog.id}` : `${API}/api/blogs`;
+      const url = editingBlog ? `${API}/api/admin/blogs/${editingBlog.id}` : `${API}/api/admin/blogs`;
       const method = editingBlog ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -302,7 +302,7 @@ export default function ManageBlogs() {
   const handleTogglePublish = async (blog: Blog) => {
     const newPublished = blog.status !== "published";
     try {
-      const res = await fetch(`${API}/api/blogs/${blog.id}`, {
+      const res = await fetch(`${API}/api/admin/blogs/${blog.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -324,7 +324,7 @@ export default function ManageBlogs() {
   const handleDeleteBlog = async (id: number) => {
     if (!window.confirm("Are you sure you want to permanently delete this blog?")) return;
     try {
-      const res = await fetch(`${API}/api/blogs/${id}`, {
+      const res = await fetch(`${API}/api/admin/blogs/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -812,6 +812,30 @@ export default function ManageBlogs() {
                     </div>
                   )}
 
+                  {/* Direct Image URL input */}
+                  <div style={{ marginBottom: "0.75rem" }}>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "#64748b", marginBottom: "0.3rem" }}>
+                      Image URL or File Path
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.image}
+                      onChange={(e) => {
+                        setFormData({ ...formData, image: e.target.value });
+                        setImagePreview(e.target.value);
+                        setSelectedImageFile(null);
+                      }}
+                      placeholder="Paste image URL (https://... or /images/...)"
+                      style={{
+                        width: "100%",
+                        padding: "0.55rem 0.75rem",
+                        borderRadius: "8px",
+                        border: "1px solid #cbd5e1",
+                        fontSize: "0.88rem",
+                      }}
+                    />
+                  </div>
+
                   {/* File Upload Button */}
                   <label
                     className="admin-btn admin-btn-secondary"
@@ -827,7 +851,7 @@ export default function ManageBlogs() {
                       marginBottom: "1rem",
                     }}
                   >
-                    <Upload size={16} /> Upload From Computer
+                    <Upload size={16} /> {selectedImageFile ? `Selected: ${selectedImageFile.name}` : "Upload From Computer"}
                     <input
                       type="file"
                       accept="image/*"

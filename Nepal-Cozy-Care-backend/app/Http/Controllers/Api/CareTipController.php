@@ -128,25 +128,37 @@ class CareTipController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'title' => 'required|string|max:255',
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
-            'image' => 'nullable|string',
             'category' => 'required|in:watering,fertilizing,pest_control,indoor,outdoor,seasonal',
             'difficulty' => 'required|in:beginner,intermediate,advanced',
             'plant_ids' => 'nullable|array',
             'plant_ids.*' => 'exists:plants,id',
             'is_published' => 'boolean',
             'published_at' => 'nullable|date',
-        ]);
+        ];
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'nullable|image|max:8192';
+        } else {
+            $rules['image'] = 'nullable|string';
+        }
+        $validated = $request->validate($rules);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('care-tips', 'public');
+        } elseif ($request->filled('image')) {
+            $validated['image'] = $request->input('image');
+        }
+
         $validated['slug'] = Str::slug($validated['title']);
-        $validated['user_id'] = $request->user()->id;
+        $validated['user_id'] = $request->user()?->id ?? 1;
         $count = CareTip::where('slug', 'like', $validated['slug'].'%')->count();
         if ($count > 0) {
             $validated['slug'] = $validated['slug'].'-'.($count + 1);
         }
-        if (! isset($validated['published_at']) && $validated['is_published']) {
+        if (! isset($validated['published_at']) && ($validated['is_published'] ?? false)) {
             $validated['published_at'] = now();
         }
         $careTip = CareTip::create($validated);
@@ -163,18 +175,30 @@ class CareTipController extends Controller
     public function update(Request $request, $id)
     {
         $careTip = CareTip::findOrFail($id);
-        $validated = $request->validate([
+        $rules = [
             'title' => 'sometimes|string|max:255',
             'excerpt' => 'nullable|string|max:500',
             'content' => 'sometimes|string',
-            'image' => 'nullable|string',
             'category' => 'sometimes|in:watering,fertilizing,pest_control,indoor,outdoor,seasonal',
             'difficulty' => 'sometimes|in:beginner,intermediate,advanced',
             'plant_ids' => 'nullable|array',
             'plant_ids.*' => 'exists:plants,id',
             'is_published' => 'boolean',
             'published_at' => 'nullable|date',
-        ]);
+        ];
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'nullable|image|max:8192';
+        } else {
+            $rules['image'] = 'nullable|string';
+        }
+        $validated = $request->validate($rules);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('care-tips', 'public');
+        } elseif ($request->filled('image')) {
+            $validated['image'] = $request->input('image');
+        }
+
         if (isset($validated['title'])) {
             $validated['slug'] = Str::slug($validated['title']);
             $count = CareTip::where('slug', 'like', $validated['slug'].'%')
