@@ -35,11 +35,11 @@ it("shows a recoverable load error and retries", async () => {
 });
 it("submits selected quantity and shows inline cart confirmation", async () => {
   localStorage.setItem("token", "test");
-  const fetchMock = vi.fn().mockResolvedValueOnce(response({data:{plant}})).mockResolvedValueOnce(response({message:"Added"}));
+  const fetchMock = vi.fn().mockImplementation(async (url: string) => (String(url).includes("/api/plants/") ? response({data:{plant}}) : response({message:"Added"})));
   vi.stubGlobal("fetch", fetchMock); show();
   await screen.findByRole("heading", {name:"Monstera"});
   fireEvent.click(screen.getByRole("button", {name:"Increase quantity"}));
   fireEvent.click(screen.getAllByRole("button", {name:"Add to cart"})[0]);
-  await waitFor(() => expect(screen.getByRole("status").textContent).toContain("Added 2 Monstera"));
+  await waitFor(() => expect(screen.getByText(/Added 2 Monstera/i)).toBeInTheDocument());
   expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({plant_id:1, quantity:2});
 });

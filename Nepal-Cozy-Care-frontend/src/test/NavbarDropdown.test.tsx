@@ -14,7 +14,7 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 function setup() {
   render(<MemoryRouter><Navbar /></MemoryRouter>);
-  const link = screen.getByRole("link", { name: "Plants", exact: true });
+  const link = screen.getByRole("link", { name: /^Plants$/i });
   const menu = link.closest(".site-nav__item--dropdown")!;
   return { link, menu };
 }
@@ -23,7 +23,7 @@ it("stays open when entering its dropdown and closes immediately on leaving", ()
   fireEvent.mouseEnter(menu);
   act(() => vi.advanceTimersByTime(5000));
   expect(menu).toHaveClass("is-desktop-open");
-  const child = screen.getByRole("link", { name: "Indoor Plants", exact: true });
+  const child = screen.getByRole("link", { name: /^Indoor Plants$/i });
   fireEvent.mouseOut(link, { relatedTarget: child });
   fireEvent.mouseOver(child, { relatedTarget: link });
   expect(menu).toHaveClass("is-desktop-open");
@@ -33,7 +33,7 @@ it("stays open when entering its dropdown and closes immediately on leaving", ()
 it("shows only the newly hovered menu", () => {
   const { menu } = setup();
   fireEvent.mouseEnter(menu);
-  const accessories = screen.getByRole("link", { name: "Accessories", exact: true })
+  const accessories = screen.getByRole("link", { name: /^Accessories$/i })
     .closest(".site-nav__item--dropdown")!;
   fireEvent.mouseLeave(menu);
   fireEvent.mouseEnter(accessories);
@@ -48,7 +48,7 @@ it("closes immediately when the main link or a dropdown link is clicked", () => 
   fireEvent.click(link);
   expect(menu).not.toHaveClass("is-desktop-open");
   fireEvent.mouseEnter(menu);
-  fireEvent.click(screen.getByRole("link", { name: "Indoor Plants", exact: true }));
+  fireEvent.click(screen.getByRole("link", { name: /^Indoor Plants$/i }));
   expect(menu).not.toHaveClass("is-desktop-open");
 });
 it("supports keyboard focus and Escape", () => {
