@@ -69,9 +69,13 @@ class Plant extends Model
         'is_popular_item',
         'is_best_seller',
         'shop_id',
+        'supplier_id',
+        'wholesale_price',
         'approval_status',
         'rejection_reason',
         'submitted_at',
+        'meta_title',
+        'meta_description',
     ];
 
     public const STATUS_DRAFT = 'draft';
@@ -84,11 +88,17 @@ class Plant extends Model
         'rooms' => 'array',
         'quantity_categories' => 'array',
         'submitted_at' => 'datetime',
+        'wholesale_price' => 'float',
     ];
 
     public function shop()
     {
         return $this->belongsTo(Shop::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function reviews(): HasMany
@@ -114,18 +124,26 @@ class Plant extends Model
 
     public function scopeMarketplaceApproved($query)
     {
+        $isMarketplaceEnabled = AdminSetting::current()->vendor_marketplace_enabled;
+
         return $query->where('is_active', true)
             ->where(function ($q) {
                 $q->where('approval_status', self::STATUS_APPROVED)
                     ->orWhereNull('approval_status');
             })
-            ->where(function ($q) {
-                $q->whereDoesntHave('shop')
-                    ->orWhereHas('shop', function ($sq) {
-                        $sq->where('status', Shop::STATUS_APPROVED);
-                    });
+            ->when(! $isMarketplaceEnabled, function ($q) {
+                // If vendor features are disabled, only list Cozy Care direct plants
+                $q->whereNull('shop_id');
+            }, function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereDoesntHave('shop')
+                        ->orWhereHas('shop', function ($sq) {
+                            $sq->where('status', Shop::STATUS_APPROVED);
+                        });
+                });
             });
     }
+
 
     public function scopeExcludeAccessories($query)
     {

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, X, Store, ShieldCheck } from "lucide-react";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
+import { useFeatureFlags } from "../../context/FeatureFlagsContext";
 
 type CartItem = {
   id: number;
@@ -34,6 +35,8 @@ export default function CartItems({
   updateQuantity,
   removeItem,
 }: CartItemsProps) {
+  const { vendor_marketplace_enabled } = useFeatureFlags();
+
   // Group cart items by shop
   const groupedItems = cartItems.reduce<
     Record<string, { shopName: string; shopSlug: string; isVerified: boolean; items: CartItem[] }>
@@ -72,26 +75,28 @@ export default function CartItems({
               className="cart-shop-group"
             >
               {/* Shop Group Header */}
-              <div className="cart-shop-header">
-                <div className="cart-shop-info">
-                  <Store size={16} className="cart-shop-icon" />
-                  <span className="cart-shop-label">Sold & Shipped by:</span>
-                  <Link
-                    to={`/shops/${group.shopSlug}`}
-                    className="cart-shop-name-link"
-                  >
-                    {group.shopName}
-                  </Link>
-                  {group.isVerified && (
-                    <span className="cart-shop-verified-badge" title="Verified Partner Nursery">
-                      <ShieldCheck size={14} />
-                    </span>
-                  )}
+              {vendor_marketplace_enabled && (
+                <div className="cart-shop-header">
+                  <div className="cart-shop-info">
+                    <Store size={16} className="cart-shop-icon" />
+                    <span className="cart-shop-label">Sold & Shipped by:</span>
+                    <Link
+                      to={`/shops/${group.shopSlug}`}
+                      className="cart-shop-name-link"
+                    >
+                      {group.shopName}
+                    </Link>
+                    {group.isVerified && (
+                      <span className="cart-shop-verified-badge" title="Verified Partner Nursery">
+                        <ShieldCheck size={14} />
+                      </span>
+                    )}
+                  </div>
+                  <span className="cart-shop-subtotal-badge">
+                    Shop Subtotal: Rs. {shopSubtotal.toFixed(2)}
+                  </span>
                 </div>
-                <span className="cart-shop-subtotal-badge">
-                  Shop Subtotal: Rs. {shopSubtotal.toFixed(2)}
-                </span>
-              </div>
+              )}
 
               {/* Items from this shop */}
               <div className="cart-shop-items">
@@ -106,19 +111,21 @@ export default function CartItems({
                       />
                       <div className="cart-item-details">
                         <h3 className="cart-item-name">{item.plant.name}</h3>
-                        <Link
-                          to={`/shops/${group.shopSlug}`}
-                          className="inline-flex items-center gap-1 text-[11px] text-emerald-800 hover:underline mb-1"
-                        >
-                          <Store size={11} className="text-emerald-600" />
-                          <span>{group.shopName}</span>
-                        </Link>
+                        {vendor_marketplace_enabled && (
+                          <Link
+                            to={`/shops/${group.shopSlug}`}
+                            className="inline-flex items-center gap-1 text-[11px] text-emerald-800 hover:underline mb-1"
+                          >
+                            <Store size={11} className="text-emerald-600" />
+                            <span>{group.shopName}</span>
+                          </Link>
+                        )}
                         <button
                           className="cart-remove-btn"
                           onClick={() => removeItem(item.id)}
                         >
                           <X size={14} />
-                          Remove Item
+                          <span>Remove</span>
                         </button>
                       </div>
                     </div>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Star, ShoppingCart, Store, ShieldCheck } from "lucide-react";
+import { useFeatureFlags } from "../../context/FeatureFlagsContext";
 
 interface ProductInfoProps {
   name: string;
@@ -29,12 +30,13 @@ export default function ProductInfo({
   shop,
 }: ProductInfoProps) {
   const totalPrice = price * quantity;
+  const { vendor_marketplace_enabled } = useFeatureFlags();
 
   return (
     <div className="product-info-section">
       <h1 className="product-title">{name}</h1>
 
-      {shop && (
+      {vendor_marketplace_enabled && shop && (
         <div style={{ marginTop: '0.35rem', marginBottom: '0.65rem' }}>
           <Link
             to={`/shops/${shop.slug}`}

@@ -2,6 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Heart, Star, Store, ShieldCheck } from "lucide-react";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../utils/imageUrl";
 import type { Plant } from "../../types/plant";
+import { useFeatureFlags } from "../../context/FeatureFlagsContext";
 
 interface ProductGridProps {
   plants: Plant[];
@@ -28,6 +29,7 @@ export default function ProductGrid({
   showSoldCount = false,
 }: ProductGridProps) {
   const navigate = useNavigate();
+  const { vendor_marketplace_enabled } = useFeatureFlags();
   if (error) {
     return (
       <div className="plants-error" style={{
@@ -124,7 +126,7 @@ export default function ProductGrid({
               <div className="plants-card-content">
                 <h3 className="plants-card-name">{plant.name}</h3>
                 <p className="plants-card-category">{plant.category || "Indoor Plant"}</p>
-                {plant.shop && (
+                {vendor_marketplace_enabled && plant.shop && (
                   <Link
                     to={`/shops/${plant.shop.slug}`}
                     onClick={(e) => e.stopPropagation()}

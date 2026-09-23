@@ -14,6 +14,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { CURATED_BLOGS, type CuratedBlog } from "../features/blogs/curatedBlogs";
 import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../utils/imageUrl";
+import SEO from "../components/common/SEO";
 import "../styles/blogDetail.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -213,6 +214,13 @@ export default function BlogDetail() {
 
   return (
     <Layout>
+      <SEO
+        title={blog.title}
+        description={blog.excerpt || (blog.content ? blog.content.slice(0, 160) : undefined)}
+        canonicalPath={`/blogs/${blog.id}`}
+        image={blog.image || undefined}
+        type="article"
+      />
       {/* Pinned Scroll Reading Progress Bar */}
       <div className="cozy-read-progress-bar" style={{ width: `${scrollPercent}%` }} />
 

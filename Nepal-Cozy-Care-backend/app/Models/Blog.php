@@ -18,6 +18,8 @@ class Blog extends Model
         'image',
         'author',
         'category',
+        'meta_title',
+        'meta_description',
         'views',
         'is_published',
         'published_at',

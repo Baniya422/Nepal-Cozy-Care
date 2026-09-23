@@ -11,6 +11,7 @@ import UgaooSortDropdown, {
 } from "../components/plants/UgaooSortDropdown";
 import { DEFAULT_PLANT_CATALOG } from "../features/plant-finder/data";
 import type { Plant } from "../types/plant";
+import SEO from "../components/common/SEO";
 import "../styles/plants.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -369,6 +370,11 @@ export default function Plants() {
 
   return (
     <Layout>
+      <SEO
+        title="Buy Indoor & Outdoor Plants Online in Nepal"
+        description="Shop hand-nurtured indoor plants, succulents, low light plants, and air purifiers in Kathmandu, Pokhara, and across Nepal."
+        canonicalPath="/plants"
+      />
       <div className="plants-page ugaoo-plants-page">
         {/* ================= HERO HEADER ================= */}
         <div className="ugaoo-plants-hero">

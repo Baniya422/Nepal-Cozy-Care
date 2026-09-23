@@ -19,6 +19,12 @@ class SellerMiddleware
             ], 401);
         }
 
+        if (! \App\Models\AdminSetting::current()->vendor_marketplace_enabled) {
+            return response()->json([
+                'message' => 'Vendor marketplace features are currently disabled.',
+            ], 403);
+        }
+
         // Must be seller (or super admin testing/managing)
         if (! in_array($user->role, ['seller', 'super_admin', 'admin'], true)) {
             return response()->json([

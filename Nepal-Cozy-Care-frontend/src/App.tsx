@@ -5,6 +5,8 @@ import AdminProtectedRoute from './components/admin/AdminProtectedRoute'
 import SellerProtectedRoute from './components/seller/SellerProtectedRoute'
 import Layout from './components/layout/Layout'
 import SellerLayout from './components/seller/SellerLayout'
+import VendorRouteGuard from './components/common/VendorRouteGuard'
+import ScrollToTop from './components/common/ScrollToTop'
 
 const Register = lazy(() => import('./pages/Register'))
 const Login = lazy(() => import('./pages/Login'))
@@ -54,6 +56,8 @@ const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettings'))
 const ManageSellerApplications = lazy(() => import('./pages/admin/ManageSellerApplications'))
 const ManageShops = lazy(() => import('./pages/admin/ManageShops'))
 const ManageMarketplaceProducts = lazy(() => import('./pages/admin/ManageMarketplaceProducts'))
+const ManageSuppliers = lazy(() => import('./pages/admin/ManageSuppliers'))
+const ManagePromoCodes = lazy(() => import('./pages/admin/ManagePromoCodes'))
 const ShopsDirectory = lazy(() => import('./pages/shops/ShopsDirectory'))
 const ShopDetail = lazy(() => import('./pages/shops/ShopDetail'))
 const BecomeASeller = lazy(() => import('./pages/seller/BecomeASeller'))
@@ -74,8 +78,10 @@ function RouteLoading() {
 
 function App() {
   return (
-    <Suspense fallback={<RouteLoading />}>
-      <Routes>
+    <>
+      <ScrollToTop />
+      <Suspense fallback={<RouteLoading />}>
+        <Routes>
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -104,9 +110,30 @@ function App() {
         <Route path="/my-garden" element={<MyGarden />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/track-order" element={<TrackOrder />} />
-        <Route path="/shops" element={<ShopsDirectory />} />
-        <Route path="/shops/:slug" element={<ShopDetail />} />
-        <Route path="/become-a-seller" element={<BecomeASeller />} />
+        <Route
+          path="/shops"
+          element={
+            <VendorRouteGuard>
+              <ShopsDirectory />
+            </VendorRouteGuard>
+          }
+        />
+        <Route
+          path="/shops/:slug"
+          element={
+            <VendorRouteGuard>
+              <ShopDetail />
+            </VendorRouteGuard>
+          }
+        />
+        <Route
+          path="/become-a-seller"
+          element={
+            <VendorRouteGuard>
+              <BecomeASeller />
+            </VendorRouteGuard>
+          }
+        />
       </Route>
 
       <Route
@@ -237,13 +264,31 @@ function App() {
           </AdminProtectedRoute>
         }
       />
+      <Route
+        path="/admin/suppliers"
+        element={
+          <AdminProtectedRoute>
+            <ManageSuppliers />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/promo-codes"
+        element={
+          <AdminProtectedRoute>
+            <ManagePromoCodes />
+          </AdminProtectedRoute>
+        }
+      />
 
-      {/* Super Admin Marketplace Routes */}
+      {/* Super Admin Marketplace Routes (Guarded by Feature Flag) */}
       <Route
         path="/admin/seller-applications"
         element={
           <AdminProtectedRoute>
-            <ManageSellerApplications />
+            <VendorRouteGuard>
+              <ManageSellerApplications />
+            </VendorRouteGuard>
           </AdminProtectedRoute>
         }
       />
@@ -251,7 +296,9 @@ function App() {
         path="/admin/shops"
         element={
           <AdminProtectedRoute>
-            <ManageShops />
+            <VendorRouteGuard>
+              <ManageShops />
+            </VendorRouteGuard>
           </AdminProtectedRoute>
         }
       />
@@ -259,18 +306,22 @@ function App() {
         path="/admin/marketplace-products"
         element={
           <AdminProtectedRoute>
-            <ManageMarketplaceProducts />
+            <VendorRouteGuard>
+              <ManageMarketplaceProducts />
+            </VendorRouteGuard>
           </AdminProtectedRoute>
         }
       />
 
-      {/* Seller Dashboard Routes */}
+      {/* Seller Dashboard Routes (Guarded by Feature Flag) */}
       <Route
         path="/seller"
         element={
-          <SellerProtectedRoute>
-            <SellerLayout />
-          </SellerProtectedRoute>
+          <VendorRouteGuard>
+            <SellerProtectedRoute>
+              <SellerLayout />
+            </SellerProtectedRoute>
+          </VendorRouteGuard>
         }
       >
         <Route index element={<SellerDashboard />} />
@@ -284,6 +335,7 @@ function App() {
       </Route>
       </Routes>
     </Suspense>
+    </>
   )
 }
 export default App

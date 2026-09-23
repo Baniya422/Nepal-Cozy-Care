@@ -92,10 +92,16 @@ class PlantController extends Controller
         }
         $perPage = (int) $request->query('per_page', 12);
         $paginator = $query->paginate($perPage);
-        $paginator->getCollection()->transform(function ($plant) {
+        $isMarketplaceEnabled = \App\Models\AdminSetting::current()->vendor_marketplace_enabled;
+        $paginator->getCollection()->transform(function ($plant) use ($isMarketplaceEnabled) {
             $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
             $plant->review_count = (int) ($plant->reviews_count ?? 0);
             unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+            if (! $isMarketplaceEnabled) {
+                $plant->unsetRelation('shop');
+                $plant->makeHidden(['shop', 'shop_id']);
+            }
 
             return $plant;
         });
@@ -125,6 +131,11 @@ class PlantController extends Controller
         $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
         $plant->review_count = (int) ($plant->reviews_count ?? 0);
         unset($plant->reviews_avg_rating, $plant->reviews_count);
+
+        if (! \App\Models\AdminSetting::current()->vendor_marketplace_enabled) {
+            $plant->unsetRelation('shop');
+            $plant->makeHidden(['shop', 'shop_id']);
+        }
 
         return response()->json([
             'message' => null,
@@ -207,6 +218,7 @@ class PlantController extends Controller
     public function adminIndex(Request $request)
     {
         $query = Plant::query()
+            ->with(['supplier:id,name', 'shop:id,name,slug'])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');
         $perPage = (int) $request->query('per_page', 100);
@@ -214,6 +226,7 @@ class PlantController extends Controller
         $paginator->getCollection()->transform(function ($plant) {
             $plant->avg_rating = round((float) ($plant->reviews_avg_rating ?? 0), 1);
             $plant->review_count = (int) ($plant->reviews_count ?? 0);
+            $plant->requires_admin_decision = ! empty($plant->shop_id);
             unset($plant->reviews_avg_rating, $plant->reviews_count);
 
             return $plant;

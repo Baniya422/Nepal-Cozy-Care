@@ -24,6 +24,12 @@ class SellerController extends Controller
      */
     public function apply(Request $request)
     {
+        if (! \App\Models\AdminSetting::current()->vendor_marketplace_enabled) {
+            return response()->json([
+                'message' => 'Vendor partner registration is temporarily closed.',
+            ], 403);
+        }
+
         $user = $request->user();
 
         // Check if user already owns a shop
@@ -113,6 +119,18 @@ class SellerController extends Controller
      */
     public function applicationStatus(Request $request)
     {
+        if (! \App\Models\AdminSetting::current()->vendor_marketplace_enabled) {
+            return response()->json([
+                'message' => 'Vendor partner features are temporarily closed.',
+                'data' => [
+                    'marketplace_enabled' => false,
+                    'has_shop' => false,
+                    'shop' => null,
+                    'role' => $request->user()->role,
+                ],
+            ]);
+        }
+
         $shop = Shop::where('user_id', $request->user()->id)->first();
 
         return response()->json([

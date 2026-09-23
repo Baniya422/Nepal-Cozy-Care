@@ -25,24 +25,44 @@ export default function SeasonalCarePreview({ content }: { content: HomepageCont
   const [reminders, setReminders] = useState<SeasonalReminder[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    void fetchSeasonalPreview();
-  }, []);
-  const fetchSeasonalPreview = async () => {
-    try {
-      const response = await fetch(`${API}/api/seasonal-reminders/current`);
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(data.message || "Could not load seasonal reminders.");
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const fetchSeasonalPreview = async () => {
+      try {
+        const response = await fetch(`${API}/api/seasonal-reminders/current`, {
+          signal: controller.signal,
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.message || "Could not load seasonal reminders.");
+        }
+        if (isMounted) {
+          setSeasonLabel(data.data?.season_label || "Seasonal Care");
+          setReminders((data.data?.reminders ?? []) as SeasonalReminder[]);
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        console.error("Error loading seasonal reminder preview:", error);
+        if (isMounted) {
+          setReminders([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-      setSeasonLabel(data.data?.season_label || "Seasonal Care");
-      setReminders((data.data?.reminders ?? []) as SeasonalReminder[]);
-    } catch (error) {
-      console.error("Error loading seasonal reminder preview:", error);
-      setReminders([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    void fetchSeasonalPreview();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
   const visibleReminders = reminders.slice(0, 2);
   return (
     <section className="seasonal-home-section">

@@ -13,13 +13,99 @@ class AdminSettingsController extends Controller
 {
     public function show(Request $request, MailSettingsService $mailSettings)
     {
+        $settings = $this->settings();
+
         return response()->json([
             'message' => 'Admin settings loaded successfully.',
             'data' => [
                 'account' => $request->user()->only(['id', 'name', 'email']),
-                'mail' => $this->mailPayload($this->settings(), $mailSettings),
+                'mail' => $this->mailPayload($settings, $mailSettings),
+                'launch' => $this->launchPayload($settings),
             ],
         ]);
+    }
+
+    public function publicFeatures(): JsonResponse
+    {
+        $settings = AdminSetting::current();
+
+        return response()->json([
+            'message' => null,
+            'data' => [
+                'vendor_marketplace_enabled' => (bool) $settings->vendor_marketplace_enabled,
+                'esewa_enabled' => (bool) $settings->esewa_enabled,
+                'free_delivery_threshold' => (float) ($settings->free_delivery_threshold ?? 2000.0),
+                'free_delivery_radius_km' => (float) ($settings->free_delivery_radius_km ?? 10.0),
+                'standard_delivery_fee' => (float) ($settings->standard_delivery_fee ?? 100.0),
+                'dispatch_configured' => $settings->dispatch_latitude !== null && $settings->dispatch_longitude !== null,
+                'dispatch_address' => $settings->dispatch_address,
+            ],
+        ]);
+    }
+
+    public function updateLaunch(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'vendor_marketplace_enabled' => ['required', 'boolean'],
+            'esewa_enabled' => ['required', 'boolean'],
+            'dispatch_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'dispatch_longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'dispatch_address' => ['nullable', 'string', 'max:255'],
+            'free_delivery_threshold' => ['required', 'numeric', 'min:0'],
+            'free_delivery_radius_km' => ['required', 'numeric', 'min:0.1'],
+            'standard_delivery_fee' => ['required', 'numeric', 'min:0'],
+            'max_delivery_distance_km' => ['required', 'numeric', 'min:1'],
+            'pricing_method' => ['required', 'in:distance_bands,per_km_rate'],
+            'distance_pricing_rules' => ['nullable', 'array'],
+            'routing_service' => ['required', 'in:osrm,openrouteservice,mapbox'],
+            'routing_api_url' => ['nullable', 'string', 'max:255'],
+            'routing_api_key' => ['nullable', 'string', 'max:255'],
+            'clear_routing_api_key' => ['sometimes', 'boolean'],
+            'site_production_url' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $settings = $this->settings();
+
+        if ($request->filled('routing_api_key')) {
+            $settings->routing_api_key = $request->input('routing_api_key');
+        } elseif ($request->boolean('clear_routing_api_key')) {
+            $settings->routing_api_key = null;
+        }
+        unset($validated['routing_api_key'], $validated['clear_routing_api_key']);
+
+        $settings->fill($validated)->save();
+
+        return response()->json([
+            'message' => 'Launch and delivery settings saved successfully.',
+            'data' => [
+                'launch' => $this->launchPayload($settings->fresh()),
+            ],
+        ]);
+    }
+
+    private function launchPayload(AdminSetting $settings): array
+    {
+        return [
+            'vendor_marketplace_enabled' => (bool) $settings->vendor_marketplace_enabled,
+            'esewa_enabled' => (bool) $settings->esewa_enabled,
+            'dispatch_latitude' => $settings->dispatch_latitude,
+            'dispatch_longitude' => $settings->dispatch_longitude,
+            'dispatch_address' => $settings->dispatch_address,
+            'free_delivery_threshold' => (float) ($settings->free_delivery_threshold ?? 2000.0),
+            'free_delivery_radius_km' => (float) ($settings->free_delivery_radius_km ?? 10.0),
+            'standard_delivery_fee' => (float) ($settings->standard_delivery_fee ?? 100.0),
+            'max_delivery_distance_km' => (float) ($settings->max_delivery_distance_km ?? 25.0),
+            'pricing_method' => $settings->pricing_method ?: 'distance_bands',
+            'distance_pricing_rules' => $settings->distance_pricing_rules ?: [
+                ['min_km' => 10, 'max_km' => 15, 'fee' => 150],
+                ['min_km' => 15, 'max_km' => 20, 'fee' => 220],
+                ['min_km' => 20, 'max_km' => 25, 'fee' => 300],
+            ],
+            'routing_service' => $settings->routing_service ?: 'osrm',
+            'routing_api_url' => $settings->routing_api_url,
+            'routing_api_key_configured' => filled($settings->routing_api_key),
+            'site_production_url' => $settings->site_production_url,
+        ];
     }
 
     public function updateMail(Request $request, MailSettingsService $mailSettings)

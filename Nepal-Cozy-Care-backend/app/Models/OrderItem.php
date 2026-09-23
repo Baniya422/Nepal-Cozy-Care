@@ -10,8 +10,13 @@ class OrderItem extends Model
         'order_id',
         'plant_id',
         'shop_id',
+        'supplier_id',
         'product_name',
         'shop_name',
+        'supplier_name',
+        'wholesale_unit_cost',
+        'supplier_obligation_status',
+        'supplier_payout_status',
         'quantity',
         'price',
         'line_total',
@@ -21,6 +26,7 @@ class OrderItem extends Model
         'quantity' => 'integer',
         'price' => 'float',
         'line_total' => 'float',
+        'wholesale_unit_cost' => 'float',
     ];
 
     public function plant()
@@ -33,8 +39,14 @@ class OrderItem extends Model
         return $this->belongsTo(Shop::class);
     }
 
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
 }
+
