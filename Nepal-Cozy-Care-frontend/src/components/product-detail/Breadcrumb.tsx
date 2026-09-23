@@ -1,16 +1,4 @@
-import { useNavigate } from "react-router-dom";
-interface BreadcrumbProps {
-  productName: string;
-}
-export default function Breadcrumb({ productName }: BreadcrumbProps) {
-  const navigate = useNavigate();
-  return (
-    <nav className="breadcrumb">
-      <span onClick={() => navigate('/')}>Home</span>
-      <span>/</span>
-      <span onClick={() => navigate('/plants')}>Plants</span>
-      <span>/</span>
-      <span className="current">{productName}</span>
-    </nav>
-  );
+import { Link } from "react-router-dom";
+export default function Breadcrumb({ productName }: { productName: string }) {
+  return <nav className="breadcrumb" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><Link to="/plants">Plants</Link><span aria-hidden="true">/</span><span aria-current="page">{productName}</span></nav>;
 }
