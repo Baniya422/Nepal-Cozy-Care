@@ -36,6 +36,10 @@ class StorePlantRequest extends FormRequest
             'is_active' => ['nullable'],
             'is_popular_item' => ['nullable', 'boolean'],
             'is_best_seller' => ['nullable', 'boolean'],
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
+            'wholesale_price' => ['nullable', 'numeric', 'min:0'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ContentTemplateController;
 use App\Http\Controllers\Api\DecorationController;
+use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\GardenEntryController;
 use App\Http\Controllers\Api\HelpCenterTemplateController;
 use App\Http\Controllers\Api\HomepageContentController;
@@ -19,13 +20,18 @@ use App\Http\Controllers\Api\PlantController;
 use App\Http\Controllers\Api\PlantFinderTemplateController;
 use App\Http\Controllers\Api\PlantHealthAiController;
 use App\Http\Controllers\Api\PlantHealthTemplateController;
+use App\Http\Controllers\Api\PromoCodeController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SeasonalReminderController;
 use App\Http\Controllers\Api\SellerController;
 use App\Http\Controllers\Api\ShopController;
+use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/features', [AdminSettingsController::class, 'publicFeatures']);
+
 
 Route::get('/ping', function () {
     return response()->json([
@@ -62,6 +68,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart/{id}', [CartController::class, 'destroy']);
     Route::delete('/cart', [CartController::class, 'clear']);
     Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::post('/delivery/quote', [DeliveryController::class, 'quote']);
+    Route::post('/promo/validate', [PromoCodeController::class, 'validateCode']);
     Route::get('/orders', [OrderController::class, 'myOrders']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
@@ -136,8 +144,34 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/page-content', [AdminPageContentController::class, 'index']);
     Route::put('/admin/page-content/{key}', [AdminPageContentController::class, 'update']);
     Route::get('/admin/settings', [AdminSettingsController::class, 'show']);
+    Route::put('/admin/settings/launch', [AdminSettingsController::class, 'updateLaunch']);
     Route::put('/admin/settings/mail', [AdminSettingsController::class, 'updateMail']);
     Route::post('/admin/settings/mail/test', [AdminSettingsController::class, 'testMail']);
+
+    // Admin Promo Codes
+    Route::get('/admin/promo-codes', [PromoCodeController::class, 'adminIndex']);
+    Route::post('/admin/promo-codes', [PromoCodeController::class, 'store']);
+    Route::put('/admin/promo-codes/{id}', [PromoCodeController::class, 'update']);
+    Route::put('/admin/promo-codes/{id}/toggle', [PromoCodeController::class, 'toggle']);
+    Route::delete('/admin/promo-codes/{id}', [PromoCodeController::class, 'destroy']);
+
+    // Admin Nursery Suppliers & Financial Management
+    Route::get('/admin/suppliers', [SupplierController::class, 'index']);
+    Route::post('/admin/suppliers', [SupplierController::class, 'store']);
+    Route::get('/admin/suppliers/financial-summary', [SupplierController::class, 'financialSummary']);
+    Route::get('/admin/suppliers/audit-logs', [SupplierController::class, 'auditLogs']);
+    Route::get('/admin/suppliers/{id}', [SupplierController::class, 'show']);
+    Route::put('/admin/suppliers/{id}', [SupplierController::class, 'update']);
+    Route::put('/admin/plants/{id}/supplier', [SupplierController::class, 'assignPlantSupplier']);
+    Route::post('/admin/supplier-payments', [SupplierController::class, 'recordPayment']);
+    Route::delete('/admin/supplier-payments/{id}', [SupplierController::class, 'deletePayment']);
+    Route::put('/admin/orders/{orderId}/items/{itemId}/supplier', [SupplierController::class, 'assignOrderItemSupplier']);
+    Route::put('/admin/orders/{orderId}/items/{itemId}/obligation', [SupplierController::class, 'updateObligationStatus']);
+    Route::post('/admin/orders/{id}/cod-collect', [SupplierController::class, 'recordCodCollection']);
+    Route::post('/admin/orders/{orderId}/expenses', [SupplierController::class, 'recordOrderExpense']);
+    Route::delete('/admin/orders/{orderId}/expenses/{expenseId}', [SupplierController::class, 'deleteOrderExpense']);
+    Route::put('/orders/{id}/payment-status', [OrderController::class, 'updatePaymentStatus']);
+
     Route::get('/admin/dashboard/stats', [AdminController::class, 'dashboardStats']);
     Route::get('/admin/dashboard/recent-orders', [AdminController::class, 'recentOrders']);
     Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);

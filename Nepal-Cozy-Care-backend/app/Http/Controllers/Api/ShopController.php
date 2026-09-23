@@ -11,6 +11,12 @@ class ShopController extends Controller
 {
     public function index(Request $request)
     {
+        if (! \App\Models\AdminSetting::current()->vendor_marketplace_enabled) {
+            return response()->json([
+                'message' => 'Partner shops directory is currently unavailable.',
+            ], 404);
+        }
+
         $query = Shop::approved()
             ->withCount(['plants' => function ($q) {
                 $q->where('is_active', true)
@@ -73,6 +79,12 @@ class ShopController extends Controller
 
     public function show(string $slug)
     {
+        if (! \App\Models\AdminSetting::current()->vendor_marketplace_enabled) {
+            return response()->json([
+                'message' => 'Partner shop is currently unavailable.',
+            ], 404);
+        }
+
         $shop = Shop::where('slug', $slug)
             ->where('status', Shop::STATUS_APPROVED)
             ->withCount(['plants' => function ($q) {
@@ -94,6 +106,12 @@ class ShopController extends Controller
 
     public function plants(string $slug, Request $request)
     {
+        if (! \App\Models\AdminSetting::current()->vendor_marketplace_enabled) {
+            return response()->json([
+                'message' => 'Partner shop plants are currently unavailable.',
+            ], 404);
+        }
+
         $shop = Shop::where('slug', $slug)
             ->where('status', Shop::STATUS_APPROVED)
             ->firstOrFail();

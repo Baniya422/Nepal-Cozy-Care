@@ -6,6 +6,7 @@ import ProductImage from '../components/product-detail/ProductImage';
 import ProductInfo from '../components/product-detail/ProductInfo';
 import InfoSections from '../components/product-detail/InfoSections';
 import WhyChooseUs from '../components/product-detail/WhyChooseUs';
+import SEO from '../components/common/SEO';
 import '../styles/productDetail.css';
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 interface Plant {
@@ -28,6 +29,8 @@ interface Plant {
   image?: string;
   avg_rating?: number;
   review_count?: number;
+  meta_title?: string;
+  meta_description?: string;
   shop?: {
     id: number;
     name: string;
@@ -130,6 +133,13 @@ export function ProductDetail() {
   }
   return (
     <Layout>
+      <SEO
+        title={plant.meta_title || plant.name}
+        description={plant.meta_description || plant.description?.slice(0, 160) || `Buy healthy ${plant.name} online in Nepal from Cozy Care.`}
+        canonicalPath={`/plants/${plant.id}`}
+        image={plant.image || undefined}
+        type="product"
+      />
       <div className="product-page">
         <div className="product-container">
           <Breadcrumb productName={plant.name} />

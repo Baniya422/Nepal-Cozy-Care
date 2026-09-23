@@ -25,12 +25,16 @@ import {
   PackageCheck,
   ExternalLink,
   Box,
+  Tag,
 } from "lucide-react";
 import "./admin.css";
+import { useFeatureFlags } from "../../context/FeatureFlagsContext";
+
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
-const menuGroups = [
+
+const getMenuGroups = (vendorMarketplaceEnabled: boolean) => [
   {
     group: "Overview",
     items: [
@@ -38,24 +42,31 @@ const menuGroups = [
       { path: "/admin/reports", icon: BarChart3, label: "Reports & Stats" },
     ],
   },
+  ...(vendorMarketplaceEnabled
+    ? [
+        {
+          group: "Marketplace & Vendors",
+          items: [
+            { path: "/admin/seller-applications", icon: Store, label: "Seller Applications" },
+            { path: "/admin/shops", icon: Building2, label: "Manage Shops" },
+            { path: "/admin/marketplace-products", icon: PackageCheck, label: "Marketplace Products" },
+            { path: "/seller/dashboard", icon: ExternalLink, label: "Vendor Dashboard (Live)" },
+          ],
+        },
+      ]
+    : []),
   {
-    group: "Marketplace & Vendors",
-    items: [
-      { path: "/admin/seller-applications", icon: Store, label: "Seller Applications" },
-      { path: "/admin/shops", icon: Building2, label: "Manage Shops" },
-      { path: "/admin/marketplace-products", icon: PackageCheck, label: "Marketplace Products" },
-      { path: "/seller/dashboard", icon: ExternalLink, label: "Vendor Dashboard (Live)" },
-    ],
-  },
-  {
-    group: "Store & Catalog",
+    group: "Store & Operations",
     items: [
       { path: "/admin/orders", icon: ShoppingCart, label: "Orders" },
+      { path: "/admin/suppliers", icon: Building2, label: "Nursery Suppliers" },
+      { path: "/admin/promo-codes", icon: Tag, label: "Promo Codes" },
       { path: "/admin/plants", icon: Leaf, label: "Manage Plants" },
       { path: "/admin/decorations", icon: Box, label: "3D Decorations" },
       { path: "/admin/accessories", icon: Package, label: "Accessories" },
     ],
   },
+
   {
     group: "Website & Content",
     items: [
@@ -81,9 +92,10 @@ const menuGroups = [
   },
 ];
 
-const allMenuItems = menuGroups.flatMap((g) => g.items);
-
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { vendor_marketplace_enabled } = useFeatureFlags();
+  const menuGroups = getMenuGroups(vendor_marketplace_enabled);
+  const allMenuItems = menuGroups.flatMap((g) => g.items);
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(() => {

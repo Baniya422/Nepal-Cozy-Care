@@ -33,6 +33,10 @@ class MarketplaceMultiVendorTest extends TestCase
     {
         parent::setUp();
 
+        AdminSetting::current()->update([
+            'vendor_marketplace_enabled' => true,
+        ]);
+
         $this->superAdmin = User::factory()->create([
             'role' => User::ROLE_SUPER_ADMIN,
         ]);

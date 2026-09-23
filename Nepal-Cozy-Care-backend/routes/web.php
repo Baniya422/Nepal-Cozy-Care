@@ -6,6 +6,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+
+
 // Direct storage file serving fallback for public uploads (ensures images work regardless of symlink status)
 Route::get('/storage/{path}', function (string $path) {
     $filePath = storage_path('app/public/'.$path);

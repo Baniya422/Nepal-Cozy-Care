@@ -7,21 +7,31 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
 use App\Http\Requests\UpdateOrderConfirmationRequest;
 use App\Http\Requests\UpdateOrderStatusRequest;
+use App\Models\AdminSetting;
 use App\Models\Cart;
+use App\Models\FinancialAuditLog;
 use App\Models\GardenEntry;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Plant;
+use App\Models\PromoCode;
+use App\Models\PromoCodeUsage;
 use App\Models\Shop;
+use App\Services\DeliveryRoutingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        protected DeliveryRoutingService $deliveryRoutingService
+    ) {}
+
     public function checkout(CheckoutRequest $request)
     {
-        if ($request->payment_method !== 'cod') {
+        $settings = AdminSetting::current();
+        if (! $settings->esewa_enabled && $request->payment_method !== 'cod') {
             return response()->json([
                 'message' => 'Selected payment gateway is coming soon. Please use Cash on Delivery for now.',
                 'errors' => [
@@ -29,10 +39,12 @@ class OrderController extends Controller
                 ],
             ], 422);
         }
+
         $userId = $request->user()->id;
-        $cartItems = Cart::with(['plant.shop'])
+        $cartItems = Cart::with(['plant.shop', 'plant.supplier'])
             ->where('user_id', $userId)
             ->get();
+
         if ($cartItems->isEmpty()) {
             return response()->json([
                 'message' => 'Cart is empty',
@@ -42,8 +54,8 @@ class OrderController extends Controller
             ], 400);
         }
 
-        $result = DB::transaction(function () use ($cartItems, $request, $userId) {
-            $subtotal = 0;
+        $result = DB::transaction(function () use ($cartItems, $request, $userId, $settings) {
+            $subtotal = 0.0;
             foreach ($cartItems as $item) {
                 $plant = $item->plant;
                 if (! $plant) {
@@ -57,14 +69,73 @@ class OrderController extends Controller
                 }
                 $subtotal += ($plant->price * $item->quantity);
             }
-            $deliveryFee = 0;
-            $tax = round($subtotal * 0.10, 2);
-            $total = $subtotal + $deliveryFee + $tax;
+
+            // Promo code evaluation with pessimistic locking
+            $promo = null;
+            $discountAmount = 0.0;
+            if ($request->filled('promo_code')) {
+                $code = strtoupper(trim($request->promo_code));
+                $promo = PromoCode::where('code', $code)->lockForUpdate()->first();
+
+                if (! $promo) {
+                    return response()->json([
+                        'message' => 'The promo code entered does not exist.',
+                        'errors' => ['promo_code' => ['Invalid promo code.']],
+                    ], 422);
+                }
+
+                $eval = $promo->evaluateEligibility($subtotal, $request->user());
+                if (! $eval['eligible']) {
+                    return response()->json([
+                        'message' => $eval['message'],
+                        'errors' => ['promo_code' => [$eval['message']]],
+                    ], 422);
+                }
+
+                $discountAmount = (float) $eval['discount'];
+            }
+
+            $discountedSubtotal = max(0.0, round($subtotal - $discountAmount, 2));
+
+            // Road distance and delivery fee calculation
+            $roadDistanceKm = null;
+            $quoteDetails = null;
+            $deliveryFee = 0.0;
+
+            if ($request->filled('delivery_latitude') && $request->filled('delivery_longitude')) {
+                try {
+                    $quote = $this->deliveryRoutingService->quoteDelivery(
+                        (float) $request->delivery_latitude,
+                        (float) $request->delivery_longitude,
+                        $discountedSubtotal,
+                        $settings
+                    );
+                    $deliveryFee = (float) $quote['delivery_fee'];
+                    $roadDistanceKm = (float) $quote['road_distance_km'];
+                    $quoteDetails = $quote;
+                } catch (\RuntimeException $e) {
+                    return response()->json([
+                        'message' => $e->getMessage(),
+                        'errors' => ['location' => [$e->getMessage()]],
+                    ], 422);
+                }
+            } else {
+                // Fallback when coordinates are not supplied
+                $deliveryFee = 0.0;
+            }
+
+            $tax = round($discountedSubtotal * 0.10, 2);
+            $total = round($discountedSubtotal + $deliveryFee + $tax, 2);
+
             $order = Order::create([
                 'user_id' => $userId,
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
-                'subtotal' => $subtotal,
+                'payment_method' => $request->payment_method,
+                'promo_code_id' => $promo?->id,
+                'promo_code' => $promo?->code,
+                'discount_amount' => $discountAmount,
+                'subtotal' => round($subtotal, 2),
                 'delivery_fee' => $deliveryFee,
                 'tax' => $tax,
                 'total' => $total,
@@ -72,13 +143,30 @@ class OrderController extends Controller
                 'shipping_phone' => $request->shipping_phone,
                 'shipping_city' => $request->shipping_city,
                 'shipping_address' => $request->shipping_address,
+                'delivery_latitude' => $request->delivery_latitude,
+                'delivery_longitude' => $request->delivery_longitude,
+                'delivery_road_distance_km' => $roadDistanceKm,
+                'delivery_quote_details' => $quoteDetails,
                 'location_notes' => $request->location_notes,
                 'preferred_contact_method' => $request->preferred_contact_method,
                 'confirmation_status' => 'pending',
                 'estimated_delivery_date' => now()->addDays(4),
             ]);
 
+            // Record promo code usage
+            if ($promo) {
+                PromoCodeUsage::create([
+                    'promo_code_id' => $promo->id,
+                    'user_id' => $userId,
+                    'order_id' => $order->id,
+                    'discount_amount' => $discountAmount,
+                ]);
+                $promo->increment('times_used');
+            }
+
             $defaultShop = null;
+            $hasIncompleteCost = false;
+
             foreach ($cartItems as $item) {
                 $plant = $item->plant;
                 $price = $plant->price;
@@ -91,18 +179,35 @@ class OrderController extends Controller
                 $shopId = $plant->shop_id ?? $defaultShop?->id;
                 $shopName = $shop?->name ?? $defaultShop?->name ?? 'Nepal Cozy Care';
 
+                // Supplier snapshots
+                $supplier = $plant->supplier;
+                $supplierId = $plant->supplier_id;
+                $supplierName = $supplier?->name;
+                $wholesaleUnitCost = $plant->wholesale_price;
+
+                if ($wholesaleUnitCost === null) {
+                    $hasIncompleteCost = true;
+                }
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'plant_id' => $plant->id,
                     'shop_id' => $shopId,
+                    'supplier_id' => $supplierId,
                     'product_name' => $plant->name,
                     'shop_name' => $shopName,
+                    'supplier_name' => $supplierName,
+                    'wholesale_unit_cost' => $wholesaleUnitCost,
+                    'supplier_obligation_status' => 'payable',
+                    'supplier_payout_status' => 'unpaid',
                     'quantity' => $item->quantity,
                     'price' => $price,
                     'line_total' => $lineTotal,
                 ]);
+
                 $plant->stock = $plant->stock - $item->quantity;
                 $plant->save();
+
                 if (! $plant->isAccessory()) {
                     GardenEntry::create([
                         'user_id' => $userId,
@@ -117,6 +222,11 @@ class OrderController extends Controller
                     ]);
                 }
             }
+
+            if ($hasIncompleteCost) {
+                $order->update(['earnings_incomplete' => true]);
+            }
+
             Cart::where('user_id', $userId)->delete();
 
             return $order->load(['items.plant', 'items.shop', 'user']);
@@ -135,6 +245,7 @@ class OrderController extends Controller
             ],
         ], 201);
     }
+
 
     public function adminIndex(Request $request)
     {
@@ -186,8 +297,27 @@ class OrderController extends Controller
                     $item->plant->increment('stock', $item->quantity);
                 }
             }
+
+            // Restore promo code usage if order had promo applied
+            if ($order->promo_code_id) {
+                $promo = PromoCode::find($order->promo_code_id);
+                if ($promo && $promo->times_used > 0) {
+                    $promo->decrement('times_used');
+                }
+                PromoCodeUsage::where('order_id', $order->id)->delete();
+            }
+
             $order->status = 'cancelled';
             $order->save();
+
+            FinancialAuditLog::log(
+                'order_cancelled',
+                'order',
+                $order->id,
+                ['status' => 'pending'],
+                ['status' => 'cancelled'],
+                "Order #{$order->id} was cancelled. Stock restored and promo reservation released. Supplier obligations remain recorded."
+            );
         });
 
         return response()->json([
@@ -206,6 +336,11 @@ class OrderController extends Controller
         $perPage = (int) $request->query('per_page', 10);
         $paginator = $query->paginate($perPage);
 
+        // Hide private wholesale data from customer response
+        $paginator->getCollection()->each(function ($order) {
+            $order->items->makeHidden(['wholesale_unit_cost', 'supplier_id', 'supplier_name', 'supplier_obligation_status', 'supplier_payout_status']);
+        });
+
         return response()->json([
             'message' => null,
             'data' => [
@@ -222,12 +357,20 @@ class OrderController extends Controller
 
     public function show(Request $request, $id)
     {
-        $order = Order::with(['items.plant', 'items.shop', 'user'])->findOrFail($id);
-        if ($order->user_id !== $request->user()->id && ! $request->user()->isSuperAdmin()) {
+        $order = Order::with(['items.plant', 'items.shop', 'items.supplier', 'user', 'expenses'])->findOrFail($id);
+        $user = $request->user();
+        $isAdmin = $user->isSuperAdmin() || in_array($user->role, ['admin', 'super_admin'], true);
+
+        if ($order->user_id !== $user->id && ! $isAdmin) {
             return response()->json([
                 'message' => 'Forbidden',
                 'errors' => [],
             ], 403);
+        }
+
+        if (! $isAdmin) {
+            $order->items->makeHidden(['wholesale_unit_cost', 'supplier_id', 'supplier_name', 'supplier_obligation_status', 'supplier_payout_status']);
+            $order->makeHidden(['expenses']);
         }
 
         return response()->json([
@@ -237,6 +380,37 @@ class OrderController extends Controller
             ],
         ]);
     }
+
+    public function updatePaymentStatus(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        $validated = $request->validate([
+            'payment_status' => ['required', 'in:unpaid,paid,partially_paid,refunded'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $oldStatus = $order->payment_status;
+        $order->payment_status = $validated['payment_status'];
+        $order->save();
+
+        FinancialAuditLog::log(
+            'payment_status_updated',
+            'order',
+            $order->id,
+            ['payment_status' => $oldStatus],
+            ['payment_status' => $order->payment_status],
+            $validated['notes'] ?? "Payment status changed from {$oldStatus} to {$order->payment_status}"
+        );
+
+        return response()->json([
+            'message' => 'Order payment status updated successfully.',
+            'data' => [
+                'order' => $order->fresh(['items.plant', 'user']),
+            ],
+        ]);
+    }
+
 
     public function updateStatus(UpdateOrderStatusRequest $request, $id)
     {

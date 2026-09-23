@@ -28,6 +28,10 @@ type OrderItem = {
   plant_name: string;
   quantity: number;
   price: number;
+  wholesale_unit_cost?: number | null;
+  supplier_name?: string | null;
+  supplier_id?: number | null;
+  supplier_obligation_status?: string | null;
 };
 type Order = {
   id: number;
@@ -38,6 +42,17 @@ type Order = {
   total: number;
   date: string;
   status: OrderStatus;
+  payment_method: string;
+  payment_status: string;
+  road_distance_km?: number | null;
+  delivery_fee: number;
+  delivery_latitude?: number | null;
+  delivery_longitude?: number | null;
+  promo_code?: string | null;
+  discount_amount: number;
+  cod_collected_amount: number;
+  cod_collected_at?: string | null;
+  earnings_incomplete: boolean;
   shipping_name: string;
   shipping_phone: string;
   shipping_city: string;
@@ -91,6 +106,17 @@ const transformOrder = (order: any): Order => ({
   total: Number(order?.total ?? 0),
   date: String(order?.created_at ?? ""),
   status: normalizeStatus(String(order?.status ?? "pending")),
+  payment_method: order?.payment_method || "cod",
+  payment_status: order?.payment_status || "pending",
+  road_distance_km: order?.road_distance_km ? Number(order.road_distance_km) : null,
+  delivery_fee: Number(order?.delivery_fee ?? 0),
+  delivery_latitude: order?.delivery_latitude ? Number(order.delivery_latitude) : null,
+  delivery_longitude: order?.delivery_longitude ? Number(order.delivery_longitude) : null,
+  promo_code: order?.promo_code || null,
+  discount_amount: Number(order?.discount_amount ?? 0),
+  cod_collected_amount: Number(order?.cod_collected_amount ?? 0),
+  cod_collected_at: order?.cod_collected_at ?? null,
+  earnings_incomplete: Boolean(order?.earnings_incomplete),
   shipping_name: order?.shipping_name || order?.user?.name || "Unknown",
   shipping_phone: order?.shipping_phone || "-",
   shipping_city: order?.shipping_city || "-",
@@ -114,6 +140,10 @@ const transformOrder = (order: any): Order => ({
         plant_name: item?.plant?.name || "Unknown Plant",
         quantity: Number(item?.quantity ?? 0),
         price: Number(item?.price ?? 0),
+        wholesale_unit_cost: item?.wholesale_unit_cost !== null && item?.wholesale_unit_cost !== undefined ? Number(item.wholesale_unit_cost) : null,
+        supplier_name: item?.supplier?.name || null,
+        supplier_id: item?.supplier_id ? Number(item.supplier_id) : null,
+        supplier_obligation_status: item?.supplier_obligation_status || "kept",
       }))
     : [],
 });
@@ -152,6 +182,10 @@ export default function ManageOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [confirmationNotes, setConfirmationNotes] = useState("");
+  const [showCodModal, setShowCodModal] = useState(false);
+  const [codAmount, setCodAmount] = useState("");
+  const [codNotes, setCodNotes] = useState("");
+  const [busyCod, setBusyCod] = useState(false);
   useEffect(() => {
     void fetchOrders();
   }, []);
@@ -258,6 +292,73 @@ export default function ManageOrders() {
       setSavingConfirmationId(null);
     }
   };
+
+  const handleRecordCodCollection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedOrder || !codAmount) return;
+    setBusyCod(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/admin/suppliers/orders/${selectedOrder.id}/cod-collection`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          amount: parseFloat(codAmount),
+          notes: codNotes || "Customer COD collected",
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to record COD collection");
+      }
+      setShowCodModal(false);
+      setCodAmount("");
+      setCodNotes("");
+      void fetchOrders();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setBusyCod(false);
+    }
+  };
+
+  const handleUpdateObligation = async (itemId: number, obligationStatus: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API}/api/admin/suppliers/items/${itemId}/obligation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          obligation_status: obligationStatus,
+          reason: `Admin set supplier obligation to ${obligationStatus}`,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to update obligation");
+      void fetchOrders();
+      if (selectedOrder) {
+        setSelectedOrder((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            order_items: prev.order_items.map((it) =>
+              it.id === itemId ? { ...it, supplier_obligation_status: obligationStatus } : it
+            ),
+          };
+        });
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const handleViewDetail = (order: Order) => {
     setSelectedOrder(order);
     setConfirmationNotes(order.confirmation_notes || "");
@@ -416,6 +517,21 @@ export default function ManageOrders() {
                           {getStatusIcon(order.status)}
                           {formatStatusLabel(order.status)}
                         </span>
+                        <div style={{ marginTop: "4px" }}>
+                          <span
+                            style={{
+                              fontSize: "0.7rem",
+                              fontWeight: 600,
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              background: order.payment_status === "paid" ? "#ecfdf5" : "#fef3c7",
+                              color: order.payment_status === "paid" ? "#065f46" : "#92400e",
+                              border: `1px solid ${order.payment_status === "paid" ? "#a7f3d0" : "#fde68a"}`,
+                            }}
+                          >
+                            {order.payment_status === "paid" ? "COD Paid" : "COD Unpaid"}
+                          </span>
+                        </div>
                       </td>
                       <td>
                         <span
@@ -553,6 +669,73 @@ export default function ManageOrders() {
                       {selectedOrder.location_notes || "Not provided"}
                     </p>
                   </div>
+                  <div className="admin-info-section">
+                    <h4>Payment & Delivery Financials</h4>
+                    <p>
+                      <strong>Payment Status:</strong>{" "}
+                      <span
+                        style={{
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          background: selectedOrder.payment_status === "paid" ? "#ecfdf5" : "#fef3c7",
+                          color: selectedOrder.payment_status === "paid" ? "#065f46" : "#92400e",
+                          border: `1px solid ${selectedOrder.payment_status === "paid" ? "#a7f3d0" : "#fde68a"}`,
+                        }}
+                      >
+                        {selectedOrder.payment_status === "paid" ? "COD Paid" : "COD Unpaid"}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>Cash Collected:</strong> {formatPrice(selectedOrder.cod_collected_amount)}
+                      {selectedOrder.payment_status !== "paid" && (
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-secondary admin-btn-sm"
+                          style={{ marginLeft: "0.5rem", padding: "2px 6px", fontSize: "0.75rem" }}
+                          onClick={() => {
+                            setCodAmount(String(Math.max(0, selectedOrder.total - selectedOrder.cod_collected_amount)));
+                            setShowCodModal(true);
+                          }}
+                        >
+                          Record COD
+                        </button>
+                      )}
+                    </p>
+                    <p>
+                      <strong>Road Distance:</strong> {selectedOrder.road_distance_km ? `${selectedOrder.road_distance_km} km` : "N/A"}
+                    </p>
+                    <p>
+                      <strong>Delivery Fee:</strong> {formatPrice(selectedOrder.delivery_fee)}
+                    </p>
+                    {selectedOrder.promo_code && (
+                      <p>
+                        <strong>Promo Code:</strong> {selectedOrder.promo_code} (-{formatPrice(selectedOrder.discount_amount)})
+                      </p>
+                    )}
+                    <p>
+                      <strong>Cost Accounting:</strong>{" "}
+                      {selectedOrder.earnings_incomplete ? (
+                        <span style={{ color: "#d97706", fontWeight: 600 }}>⚠️ Incomplete wholesale data</span>
+                      ) : (
+                        <span style={{ color: "#059669", fontWeight: 600 }}>✓ Costs Complete</span>
+                      )}
+                    </p>
+                    {selectedOrder.delivery_latitude && selectedOrder.delivery_longitude && (
+                      <p>
+                        <strong>GPS Pin:</strong>{" "}
+                        <a
+                          href={`https://www.google.com/maps?q=${selectedOrder.delivery_latitude},${selectedOrder.delivery_longitude}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: "#2563eb", textDecoration: "underline", fontSize: "0.8rem" }}
+                        >
+                          View Map ({selectedOrder.delivery_latitude.toFixed(4)}, {selectedOrder.delivery_longitude.toFixed(4)})
+                        </a>
+                      </p>
+                    )}
+                  </div>
                   <div className="admin-info-section admin-info-section-wide">
                     <h4>Quick Contact</h4>
                     <div className="admin-order-contact-row">
@@ -658,11 +841,14 @@ export default function ManageOrders() {
                   </div>
                 </div>
                 <div className="admin-order-items">
-                  <h4>Order Items</h4>
+                  <h4>Order Items & Nursery Wholesale Costs</h4>
                   <table className="admin-table">
                     <thead>
                       <tr>
                         <th>Product</th>
+                        <th>Nursery Supplier</th>
+                        <th>Unit Wholesale Cost</th>
+                        <th>Obligation</th>
                         <th>Quantity</th>
                         <th>Price</th>
                         <th>Subtotal</th>
@@ -671,7 +857,35 @@ export default function ManageOrders() {
                     <tbody>
                       {selectedOrder.order_items.map((item) => (
                         <tr key={item.id}>
-                          <td>{item.plant_name}</td>
+                          <td><strong>{item.plant_name}</strong></td>
+                          <td>{item.supplier_name || <span style={{ color: "#9ca3af" }}>Not assigned</span>}</td>
+                          <td>
+                            {typeof item.wholesale_unit_cost === "number"
+                              ? formatPrice(item.wholesale_unit_cost)
+                              : <span style={{ color: "#d97706" }}>Missing (Incomplete)</span>}
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                fontSize: "0.75rem",
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                background: item.supplier_obligation_status === "waived" ? "#f3f4f6" : "#ecfdf5",
+                                color: item.supplier_obligation_status === "waived" ? "#6b7280" : "#065f46",
+                              }}
+                            >
+                              {item.supplier_obligation_status || "kept"}
+                            </span>
+                            {selectedOrder.status === "cancelled" && (
+                              <button
+                                type="button"
+                                style={{ marginLeft: "6px", fontSize: "0.7rem", background: "none", border: "1px solid #d1d5db", borderRadius: "3px", cursor: "pointer" }}
+                                onClick={() => handleUpdateObligation(item.id, item.supplier_obligation_status === "waived" ? "kept" : "waived")}
+                              >
+                                {item.supplier_obligation_status === "waived" ? "Restore Obligation" : "Waive"}
+                              </button>
+                            )}
+                          </td>
                           <td>{item.quantity}</td>
                           <td>{formatPrice(item.price)}</td>
                           <td>{formatPrice(item.price * item.quantity)}</td>
@@ -710,6 +924,71 @@ export default function ManageOrders() {
             </div>
           </div>
         ) : null}
+
+        {/* Record COD Payment Modal */}
+        {showCodModal && selectedOrder && (
+          <div className="admin-modal-overlay">
+            <div className="admin-modal" style={{ maxWidth: "450px" }}>
+              <div className="admin-modal-header">
+                <h3>Record Cash on Delivery Collection</h3>
+                <button
+                  type="button"
+                  className="admin-modal-close"
+                  onClick={() => setShowCodModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <form onSubmit={handleRecordCodCollection}>
+                <div className="admin-modal-body" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  <div style={{ background: "#f8fafc", padding: "0.75rem", borderRadius: "6px", fontSize: "0.85rem" }}>
+                    <div><strong>Order:</strong> {selectedOrder.order_id}</div>
+                    <div><strong>Total Due:</strong> {formatPrice(selectedOrder.total)}</div>
+                    <div><strong>Already Collected:</strong> {formatPrice(selectedOrder.cod_collected_amount)}</div>
+                  </div>
+                  <div>
+                    <label className="admin-label">Amount Collected (NPR) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      min="1"
+                      className="admin-input"
+                      value={codAmount}
+                      onChange={(e) => setCodAmount(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="admin-label">Notes & Rider Details</label>
+                    <input
+                      type="text"
+                      className="admin-input"
+                      value={codNotes}
+                      onChange={(e) => setCodNotes(e.target.value)}
+                      placeholder="e.g. Handed cash to rider Aarav"
+                    />
+                  </div>
+                </div>
+                <div className="admin-modal-footer">
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn--secondary"
+                    onClick={() => setShowCodModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="admin-btn admin-btn--primary"
+                    disabled={busyCod}
+                  >
+                    {busyCod ? "Recording..." : "Confirm COD Collection"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

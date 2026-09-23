@@ -14,6 +14,7 @@ import {
   defaultHomepageContent,
   type HomepageContent,
 } from "../features/homepage/content";
+import SEO from "../components/common/SEO";
 import "../components/home/home.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 export default function Home() {
@@ -46,7 +47,10 @@ export default function Home() {
             // ignore
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
         console.warn("Could not background-refresh homepage content:", error);
       } finally {
         clearTimeout(timeout);
@@ -61,6 +65,11 @@ export default function Home() {
   }, []);
   return (
     <Layout>
+      <SEO
+        title="Nepal Cozy Care - Premium Indoor Plants & Plant Care in Nepal"
+        description="Discover healthy indoor plants, designer ceramic pots, smart plant health checker, and watering guides with fast doorstep delivery across Nepal."
+        canonicalPath="/"
+      />
       <Hero content={content.hero} />
       <Features items={content.features} />
       <SmartCareTools content={content.smart_tools} />

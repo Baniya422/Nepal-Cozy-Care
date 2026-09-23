@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, Store } from "lucide-react";
+import { useFeatureFlags } from "../../context/FeatureFlagsContext";
 import "./navbar.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -41,6 +42,7 @@ const readCurrentUser = () => {
 export default function Navbar() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const { vendor_marketplace_enabled } = useFeatureFlags();
   const [currentUser, setCurrentUser] = useState<{ name?: string; email?: string; role?: string } | null>(() => {
     try {
       const stored = localStorage.getItem("user");
@@ -54,6 +56,8 @@ export default function Navbar() {
 
   const isSuperAdmin = currentUser?.role === "super_admin" || currentUser?.role === "admin";
   const isSeller = currentUser?.role === "seller";
+  const visibleNavItems = navItems.filter((item) => vendor_marketplace_enabled || item.to !== "/shops");
+
   const refreshCartCount = useCallback(async () => {
     if (!token) {
       setCartCount(readLocalAccessoryCartCount());
@@ -166,7 +170,7 @@ export default function Navbar() {
           className={`site-header__panel${menuOpen ? " is-open" : ""}`}
         >
           <nav className="site-nav" aria-label="Primary navigation">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -180,6 +184,7 @@ export default function Navbar() {
               </NavLink>
             ))}
           </nav>
+
           <div className="site-header__actions">
             <button
               type="button"
@@ -212,7 +217,7 @@ export default function Navbar() {
             </button>
             {token ? (
               <>
-                {!isSuperAdmin && !isSeller && (
+                {vendor_marketplace_enabled && !isSuperAdmin && !isSeller && (
                   <Link
                     to="/become-a-seller"
                     className="site-ghost-btn"

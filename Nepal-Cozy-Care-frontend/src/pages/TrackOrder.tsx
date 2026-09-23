@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Layout from "../components/layout/Layout";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../utils/imageUrl";
+import { useFeatureFlags } from "../context/FeatureFlagsContext";
 import "../styles/trackOrder.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 type OrderItem = {
@@ -127,6 +128,7 @@ const normalizeOrderData = (rawOrder: any): OrderData => ({
 export default function TrackOrder() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { vendor_marketplace_enabled } = useFeatureFlags();
   const queryOrderId = searchParams.get("orderId") ?? "";
   const queryEmail = searchParams.get("email") ?? "";
   const [orderId, setOrderId] = useState(() => queryOrderId);
@@ -510,7 +512,7 @@ export default function TrackOrder() {
                         <h4 className="track-order-item-name">
                           {item.plant.name}
                         </h4>
-                        {(item.shop_name || item.shop?.name) && (
+                        {vendor_marketplace_enabled && (item.shop_name || item.shop?.name) && (
                           <p style={{ fontSize: "0.8rem", color: "#059669", display: "flex", alignItems: "center", gap: "0.25rem", marginTop: "0.15rem" }}>
                             <Store size={13} />
                             Sold by:{" "}
