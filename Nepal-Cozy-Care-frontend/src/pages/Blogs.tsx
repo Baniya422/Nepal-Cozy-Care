@@ -39,58 +39,6 @@ function ReadProgress() {
   return <div className="blog-read-progress" style={{ width: `${w}%` }} />;
 }
 
-// ── Custom Cursor ──────────────────────────────────────────────────────────────
-function BlogCursor() {
-  const dot  = useRef<HTMLDivElement>(null);
-  const ring = useRef<HTMLDivElement>(null);
-  const mouse   = useRef({ x: -100, y: -100 });
-  const ringPos = useRef({ x: -100, y: -100 });
-  const raf     = useRef(0);
-
-  useEffect(() => {
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-    const move = (e: MouseEvent) => {
-      mouse.current = { x: e.clientX, y: e.clientY };
-      if (dot.current) { dot.current.style.left = e.clientX + "px"; dot.current.style.top = e.clientY + "px"; }
-      const el = e.target as HTMLElement;
-      const hover = el.closest("a,button,[data-hover]");
-      if (hover) {
-        dot.current?.classList.add("hovering");
-        ring.current?.classList.add("hovering");
-      } else {
-        dot.current?.classList.remove("hovering");
-        ring.current?.classList.remove("hovering");
-      }
-    };
-    const down = () => { dot.current?.classList.add("clicking"); ring.current?.classList.add("clicking"); };
-    const up   = () => { dot.current?.classList.remove("clicking"); ring.current?.classList.remove("clicking"); };
-    const tick = () => {
-      ringPos.current.x = lerp(ringPos.current.x, mouse.current.x, 0.1);
-      ringPos.current.y = lerp(ringPos.current.y, mouse.current.y, 0.1);
-      if (ring.current) { ring.current.style.left = ringPos.current.x + "px"; ring.current.style.top = ringPos.current.y + "px"; }
-      raf.current = requestAnimationFrame(tick);
-    };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mousedown", down);
-    window.addEventListener("mouseup", up);
-    raf.current = requestAnimationFrame(tick);
-    return () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mousedown", down);
-      window.removeEventListener("mouseup", up);
-      cancelAnimationFrame(raf.current);
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={dot}  className="blog-cursor-dot"  />
-      <div ref={ring} className="blog-cursor-ring" />
-    </>
-  );
-}
-
 // ── Scroll reveal hook ─────────────────────────────────────────────────────────
 function useReveal() {
   useEffect(() => {
@@ -379,18 +327,19 @@ export default function Blogs() {
     <Layout>
       <div className="blog-journal">
         <ReadProgress />
-        <BlogCursor />
 
         {/* ─────────────────────────────────────────────────────────────────
             1. CINEMATIC FULLSCREEN HERO
         ───────────────────────────────────────────────────────────────── */}
         {featured && cat === "All" && !search && (
           <section className="bj-hero">
-            {/* Parallax background */}
-            <div
+            {/* Parallax background with fallback */}
+            <img
+              src={resolveImageUrl(featured.image, DEFAULT_BLOG_IMAGE)}
+              alt={featured.title}
               className="bj-hero-bg"
+              onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
               style={{
-                backgroundImage: `url(${featured.image})`,
                 transform: `translateY(${heroY}px) translateX(${mouseX * 0.3}px)`,
               }}
             />

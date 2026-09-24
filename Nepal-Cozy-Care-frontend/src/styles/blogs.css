@@ -40,32 +40,6 @@
   pointer-events: none;
 }
 
-/* ── Custom Cursor ── */
-.blog-cursor-dot {
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  position: fixed; top: 0; left: 0;
-  pointer-events: none; z-index: 9999;
-  transform: translate(-50%,-50%);
-  transition: width .25s, height .25s, background .25s;
-  mix-blend-mode: multiply;
-}
-.blog-cursor-ring {
-  width: 36px; height: 36px;
-  border: 1.5px solid var(--accent);
-  border-radius: 50%;
-  position: fixed; top: 0; left: 0;
-  pointer-events: none; z-index: 9998;
-  transform: translate(-50%,-50%);
-  transition: width .3s, height .3s, border-color .3s, opacity .3s;
-  opacity: .7;
-}
-.blog-cursor-dot.hovering  { width:14px; height:14px; background:var(--primary); }
-.blog-cursor-ring.hovering { width:56px; height:56px; border-color:var(--primary); opacity:.4; }
-.blog-cursor-dot.clicking  { transform:translate(-50%,-50%) scale(.6); }
-.blog-cursor-ring.clicking { width:28px; height:28px; }
-
 /* ── Scroll Reveal ── */
 @keyframes bj-fadeUp {
   from { opacity:0; transform:translateY(32px); }
@@ -111,9 +85,12 @@
 .bj-hero-bg {
   position: absolute;
   inset: -8%;
-  background-size: cover;
-  background-position: center;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  object-position: center;
   will-change: transform;
+  pointer-events: none;
 }
 
 .bj-hero-overlay-1 {
