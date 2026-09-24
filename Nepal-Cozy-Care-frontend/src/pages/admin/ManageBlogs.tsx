@@ -16,6 +16,8 @@ import {
   FileText,
   Check,
 } from "lucide-react";
+import BlogDetailsFields, { detailsFromBlog, emptyBlogDetails, lines, type BlogDetailsForm } from "./BlogDetailsFields";
+import { fetchAllBlogs, uploadBlogImage } from "../../features/blogs/blogData";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { CURATED_BLOGS } from "../../features/blogs/curatedBlogs";
 import "../../components/admin/admin.css";
@@ -28,6 +30,7 @@ import {
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 interface Blog {
+  details: BlogDetailsForm;
   id: number;
   title: string;
   author: string;
@@ -88,7 +91,7 @@ export default function ManageBlogs() {
 
   const [formData, setFormData] = useState<BlogFormData>({
     title: "",
-    author: "Sarah Johnson",
+    author: "Cozy Care Botanist",
     category: "Indoor Plants",
     excerpt: "",
     content: "",
@@ -98,6 +101,8 @@ export default function ManageBlogs() {
     image: "/images/blog-hero-lush.jpg",
   });
 
+  const [details, setDetails] = useState<BlogDetailsForm>(emptyBlogDetails);
+  const [authorFile, setAuthorFile] = useState<File | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>("/images/blog-hero-lush.jpg");
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -117,16 +122,10 @@ export default function ManageBlogs() {
   const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/admin/blogs`, {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const blogsData = data.data?.blogs || data.data?.data || data.data || [];
+      const blogsData = await fetchAllBlogs(`${API}/api/admin/blogs`, token);
+      {
         const transformedBlogs: Blog[] = blogsData.map((blog: any) => ({
+          details: detailsFromBlog(blog),
           id: blog.id,
           title: blog.title,
           author: blog.author || "Cozy Care Botanist",
@@ -144,6 +143,7 @@ export default function ManageBlogs() {
       }
     } catch (error) {
       console.error("Error fetching blogs:", error);
+      setStatusMessage({ type: "error", text: "Could not load all articles. Please refresh and try again." });
     } finally {
       setLoading(false);
     }
@@ -171,6 +171,9 @@ export default function ManageBlogs() {
             content: guide.content,
             category: guide.category,
             author: guide.author,
+            author_role: guide.author_role, author_image: guide.author_image,
+            author_bio: guide.author_bio || "", read_time: guide.read_time,
+            tags: guide.tags, tips: guide.tips || [], takeaways: guide.takeaways || [],
             image: guide.image,
             is_published: true,
             is_top_trend: Boolean(guide.is_top_trend),
@@ -195,9 +198,11 @@ export default function ManageBlogs() {
   // Switch to Editor for creating new blog
   const handleCreateNew = () => {
     setEditingBlog(null);
+    setDetails(emptyBlogDetails);
+    setAuthorFile(null);
     setFormData({
       title: "",
-      author: "Sarah Johnson",
+      author: "Cozy Care Botanist",
       category: "Indoor Plants",
       excerpt: "",
       content: "",
@@ -215,6 +220,8 @@ export default function ManageBlogs() {
   // Switch to Editor for modifying existing blog
   const handleEditBlog = (blog: Blog) => {
     setEditingBlog(blog);
+    setDetails(blog.details);
+    setAuthorFile(null);
     setFormData({
       title: blog.title,
       author: blog.author,
@@ -246,28 +253,8 @@ export default function ManageBlogs() {
     try {
       let finalImagePath = formData.image;
 
-      // Handle image file upload if user picked a new file
-      if (selectedImageFile) {
-        const fileData = new FormData();
-        fileData.append("file", selectedImageFile);
-        fileData.append("directory", "blogs");
-
-        const uploadRes = await fetch(`${API}/api/upload`, {
-          method: "POST",
-          headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-          body: fileData,
-        });
-
-        const uploadJson = await uploadRes.json().catch(() => ({}));
-        if (!uploadRes.ok) {
-          throw new Error(uploadJson.message || "Image upload failed. Please try again.");
-        }
-        const uploadedPath = uploadJson.data?.path || uploadJson.path;
-        if (typeof uploadedPath !== "string" || !uploadedPath.trim()) {
-          throw new Error("Image upload did not return a saved image. Please try again.");
-        }
-        finalImagePath = uploadedPath;
-      }
+      if (selectedImageFile) finalImagePath = await uploadBlogImage(API, token, selectedImageFile);
+      const authorImagePath = authorFile ? await uploadBlogImage(API, token, authorFile) : details.author_image;
 
       const url = editingBlog ? `${API}/api/admin/blogs/${editingBlog.id}` : `${API}/api/admin/blogs`;
       const method = editingBlog ? "PUT" : "POST";
@@ -280,6 +267,9 @@ export default function ManageBlogs() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          ...details,
+          author_image: authorImagePath,
+          tags: lines(details.tags), tips: lines(details.tips), takeaways: lines(details.takeaways),
           title: formData.title,
           excerpt: formData.excerpt,
           content: formData.content,
@@ -664,6 +654,7 @@ export default function ManageBlogs() {
                     </div>
                   </div>
                 </div>
+                <BlogDetailsFields value={details} onChange={setDetails} author={formData.author} file={authorFile} onFileChange={setAuthorFile} />
               </div>
 
               {/* ── RIGHT: Sidebar ── */}

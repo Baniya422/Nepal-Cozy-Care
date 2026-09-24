@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, X } from "lucide-react";
 import Layout from "../components/layout/Layout";
-import { CURATED_BLOGS, type CuratedBlog } from "../features/blogs/curatedBlogs";
+import { DEFAULT_AUTHOR_IMAGE, fetchAllBlogs, mapBlogFromApi } from "../features/blogs/blogData";
+import { type CuratedBlog } from "../features/blogs/curatedBlogs";
 import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../utils/imageUrl";
 import "../styles/blogs.css";
 
@@ -101,7 +102,7 @@ function WideCard({ blog, onClick }: { blog: CuratedBlog; onClick: () => void })
             <img
               src={blog.author_image} alt={blog.author}
               className="bj-card-author-img"
-              onError={(e) => handleImageError(e, "/images/team-sarah.jpg")}
+              onError={(e) => handleImageError(e, DEFAULT_AUTHOR_IMAGE)}
             />
             <span className="bj-card-author-name">{blog.author}</span>
           </div>
@@ -188,7 +189,7 @@ function StandardCard({
               <img
                 src={blog.author_image} alt={blog.author}
                 className="bj-card-author-img"
-                onError={(e) => handleImageError(e, "/images/team-sarah.jpg")}
+                onError={(e) => handleImageError(e, DEFAULT_AUTHOR_IMAGE)}
               />
               <span className="bj-card-author-name">{blog.author}</span>
             </div>
@@ -205,29 +206,9 @@ export default function Blogs() {
   const navigate = useNavigate();
   useReveal();
 
-  const CACHE_KEY = "cozy_cached_blogs";
-
-  const [blogs, setBlogs] = useState<CuratedBlog[]>(() => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch {}
-    return CURATED_BLOGS;
-  });
-
-  const [loading, setLoading] = useState<boolean>(() => {
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return false;
-      }
-    } catch {}
-    return true;
-  });
+  const [blogs, setBlogs] = useState<CuratedBlog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const [cat,   setCat]                 = useState("All");
   const [search, setSearch]             = useState("");
@@ -254,35 +235,10 @@ export default function Blogs() {
     let isMounted = true;
     const fetchApiBlogs = async () => {
       try {
-        const res  = await fetch(`${API}/api/blogs?per_page=30`);
-        const json = await res.json();
-        const apiList = json.data?.blogs || json.data || [];
-        if (Array.isArray(apiList) && apiList.length > 0) {
-          const formatted: CuratedBlog[] = apiList.map((b: any, idx: number) => ({
-            id: b.id,
-            title: b.title,
-            excerpt: b.excerpt || (b.content ? b.content.substring(0, 160) + "..." : ""),
-            content: b.content || "",
-            image: resolveImageUrl(b.image, CURATED_BLOGS[idx % CURATED_BLOGS.length].image),
-            author: b.author || "Cozy Care Botanist",
-            author_role: "Care Specialist",
-            author_image: resolveImageUrl(CURATED_BLOGS[idx % CURATED_BLOGS.length].author_image, "/images/team-sarah.jpg"),
-            category: b.category || "Indoor Plants",
-            read_time: "5 min read",
-            views: b.views || 0,
-            published_at: b.published_at || b.created_at || new Date().toISOString(),
-            is_featured: Boolean(b.is_top_story),
-            is_top_trend: Boolean(b.is_top_trend),
-            tags: ["PlantCare", "Kathmandu", b.category || "Greenery"],
-          }));
-          const combined = [...formatted, ...CURATED_BLOGS.filter((cb) => !formatted.some((ab) => ab.id === cb.id))];
-          if (isMounted) {
-            setBlogs(combined);
-            try { localStorage.setItem(CACHE_KEY, JSON.stringify(combined)); } catch {}
-          }
-        }
+        const apiList = await fetchAllBlogs(`${API}/api/blogs`);
+        if (isMounted) setBlogs(apiList.map(mapBlogFromApi));
       } catch {
-        /* fallback */
+        if (isMounted) setLoadError("We couldn't load the journal. Please refresh to try again.");
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -359,6 +315,7 @@ export default function Blogs() {
 
   return (
     <Layout>
+      {loadError && <p role="alert" style={{ padding: "2rem", textAlign: "center" }}>{loadError}</p>}
       <div className="blog-journal">
         <ReadProgress />
 
@@ -401,7 +358,7 @@ export default function Blogs() {
                   <img
                     src={featured.author_image} alt={featured.author}
                     className="bj-hero-avatar"
-                    onError={(e) => handleImageError(e, "/images/team-sarah.jpg")}
+                    onError={(e) => handleImageError(e, DEFAULT_AUTHOR_IMAGE)}
                   />
                   <div>
                     <div className="bj-hero-author-name">{featured.author}</div>

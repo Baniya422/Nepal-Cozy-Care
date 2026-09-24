@@ -2,18 +2,14 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ArrowLeft, Share2, Check } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "../components/layout/Layout";
-import { CURATED_BLOGS, type CuratedBlog } from "../features/blogs/curatedBlogs";
-import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../utils/imageUrl";
+import { type CuratedBlog } from "../features/blogs/curatedBlogs";
+import { handleImageError, DEFAULT_BLOG_IMAGE } from "../utils/imageUrl";
+import { DEFAULT_AUTHOR_IMAGE, mapBlogFromApi } from "../features/blogs/blogData";
+import { parseArticleSections } from "../features/blogs/articleContent";
 import SEO from "../components/common/SEO";
 import "../styles/blogDetail.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-type RelatedBlogApi = {
-  id: number; title: string; excerpt?: string | null; content?: string | null;
-  image?: string | null; author?: string | null; category?: string | null;
-  views?: number | null; published_at?: string | null;
-};
 
 // ── Inline markdown renderer ──────────────────────────────────────────────────
 const renderInline = (text: string): ReactNode[] =>
@@ -132,8 +128,6 @@ export default function BlogDetail() {
 
     const fetchArticle = async () => {
       setLoading(true);
-      const numericId  = Number(id);
-      const foundCurated = CURATED_BLOGS.find((b) => b.id === numericId);
 
       try {
         const res  = await fetch(`${API}/api/blogs/${id}`);
@@ -141,44 +135,15 @@ export default function BlogDetail() {
           const data   = await res.json();
           const apiBlog = data.data?.blog;
           if (apiBlog) {
-            setBlog({
-              id: apiBlog.id, title: apiBlog.title,
-              excerpt:  apiBlog.excerpt || "",
-              content:  apiBlog.content || "",
-              image:    resolveImageUrl(apiBlog.image || foundCurated?.image, DEFAULT_BLOG_IMAGE),
-              author:   apiBlog.author || foundCurated?.author || "Cozy Care Botanist",
-              author_role:  foundCurated?.author_role  || "Senior Botanist",
-              author_image: resolveImageUrl(foundCurated?.author_image, "/images/team-sarah.jpg"),
-              category:   apiBlog.category || foundCurated?.category || "Indoor Plants",
-              read_time:  foundCurated?.read_time || "5 min read",
-              views:      apiBlog.views   || foundCurated?.views || 1840,
-              published_at: apiBlog.published_at || apiBlog.created_at || "2026-09-08",
-              tags:       foundCurated?.tags || ["PlantCare", "Kathmandu"],
-              tips:       foundCurated?.tips || ["Always check root moisture before watering.", "Provide bright, gentle indirect sunlight."],
-              takeaways:  foundCurated?.takeaways || ["Consistency in care yields thriving plants.", "Aerated soil prevents root decay."],
-            });
-            const apiRelated = data.data?.related_blogs || [];
-            setRelatedBlogs(
-              apiRelated.length > 0
-                ? apiRelated.map((rb: RelatedBlogApi) => ({
-                    id: rb.id, title: rb.title, excerpt: rb.excerpt || "",
-                    content: rb.content || "",
-                    image:   resolveImageUrl(rb.image, "/images/blog-leaf-macro.jpg"),
-                    author:  rb.author || "Cozy Care Team", author_role: "Care Specialist",
-                    author_image: "/images/team-emily.jpg",
-                    category: rb.category || "Care Tips", read_time: "4 min read",
-                    views: rb.views || 920, published_at: rb.published_at || "2026-09-01",
-                    tags: ["IndoorPlants"],
-                  }))
-                : CURATED_BLOGS.filter((b) => b.id !== numericId).slice(0, 3)
-            );
+            setBlog(mapBlogFromApi(apiBlog));
+            setRelatedBlogs((data.data?.related_blogs || []).map(mapBlogFromApi));
             setLoading(false); return;
           }
         }
       } catch { /* fallback */ }
 
-      if (foundCurated) { setBlog(foundCurated); setRelatedBlogs(CURATED_BLOGS.filter((b) => b.id !== numericId).slice(0, 3)); }
-      else               { setBlog(CURATED_BLOGS[0]); setRelatedBlogs(CURATED_BLOGS.slice(1, 4)); }
+      setBlog(null);
+      setRelatedBlogs([]);
       setLoading(false);
     };
 
@@ -229,30 +194,14 @@ export default function BlogDetail() {
   }
 
   // Parse content into sections
-  const rawParagraphs = blog.content
-    ? blog.content.split("\n\n").filter((p) => p.trim().length > 0)
-    : [];
-
-  // Build named sections from headings
-  type Section = { heading: string | null; paras: string[] };
-  const sections: Section[] = [];
-  let current: Section = { heading: null, paras: [] };
-  for (const para of rawParagraphs) {
-    if (para.startsWith("### ") || para.startsWith("## ")) {
-      if (current.paras.length > 0 || current.heading) sections.push(current);
-      current = { heading: para.replace(/^##+ /, ""), paras: [] };
-    } else {
-      current.paras.push(para);
-    }
-  }
-  if (current.paras.length > 0 || current.heading) sections.push(current);
+  const sections = parseArticleSections(blog.content);
 
   // TOC headings
   const tocHeadings = sections.filter((s) => s.heading).map((s) => s.heading!);
 
   // First para intro
-  const introSection  = sections[0];
-  const bodySections  = sections.slice(1);
+  const introSection = sections[0]?.heading ? undefined : sections[0];
+  const bodySections = introSection ? sections.slice(1) : sections;
 
   const publishedDate = new Date(blog.published_at).toLocaleDateString("en-US", {
     month: "long", day: "numeric", year: "numeric",
@@ -261,8 +210,8 @@ export default function BlogDetail() {
   return (
     <Layout>
       <SEO
-        title={blog.title}
-        description={blog.excerpt || blog.content?.slice(0, 160)}
+        title={blog.meta_title || blog.title}
+        description={blog.meta_description || blog.excerpt || blog.content?.slice(0, 160)}
         canonicalPath={`/blogs/${blog.id}`}
         image={blog.image || undefined}
         type="article"
@@ -304,7 +253,7 @@ export default function BlogDetail() {
                 <img
                   src={blog.author_image} alt={blog.author}
                   className="art-hero-avatar"
-                  onError={(e) => handleImageError(e, "/images/team-sarah.jpg")}
+                  onError={(e) => handleImageError(e, DEFAULT_AUTHOR_IMAGE)}
                 />
                 <div>
                   <div className="art-hero-author-name">{blog.author}</div>
@@ -312,7 +261,7 @@ export default function BlogDetail() {
                 </div>
               </div>
               <div className="art-hero-divider" />
-              <span className="art-hero-readtime">{blog.read_time} read</span>
+              <span className="art-hero-readtime">{blog.read_time}</span>
               <button
                 className={`art-share-btn${copied ? " copied" : ""}`}
                 onClick={handleCopy}
@@ -338,9 +287,7 @@ export default function BlogDetail() {
 
             {/* Intro with drop cap */}
             {introSection && introSection.paras.length > 0 && (
-              <p className="art-intro art-drop-cap art-reveal">
-                {introSection.paras.join(" ")}
-              </p>
+              <div>{introSection.paras.map((para, i) => <p key={i} className={i === 0 ? "art-intro art-drop-cap art-reveal" : "art-section-para art-reveal"}>{renderInline(para)}</p>)}</div>
             )}
 
             {/* Sections */}
@@ -439,6 +386,7 @@ export default function BlogDetail() {
               </div>
             )}
 
+            {blog.tags.length > 0 && <div className="art-share-row" aria-label="Article tags">{blog.tags.map((tag, index) => <span className="art-share-chip" key={index}>#{tag}</span>)}</div>}
             {/* Divider */}
             <div className="art-divider art-reveal">
               <div className="art-divider-line" />
@@ -451,14 +399,14 @@ export default function BlogDetail() {
               <img
                 src={blog.author_image} alt={blog.author}
                 className="art-author-card-img"
-                onError={(e) => handleImageError(e, "/images/team-sarah.jpg")}
+                onError={(e) => handleImageError(e, DEFAULT_AUTHOR_IMAGE)}
               />
               <div>
                 <div className="art-author-card-label">Written by</div>
                 <div className="art-author-card-name">{blog.author}</div>
+                {blog.author_role && <p>{blog.author_role}</p>}
                 <div className="art-author-card-bio">
-                  Plant enthusiast &amp; contributor at Nepal Cozy Care. Sharing care wisdom rooted in the
-                  Himalayan landscape, one leaf at a time.
+{blog.author_bio}
                 </div>
               </div>
             </div>
@@ -512,7 +460,7 @@ export default function BlogDetail() {
                         <img
                           src={rel.author_image} alt={rel.author}
                           className="art-rel-author-img"
-                          onError={(e) => handleImageError(e, "/images/team-sarah.jpg")}
+                          onError={(e) => handleImageError(e, DEFAULT_AUTHOR_IMAGE)}
                         />
                         <span>{rel.author}</span>
                         <span>·</span>

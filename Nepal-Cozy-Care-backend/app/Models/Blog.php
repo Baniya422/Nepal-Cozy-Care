@@ -17,6 +17,13 @@ class Blog extends Model
         'content',
         'image',
         'author',
+        'author_role',
+        'author_bio',
+        'author_image',
+        'read_time',
+        'tags',
+        'tips',
+        'takeaways',
         'category',
         'meta_title',
         'meta_description',
@@ -28,6 +35,9 @@ class Blog extends Model
     ];
 
     protected $casts = [
+        'tags' => 'array',
+        'tips' => 'array',
+        'takeaways' => 'array',
         'is_published' => 'boolean',
         'published_at' => 'datetime',
         'is_top_trend' => 'boolean',

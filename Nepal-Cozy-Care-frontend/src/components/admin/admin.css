@@ -1914,3 +1914,14 @@
  .plant-editor-preview { flex-direction: column; }
  .plant-editor-preview img { width: 100%; height: 200px; }
 }
+
+.blog-details-fields { display: grid; gap: 1rem; }
+.blog-details-fields section { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.4rem; }
+.blog-details-fields h3 { margin: 0 0 .5rem; color: #244637; font-size: 1.1rem; }
+.blog-details-fields p, .blog-details-fields small { color: #64748b; line-height: 1.5; }
+.blog-details-fields label { display: block; margin: 1rem 0 .4rem; font-weight: 600; font-size: .875rem; }
+.blog-details-fields input, .blog-details-fields textarea { width: 100%; padding: .7rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+.blog-details-fields small { display: block; margin-top: .5rem; }
+.blog-details-fields button { padding: .5rem; margin-top: .5rem; color: #9f1239; }
+.blog-writer-preview { display: flex; gap: 1rem; padding-top: 1rem; align-items: flex-start; }
+.blog-writer-preview img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; }

@@ -7,6 +7,9 @@ export type CuratedBlog = {
   author: string;
   author_role: string;
   author_image: string;
+  author_bio?: string;
+  meta_title?: string;
+  meta_description?: string;
   category: string;
   read_time: string;
   views: number;

@@ -139,6 +139,7 @@ class BlogController extends Controller
             $image = $request->file('image')->store('blogs', 'public');
         }
         $blog = Blog::create([
+            ...$validated,
             'user_id' => $request->user()?->id ?? 1,
             'title' => $validated['title'],
             'slug' => $slug,
