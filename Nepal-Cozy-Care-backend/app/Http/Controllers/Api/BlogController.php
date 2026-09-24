@@ -64,7 +64,7 @@ class BlogController extends Controller
                     'last_page' => $paginator->lastPage(),
                 ],
             ],
-        ]);
+        ])->header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     }
 
     public function show(int $id)

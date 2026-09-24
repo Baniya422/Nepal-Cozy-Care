@@ -81,7 +81,7 @@ function MagBtn({ children, className, style, onClick }: { children: React.React
 // ── Wide Card ─────────────────────────────────────────────────────────────────
 function WideCard({ blog, onClick }: { blog: CuratedBlog; onClick: () => void }) {
   return (
-    <div className="bj-wide-card bj-reveal" onClick={onClick}>
+    <div className="bj-wide-card" onClick={onClick}>
       <div className="bj-wide-card-img-wrap">
         <img
           src={blog.image} alt={blog.title}
@@ -113,9 +113,9 @@ function WideCard({ blog, onClick }: { blog: CuratedBlog; onClick: () => void })
 }
 
 // ── Small Card ────────────────────────────────────────────────────────────────
-function SmallCard({ blog, delay, onClick }: { blog: CuratedBlog; delay: number; onClick: () => void }) {
+function SmallCard({ blog, onClick }: { blog: CuratedBlog; delay?: number; onClick: () => void }) {
   return (
-    <div className="bj-small-card bj-reveal" style={{ animationDelay: `${delay}s`, flex: 1 }} onClick={onClick}>
+    <div className="bj-small-card" style={{ flex: 1 }} onClick={onClick}>
       <div className="bj-small-card-img-wrap">
         <img
           src={blog.image} alt={blog.title}
@@ -140,17 +140,17 @@ function SmallCard({ blog, delay, onClick }: { blog: CuratedBlog; delay: number;
 
 // ── Standard Card ─────────────────────────────────────────────────────────────
 function StandardCard({
-  blog, delay, onClick, isBookmarked, onBookmark,
+  blog, onClick, isBookmarked, onBookmark,
 }: {
-  blog: CuratedBlog; delay: number; onClick: () => void;
+  blog: CuratedBlog; delay?: number; onClick: () => void;
   isBookmarked: boolean; onBookmark: (e: React.MouseEvent) => void;
 }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   return (
     <div
-      className="bj-tilt bj-reveal"
-      style={{ animationDelay: `${delay}s`, cursor: "pointer" }}
+      className="bj-tilt"
+      style={{ cursor: "pointer" }}
       onClick={onClick}
       onMouseMove={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
@@ -205,7 +205,30 @@ export default function Blogs() {
   const navigate = useNavigate();
   useReveal();
 
-  const [blogs, setBlogs]               = useState<CuratedBlog[]>(CURATED_BLOGS);
+  const CACHE_KEY = "cozy_cached_blogs";
+
+  const [blogs, setBlogs] = useState<CuratedBlog[]>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return CURATED_BLOGS;
+  });
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return false;
+      }
+    } catch {}
+    return true;
+  });
+
   const [cat,   setCat]                 = useState("All");
   const [search, setSearch]             = useState("");
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
@@ -228,6 +251,7 @@ export default function Blogs() {
 
   // Fetch from backend
   useEffect(() => {
+    let isMounted = true;
     const fetchApiBlogs = async () => {
       try {
         const res  = await fetch(`${API}/api/blogs?per_page=30`);
@@ -252,11 +276,21 @@ export default function Blogs() {
             tags: ["PlantCare", "Kathmandu", b.category || "Greenery"],
           }));
           const combined = [...formatted, ...CURATED_BLOGS.filter((cb) => !formatted.some((ab) => ab.id === cb.id))];
-          setBlogs(combined);
+          if (isMounted) {
+            setBlogs(combined);
+            try { localStorage.setItem(CACHE_KEY, JSON.stringify(combined)); } catch {}
+          }
         }
-      } catch { /* fallback */ }
+      } catch {
+        /* fallback */
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
     void fetchApiBlogs();
+    return () => { isMounted = false; };
   }, []);
 
   // Only show hero for explicitly featured blogs — no fallback to blogs[0]
@@ -331,7 +365,7 @@ export default function Blogs() {
         {/* ─────────────────────────────────────────────────────────────────
             1. CINEMATIC FULLSCREEN HERO
         ───────────────────────────────────────────────────────────────── */}
-        {featured && cat === "All" && !search && (
+        {featured && cat === "All" && !search ? (
           <section className="bj-hero">
             {/* Parallax background with fallback */}
             <img
@@ -390,7 +424,60 @@ export default function Blogs() {
               <div className="bj-hero-scroll-line" />
             </div>
           </section>
-        )}
+        ) : loading && cat === "All" && !search ? (
+          <section className="bj-hero bj-hero-skeleton">
+            <img
+              src={DEFAULT_BLOG_IMAGE}
+              alt="Loading journal..."
+              className="bj-hero-bg"
+              style={{ filter: "brightness(0.55)" }}
+            />
+            <div className="bj-hero-overlay-1" />
+            <div className="bj-hero-overlay-2" />
+
+            <div className="bj-hero-content">
+              <div className="bj-hero-eyebrow" style={{ opacity: 0.6 }}>
+                <div className="bj-hero-line" />
+                <span className="bj-hero-label">Featured Story</span>
+                <span className="bj-hero-date">· {currentMonth} 2026</span>
+              </div>
+
+              <div
+                style={{
+                  width: "min(680px, 80%)",
+                  height: "clamp(36px, 5.5vw, 60px)",
+                  borderRadius: "10px",
+                  background: "linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.06) 75%)",
+                  backgroundSize: "200% 100%",
+                  animation: "bjShimmer 1.8s infinite",
+                  margin: "0 0 24px",
+                }}
+              />
+
+              <div
+                style={{
+                  width: "min(460px, 60%)",
+                  height: "22px",
+                  borderRadius: "6px",
+                  background: "linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 75%)",
+                  backgroundSize: "200% 100%",
+                  animation: "bjShimmer 1.8s infinite",
+                  margin: "0 0 40px",
+                }}
+              />
+
+              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                <div style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(255,255,255,0.12)" }} />
+                <div style={{ width: 110, height: 16, borderRadius: 6, background: "rgba(255,255,255,0.09)" }} />
+              </div>
+            </div>
+
+            <div className="bj-hero-scroll" style={{ opacity: 0.4 }}>
+              <span className="bj-hero-scroll-label">Scroll</span>
+              <div className="bj-hero-scroll-line" />
+            </div>
+          </section>
+        ) : null}
 
         {/* ─────────────────────────────────────────────────────────────────
             2. SECTION HEADER + SEARCH + CATEGORY PILLS

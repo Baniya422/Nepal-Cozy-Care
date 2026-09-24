@@ -62,10 +62,11 @@
 }
 
 .bj-reveal {
-  opacity:0; transform:translateY(28px);
-  transition: opacity .75s cubic-bezier(.23,1,.32,1), transform .75s cubic-bezier(.23,1,.32,1);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .35s ease, transform .35s ease;
 }
-.bj-reveal.visible { opacity:1; transform:translateY(0); }
+.bj-reveal.visible { opacity: 1; transform: translateY(0); }
 
 .bj-fade-up   { animation: bj-fadeUp .7s cubic-bezier(.23,1,.32,1) both; }
 .bj-fade-in   { animation: bj-fadeIn .6s ease both; }
@@ -576,4 +577,9 @@
   .bj-pills { gap: 6px; }
   .bj-small-card { flex-direction: column; }
   .bj-small-card-img-wrap { width: 100%; max-width: 100%; height: 180px; }
+}
+
+@keyframes bjShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

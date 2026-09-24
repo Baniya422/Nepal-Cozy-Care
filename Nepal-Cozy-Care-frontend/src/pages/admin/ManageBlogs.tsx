@@ -104,6 +104,12 @@ export default function ManageBlogs() {
 
   const token = localStorage.getItem("token");
 
+  const clearPublicBlogCache = () => {
+    try {
+      localStorage.removeItem("cozy_cached_blogs");
+    } catch {}
+  };
+
   useEffect(() => {
     void fetchBlogs();
   }, []);
@@ -178,6 +184,7 @@ export default function ManageBlogs() {
     }
 
     setSeeding(false);
+    clearPublicBlogCache();
     setStatusMessage({
       type: "success",
       text: `✓ Successfully populated ${successCount} curated plant care guides!`,
@@ -294,6 +301,7 @@ export default function ManageBlogs() {
         type: "success",
         text: `✓ Blog "${formData.title}" ${editingBlog ? "updated" : "created"} successfully!`,
       });
+      clearPublicBlogCache();
       setViewMode("list");
       void fetchBlogs();
     } catch (err: any) {
@@ -316,6 +324,7 @@ export default function ManageBlogs() {
         body: JSON.stringify({ is_published: newPublished }),
       });
       if (res.ok) {
+        clearPublicBlogCache();
         setBlogs((prev) =>
           prev.map((b) => (b.id === blog.id ? { ...b, status: newPublished ? "published" : "draft" } : b))
         );
@@ -340,7 +349,9 @@ export default function ManageBlogs() {
         },
         body: JSON.stringify({ is_top_story: newStory }),
       });
-      if (!res.ok) {
+      if (res.ok) {
+        clearPublicBlogCache();
+      } else {
         setBlogs((prev) =>
           prev.map((b) => (b.id === blog.id ? { ...b, isTopStory: !newStory } : b))
         );
@@ -368,7 +379,9 @@ export default function ManageBlogs() {
         },
         body: JSON.stringify({ is_top_trend: newTrend }),
       });
-      if (!res.ok) {
+      if (res.ok) {
+        clearPublicBlogCache();
+      } else {
         setBlogs((prev) =>
           prev.map((b) => (b.id === blog.id ? { ...b, isTopTrend: !newTrend } : b))
         );
@@ -390,6 +403,7 @@ export default function ManageBlogs() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
+        clearPublicBlogCache();
         setBlogs((prev) => prev.filter((b) => b.id !== id));
         setStatusMessage({ type: "success", text: "Article deleted successfully." });
       }

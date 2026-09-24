@@ -45,7 +45,7 @@ By aligning your care routine with local climate patterns, your living space wil
     read_time: "6 min read",
     views: 3420,
     published_at: "2026-09-08",
-    is_featured: true,
+    is_featured: false,
     is_top_trend: true,
     tags: ["KathmanduGardening", "UrbanSanctuary", "SeasonalCare", "IndoorPlants"],
     tips: [
