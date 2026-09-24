@@ -21,6 +21,10 @@ php artisan view:clear || true
 
 # Ensure storage symlink exists
 echo "Ensuring public storage symlink..."
+if [ -e /var/www/html/public/storage ] && [ ! -L /var/www/html/public/storage ]; then
+    echo "Removing placeholder public/storage directory..."
+    rm -rf /var/www/html/public/storage
+fi
 php artisan storage:link || true
 
 # Run database migrations and seeds if enabled
