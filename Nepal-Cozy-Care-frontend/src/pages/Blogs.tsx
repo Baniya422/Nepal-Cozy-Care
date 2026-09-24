@@ -346,16 +346,6 @@ export default function Blogs() {
             <div className="bj-hero-overlay-1" />
             <div className="bj-hero-overlay-2" />
 
-            {/* Floating issue number */}
-            <div className="bj-hero-issue bj-fade-in">
-              No.{String(new Date().getMonth() + 1).padStart(2, "0")}
-            </div>
-
-            {/* Decorative ring */}
-            <div className="bj-hero-ring bj-float">
-              <div className="bj-hero-ring-inner bj-rotate">🌿</div>
-            </div>
-
             {/* Hero text */}
             <div className="bj-hero-content">
               <div className="bj-hero-eyebrow bj-fade-up" style={{ animationDelay: ".1s" }}>
@@ -381,7 +371,7 @@ export default function Blogs() {
                   />
                   <div>
                     <div className="bj-hero-author-name">{featured.author}</div>
-                    <div className="bj-hero-author-meta">{featured.read_time} read</div>
+                    <div className="bj-hero-author-meta">{featured.read_time}</div>
                   </div>
                 </div>
 
