@@ -340,7 +340,7 @@ export default function Blogs() {
               className="bj-hero-bg"
               onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
               style={{
-                transform: `translateY(${heroY}px) translateX(${mouseX * 0.3}px)`,
+                transform: `scale(1.08) translateY(${heroY * 0.3}px) translateX(${mouseX * 0.2}px)`,
               }}
             />
             <div className="bj-hero-overlay-1" />

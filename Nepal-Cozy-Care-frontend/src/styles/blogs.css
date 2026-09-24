@@ -77,6 +77,7 @@
   position: relative;
   height: 100vh;
   min-height: 600px;
+  width: 100%;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -84,9 +85,13 @@
 
 .bj-hero-bg {
   position: absolute;
-  inset: -8%;
-  width: 116%;
-  height: 116%;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  min-height: 100% !important;
+  max-width: none !important;
   object-fit: cover;
   object-position: center;
   will-change: transform;
