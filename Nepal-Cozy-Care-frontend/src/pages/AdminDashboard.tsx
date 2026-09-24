@@ -169,34 +169,9 @@ export default function AdminDashboard() {
                 <div key={i} className="admin-stat-card skeleton" style={{ minHeight: 110 }} />
               ))
             : statCards.map((s, i) => (
-                <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} change={s.change} color={s.color} delay={i * 0.07} />
+                <StatCard key={s.label} icon={s.icon} label={s.label} value={s.value} color={s.color} delay={i * 0.07} />
               ))
           }
-        </div>
-
-        {/* ── Charts row ────────────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 24 }}>
-          {/* Weekly Traffic */}
-          <div style={{ ...cardStyle, padding: "22px 24px", animation: "fadeUp .7s .28s both" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <div>
-                <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 16, color: "#1c1a16", fontWeight: 400 }}>Weekly Traffic</div>
-                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: "#7a7060", letterSpacing: ".1em", marginTop: 2 }}>Page views · last 7 days</div>
-              </div>
-              <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 24, color: "#1c1a16", fontWeight: 400 }}>
-                {TRAFFIC.reduce((s, d) => s + d.views, 0).toLocaleString()}
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "#c4622d", marginLeft: 6 }}>↑ 18%</span>
-              </div>
-            </div>
-            <SparkBar data={TRAFFIC} />
-          </div>
-
-          {/* Donut */}
-          <div style={{ ...cardStyle, padding: "22px 24px", animation: "fadeUp .7s .34s both" }}>
-            <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 16, color: "#1c1a16", fontWeight: 400, marginBottom: 4 }}>Distribution</div>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: "#7a7060", letterSpacing: ".1em", marginBottom: 18 }}>Store breakdown</div>
-            <DonutChart data={DONUT_DATA} />
-          </div>
         </div>
 
         {/* ── Quick Actions: CMS links ───────────────────────────────────── */}

@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef, useCallback, type ReactNode } from "react";
-import { ArrowLeft, Share2, Check, X } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { ArrowLeft, Share2, Check } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import { CURATED_BLOGS, type CuratedBlog } from "../features/blogs/curatedBlogs";
