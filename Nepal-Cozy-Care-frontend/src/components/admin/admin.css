@@ -1891,3 +1891,26 @@
 }
 
 
+
+/* Complete plant editor */
+.plant-editor-modal { max-width: 920px; }
+.plant-editor-modal .admin-modal-header { position: sticky; top: 0; background: white; z-index: 2; }
+.plant-editor-modal .admin-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.plant-editor-modal .admin-form-group { min-width: 0; }
+.plant-editor-modal select { font-size: .9rem; }
+.plant-editor-intro { background: #edf6f0; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; }
+.plant-editor-intro h4, .plant-editor-preview h4 { margin: 0 0 .5rem; color: #154d3b; }
+.plant-editor-intro p, .plant-editor-help { color: #52665b; font-size: .875rem; line-height: 1.6; margin: 0; }
+.plant-editor-modal small { display: block; color: #64748b; margin-top: .5rem; line-height: 1.5; }
+.plant-editor-preview { display: flex; gap: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 12px; margin: 1rem 0; }
+.plant-editor-preview img { width: 150px; height: 170px; object-fit: cover; border-radius: 10px; }
+.plant-editor-preview p { margin: .5rem 0; }
+.plant-editor-preview del { color: #64748b; font-size: .875rem; margin-left: .5rem; }
+.plant-editor-badges { display: flex; gap: .5rem; margin-bottom: .6rem; }
+.plant-editor-badges span { background: #e8bf3e; color: #153b2a; border-radius: 5px; padding: .3rem .5rem; font-size: .75rem; font-weight: 700; }
+.plant-editor-modal .admin-modal-footer { position: sticky; bottom: -1.25rem; background: white; z-index: 1; padding: 1rem 0; }
+@media (max-width: 640px) {
+ .plant-editor-modal .admin-form-grid { grid-template-columns: 1fr; }
+ .plant-editor-preview { flex-direction: column; }
+ .plant-editor-preview img { width: 100%; height: 200px; }
+}

@@ -14,6 +14,9 @@ export interface Plant {
   survival_guide?: string;
   care_instructions?: string;
   price: number;
+  discount_percent?: number;
+  soil?: string;
+  is_popular_item?: boolean;
   stock?: number;
   category?: string;
   size?: string;

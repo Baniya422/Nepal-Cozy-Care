@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import PlantFinderPreview from "../features/plant-finder/components/PlantFinderPreview";
 import PlantFinderQuizForm from "../features/plant-finder/components/PlantFinderQuizForm";
 import PlantFinderResults from "../features/plant-finder/components/PlantFinderResults";
-import { applyPlantFinderTemplate, DEFAULT_PLANT_CATALOG } from "../features/plant-finder/data";
-import { extractPlantsFromResponse } from "../features/plant-finder/utils";
+import { applyPlantFinderTemplate } from "../features/plant-finder/data";
+import { fetchPlantFinderCatalog } from "../features/plant-finder/catalog";
 import { getAIPlantRecommendations } from "../features/plant-finder/aiMatchmaker";
 import { buildRoomTransferState, saveRoomTransferState } from "../features/room-designer/roomTransferState";
 import type {
@@ -26,7 +26,9 @@ const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT ?? "3000");
 export function PlantFinder() {
   const navigate = useNavigate();
   const [, setTemplateRevision] = useState(0);
-  const [cachedPlants, setCachedPlants] = useState<Plant[]>(DEFAULT_PLANT_CATALOG);
+  const [cachedPlants, setCachedPlants] = useState<Plant[]>([]);
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
+  const [catalogError, setCatalogError] = useState("");
   const [selections, setSelections] = useState<PlantFinderSelections>({
     room: "living-room",
     light: "bright-light",
@@ -57,24 +59,6 @@ export function PlantFinder() {
     } else {
       applyPlantFinderTemplate(null);
     }
-
-    // Pre-fetch plants quietly in background so recommendations are instant
-    fetch(`${API}/api/plants?per_page=100`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Plant fetch response not ok");
-        return res.json();
-      })
-      .then((data) => {
-        if (isMounted) {
-          const plants = extractPlantsFromResponse(data);
-          if (plants && plants.length > 0) {
-            setCachedPlants(plants);
-          }
-        }
-      })
-      .catch((err) => {
-        console.warn("Background plants pre-fetch notice (using default catalog):", err);
-      });
 
     const loadTemplate = async () => {
       const controller = new AbortController();
@@ -132,18 +116,13 @@ export function PlantFinder() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (loadingCatalog) return;
+    setLoadingCatalog(true);
+    setCatalogError("");
     try {
-      let plants = cachedPlants;
-      if (!plants || plants.length === 0) {
-        const response = await fetch(`${API}/api/plants?per_page=100`);
-        const data = await response.json();
-        plants = extractPlantsFromResponse(data);
-        if (plants && plants.length > 0) {
-          setCachedPlants(plants);
-        }
-      }
-      const activePlants = plants && plants.length > 0 ? plants : DEFAULT_PLANT_CATALOG;
-      const results = getAIPlantRecommendations(activePlants, selections);
+      const plants = await fetchPlantFinderCatalog(API);
+      setCachedPlants(plants);
+      const results = getAIPlantRecommendations(plants, selections);
       setRecommendedPlants(results.recommendedPlants);
       setMorePlants(results.morePlants);
       setShowResults(true);
@@ -154,17 +133,10 @@ export function PlantFinder() {
         }
       }, 150);
     } catch (error) {
-      console.warn("API fetch notice in plant finder, using catalog:", error);
-      const results = getAIPlantRecommendations(DEFAULT_PLANT_CATALOG, selections);
-      setRecommendedPlants(results.recommendedPlants);
-      setMorePlants(results.morePlants);
-      setShowResults(true);
-      setTimeout(() => {
-        const resultsEl = document.getElementById("plantfinder-results-section");
-        if (resultsEl) {
-          resultsEl.scrollIntoView({ behavior: "smooth" });
-        }
-      }, 150);
+      setCatalogError("We couldn't load the plant catalog. Please try Find Plants again.");
+      setShowResults(false);
+    } finally {
+      setLoadingCatalog(false);
     }
   };
 
@@ -229,6 +201,8 @@ export function PlantFinder() {
         </div>
       </section>
 
+      {loadingCatalog && <p role="status" style={{ textAlign: "center" }}>Finding matches in the current plant catalog…</p>}
+      {catalogError && <p role="alert" style={{ textAlign: "center", color: "#b91c1c" }}>{catalogError}</p>}
       {showResults && (
         <PlantFinderResults
           apiBaseUrl={API}

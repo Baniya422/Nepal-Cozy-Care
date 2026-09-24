@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, Eye, Edit, Trash2, X, Upload } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
+import { getProductPricing } from "../../utils/productPricing";
 import {
   DEFAULT_PLANT_IMAGE,
   handleImageError,
@@ -9,6 +10,8 @@ import {
 } from "../../utils/imageUrl";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 interface Plant {
+  soil?: string;
+  discount_percent?: number;
   id: number;
   name: string;
   scientific_name: string | null;
@@ -32,6 +35,8 @@ interface Plant {
   is_best_seller?: boolean;
 }
 interface PlantFormData {
+  soil: string;
+  discount_percent: string;
   name: string;
   scientific_name: string;
   description: string;
@@ -60,6 +65,8 @@ export default function ManagePlants() {
   const [showModal, setShowModal] = useState(false);
   const [editingPlant, setEditingPlant] = useState<Plant | null>(null);
   const [formData, setFormData] = useState<PlantFormData>({
+    soil: "",
+    discount_percent: "0",
     name: "",
     scientific_name: "",
     description: "",
@@ -67,22 +74,24 @@ export default function ManagePlants() {
     care_instructions: "",
     price: "",
     stock: "",
-    category: "Indoor",
+    category: "Indoor Plants",
     size: "Medium",
-    light: "",
+    light: "Bright Indirect",
     water: "",
     temperature: "",
-    humidity: "",
+    humidity: "Normal Humidity",
     fertilizer: "",
-    difficulty: "Easy",
+    difficulty: "Beginner Friendly",
     is_active: true,
     image: "",
-    rooms: [],
+    rooms: ["Living Room"],
     is_popular_item: false,
     is_best_seller: false,
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const pricing = getProductPricing(formData.price, formData.discount_percent);
+  const isAccessory = /pot|planter|tool|soil|fertilizer|accessor/i.test(formData.category);
   useEffect(() => {
     fetchPlants();
   }, []);
@@ -142,6 +151,12 @@ export default function ManagePlants() {
       return;
     }
     const formDataToSend = new FormData();
+    if (!isAccessory && (!formData.rooms.length || !formData.light || !formData.difficulty || !formData.humidity)) {
+      alert("Choose light, care difficulty, humidity, and at least one suitable room for Plant Finder.");
+      return;
+    }
+    formDataToSend.append("soil", formData.soil.trim());
+    formDataToSend.append("discount_percent", formData.discount_percent || "0");
     formDataToSend.append("name", formData.name.trim());
     formDataToSend.append("scientific_name", formData.scientific_name.trim() || "");
     formDataToSend.append("description", formData.description.trim() || "");
@@ -160,6 +175,7 @@ export default function ManagePlants() {
     formData.rooms.forEach((room) => {
       formDataToSend.append("rooms[]", room);
     });
+    if (!formData.rooms.length) formDataToSend.append("rooms", "");
     formDataToSend.append("is_active", formData.is_active ? "1" : "0");
     formDataToSend.append("is_popular_item", formData.is_popular_item ? "1" : "0");
     formDataToSend.append("is_best_seller", formData.is_best_seller ? "1" : "0");
@@ -239,6 +255,8 @@ export default function ManagePlants() {
   const handleEdit = (plant: Plant) => {
     setEditingPlant(plant);
     setFormData({
+      soil: plant.soil || "",
+      discount_percent: String(plant.discount_percent ?? 0),
       name: plant.name,
       scientific_name: plant.scientific_name || "",
       description: plant.description || "",
@@ -256,7 +274,7 @@ export default function ManagePlants() {
       difficulty: plant.difficulty || "Beginner Friendly",
       is_active: plant.is_active,
       image: plant.image || "",
-      rooms: plant.rooms && plant.rooms.length > 0 ? plant.rooms : ["Living Room"],
+      rooms: plant.rooms || [],
       is_popular_item: plant.is_popular_item || false,
       is_best_seller: plant.is_best_seller || false,
     });
@@ -271,6 +289,8 @@ export default function ManagePlants() {
   };
   const resetForm = () => {
     setFormData({
+      soil: "",
+      discount_percent: "0",
       name: "",
       scientific_name: "",
       description: "",
@@ -431,7 +451,7 @@ export default function ManagePlants() {
         </div>
         {showModal && (
           <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal plant-editor-modal" role="dialog" aria-modal="true" aria-label={editingPlant ? "Edit Plant" : "Add New Plant"} onClick={(e) => e.stopPropagation()}>
               <div className="admin-modal-header">
                 <h3>{editingPlant ? "Edit Plant" : "Add New Plant"}</h3>
                 <button className="admin-modal-close" onClick={() => setShowModal(false)}>
@@ -439,10 +459,14 @@ export default function ManagePlants() {
                 </button>
               </div>
               <form onSubmit={handleSubmit} className="admin-form">
+                <div className="plant-editor-intro">
+                  <h4>Product details & care profile</h4>
+                  <p>These details appear in your shop and product page. Plant Finder uses light, difficulty, humidity, and suitable rooms to recommend this plant.</p>
+                </div>
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
-                    <label>Plant Name *</label>
-                    <input
+                    <label htmlFor="plant-name">Plant Name *</label>
+                    <input id="plant-name"
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -450,8 +474,8 @@ export default function ManagePlants() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Scientific Name</label>
-                    <input
+                    <label htmlFor="plant-scientific_name">Scientific Name</label>
+                    <input id="plant-scientific_name"
                       type="text"
                       value={formData.scientific_name}
                       onChange={(e) =>
@@ -460,8 +484,8 @@ export default function ManagePlants() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Category</label>
-                    <select
+                    <label htmlFor="plant-category">Category</label>
+                    <select id="plant-category"
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     >
@@ -483,8 +507,8 @@ export default function ManagePlants() {
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Size</label>
-                    <select
+                    <label htmlFor="plant-size">Size</label>
+                    <select id="plant-size"
                       value={formData.size}
                       onChange={(e) => setFormData({ ...formData, size: e.target.value })}
                     >
@@ -495,19 +519,20 @@ export default function ManagePlants() {
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Care Difficulty (Plant Finder Quiz)</label>
-                    <select
+                    <label htmlFor="plant-difficulty">Care Difficulty (Plant Finder Quiz)</label>
+                    <select id="plant-difficulty"
                       value={formData.difficulty}
                       onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                     >
-                      <option value="Beginner Friendly">🌱 Beginner Friendly (Easy & forgiving)</option>
-                      <option value="Moderate Care">🪴 Moderate Care (Regular weekly attention)</option>
-                      <option value="Green Thumb Enthusiast">🌿 Green Thumb Enthusiast (Advanced care)</option>
+                      <option value="Beginner Friendly">Beginner Friendly</option>
+                      <option value="Moderate Care">Moderate Care</option>
+                      <option value="Green Thumb Enthusiast">Green Thumb Enthusiast</option>
+                      {formData.difficulty && !["Beginner Friendly", "Moderate Care", "Green Thumb Enthusiast"].includes(formData.difficulty) && <option value={formData.difficulty}>{formData.difficulty}</option>}
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Price (NPR) *</label>
-                    <input
+                    <label htmlFor="plant-price">Selling Price (NPR) *</label>
+                    <input id="plant-price"
                       type="number"
                       step="0.01"
                       value={formData.price}
@@ -516,8 +541,14 @@ export default function ManagePlants() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Stock Quantity *</label>
-                    <input
+                    <label htmlFor="plant-discount">Discount (%)</label>
+                    <input id="plant-discount" type="number" min="0" max="99" step="1" value={formData.discount_percent}
+                      onChange={(e) => setFormData({ ...formData, discount_percent: e.target.value })} />
+                    <small>Use 0 for no sale. The selling price is what customers pay.</small>
+                  </div>
+                  <div className="admin-form-group">
+                    <label htmlFor="plant-stock">Stock Quantity *</label>
+                    <input id="plant-stock"
                       type="number"
                       value={formData.stock}
                       onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
@@ -525,21 +556,22 @@ export default function ManagePlants() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Light Requirements (Plant Finder Quiz)</label>
-                    <select
+                    <label htmlFor="plant-light">Light Requirements (Plant Finder Quiz)</label>
+                    <select id="plant-light"
                       value={formData.light}
                       onChange={(e) => setFormData({ ...formData, light: e.target.value })}
                     >
                       <option value="">Select light type</option>
-                      <option value="Bright Indirect">☀️ Bright Indirect Light (Near sunny window)</option>
-                      <option value="Medium Light">⛅ Medium Light (Soft ambient room sun)</option>
-                      <option value="Low Light">🌙 Low Light / Shade (Dim inner room or corridor)</option>
-                      <option value="Direct Sunlight">🌤️ Direct Sunlight (Open terrace or sunny sill)</option>
+                      <option value="Bright Indirect">Bright Indirect Light</option>
+                      <option value="Medium Light">Medium / Filtered Light</option>
+                      <option value="Low Light">Low Light / Shade</option>
+                      <option value="Direct Sunlight">Direct Sunlight</option>
+                      {formData.light && !["Bright Indirect", "Medium Light", "Low Light", "Direct Sunlight"].includes(formData.light) && <option value={formData.light}>{formData.light}</option>}
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Water Frequency</label>
-                    <select
+                    <label htmlFor="plant-water">Water Frequency</label>
+                    <select id="plant-water"
                       value={formData.water}
                       onChange={(e) => setFormData({ ...formData, water: e.target.value })}
                     >
@@ -553,20 +585,21 @@ export default function ManagePlants() {
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Humidity Level (Plant Finder Quiz)</label>
-                    <select
+                    <label htmlFor="plant-humidity">Humidity Level (Plant Finder Quiz)</label>
+                    <select id="plant-humidity"
                       value={formData.humidity}
                       onChange={(e) => setFormData({ ...formData, humidity: e.target.value })}
                     >
                       <option value="">Select humidity</option>
-                      <option value="Normal Humidity">🍃 Normal Humidity (Typical room air 40%-60%)</option>
-                      <option value="High Humidity">💧 High Humidity (Bathrooms & misted areas 60%+)</option>
-                      <option value="Drier Air">🌵 Drier Air (Air-conditioned rooms or heaters)</option>
+                      <option value="Normal Humidity">Normal Humidity (40–60%)</option>
+                      <option value="High Humidity">High Humidity (60%+)</option>
+                      <option value="Drier Air">Drier Air</option>
+                      {formData.humidity && !["Normal Humidity", "High Humidity", "Drier Air"].includes(formData.humidity) && <option value={formData.humidity}>{formData.humidity}</option>}
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Temperature</label>
-                    <input
+                    <label htmlFor="plant-temperature">Temperature</label>
+                    <input id="plant-temperature"
                       type="text"
                       value={formData.temperature}
                       onChange={(e) => setFormData({ ...formData, temperature: e.target.value })}
@@ -574,17 +607,24 @@ export default function ManagePlants() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Fertilizer</label>
-                    <input
+                    <label htmlFor="plant-fertilizer">Fertilizer</label>
+                    <input id="plant-fertilizer"
                       type="text"
                       value={formData.fertilizer}
                       onChange={(e) => setFormData({ ...formData, fertilizer: e.target.value })}
                       placeholder="e.g., Monthly in spring/summer"
                     />
                   </div>
+                  <div className="admin-form-group">
+                    <label htmlFor="plant-soil">Soil / Potting Mix</label>
+                    <input id="plant-soil" type="text" maxLength={255} value={formData.soil}
+                      onChange={(e) => setFormData({ ...formData, soil: e.target.value })}
+                      placeholder="e.g., Well-draining mix with perlite" />
+                  </div>
                 </div>
                 <div className="admin-form-group">
-                  <label>Suitable Rooms (Plant Finder Quiz Match)</label>
+                  <label>Suitable Rooms (Plant Finder Quiz Match) *</label>
+                  <p className="plant-editor-help">Select every room where this plant can thrive. Active plants are automatically available to the quiz; results depend on the customer's choices.</p>
                   <div className="admin-checkbox-group">
                     {[
                       { key: "Living Room", label: "🛋️ Living Room" },
@@ -618,16 +658,16 @@ export default function ManagePlants() {
                   </div>
                 </div>
                 <div className="admin-form-group">
-                  <label>Description</label>
-                  <textarea
+                  <label htmlFor="plant-description">Description</label>
+                  <textarea id="plant-description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
                   />
                 </div>
                 <div className="admin-form-group">
-                  <label>Survival Guide</label>
-                  <textarea
+                  <label htmlFor="plant-survival_guide">Survival Guide</label>
+                  <textarea id="plant-survival_guide"
                     value={formData.survival_guide}
                     onChange={(e) => setFormData({ ...formData, survival_guide: e.target.value })}
                     rows={4}
@@ -635,8 +675,8 @@ export default function ManagePlants() {
                   />
                 </div>
                 <div className="admin-form-group">
-                  <label>Care Instructions</label>
-                  <textarea
+                  <label htmlFor="plant-care_instructions">Care Instructions</label>
+                  <textarea id="plant-care_instructions"
                     value={formData.care_instructions}
                     onChange={(e) => setFormData({ ...formData, care_instructions: e.target.value })}
                     rows={4}
@@ -661,7 +701,7 @@ export default function ManagePlants() {
                           value={formData.image}
                           onChange={(e) => {
                             setFormData((prev) => ({ ...prev, image: e.target.value }));
-                            setImagePreview(e.target.value);
+                            setImagePreview(resolveImageUrl(e.target.value, DEFAULT_PLANT_IMAGE));
                             setSelectedImage(null);
                           }}
                           placeholder="Paste image URL (https://... or /images/...)"
@@ -736,7 +776,7 @@ export default function ManagePlants() {
                         setFormData({ ...formData, is_active: e.target.checked })
                       }
                     />
-                    Active
+                    Active — visible in shop and Plant Finder
                   </label>
                 </div>
                 <div className="admin-form-group">
@@ -767,6 +807,20 @@ export default function ManagePlants() {
                     </label>
                   </div>
                 </div>
+                <section className="plant-editor-preview" aria-label="Product card preview">
+                  <img key={imagePreview || formData.image} src={imagePreview || resolveImageUrl(formData.image, DEFAULT_PLANT_IMAGE)} alt="Product card preview" onError={(e) => handleImageError(e, DEFAULT_PLANT_IMAGE)} />
+                  <div>
+                    <h4>Product card preview</h4>
+                    <div className="plant-editor-badges">
+                      {formData.is_best_seller ? <span>BESTSELLER</span> : formData.is_popular_item ? <span>POPULAR</span> : null}
+                      {pricing.discountPercent > 0 && <span>{pricing.discountPercent}% OFF</span>}
+                    </div>
+                    <strong>{formData.name || "Your plant name"}</strong>
+                    <p>{formData.category}</p>
+                    <p>Rs. {pricing.sellingPrice.toLocaleString()} {pricing.discountPercent > 0 && <del>Rs. {pricing.originalPrice.toLocaleString()}</del>}</p>
+                    <small>Ratings and review counts come from customer reviews.</small>
+                  </div>
+                </section>
                 <div className="admin-modal-footer">
                   <button
                     type="button"

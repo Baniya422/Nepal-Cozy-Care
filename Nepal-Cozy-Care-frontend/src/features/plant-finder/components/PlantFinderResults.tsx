@@ -84,7 +84,7 @@ export default function PlantFinderResults({
               />
             ))}
           </div>
-        ) : null}
+        ) : <p role="status">No plants are available right now. Please check back soon.</p>}
       </section>
 
       {morePlants.length > 0 ? (

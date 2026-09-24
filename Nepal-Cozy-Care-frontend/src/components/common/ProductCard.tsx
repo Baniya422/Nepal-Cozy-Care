@@ -4,10 +4,10 @@ import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE, DEFAULT_POT_IMA
 import { useFeatureFlags } from "../../context/FeatureFlagsContext";
 import { useAddToCart } from "../../hooks/useAddToCart";
 import { useWishlist } from "../../hooks/useWishlist";
+import { getProductPricing } from "../../utils/productPricing";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
-const DEFAULT_BADGES = ["BESTSELLER", "TRENDING", "FEATURED", "POPULAR", "TOP RATED"];
 
 export interface ProductCardData {
   id: number;
@@ -21,6 +21,8 @@ export interface ProductCardData {
   review_count?: number;
   badge?: string | null;
   discount_percent?: number;
+  is_best_seller?: boolean;
+  is_popular_item?: boolean;
   stock?: number;
   total_sold?: number;
   shop?: {
@@ -104,21 +106,18 @@ export default function ProductCard({
   const resolvedBadge =
     explicitBadge !== undefined
       ? explicitBadge
-      : product.badge || DEFAULT_BADGES[index % DEFAULT_BADGES.length];
+      : product.badge || (product.is_best_seller ? "BESTSELLER" : product.is_popular_item ? "POPULAR" : null);
 
-  // Discount percentage (12% - 20%)
-  const discountPercent =
-    product.discount_percent ?? (12 + ((product.id * 3) % 11));
-  const numericPrice = Number(product.price) || 0;
-  const originalPrice = Math.round(numericPrice * (1 + discountPercent / 100));
+  const { sellingPrice: numericPrice, discountPercent, originalPrice } =
+    getProductPricing(product.price, product.discount_percent);
 
   // Rating & Review count
   const rating =
     Number(product.avg_rating) > 0
       ? Number(product.avg_rating).toFixed(1)
-      : "4.8";
+      : "New";
   const reviewCount =
-    product.review_count || 85 + ((product.id * 19) % 140);
+    product.review_count ?? 0;
 
   // Subtitle
   const subtitle =
@@ -218,9 +217,9 @@ export default function ProductCard({
             <span className="product-price">
               Rs. {numericPrice.toLocaleString()}
             </span>
-            <span className="product-compare-price">
+            {discountPercent > 0 && <span className="product-compare-price">
               Rs. {originalPrice.toLocaleString()}
-            </span>
+            </span>}
           </div>
 
           <div className="product-actions-group">

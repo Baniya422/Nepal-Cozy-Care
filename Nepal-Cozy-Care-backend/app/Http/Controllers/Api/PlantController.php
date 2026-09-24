@@ -25,7 +25,7 @@ class PlantController extends Controller
             $query->select([
                 'id', 'shop_id', 'name', 'scientific_name', 'category', 'size',
                 'difficulty', 'light', 'water', 'rooms', 'price', 'stock', 'image',
-                'is_active', 'views', 'total_sold', 'is_best_seller', 'created_at',
+                'is_active', 'views', 'total_sold', 'is_best_seller', 'is_popular_item', 'discount_percent', 'created_at',
             ]);
         }
 
@@ -222,6 +222,7 @@ class PlantController extends Controller
     public function adminIndex(Request $request)
     {
         $query = Plant::query()
+            ->orderByDesc('id')
             ->with(['supplier:id,name', 'shop:id,name,slug'])
             ->withAvg('reviews', 'rating')
             ->withCount('reviews');

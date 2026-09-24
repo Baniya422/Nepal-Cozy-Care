@@ -247,14 +247,19 @@ export default function ManageBlogs() {
 
         const uploadRes = await fetch(`${API}/api/upload`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
           body: fileData,
         });
 
-        if (uploadRes.ok) {
-          const uploadJson = await uploadRes.json();
-          finalImagePath = uploadJson.data?.path || uploadJson.path || finalImagePath;
+        const uploadJson = await uploadRes.json().catch(() => ({}));
+        if (!uploadRes.ok) {
+          throw new Error(uploadJson.message || "Image upload failed. Please try again.");
         }
+        const uploadedPath = uploadJson.data?.path || uploadJson.path;
+        if (typeof uploadedPath !== "string" || !uploadedPath.trim()) {
+          throw new Error("Image upload did not return a saved image. Please try again.");
+        }
+        finalImagePath = uploadedPath;
       }
 
       const url = editingBlog ? `${API}/api/admin/blogs/${editingBlog.id}` : `${API}/api/admin/blogs`;
@@ -804,6 +809,7 @@ export default function ManageBlogs() {
                   {imagePreview && (
                     <div style={{ marginBottom: "1rem", borderRadius: "10px", overflow: "hidden", border: "1px solid #cbd5e1", height: "160px" }}>
                       <img
+                        key={imagePreview}
                         src={imagePreview}
                         alt="Cover Preview"
                         onError={(event) => handleImageError(event, DEFAULT_BLOG_IMAGE)}
@@ -822,7 +828,7 @@ export default function ManageBlogs() {
                       value={formData.image}
                       onChange={(e) => {
                         setFormData({ ...formData, image: e.target.value });
-                        setImagePreview(e.target.value);
+                        setImagePreview(resolveImageUrl(e.target.value, DEFAULT_BLOG_IMAGE));
                         setSelectedImageFile(null);
                       }}
                       placeholder="Paste image URL (https://... or /images/...)"

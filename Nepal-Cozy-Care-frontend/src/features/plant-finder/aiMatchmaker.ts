@@ -131,7 +131,7 @@ export function calculatePlantAIScore(
         score += 3;
       }
     } else if (selLoc === "dry") {
-      if (plantHumid.includes("low") || plantHumid.includes("30") || plantHumid.includes("40") || plantDiff.includes("easy")) {
+      if (plantHumid.includes("dry") || plantHumid.includes("drier") || plantHumid.includes("low") || plantHumid.includes("30") || plantHumid.includes("40")) {
         score += 5;
         highlights.push("Drought Tolerant");
       } else {
@@ -146,8 +146,7 @@ export function calculatePlantAIScore(
 
   // --- 5. NATURAL BOTANICAL HEALTH & SEED VARIATION ---
   // Ensure realistic varied scores like 98%, 95%, 92%, etc.
-  const seedVariation = (plant.id * 7 + 13) % 6; // -3 to +2
-  let finalScore = Math.min(99, Math.max(78, score + seedVariation - 1));
+  const finalScore = Math.min(99, Math.max(0, score));
 
   // Synthesize rich AI explanation sentence
   let reasonText = "";
@@ -204,6 +203,8 @@ export function getAIPlantRecommendations(
 
   // Filter out non-plant categories like pots, fertilizers, tools
   const validPlants = allPlants.filter((plant) => {
+    if (plant.is_active === false) return false;
+    if (/pot|planter|tool|soil|fertilizer|accessor|seed/i.test(plant.category || "")) return false;
     if (plant.category && normalizedNonPlants.has(normalize(plant.category))) {
       return false;
     }

@@ -31,6 +31,7 @@ class StorePlantRequest extends FormRequest
             'survival_guide' => ['nullable', 'string'],
             'care_instructions' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'discount_percent' => ['sometimes', 'integer', 'min:0', 'max:99'],
             'stock' => ['required', 'integer', 'min:0'],
             'is_active' => ['nullable'],
             'is_popular_item' => ['nullable'],

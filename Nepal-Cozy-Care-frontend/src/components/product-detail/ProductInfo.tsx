@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Star, ShoppingBag, Store, ShieldCheck, Sun, Droplets, Sprout, ArrowRight } from "lucide-react";
 import { useFeatureFlags } from "../../context/FeatureFlagsContext";
+import { getProductPricing } from "../../utils/productPricing";
 
 interface ProductInfoProps {
   name: string; price: number; size?: string; stock: number;
+  discountPercent?: number;
   scientificName?: string; description?: string; category?: string;
   light?: string; water?: string; difficulty?: string;
   rating?: number; reviewCount?: number;
@@ -18,6 +20,7 @@ export default function ProductInfo(props: ProductInfoProps) {
     rating = 0, reviewCount = 0, quantity, setQuantity, onAddToCart, onBuyNow, busy, message, shop } = props;
   const { vendor_marketplace_enabled } = useFeatureFlags();
   const available = stock > 0;
+  const pricing = getProductPricing(price, props.discountPercent);
   return (
     <section className="product-info-section" aria-label="Product information">
       <div className="pd-eyebrow">COZY CARE / {category || "THE PLANT COLLECTION"}</div>
@@ -28,6 +31,7 @@ export default function ProductInfo(props: ProductInfoProps) {
         <span className={`pd-stock ${available ? "" : "is-unavailable"}`}>{available ? "In stock" : "Out of stock"}</span>
       </div>
       <div className="pd-price">{money(price)}<span>per plant</span></div>
+      {pricing.discountPercent > 0 && <p><del>{money(pricing.originalPrice)}</del> · {pricing.discountPercent}% OFF</p>}
       {description && <p className="pd-intro">{description.length > 200 ? `${description.slice(0, 197)}…` : description}</p>}
       {vendor_marketplace_enabled && shop && <Link className="pd-seller" to={`/shops/${shop.slug}`}><Store size={15} /> Sold by {shop.name}{shop.is_verified && <ShieldCheck size={16} aria-label="Verified seller" />}</Link>}
       <div className="pd-care-summary">

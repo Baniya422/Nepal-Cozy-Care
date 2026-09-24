@@ -37,6 +37,12 @@ export type Plant = {
   price: number | string;
   image?: string;
   avg_rating?: number;
+  review_count?: number;
+  discount_percent?: number;
+  is_best_seller?: boolean;
+  is_popular_item?: boolean;
+  is_active?: boolean;
+  stock?: number;
   category?: string;
   light?: string;
   difficulty?: string;

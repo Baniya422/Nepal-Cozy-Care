@@ -60,6 +60,7 @@ class Plant extends Model
         'survival_guide',
         'care_instructions',
         'price',
+        'discount_percent',
         'stock',
         'image',
         'is_active',
@@ -85,6 +86,10 @@ class Plant extends Model
     public const STATUS_ARCHIVED = 'archived';
 
     protected $casts = [
+        'discount_percent' => 'integer',
+        'is_active' => 'boolean',
+        'is_popular_item' => 'boolean',
+        'is_best_seller' => 'boolean',
         'rooms' => 'array',
         'quantity_categories' => 'array',
         'submitted_at' => 'datetime',
@@ -133,7 +138,13 @@ class Plant extends Model
             })
             ->when(! $isMarketplaceEnabled, function ($q) {
                 // If vendor features are disabled, only list Cozy Care direct plants
-                $q->whereNull('shop_id');
+                $q->where(function ($direct) {
+                    $direct->whereNull('shop_id')
+                        ->orWhereHas('shop', function ($shop) {
+                            $shop->where('slug', 'nepal-cozy-care')
+                                ->where('status', Shop::STATUS_APPROVED);
+                        });
+                });
             }, function ($q) {
                 $q->where(function ($sub) {
                     $sub->whereDoesntHave('shop')

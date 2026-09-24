@@ -18,6 +18,9 @@ interface Plant {
   survival_guide?: string;
   care_instructions?: string;
   price: number;
+  discount_percent?: number;
+  soil?: string;
+  rooms?: string[];
   stock: number;
   category?: string;
   size?: string;
@@ -180,6 +183,7 @@ export function ProductDetail() {
               message={message}
               name={plant.name}
               price={plant.price}
+              discountPercent={plant.discount_percent}
               size={plant.size}
               quantity={quantity}
               setQuantity={setQuantity}

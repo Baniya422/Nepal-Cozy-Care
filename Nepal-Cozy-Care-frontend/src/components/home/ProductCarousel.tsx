@@ -111,10 +111,11 @@ export default function ProductCarousel({
               name: plant.name,
               price: Number(plant.price),
               image: plant.image || fallback?.image,
-              avg_rating: Number(plant.avg_rating) || fallback?.avg_rating || 4.8,
-              review_count: plant.review_count || fallback?.review_count || (100 + ((plant.id * 19) % 90)),
-              badge: fallback?.badge || defaultBadge,
-              discount_percent: fallback?.discount_percent || (10 + ((plant.id * 3) % 15)),
+              avg_rating: Number(plant.avg_rating) || 0,
+              review_count: plant.review_count ?? 0,
+              badge: plant.is_best_seller ? "BESTSELLER" : plant.is_popular_item ? "POPULAR" : "",
+              discount_percent: plant.discount_percent ?? 0,
+              stock: plant.stock,
               subtitle: plant.subtitle || plant.category || fallback?.subtitle || "Healthy indoor potted plant",
             };
           });
@@ -203,7 +204,7 @@ export default function ProductCarousel({
               key={plant.id}
               product={plant}
               index={index}
-              badge={plant.badge || defaultBadge}
+              badge={plant.badge ?? defaultBadge}
               isWishlisted={wishlistIds.includes(plant.id)}
               isWishlistBusy={wishlistBusyId === plant.id}
               onToggleWishlist={(id) => void toggleWishlist(id)}
