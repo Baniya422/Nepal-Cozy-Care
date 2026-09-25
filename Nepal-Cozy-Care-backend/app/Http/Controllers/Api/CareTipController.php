@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CareTip;
+use App\Models\Plant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -143,11 +144,53 @@ class CareTipController extends Controller
             ->limit(4)
             ->get();
 
+        $relatedProducts = [];
+        if (! empty($careTip->plant_ids)) {
+            $relatedProducts = Plant::whereIn('id', $careTip->plant_ids)
+                ->where('is_approved', true)
+                ->limit(8)
+                ->get();
+        }
+        if (empty($relatedProducts) || (is_object($relatedProducts) && $relatedProducts->isEmpty())) {
+            $fallbackQuery = Plant::where('is_approved', true);
+            $cat = strtolower((string) $careTip->category);
+            if ($cat === 'watering') {
+                $fallbackQuery->where(function ($q) {
+                    $q->where('category', 'like', '%water%')
+                      ->orWhere('name', 'like', '%water%')
+                      ->orWhere('name', 'like', '%spray%');
+                });
+            } elseif ($cat === 'fertilizing') {
+                $fallbackQuery->where(function ($q) {
+                    $q->where('category', 'like', '%fertiliz%')
+                      ->orWhere('name', 'like', '%food%')
+                      ->orWhere('name', 'like', '%nutrient%');
+                });
+            } elseif ($cat === 'pest_control') {
+                $fallbackQuery->where(function ($q) {
+                    $q->where('category', 'like', '%pest%')
+                      ->orWhere('name', 'like', '%neem%')
+                      ->orWhere('name', 'like', '%spray%');
+                });
+            } elseif ($cat === 'indoor' || $cat === 'soil') {
+                $fallbackQuery->where(function ($q) {
+                    $q->where('category', 'like', '%soil%')
+                      ->orWhere('name', 'like', '%potting%')
+                      ->orWhere('name', 'like', '%perlite%');
+                });
+            }
+            $relatedProducts = $fallbackQuery->limit(6)->get();
+            if ($relatedProducts->isEmpty()) {
+                $relatedProducts = Plant::where('is_approved', true)->limit(4)->get();
+            }
+        }
+
         return response()->json([
             'message' => null,
             'data' => [
                 'tip' => $careTip,
                 'related_tips' => $relatedTips,
+                'related_products' => $relatedProducts,
             ],
         ]);
     }

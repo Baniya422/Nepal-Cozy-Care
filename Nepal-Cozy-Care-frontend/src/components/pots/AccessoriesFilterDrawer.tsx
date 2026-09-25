@@ -40,8 +40,10 @@ const ACCESSORY_CATEGORIES = [
   { value: "pots", label: "Pots & Planters" },
   { value: "soil", label: "Soil & Growing Media" },
   { value: "fertilizer", label: "Fertilisers & Plant Food" },
+  { value: "seeds", label: "Seeds & Microgreens" },
   { value: "tools", label: "Garden Tools & Accessories" },
   { value: "watering", label: "Watering Cans & Sprayers" },
+  { value: "decor", label: "Gardening Decor & Pebbles" },
 ];
 
 const PRICE_PRESETS: Array<{ label: string; min: number | ""; max: number | "" }> = [

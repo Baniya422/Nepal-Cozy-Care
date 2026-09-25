@@ -12,6 +12,7 @@ import {
   Clock3,
   Sparkles,
   ExternalLink,
+  ShoppingBag,
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
@@ -29,6 +30,7 @@ interface CareTip {
   views_count: number;
   status: "published" | "draft";
   image: string | null;
+  plant_ids?: number[];
 }
 interface CareTipFormData {
   title: string;
@@ -38,6 +40,7 @@ interface CareTipFormData {
   difficulty: "beginner" | "intermediate" | "advanced";
   status: "published" | "draft";
   image: string;
+  plant_ids: number[];
 }
 const emptyForm: CareTipFormData = {
   title: "",
@@ -47,6 +50,7 @@ const emptyForm: CareTipFormData = {
   difficulty: "beginner",
   status: "published",
   image: "",
+  plant_ids: [],
 };
 const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
 export default function ManageCareTips() {
@@ -64,6 +68,28 @@ export default function ManageCareTips() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [availableProducts, setAvailableProducts] = useState<Array<{ id: number; name: string; category?: string; price: number; image?: string }>>([]);
+  const [productSearch, setProductSearch] = useState("");
+
+  useEffect(() => {
+    fetch(`${API}/api/plants?per_page=100`)
+      .then((res) => res.json())
+      .then((data) => {
+        const list = data.data?.data ?? data.data ?? [];
+        if (Array.isArray(list)) {
+          setAvailableProducts(
+            list.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              category: p.category,
+              price: Number(p.price) || 0,
+              image: p.image,
+            }))
+          );
+        }
+      })
+      .catch((err) => console.error("Failed to load products for care tips:", err));
+  }, []);
   useEffect(() => {
     void fetchCareTips();
   }, []);
@@ -244,6 +270,7 @@ export default function ManageCareTips() {
       difficulty: (tip.difficulty as CareTipFormData["difficulty"]) || "beginner",
       status: tip.status,
       image: tip.image || "",
+      plant_ids: Array.isArray(tip.plant_ids) ? tip.plant_ids : [],
     });
     setSelectedImage(null);
     setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : null);
@@ -712,7 +739,209 @@ export default function ManageCareTips() {
                     placeholder="Write the full guide here. Use short paragraphs and line breaks for easier reading."
                   />
                 </div>
-                <div className="admin-form-group">
+                                <div className="admin-form-group">
+                  <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+                      <ShoppingBag size={16} style={{ color: "#059669" }} />
+                      Recommended Care Products (Linked Products)
+                    </span>
+                    <span style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 500 }}>
+                      {formData.plant_ids.length} linked to this guide
+                    </span>
+                  </label>
+
+                  {/* Selected Linked Products List */}
+                  {formData.plant_ids.length > 0 && (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem", background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                      {formData.plant_ids.map((id) => {
+                        const prod = availableProducts.find((p) => p.id === id);
+                        return (
+                          <span
+                            key={id}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.4rem",
+                              background: "#ffffff",
+                              border: "1px solid #cbd5e1",
+                              borderRadius: "9999px",
+                              padding: "0.25rem 0.65rem 0.25rem 0.4rem",
+                              fontSize: "0.82rem",
+                              color: "#1e293b",
+                              fontWeight: 500,
+                              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                            }}
+                          >
+                            {prod?.image && (
+                              <img
+                                src={resolveImageUrl(prod.image, FALLBACK_IMAGE)}
+                                alt=""
+                                style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }}
+                                onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
+                              />
+                            )}
+                            <span>{prod?.name || `Product #${id}`}</span>
+                            {prod?.price ? <span style={{ color: "#059669", fontWeight: 600 }}>Rs. {prod.price}</span> : null}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  plant_ids: prev.plant_ids.filter((item) => item !== id),
+                                }));
+                              }}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#94a3b8",
+                                cursor: "pointer",
+                                padding: 0,
+                                display: "inline-flex",
+                                alignItems: "center",
+                              }}
+                              title="Remove linked product"
+                            >
+                              <X size={13} />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Search and Add Products Dropdown */}
+                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <div style={{ position: "relative", flex: 1 }}>
+                      <input
+                        type="text"
+                        placeholder="Search products by name or category to link (e.g., Neem, Soil, Fertilizer, Pruner)..."
+                        value={productSearch}
+                        onChange={(e) => setProductSearch(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "0.55rem 0.75rem",
+                          borderRadius: "8px",
+                          border: "1px solid #cbd5e1",
+                          fontSize: "0.85rem",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {productSearch.trim().length > 0 && (
+                    <div
+                      style={{
+                        maxHeight: "180px",
+                        overflowY: "auto",
+                        background: "#ffffff",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                        marginTop: "0.35rem",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      {availableProducts
+                        .filter(
+                          (p) =>
+                            !formData.plant_ids.includes(p.id) &&
+                            (p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                              (p.category && p.category.toLowerCase().includes(productSearch.toLowerCase())))
+                        )
+                        .slice(0, 8)
+                        .map((prod) => (
+                          <div
+                            key={prod.id}
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                plant_ids: [...prev.plant_ids, prod.id],
+                              }));
+                              setProductSearch("");
+                            }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "0.5rem 0.75rem",
+                              cursor: "pointer",
+                              borderBottom: "1px solid #f1f5f9",
+                              fontSize: "0.84rem",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <img
+                                src={resolveImageUrl(prod.image, FALLBACK_IMAGE)}
+                                alt=""
+                                style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "cover" }}
+                                onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
+                              />
+                              <div>
+                                <span style={{ fontWeight: 600, color: "#1e293b" }}>{prod.name}</span>
+                                {prod.category && (
+                                  <span style={{ color: "#64748b", marginLeft: "0.5rem", fontSize: "0.75rem" }}>
+                                    ({prod.category})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <span style={{ color: "#059669", fontWeight: 600 }}>Rs. {prod.price}</span>
+                              <span style={{ fontSize: "0.75rem", color: "#2563eb", fontWeight: 600 }}>+ Add</span>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+
+                  {/* Smart category suggestion chips */}
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <small style={{ color: "#64748b", fontSize: "0.76rem" }}>
+                      Quick Suggestions for this guide:
+                    </small>
+                    <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
+                      {availableProducts
+                        .filter((p) => !formData.plant_ids.includes(p.id))
+                        .filter((p) => {
+                          const cat = formData.category;
+                          const name = p.name.toLowerCase();
+                          const prodCat = (p.category || "").toLowerCase();
+                          if (cat === "watering") return name.includes("water") || name.includes("spray") || prodCat.includes("tool");
+                          if (cat === "fertilizing") return name.includes("fertiliz") || name.includes("seaweed") || name.includes("stick");
+                          if (cat === "pest_control") return name.includes("neem") || name.includes("trap") || name.includes("spray");
+                          if (cat === "indoor" || cat === "outdoor") return name.includes("soil") || name.includes("pot") || name.includes("pole") || name.includes("seed");
+                          return true;
+                        })
+                        .slice(0, 5)
+                        .map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                plant_ids: [...prev.plant_ids, p.id],
+                              }));
+                            }}
+                            style={{
+                              background: "#f1f5f9",
+                              border: "1px dashed #cbd5e1",
+                              borderRadius: "6px",
+                              padding: "0.2rem 0.5rem",
+                              fontSize: "0.75rem",
+                              color: "#334155",
+                              cursor: "pointer",
+                            }}
+                          >
+                            + {p.name}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+
+<div className="admin-form-group">
                   <label>Featured Image</label>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", background: "#f8fafc", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
                     <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>

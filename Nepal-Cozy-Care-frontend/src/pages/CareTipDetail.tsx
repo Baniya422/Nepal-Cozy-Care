@@ -15,6 +15,9 @@ import {
 import Layout from "../components/layout/Layout";
 import type { CareTip, CareTipDetailResponse } from "../types/careTip";
 import { resolveImageUrl, handleImageError, DEFAULT_CARE_TIP_IMAGE } from "../utils/imageUrl";
+import ProductCard from "../components/common/ProductCard";
+import { useWishlist } from "../hooks/useWishlist";
+import { useAddToCart } from "../hooks/useAddToCart";
 import "../styles/careTips.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 const FALLBACK_IMAGE = DEFAULT_CARE_TIP_IMAGE;
@@ -99,6 +102,9 @@ export default function CareTipDetail() {
   const navigate = useNavigate();
   const [tip, setTip] = useState<CareTip | null>(null);
   const [relatedTips, setRelatedTips] = useState<CareTip[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
+  const { cartBusyId, addToCart } = useAddToCart(API);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shareLabel, setShareLabel] = useState("Copy Link");
@@ -120,6 +126,7 @@ export default function CareTipDetail() {
         const data: CareTipDetailResponse = await response.json();
         setTip(data.data.tip);
         setRelatedTips(data.data.related_tips || []);
+        setRelatedProducts(data.data.related_products || []);
       } else {
         const errJson = await response.json().catch(() => ({}));
         const errMsg = errJson.message || (response.status === 404 ? "Care tip not found" : `Failed to load care tip (${response.status})`);
@@ -357,6 +364,44 @@ export default function CareTipDetail() {
             </div>
           </div>
         </section>
+        {/* Essential Routine Products Section */}
+        {relatedProducts.length > 0 && (
+          <section className="care-tip-detail-products-section" style={{ padding: "3rem 0", background: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
+            <div className="care-tips-container">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1.75rem" }}>
+                <div>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0d4e3a", textTransform: "uppercase", letterSpacing: "0.05em", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+                    <Sprout size={15} /> Care Essentials
+                  </span>
+                  <h2 style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1e293b", margin: "0.25rem 0 0" }}>
+                    Essential Products For This Routine
+                  </h2>
+                  <p style={{ color: "#64748b", margin: "0.35rem 0 0", fontSize: "0.95rem" }}>
+                    Recommended potting mixes, organic plant foods, sprays, and tools curated for this guide.
+                  </p>
+                </div>
+              </div>
+
+              <div className="plants-grid">
+                {relatedProducts.map((prod, index) => (
+                  <ProductCard
+                    key={prod.id}
+                    product={prod}
+                    index={index}
+                    badge={prod.badge || "Care Essential"}
+                    isWishlisted={wishlistIds.includes(prod.id)}
+                    isWishlistBusy={wishlistBusyId === prod.id}
+                    onToggleWishlist={(id) => void toggleWishlist(id)}
+                    onAddToCart={(id, name) => void addToCart({ id, name })}
+                    isCartBusy={cartBusyId === prod.id}
+                    defaultFallbackImage="/images/neem.webp"
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {relatedTips.length > 0 && (
           <section className="care-tip-detail-related">
             <div className="care-tips-container">

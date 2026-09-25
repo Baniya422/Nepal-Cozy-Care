@@ -50,5 +50,6 @@ export interface CareTipDetailResponse {
   data: {
     tip: CareTip;
     related_tips: CareTip[];
+    related_products?: any[];
   };
 }
