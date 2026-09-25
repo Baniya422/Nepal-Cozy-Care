@@ -146,7 +146,7 @@ export default function ProductCarousel({
   if (loading) {
     return (
       <section className="product-section">
-        <h2 className="section-title">{content.title}</h2>
+        <h2 className="home-section-title">{content.title}</h2>
         <div className="product-carousel-wrapper">
           <div className="product-carousel-track">
             {[1, 2, 3, 4].map((i) => (
@@ -168,7 +168,7 @@ export default function ProductCarousel({
   if (plants.length === 0) {
     return (
       <section className="product-section">
-        <h2 className="section-title">{content.title}</h2>
+        <h2 className="home-section-title">{content.title}</h2>
         <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#64748b" }}>
           <p>{content.empty_message}</p>
         </div>
@@ -178,7 +178,7 @@ export default function ProductCarousel({
 
   return (
     <section className="product-section">
-      <h2 className="section-title">{content.title}</h2>
+      <h2 className="home-section-title">{content.title}</h2>
 
       <div className="product-carousel-wrapper">
         {/* Left Arrow Button (Image 3 Style) */}

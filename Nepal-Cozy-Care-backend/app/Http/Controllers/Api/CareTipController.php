@@ -28,12 +28,33 @@ class CareTipController extends Controller
             $query->where('difficulty', $request->difficulty);
         }
         $query->orderBy('created_at', 'desc');
-        $careTips = $query->paginate($request->get('per_page', 12));
+
+        $perPageParam = $request->get('per_page', 100);
+        if ($perPageParam === 'all' || (int) $perPageParam <= 0) {
+            $allTips = $query->get();
+            return response()->json([
+                'message' => null,
+                'data' => [
+                    'tips' => $allTips,
+                    'data' => $allTips,
+                    'pagination' => [
+                        'current_page' => 1,
+                        'per_page' => $allTips->count(),
+                        'total' => $allTips->count(),
+                        'last_page' => 1,
+                    ],
+                ],
+            ]);
+        }
+
+        $perPage = max(1, min(500, (int) $perPageParam));
+        $careTips = $query->paginate($perPage);
 
         return response()->json([
             'message' => null,
             'data' => [
                 'tips' => $careTips->items(),
+                'data' => $careTips->items(),
                 'pagination' => [
                     'current_page' => $careTips->currentPage(),
                     'per_page' => $careTips->perPage(),
@@ -75,7 +96,10 @@ class CareTipController extends Controller
                 $query->orderBy('published_at', 'desc');
                 break;
         }
-        $careTips = $query->paginate($request->get('per_page', 12));
+        $perPage = (int) $request->get('per_page', 12);
+        if ($perPage > 100) $perPage = 100;
+        if ($perPage < 1) $perPage = 12;
+        $careTips = $query->paginate($perPage);
 
         return response()->json([
             'message' => null,
@@ -86,17 +110,33 @@ class CareTipController extends Controller
     /**
      * Display the specified care tip.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $careTip = CareTip::published()->with('author')->findOrFail($id);
+        $user = $request->user('sanctum') ?? auth('sanctum')->user();
+        $query = CareTip::with('author');
+
+        if (! $user || ! in_array($user->role ?? '', ['admin', 'seller'])) {
+            $query->published();
+        }
+
+        $careTip = is_numeric($id)
+            ? $query->where('id', (int) $id)->first()
+            : $query->where('slug', $id)->first();
+
+        if (! $careTip) {
+            return response()->json([
+                'message' => 'Care tip not found or not published.',
+            ], 404);
+        }
+
         $careTip->increment('views_count');
         $relatedTips = CareTip::published()
             ->where('id', '!=', $careTip->id)
-            ->where(function ($query) use ($careTip) {
-                $query->where('category', $careTip->category);
+            ->where(function ($q) use ($careTip) {
+                $q->where('category', $careTip->category);
                 if ($careTip->plant_ids) {
                     foreach ($careTip->plant_ids as $plantId) {
-                        $query->orWhereJsonContains('plant_ids', $plantId);
+                        $q->orWhereJsonContains('plant_ids', $plantId);
                     }
                 }
             })
@@ -148,8 +188,9 @@ class CareTipController extends Controller
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('care-tips', 'public');
-        } elseif ($request->filled('image')) {
-            $validated['image'] = $request->input('image');
+        } elseif ($request->has('image')) {
+            $img = $request->input('image');
+            $validated['image'] = ($img !== null && trim((string)$img) !== '') ? trim((string)$img) : null;
         }
 
         $validated['slug'] = Str::slug($validated['title']);
@@ -195,8 +236,9 @@ class CareTipController extends Controller
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('care-tips', 'public');
-        } elseif ($request->filled('image')) {
-            $validated['image'] = $request->input('image');
+        } elseif ($request->has('image')) {
+            $img = $request->input('image');
+            $validated['image'] = ($img !== null && trim((string)$img) !== '') ? trim((string)$img) : null;
         }
 
         if (isset($validated['title'])) {

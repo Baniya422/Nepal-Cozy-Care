@@ -429,7 +429,6 @@ export default function Pots() {
   const urlCategory = searchParams.get("category");
 
   const [items, setItems] = useState<AccessoryItem[]>(fallbackAccessories);
-  const [loading, setLoading] = useState(true);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<AccessoriesFilterValues>(defaultAccessoriesFilterValues);
   const [sortBy, setSortBy] = useState<UgaooSortOption>("featured");
@@ -466,10 +465,13 @@ export default function Pots() {
   }, [filters, sortBy]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    // Show the bundled catalog immediately while refreshing from the server.
     const fetchAccessories = async () => {
-      setLoading(true);
       try {
-        const response = await fetch(`${API}/api/plants?per_page=100&include_accessories=1`);
+        const response = await fetch(`${API}/api/plants?per_page=100&include_accessories=1`, {
+          signal: controller.signal,
+        });
         if (!response.ok) {
           throw new Error(`Failed to load accessories (${response.status})`);
         }
@@ -498,18 +500,19 @@ export default function Pots() {
             );
           });
 
-          if (onlyAccessories.length > 0) {
+          if (!controller.signal.aborted && onlyAccessories.length > 0) {
             setItems(onlyAccessories);
           }
         }
       } catch (err) {
-        console.warn("Could not fetch remote accessories, using catalog:", err);
-      } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          console.warn("Could not fetch remote accessories, using catalog:", err);
+        }
       }
     };
 
     void fetchAccessories();
+    return () => controller.abort();
   }, []);
 
   const activeFilterCount = useMemo(() => {
@@ -691,7 +694,7 @@ export default function Pots() {
 
         {/* ================= MAIN PRODUCTS GRID ================= */}
         <main className="ugaoo-plants-main">
-          {filteredItems.length === 0 && !loading ? (
+          {filteredItems.length === 0 ? (
             <div
               style={{
                 padding: "3.5rem 2rem",
@@ -727,21 +730,7 @@ export default function Pots() {
             </div>
           ) : (
             <div className="plants-grid">
-              {loading
-                ? Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="product-card skeleton-card">
-                      <div className="product-image-wrapper skeleton-box" />
-                      <div className="product-info">
-                        <div className="skeleton-line" style={{ width: "70%", height: "1.2rem" }} />
-                        <div className="skeleton-line" style={{ width: "50%", height: "0.9rem" }} />
-                        <div
-                          className="skeleton-line"
-                          style={{ width: "40%", height: "1.1rem", marginTop: "0.5rem" }}
-                        />
-                      </div>
-                    </div>
-                  ))
-                : paginatedItems.map((item, index) => (
+              {paginatedItems.map((item, index) => (
                     <ProductCard
                       key={item.id}
                       product={item}

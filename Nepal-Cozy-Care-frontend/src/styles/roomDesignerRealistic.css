@@ -15,31 +15,31 @@
 }
 
 .room-designer-page button,
-.catalog-grid button,
-.stage-toolbar button,
-.catalog-tab,
-.starter-btn {
+.room-designer-page .catalog-grid button,
+.room-designer-page .stage-toolbar button,
+.room-designer-page .catalog-tab,
+.room-designer-page .starter-btn {
   cursor: pointer;
 }
 
 /* Reduced Motion & Touch Devices */
 @media (prefers-reduced-motion: reduce), (pointer: coarse) {
-  .room-cursor {
+  .room-designer-page .room-cursor {
     display: none !important;
   }
-  .catalog-grid button,
-  .starter-btn,
-  .stage-toolbar button {
+  .room-designer-page .catalog-grid button,
+  .room-designer-page .starter-btn,
+  .room-designer-page .stage-toolbar button {
     transition: none !important;
   }
-  .catalog-grid button:hover,
-  .starter-btn:hover {
+  .room-designer-page .catalog-grid button:hover,
+  .room-designer-page .starter-btn:hover {
     transform: none !important;
   }
 }
 
 /* WebGL fallback container */
-.webgl-fallback {
+.room-designer-page .webgl-fallback {
   position: absolute;
   inset: 0;
   display: flex;
@@ -52,13 +52,13 @@
   color: #173b2c;
 }
 
-.webgl-fallback h3 {
+.room-designer-page .webgl-fallback h3 {
   font-family: Georgia, serif;
   font-size: 1.4rem;
   margin-bottom: 8px;
 }
 
-.webgl-fallback p {
+.room-designer-page .webgl-fallback p {
   font-size: 0.9rem;
   color: #4d6857;
   max-width: 400px;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 type UseWishlistOptions = {
   apiBaseUrl: string;
+  enabled?: boolean;
 };
 type WishlistItem = {
   plant_id?: number;
@@ -8,10 +9,11 @@ type WishlistItem = {
     id?: number;
   };
 };
-export function useWishlist({ apiBaseUrl }: UseWishlistOptions) {
+export function useWishlist({ apiBaseUrl, enabled = true }: UseWishlistOptions) {
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
   const [wishlistBusyId, setWishlistBusyId] = useState<number | null>(null);
   const fetchWishlist = useCallback(async () => {
+    if (!enabled) return;
     const token = localStorage.getItem("token");
     if (!token) {
       setWishlistIds([]);
@@ -42,11 +44,12 @@ export function useWishlist({ apiBaseUrl }: UseWishlistOptions) {
     } catch (error) {
       console.error("Error fetching wishlist:", error);
     }
-  }, [apiBaseUrl]);
+  }, [apiBaseUrl, enabled]);
   useEffect(() => {
     void fetchWishlist();
-  }, [fetchWishlist]);
+  }, [fetchWishlist, enabled]);
   useEffect(() => {
+    if (!enabled) return;
     const handleWishlistUpdated = () => {
       void fetchWishlist();
     };
@@ -60,7 +63,7 @@ export function useWishlist({ apiBaseUrl }: UseWishlistOptions) {
         handleWishlistUpdated as EventListener
       );
     };
-  }, [fetchWishlist]);
+  }, [fetchWishlist, enabled]);
   const toggleWishlist = useCallback(
     async (plantId: number) => {
       const token = localStorage.getItem("token");

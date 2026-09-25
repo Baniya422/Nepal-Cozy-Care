@@ -23,68 +23,72 @@ const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 export default function CareTips() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const initialSearch = searchParams.get("search") || "";
-  const initialCategory = searchParams.get("category") || "";
-  const initialPage = Number(searchParams.get("page") || "1");
+  const appliedSearchQuery = searchParams.get("search") || "";
+  const selectedCategory = searchParams.get("category") || "";
+  const difficulty = searchParams.get("difficulty") || "";
+  const sortBy = searchParams.get("sort_by") || "newest";
+  const pageParam = Number(searchParams.get("page"));
+  const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
   const [careTips, setCareTips] = useState<CareTip[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(initialPage);
   const [lastPage, setLastPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [appliedSearchQuery, setAppliedSearchQuery] = useState(initialSearch);
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [total, setTotal] = useState(0);
+  const [searchQuery, setSearchQuery] = useState(appliedSearchQuery);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  useEffect(() => setSearchQuery(appliedSearchQuery), [appliedSearchQuery]);
+  const updateFilter = (key: string, value: string) => {
+    setSearchParams((previous) => {
+      const params = new URLSearchParams(previous);
+      if (value) params.set(key, value); else params.delete(key);
+      if (key !== "page") params.delete("page");
+      return params;
+    });
+  };
+  const setCurrentPage = (page: number) => updateFilter("page", String(page));
   useEffect(() => {
-    void fetchCareTips();
-  }, [selectedCategory, currentPage, appliedSearchQuery]);
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (appliedSearchQuery.trim()) {
-      params.set("search", appliedSearchQuery.trim());
-    }
-    if (selectedCategory) {
-      params.set("category", selectedCategory);
-    }
-    if (currentPage > 1) {
-      params.set("page", String(currentPage));
-    }
-    setSearchParams(params, { replace: true });
-  }, [appliedSearchQuery, selectedCategory, currentPage, setSearchParams]);
-  const fetchCareTips = async () => {
+    const controller = new AbortController();
     setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (appliedSearchQuery) params.append("search", appliedSearchQuery);
-      if (selectedCategory) params.append("category", selectedCategory);
-      params.append("page", currentPage.toString());
-      const response = await fetch(`${API}/api/care-tips?${params.toString()}`);
-      if (response.ok) {
+    setError("");
+    setCareTips([]);
+    const params = new URLSearchParams({ search: appliedSearchQuery, category: selectedCategory,
+      difficulty, sort_by: sortBy, page: String(currentPage) });
+    void (async () => {
+      try {
+        const response = await fetch(`${API}/api/care-tips?${params}`, { signal: controller.signal });
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || `Unable to load care tips (${response.status})`);
+        }
         const data: CareTipResponse = await response.json();
+        if (controller.signal.aborted) return;
         setCareTips(data.data.data || []);
-        setCurrentPage(data.data.current_page || 1);
         setLastPage(data.data.last_page || 1);
+        setTotal(data.data.total || 0);
+        if (currentPage > data.data.last_page) {
+          setSearchParams((previous) => {
+            const next = new URLSearchParams(previous);
+            next.set("page", String(Math.max(1, data.data.last_page)));
+            return next;
+          }, { replace: true });
+        }
+      } catch (err: unknown) {
+        if (!controller.signal.aborted) {
+          if (err instanceof Error && err.name === "AbortError") return;
+          setError(err instanceof Error ? err.message : "Unable to load care tips. Please try again.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching care tips:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const clearFilters = () => {
-    setSearchQuery("");
-    setAppliedSearchQuery("");
-    setSelectedCategory("");
-    setCurrentPage(1);
-    setSearchParams({});
-  };
+    })();
+    return () => controller.abort();
+  }, [appliedSearchQuery, selectedCategory, difficulty, sortBy, currentPage, retry, setSearchParams]);
+  const clearFilters = () => { setSearchQuery(""); setSearchParams({}); };
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setCurrentPage(1);
-    setAppliedSearchQuery(searchQuery.trim());
+    updateFilter("search", searchQuery.trim());
   };
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-  };
+  const handleCategoryChange = (category: string) => updateFilter("category", category);
   const getSeasonalAdvice = () => {
     const currentMonth = new Date().getMonth();
     if (currentMonth >= 2 && currentMonth <= 4) {
@@ -132,7 +136,8 @@ export default function CareTips() {
                   <label className="ct-hero-search-input">
                     <Search size={18} />
                     <input
-                      type="text"
+                      type="search"
+                      aria-label="Search care tips"
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
                       placeholder="Search watering, sunlight, fungus gnats, fertilizer..."
@@ -145,11 +150,11 @@ export default function CareTips() {
                 <div className="ct-hero-library-stats">
                   <div className="ct-hero-library-pill">
                     <BookOpenText size={16} />
-                    {careTips.length} guides on this page
+                    {loading ? "Loading guides..." : `${total} guides found`}
                   </div>
                   <div className="ct-hero-library-pill">
                     <TrendingUp size={16} />
-                    {pageViews.toLocaleString()} total views
+                    {pageViews.toLocaleString()} views on this page
                   </div>
                   <div className="ct-hero-library-pill">
                     <Sprout size={16} />
@@ -165,7 +170,7 @@ export default function CareTips() {
                     "Explore easy-to-follow advice cards, seasonal reminders, and care actions that feel practical instead of overwhelming."}
                 </p>
                 <div className="ct-hero-spotlight-meta">
-                  <span>{featuredTip ? activeTopicLabel : "Curated for beginners"}</span>
+                  <span>{featuredTip ? featuredTip.category.replace(/_/g, " ") : "Curated for beginners"}</span>
                   <span>
                     {featuredTip
                       ? `${featuredTip.views_count.toLocaleString()} reads`
@@ -269,20 +274,31 @@ export default function CareTips() {
                     related tips.
                   </p>
                 </div>
-                {(appliedSearchQuery || selectedCategory) && (
+                {(appliedSearchQuery || selectedCategory || difficulty || sortBy !== "newest") && (
                   <button type="button" className="ct-library-reset-btn" onClick={clearFilters}>
                     Clear Filters
                   </button>
                 )}
               </section>
-              <TipsGrid
+              <div className="ct-library-controls">
+                <label>Difficulty <select aria-label="Difficulty" value={difficulty} onChange={(e) => updateFilter("difficulty", e.target.value)}>
+                  <option value="">All levels</option><option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option><option value="advanced">Advanced</option>
+                </select></label>
+                <label>Sort by <select aria-label="Sort care tips" value={sortBy} onChange={(e) => updateFilter("sort_by", e.target.value)}>
+                  <option value="newest">Newest</option><option value="oldest">Oldest</option><option value="popular">Most read</option>
+                </select></label>
+              </div>
+              {error ? <div role="alert" className="care-tips-empty"><p>{error}</p>
+                <button className="care-tips-clear-btn" onClick={() => setRetry((n) => n + 1)}>Try again</button>
+              </div> : <TipsGrid
                 careTips={careTips}
                 loading={loading}
                 clearFilters={clearFilters}
                 currentPage={currentPage}
                 lastPage={lastPage}
                 setCurrentPage={setCurrentPage}
-              />
+              />}
             </main>
           </div>
         </div>

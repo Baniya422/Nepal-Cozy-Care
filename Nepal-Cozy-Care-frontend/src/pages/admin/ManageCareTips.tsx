@@ -46,7 +46,7 @@ const emptyForm: CareTipFormData = {
   category: "watering",
   difficulty: "beginner",
   status: "published",
-  image: "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp",
+  image: "",
 };
 const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
 export default function ManageCareTips() {
@@ -59,10 +59,17 @@ export default function ManageCareTips() {
   const [formData, setFormData] = useState<CareTipFormData>(emptyForm);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [pageError, setPageError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   useEffect(() => {
     void fetchCareTips();
   }, []);
+  useEffect(() => () => {
+    if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
+  }, [imagePreview]);
   const getToken = () => localStorage.getItem("token");
   const getPreviewText = (excerpt: string, content: string, maxLength = 155) => {
     if (excerpt.trim()) {
@@ -79,15 +86,26 @@ export default function ManageCareTips() {
   };
   const fetchCareTips = async () => {
     setLoading(true);
+    setPageError("");
     try {
       const token = getToken();
-      const res = await fetch(`${API}/api/admin/care-tips`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
+      const tipsData = [];
+      let page = 1;
+      let lastPage = 1;
+      do {
+        const res = await fetch(`${API}/api/admin/care-tips?per_page=100&page=${page}`, {
+          headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to load care tips. Please try again.");
         const data = await res.json();
-        const tipsData = data.data?.tips || data.data?.data || data.data || [];
-        const transformedTips = tipsData.map((tip: any) => ({
+        const items = data.data?.tips ?? data.data?.data ?? data.data;
+        if (!Array.isArray(items)) throw new Error("Invalid care tips response.");
+        tipsData.push(...items);
+        lastPage = Number(data.data?.pagination?.last_page) || 1;
+        page++;
+      } while (page <= lastPage);
+      {
+        const transformedTips: CareTip[] = tipsData.map((tip: any) => ({
           id: tip.id,
           title: tip.title,
           excerpt: tip.excerpt || "",
@@ -103,12 +121,13 @@ export default function ManageCareTips() {
       }
     } catch (error) {
       console.error("Error fetching care tips:", error);
-      setSubmitError("Failed to load care tips");
+      setPageError("Failed to load care tips. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  const closeEditor = () => {
+  const closeEditor = (force = false) => {
+    if (saving && !force) return;
     setShowModal(false);
     setEditingTip(null);
     setFormData(emptyForm);
@@ -118,7 +137,13 @@ export default function ManageCareTips() {
   };
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (saving) return;
     setSubmitError(null);
+    if (!formData.title.trim() || !formData.content.trim()) {
+      setSubmitError("A title and guide content are required.");
+      return;
+    }
+    setSaving(true);
     const token = getToken();
     try {
       let imagePath = formData.image || null;
@@ -130,83 +155,84 @@ export default function ManageCareTips() {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
+            Accept: "application/json",
           },
           body: formDataImage,
         });
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
-          imagePath = uploadData.data?.path || uploadData.path || imagePath;
+          imagePath = uploadData.data?.path || uploadData.path;
+          if (!imagePath) throw new Error("Image upload returned no saved image. Please try again.");
         } else {
-          console.error("Image upload failed");
+          const errData = await uploadRes.json().catch(() => ({}));
+          const errMsg =
+            errData.message ||
+            (errData.errors ? Object.values(errData.errors).flat().join(" ") : null) ||
+            `Image upload failed (${uploadRes.status}). Guide was not saved.`;
+          throw new Error(errMsg);
         }
       }
       const url = editingTip ? `${API}/api/admin/care-tips/${editingTip.id}` : `${API}/api/admin/care-tips`;
       const method = editingTip ? "PUT" : "POST";
       const requestBody: Record<string, unknown> = {
-        title: formData.title,
+        title: formData.title.trim(),
         excerpt: formData.excerpt,
-        content: formData.content,
+        content: formData.content.trim(),
         category: formData.category,
         difficulty: formData.difficulty,
         is_published: formData.status === "published",
+        image: imagePath || null,
       };
-      if (imagePath) {
-        requestBody.image = imagePath;
-      }
       const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(requestBody),
       });
       if (res.ok) {
-        closeEditor();
+        closeEditor(true);
         await fetchCareTips();
       } else {
         const error = await res.json().catch(() => ({}));
-        setSubmitError(error.message || "Failed to save care tip");
+        const errMsg =
+          (error.errors ? Object.values(error.errors).flat().join(" ") : null) ||
+          error.message ||
+          `Failed to save care tip (${res.status})`;
+        setSubmitError(errMsg);
       }
     } catch (error) {
       console.error("Error saving care tip:", error);
-      setSubmitError("Failed to save care tip. Please try again.");
+      setSubmitError(error instanceof Error ? error.message : "Failed to save care tip. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this care tip?")) return;
-    const token = getToken();
+  const changeTip = async (tip: CareTip, action: "delete" | "toggle") => {
+    if (busyId !== null) return;
+    if (action === "delete" && !confirm("Are you sure you want to delete this care tip?")) return;
+    setBusyId(tip.id);
+    setPageError("");
     try {
-      const res = await fetch(`${API}/api/admin/care-tips/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(`${API}/api/admin/care-tips/${tip.id}`, {
+        method: action === "delete" ? "DELETE" : "PUT",
+        headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+        ...(action === "toggle" ? { body: JSON.stringify({ is_published: tip.status !== "published" }) } : {}),
       });
-      if (res.ok) {
-        await fetchCareTips();
-      } else {
-        alert("Failed to delete care tip");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const errMsg =
+          (data.errors ? Object.values(data.errors).flat().join(" ") : null) ||
+          data.message ||
+          `Could not update the guide (${res.status}).`;
+        throw new Error(errMsg);
       }
+      await fetchCareTips();
     } catch (error) {
-      console.error("Error deleting care tip:", error);
-    }
-  };
-  const handlePublish = async (id: number) => {
-    const token = getToken();
-    try {
-      const res = await fetch(`${API}/api/admin/care-tips/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ is_published: true }),
-      });
-      if (res.ok) {
-        await fetchCareTips();
-      }
-    } catch (error) {
-      console.error("Error publishing care tip:", error);
-    }
+      setPageError(error instanceof Error ? error.message : "Could not update the guide. Please try again.");
+    } finally { setBusyId(null); }
   };
   const handleEdit = (tip: CareTip) => {
     setEditingTip(tip);
@@ -217,10 +243,10 @@ export default function ManageCareTips() {
       category: (tip.category as CareTipFormData["category"]) || "watering",
       difficulty: (tip.difficulty as CareTipFormData["difficulty"]) || "beginner",
       status: tip.status,
-      image: tip.image || "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp",
+      image: tip.image || "",
     });
     setSelectedImage(null);
-    setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : FALLBACK_IMAGE);
+    setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : null);
     setSubmitError(null);
     setShowModal(true);
   };
@@ -228,13 +254,19 @@ export default function ManageCareTips() {
     setEditingTip(null);
     setFormData(emptyForm);
     setSelectedImage(null);
-    setImagePreview(FALLBACK_IMAGE);
+    setImagePreview(null);
     setSubmitError(null);
     setShowModal(true);
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) {
+        setSubmitError("Choose an image smaller than 8 MB.");
+        event.target.value = "";
+        return;
+      }
+      setSubmitError(null);
       setSelectedImage(file);
       setImagePreview(URL.createObjectURL(file));
     }
@@ -262,7 +294,7 @@ export default function ManageCareTips() {
         return "";
     }
   };
-  const filteredTips = careTips.filter(
+  const filteredTips = careTips.filter((tip) => !statusFilter || tip.status === statusFilter).filter(
     (tip) =>
       tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tip.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -365,6 +397,12 @@ export default function ManageCareTips() {
             Content studio tip: write short summaries first, then expand the full guidance.
           </p>
         </div>
+        {pageError && <div role="alert" className="admin-care-tip-error">{pageError}
+          <button type="button" className="admin-btn" onClick={() => void fetchCareTips()}>Retry loading</button>
+        </div>}
+        <label>Status filter <select aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="">All guides</option><option value="published">Published</option><option value="draft">Drafts</option>
+        </select></label>
         <div className="admin-table-container admin-care-tips-table-wrap">
           {loading ? (
             <div className="admin-loading">Loading care tips...</div>
@@ -436,19 +474,21 @@ export default function ManageCareTips() {
                         >
                           <Edit size={16} />
                         </button>
-                        {tip.status === "draft" && (
+                        {(
                           <button
                             className="admin-care-tip-publish-btn"
-                            title="Publish"
-                            onClick={() => void handlePublish(tip.id)}
+                            title={tip.status === "published" ? "Unpublish" : "Publish"}
+                            disabled={busyId !== null}
+                            onClick={() => void changeTip(tip, "toggle")}
                           >
-                            Publish
+                            {tip.status === "published" ? "Unpublish" : "Publish"}
                           </button>
                         )}
                         <button
                           className="admin-action-btn admin-action-delete"
                           title="Delete"
-                          onClick={() => void handleDelete(tip.id)}
+                          disabled={busyId !== null}
+                          onClick={() => void changeTip(tip, "delete")}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -459,7 +499,7 @@ export default function ManageCareTips() {
               </tbody>
             </table>
           )}
-          {!loading && filteredTips.length === 0 && (
+          {!loading && !pageError && filteredTips.length === 0 && (
             <div className="admin-empty-state">
               <p>No care tips found. Create your first care tip!</p>
             </div>
@@ -547,18 +587,18 @@ export default function ManageCareTips() {
           </div>
         )}
         {showModal && (
-          <div className="admin-modal-overlay" onClick={closeEditor}>
+          <div className="admin-modal-overlay" onClick={() => closeEditor()}>
             <div
               className="admin-modal admin-modal-large admin-care-tip-editor-modal"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="admin-modal-header">
                 <h3>{editingTip ? "Edit Care Tip" : "Create New Care Tip"}</h3>
-                <button className="admin-modal-close" onClick={closeEditor}>
+                <button className="admin-modal-close" onClick={() => closeEditor()}>
                   <X size={20} />
                 </button>
               </div>
-              {submitError && <div className="admin-care-tip-error">{submitError}</div>}
+              {submitError && <div role="alert" className="admin-care-tip-error">{submitError}</div>}
               <form onSubmit={handleSubmit} className="admin-form">
                 <div className="admin-care-tip-editor-stats">
                   <div className="admin-care-tip-editor-chip">
@@ -578,9 +618,11 @@ export default function ManageCareTips() {
                 </div>
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
-                    <label>Care Tip Title *</label>
+                    <label htmlFor="care-tip-title">Care Tip Title *</label>
                     <input
                       type="text"
+                      maxLength={255}
+                      id="care-tip-title"
                       value={formData.title}
                       onChange={(event) =>
                         setFormData((current) => ({ ...current, title: event.target.value }))
@@ -590,8 +632,9 @@ export default function ManageCareTips() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Category *</label>
+                    <label htmlFor="care-tip-category">Category *</label>
                     <select
+                      id="care-tip-category"
                       value={formData.category}
                       onChange={(event) =>
                         setFormData((current) => ({
@@ -610,8 +653,9 @@ export default function ManageCareTips() {
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Difficulty Level *</label>
+                    <label htmlFor="care-tip-difficulty">Difficulty Level *</label>
                     <select
+                      id="care-tip-difficulty"
                       value={formData.difficulty}
                       onChange={(event) =>
                         setFormData((current) => ({
@@ -627,8 +671,9 @@ export default function ManageCareTips() {
                     </select>
                   </div>
                   <div className="admin-form-group">
-                    <label>Status</label>
+                    <label htmlFor="care-tip-status">Status</label>
                     <select
+                      id="care-tip-status"
                       value={formData.status}
                       onChange={(event) =>
                         setFormData((current) => ({
@@ -643,9 +688,10 @@ export default function ManageCareTips() {
                   </div>
                 </div>
                 <div className="admin-form-group">
-                  <label>Excerpt (Brief Summary)</label>
+                  <label htmlFor="care-tip-excerpt">Excerpt (Brief Summary)</label>
                   <textarea
-                    value={formData.excerpt}
+                    id="care-tip-excerpt"
+                      value={formData.excerpt}
                     onChange={(event) =>
                       setFormData((current) => ({ ...current, excerpt: event.target.value }))
                     }
@@ -654,9 +700,10 @@ export default function ManageCareTips() {
                   />
                 </div>
                 <div className="admin-form-group">
-                  <label>Content *</label>
+                  <label htmlFor="care-tip-content">Content *</label>
                   <textarea
-                    value={formData.content}
+                    id="care-tip-content"
+                      value={formData.content}
                     onChange={(event) =>
                       setFormData((current) => ({ ...current, content: event.target.value }))
                     }
@@ -703,11 +750,23 @@ export default function ManageCareTips() {
                               type="button"
                               onClick={() => {
                                 setSelectedImage(null);
-                                setImagePreview(formData.image || FALLBACK_IMAGE);
+                                setImagePreview(formData.image ? resolveImageUrl(formData.image, FALLBACK_IMAGE) : null);
                               }}
-                              style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer" }}
+                              style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
                             >
-                              ✕ Remove file
+                              <X size={13} /> Remove file
+                            </button>
+                          )}
+                          {!selectedImage && formData.image && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({ ...prev, image: "" }));
+                                setImagePreview(null);
+                              }}
+                              style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+                            >
+                              <X size={13} /> Clear image
                             </button>
                           )}
                         </div>
@@ -778,12 +837,12 @@ export default function ManageCareTips() {
                   <button
                     type="button"
                     className="admin-btn admin-btn-secondary"
-                    onClick={closeEditor}
+                    onClick={() => closeEditor()}
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="admin-btn admin-btn-primary">
-                    {editingTip ? "Update Care Tip" : "Create Care Tip"}
+                  <button type="submit" disabled={saving} className="admin-btn admin-btn-primary">
+                    {saving ? "Saving..." : editingTip ? "Update Care Tip" : "Create Care Tip"}
                   </button>
                 </div>
               </form>

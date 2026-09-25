@@ -111,19 +111,23 @@ export default function CareTipDetail() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API}/api/care-tips/${id}`);
+      const token = localStorage.getItem("token");
+      const headers: Record<string, string> = { Accept: "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const response = await fetch(`${API}/api/care-tips/${id}`, { headers });
       if (response.ok) {
         const data: CareTipDetailResponse = await response.json();
         setTip(data.data.tip);
         setRelatedTips(data.data.related_tips || []);
-      } else if (response.status === 404) {
-        setError("Care tip not found");
       } else {
-        setError("Failed to load care tip");
+        const errJson = await response.json().catch(() => ({}));
+        const errMsg = errJson.message || (response.status === 404 ? "Care tip not found" : `Failed to load care tip (${response.status})`);
+        setError(errMsg);
       }
     } catch (fetchError) {
       console.error("Error fetching care tip:", fetchError);
-      setError("Failed to load care tip");
+      setError(fetchError instanceof Error ? fetchError.message : "Failed to load care tip");
     } finally {
       setLoading(false);
     }

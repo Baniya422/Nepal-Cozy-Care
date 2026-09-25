@@ -408,16 +408,18 @@
   width: 100%;
   margin: 0;
 }
-.section-title {
+.home-section-title,
+.product-section .home-section-title {
   text-align: center;
   color: #374151;
   font-size: 1.5rem;
   font-weight: 600;
-  margin: 0 0 2.5rem 0;
+  margin: 0 auto 2.5rem auto;
   padding: 0 2rem;
   max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
+  display: block;
+  letter-spacing: normal;
+  text-transform: none;
 }
 .product-grid {
   width: 100%;
@@ -826,7 +828,7 @@
   .product-section {
     padding: 2rem 0.5rem 2.5rem;
   }
-  .product-section .section-title {
+  .product-section .home-section-title {
     margin-bottom: 1.25rem;
     padding: 0 1rem;
     text-align: left;

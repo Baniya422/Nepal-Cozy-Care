@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, X } from "lucide-react";
 import Layout from "../components/layout/Layout";
-import { DEFAULT_AUTHOR_IMAGE, fetchAllBlogs, mapBlogFromApi } from "../features/blogs/blogData";
+import { DEFAULT_AUTHOR_IMAGE, fetchPublicBlogs, readCachedBlogs, mapBlogFromApi } from "../features/blogs/blogData";
 import { type CuratedBlog } from "../features/blogs/curatedBlogs";
 import { resolveImageUrl, handleImageError, DEFAULT_BLOG_IMAGE } from "../utils/imageUrl";
 import "../styles/blogs.css";
@@ -206,7 +206,7 @@ export default function Blogs() {
   const navigate = useNavigate();
   useReveal();
 
-  const [blogs, setBlogs] = useState<CuratedBlog[]>([]);
+  const [blogs, setBlogs] = useState<CuratedBlog[]>(() => readCachedBlogs(`${API}/api/blogs`).map(mapBlogFromApi));
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
@@ -235,8 +235,9 @@ export default function Blogs() {
     let isMounted = true;
     const fetchApiBlogs = async () => {
       try {
-        const apiList = await fetchAllBlogs(`${API}/api/blogs`);
-        if (isMounted) setBlogs(apiList.map(mapBlogFromApi));
+        await fetchPublicBlogs(`${API}/api/blogs`, (apiList) => {
+          if (isMounted) setBlogs(apiList.map(mapBlogFromApi));
+        });
       } catch {
         if (isMounted) setLoadError("We couldn't load the journal. Please refresh to try again.");
       } finally {
@@ -329,6 +330,8 @@ export default function Blogs() {
               src={resolveImageUrl(featured.image, DEFAULT_BLOG_IMAGE)}
               alt={featured.title}
               className="bj-hero-bg"
+              loading="eager"
+              fetchPriority="high"
               onError={(e) => handleImageError(e, DEFAULT_BLOG_IMAGE)}
               style={{
                 transform: `scale(1.08) translateY(${heroY * 0.3}px) translateX(${mouseX * 0.2}px)`,
@@ -339,21 +342,21 @@ export default function Blogs() {
 
             {/* Hero text */}
             <div className="bj-hero-content">
-              <div className="bj-hero-eyebrow bj-fade-up" style={{ animationDelay: ".1s" }}>
+              <div className="bj-hero-eyebrow">
                 <div className="bj-hero-line" />
                 <span className="bj-hero-label">Featured Story</span>
                 <span className="bj-hero-date">· {currentMonth} 2026</span>
               </div>
 
-              <h1 className="bj-hero-title bj-fade-up" style={{ animationDelay: ".2s" }}>
+              <h1 className="bj-hero-title">
                 {featured.title}
               </h1>
 
-              <p className="bj-hero-excerpt bj-fade-up" style={{ animationDelay: ".3s" }}>
+              <p className="bj-hero-excerpt">
                 {featured.excerpt}
               </p>
 
-              <div className="bj-hero-meta bj-fade-up" style={{ animationDelay: ".4s" }}>
+              <div className="bj-hero-meta">
                 <div className="bj-hero-author">
                   <img
                     src={featured.author_image} alt={featured.author}

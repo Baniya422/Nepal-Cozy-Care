@@ -128,7 +128,7 @@
   font-weight: 800;
 }
 
-.panel-header h2 {
+.room-designer-page .panel-header h2 {
   font-family: Georgia, serif;
   font-size: 1.35rem;
   font-weight: 600;
@@ -136,7 +136,7 @@
   margin: 0 0 4px;
 }
 
-.panel-header p {
+.room-designer-page .panel-header p {
   font-size: 0.8rem;
   color: #657b6e;
   margin: 0;
@@ -341,7 +341,7 @@
   margin-top: 14px;
 }
 
-.section-title {
+.room-designer-page .section-title {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -732,14 +732,14 @@
   margin: 0 auto;
 }
 
-.transfer-dialog-card h2 {
+.room-designer-page .transfer-dialog-card h2 {
   font-size: 1.5rem;
   font-weight: 800;
   color: #111827;
   margin: 0.2rem 0 0;
 }
 
-.transfer-dialog-card p {
+.room-designer-page .transfer-dialog-card p {
   font-size: 0.92rem;
   color: #4b5563;
   margin: 0;

@@ -61,7 +61,10 @@ export default function ProductCard({
   const { vendor_marketplace_enabled } = useFeatureFlags();
 
   // Hooks for standalone usage if callbacks aren't supplied
-  const fallbackWishlist = useWishlist({ apiBaseUrl: API });
+  const fallbackWishlist = useWishlist({
+    apiBaseUrl: API,
+    enabled: propIsWishlisted === undefined || !propOnToggleWishlist,
+  });
   const fallbackCart = useAddToCart(API);
 
   const isWishlisted =

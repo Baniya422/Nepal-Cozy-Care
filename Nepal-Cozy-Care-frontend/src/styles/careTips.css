@@ -2113,3 +2113,7 @@
   }
 }
 
+
+.ct-library-controls { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+.ct-library-controls label { display: flex; align-items: center; gap: .5rem; }
+.ct-library-controls select { padding: .6rem; border: 1px solid #d5ded6; border-radius: 8px; background: white; color: #173b2c; }

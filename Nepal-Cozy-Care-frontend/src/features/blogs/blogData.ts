@@ -47,20 +47,47 @@ export function mapBlogFromApi(blog: BlogApi): CuratedBlog {
   };
 }
 
-export async function fetchAllBlogs(url: string, token?: string | null): Promise<BlogApi[]> {
+const PUBLIC_BLOG_CACHE_TTL = 5 * 60 * 1000;
+const publicCacheKey = (url: string) => `cozy:public-blogs:v1:${url}`;
+
+export function readCachedBlogs(url: string): BlogApi[] {
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(publicCacheKey(url)) || "null");
+    if (cached && Date.now() - cached.savedAt < PUBLIC_BLOG_CACHE_TTL &&
+        Array.isArray(cached.blogs) && cached.blogs.every((blog: BlogApi) =>
+          blog && typeof blog.id === "number" && typeof blog.title === "string")) {
+      return cached.blogs;
+    }
+  } catch { /* Storage may be unavailable. */ }
+  return [];
+}
+
+export async function fetchPublicBlogs(
+  url: string,
+  onProgress: (blogs: BlogApi[]) => void,
+): Promise<BlogApi[]> {
+  const blogs = await fetchAllBlogs(url, undefined, onProgress);
+  try {
+    sessionStorage.setItem(publicCacheKey(url), JSON.stringify({ savedAt: Date.now(), blogs }));
+  } catch { /* A full or disabled cache must not prevent rendering. */ }
+  return blogs;
+}
+
+export async function fetchAllBlogs(url: string, token?: string | null, onProgress?: (blogs: BlogApi[]) => void): Promise<BlogApi[]> {
   const blogs: BlogApi[] = [];
   let page = 1;
   let lastPage = 1;
   do {
     const response = await fetch(`${url}?per_page=100&page=${page}`, {
       headers: { Accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      cache: "no-store",
+      cache: token ? "no-store" : "default",
     });
     if (!response.ok) throw new Error("Couldn't load articles. Please refresh and try again.");
     const json = await response.json();
     const items = json.data?.blogs ?? json.data?.data ?? json.data;
     if (!Array.isArray(items)) throw new Error("Invalid article response.");
     blogs.push(...items);
+    onProgress?.([...blogs]);
     lastPage = Number(json.data?.pagination?.last_page) || 1;
     page++;
   } while (page <= lastPage);
