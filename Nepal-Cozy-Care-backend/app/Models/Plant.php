@@ -158,12 +158,13 @@ class Plant extends Model
 
     public function scopeExcludeAccessories($query)
     {
-        return $query->whereNotIn('category', ['Pots', 'Tools', 'Soil', 'Fertilizers', 'Accessories'])
+        return $query->whereNotIn('category', ['Pots', 'Tools', 'Soil', 'Fertilizers', 'Accessories', 'Seeds'])
             ->where(function ($q) {
                 $q->where('category', 'not like', '%pot%')
                     ->where('category', 'not like', '%tool%')
                     ->where('category', 'not like', '%soil%')
                     ->where('category', 'not like', '%fertilizer%')
+                    ->where('category', 'not like', '%seed%')
                     ->where('category', 'not like', '%accessory%');
             });
     }

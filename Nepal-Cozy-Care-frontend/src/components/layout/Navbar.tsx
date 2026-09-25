@@ -61,6 +61,7 @@ export const defaultNavMenuConfig: NavigationMenuConfig = {
 const navItems = [
   { to: "/", label: "Home" },
   { to: "/plants", label: "Plants", hasDropdown: "plants" },
+  { to: "/seeds", label: "Seeds" },
   // { to: "/shops", label: "Shops" }, // Hidden for now, preserved for later
   { to: "/pots", label: "Accessories", hasDropdown: "accessories" },
   { to: "/care-tips", label: "Care Tips", hasDropdown: "care_tips" },

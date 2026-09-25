@@ -39,6 +39,7 @@ import {
   RefreshCw,
   Palette,
   CircleDot,
+  Sprout,
 } from "lucide-react";
 import "./admin.css";
 import { useFeatureFlags } from "../../context/FeatureFlagsContext";
@@ -181,6 +182,7 @@ const getMenuGroups = (vendorMarketplaceEnabled: boolean): MenuGroup[] => [
       { path: "/admin/suppliers", icon: Building2, label: "Nursery Suppliers" },
       { path: "/admin/promo-codes", icon: Tag, label: "Promo Codes" },
       { path: "/admin/plants", icon: Leaf, label: "Manage Plants" },
+      { path: "/admin/seeds", icon: Sprout, label: "Manage Seeds" },
       { path: "/admin/decorations", icon: Box, label: "3D Decorations" },
       { path: "/admin/accessories", icon: Package, label: "Accessories" },
     ],

@@ -17,7 +17,7 @@ export const defaultCategoryBubbles: CategoryBubbleItem[] = [
   { id: "pots", label: "Pots & Planters", path: "/pots", image: "pots", is_active: true },
   { id: "soil", label: "Soil & Media", path: "/pots?category=soil", image: "soil", is_active: true },
   { id: "fertiliser", label: "Fertilisers", path: "/pots?category=fertilizer", image: "fertiliser", is_active: true },
-  { id: "seeds", label: "Seeds", path: "/pots?category=seeds", image: "seeds", is_active: true },
+  { id: "seeds", label: "Seeds", path: "/seeds", image: "seeds", is_active: true },
   { id: "tools", label: "Garden Tools", path: "/pots?category=tools", image: "tools", is_active: true },
   { id: "watering", label: "Watering", path: "/pots?category=watering", image: "watering", is_active: true },
   { id: "care", label: "Care Tips", path: "/care-tips", image: "care", is_active: true },
@@ -42,6 +42,9 @@ const sanitizeBubbles = (list: CategoryBubbleItem[]): CategoryBubbleItem[] => {
   return list.map((c) => {
     if (c.id === "care" || c.path?.includes("care-tips") || c.label.toLowerCase() === "plant care") {
       return { ...c, label: "Care Tips", path: "/care-tips" };
+    }
+    if (c.id === "seeds" || c.label.toLowerCase() === "seeds" || c.path?.includes("seeds")) {
+      return { ...c, label: "Seeds", path: "/seeds" };
     }
     return c;
   });

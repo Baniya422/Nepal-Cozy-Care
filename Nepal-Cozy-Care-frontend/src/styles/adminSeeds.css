@@ -1,0 +1,254 @@
+/* ==========================================================================
+   ADMIN SEEDS MANAGEMENT STYLES
+   ========================================================================== */
+
+.admin-seeds-page {
+  padding-bottom: 4rem;
+}
+
+.admin-seeds-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-seeds-kicker {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.admin-seeds-hero h2 {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.4rem 0;
+  letter-spacing: -0.02em;
+}
+
+.admin-seeds-hero p {
+  color: #64748b;
+  font-size: 0.95rem;
+  max-width: 650px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Quick Metrics Cards */
+.admin-seeds-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.admin-seeds-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.admin-seeds-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-seeds-stat-icon.emerald { background: #ecfdf5; color: #059669; }
+.admin-seeds-stat-icon.blue { background: #eff6ff; color: #2563eb; }
+.admin-seeds-stat-icon.amber { background: #fffbeb; color: #d97706; }
+.admin-seeds-stat-icon.red { background: #fef2f2; color: #dc2626; }
+
+.admin-seeds-stat-info span {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+}
+
+.admin-seeds-stat-info strong {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* Filter controls bar */
+.admin-seeds-controls {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-seeds-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  min-width: 280px;
+  flex: 1;
+}
+
+.admin-seeds-search-wrap input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.9rem;
+  color: #1e293b;
+  width: 100%;
+}
+
+.admin-seeds-filters-right {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-seeds-select {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+}
+
+.admin-seeds-select:focus {
+  border-color: #059669;
+}
+
+/* Table styling */
+.admin-seeds-table-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.admin-seeds-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-seeds-table th {
+  background: #f8fafc;
+  padding: 0.9rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-seeds-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.admin-seeds-table tr:hover td {
+  background: #fcfdfc;
+}
+
+/* Thumbnail */
+.admin-seed-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+/* Category pills */
+.admin-seed-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.admin-seed-badge.vegetable { background: #fef3c7; color: #b45309; }
+.admin-seed-badge.flower { background: #fce7f3; color: #be185d; }
+.admin-seed-badge.herb { background: #ecfdf5; color: #047857; }
+.admin-seed-badge.microgreen { background: #e0e7ff; color: #4338ca; }
+.admin-seed-badge.fruit { background: #ffe4e6; color: #e11d48; }
+.admin-seed-badge.combo { background: #f3e8ff; color: #6b21a8; }
+
+/* Stock badges */
+.admin-stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.admin-stock-pill.in-stock { background: #ecfdf5; color: #065f46; }
+.admin-stock-pill.low-stock { background: #fffbeb; color: #b45309; }
+.admin-stock-pill.out-of-stock { background: #fef2f2; color: #b91c1c; }
+
+/* Modal Form Styles */
+.admin-seeds-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.admin-seeds-modal-grid.full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1024px) {
+  .admin-seeds-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-seeds-stats {
+    grid-template-columns: 1fr;
+  }
+  .admin-seeds-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}

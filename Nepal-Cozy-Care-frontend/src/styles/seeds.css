@@ -1,0 +1,330 @@
+/* ==========================================================================
+   SEEDS PAGE STYLES - NEPAL COZY CARE (Ugaoo Inspired)
+   ========================================================================== */
+
+.seeds-page {
+  background-color: #fbfbf9;
+  min-height: 100vh;
+  padding-bottom: 5rem;
+}
+
+/* Category circles container */
+.seeds-page .category-bubbles-container {
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Hero Banner */
+.seeds-hero {
+  max-width: 1380px;
+  margin: 0 auto 1.5rem auto;
+  padding: 0 1.5rem;
+}
+
+.seeds-hero-card {
+  background: linear-gradient(135deg, #0d4e3a 0%, #064030 50%, #042e22 100%);
+  border-radius: 18px;
+  padding: 2.5rem 3rem;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(13, 78, 58, 0.15);
+}
+
+.seeds-hero-card::after {
+  content: "";
+  position: absolute;
+  right: -50px;
+  top: -50px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.18) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.seeds-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #a7f3d0;
+  background: rgba(167, 243, 208, 0.15);
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+}
+
+.seeds-hero-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem 0;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.seeds-hero-desc {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 680px;
+  color: #e2e8f0;
+  margin: 0 0 1.5rem 0;
+}
+
+.seeds-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.seeds-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d1fae5;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Quick Filter Category Pills */
+.seeds-pills-bar {
+  max-width: 1380px;
+  margin: 0 auto 1.5rem auto;
+  padding: 0 1.5rem;
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.seeds-pills-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.seeds-pill-btn {
+  white-space: nowrap;
+  padding: 0.55rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.seeds-pill-btn:hover {
+  border-color: #0d4e3a;
+  color: #0d4e3a;
+  background: #f0fdf4;
+}
+
+.seeds-pill-btn.is-active {
+  background: #0d4e3a;
+  color: #ffffff;
+  border-color: #0d4e3a;
+  box-shadow: 0 4px 12px rgba(13, 78, 58, 0.2);
+}
+
+/* Action bar container */
+.seeds-page .ugaoo-action-bar-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.seeds-page .ugaoo-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  background: transparent;
+}
+
+/* Product grid container scoped */
+.seeds-page .plants-grid-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.seeds-page .plants-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.seeds-page .plants-card-image-wrapper {
+  height: 250px !important;
+  max-height: 250px !important;
+  width: 100% !important;
+  overflow: hidden;
+  background-color: #f8fafc;
+  position: relative;
+}
+
+.seeds-page .plants-card-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.seeds-page .plants-card:hover .plants-card-image {
+  transform: scale(1.05);
+}
+
+/* Sowing & Germination Guide Section */
+.seeds-guide-section {
+  max-width: 1380px;
+  margin: 4rem auto 1rem auto;
+  padding: 0 1.5rem;
+}
+
+.seeds-guide-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.seeds-guide-head {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 2.5rem auto;
+}
+
+.seeds-guide-head h3 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.seeds-guide-head p {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.seeds-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.seeds-step-card {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.seeds-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0d4e3a;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.seeds-step-card h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.seeds-step-card p {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Empty state */
+.seeds-empty-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.seeds-empty-state h3 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.seeds-empty-state p {
+  color: #64748b;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .seeds-page .plants-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .seeds-steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .seeds-hero-card {
+    padding: 2rem;
+  }
+  .seeds-hero-title {
+    font-size: 1.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .seeds-page .plants-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .seeds-hero-title {
+    font-size: 1.6rem;
+  }
+  .seeds-hero-card {
+    padding: 1.5rem;
+  }
+  .seeds-hero-badges {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .seeds-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}

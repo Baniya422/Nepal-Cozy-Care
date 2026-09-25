@@ -20,6 +20,7 @@ const PlantFinder = lazy(() =>
 const Home = lazy(() => import('./pages/Home'))
 const ShippingDelivery = lazy(() => import('./pages/ShippingDelivery'))
 const Plants = lazy(() => import('./pages/Plants'))
+const Seeds = lazy(() => import('./pages/Seeds'))
 const Pots = lazy(() => import('./pages/Pots'))
 const Blogs = lazy(() => import('./pages/Blogs'))
 const Contact = lazy(() => import('./pages/Contact'))
@@ -40,6 +41,7 @@ const MyGarden = lazy(() => import('./pages/MyGarden'))
 const BlogDetail = lazy(() => import('./pages/BlogDetail'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const ManagePlants = lazy(() => import('./pages/admin/ManagePlants'))
+const ManageSeeds = lazy(() => import('./pages/admin/ManageSeeds'))
 const ManageDecorations = lazy(() => import('./pages/admin/ManageDecorations'))
 const ManageAccessories = lazy(() => import('./pages/admin/ManageAccessories'))
 const ManageBlogs = lazy(() => import('./pages/admin/ManageBlogs'))
@@ -101,6 +103,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/plants" element={<Plants />} />
         <Route path="/plants/:id" element={<ProductDetail />} />
+        <Route path="/seeds" element={<Seeds />} />
         <Route path="/pots" element={<Pots />} />
         <Route path="/popular-items" element={<PopularItemsPage />} />
         <Route path="/best-sellers" element={<BestSellersPage />} />
@@ -272,6 +275,14 @@ function App() {
         element={
           <AdminProtectedRoute>
             <ManagePlants />
+          </AdminProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/seeds"
+        element={
+          <AdminProtectedRoute>
+            <ManageSeeds />
           </AdminProtectedRoute>
         }
       />
