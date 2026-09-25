@@ -34,6 +34,7 @@ import {
 import { useWishlist } from "../hooks/useWishlist";
 import { useAddToCart } from "../hooks/useAddToCart";
 import type { CareTip, CareTipResponse } from "../types/careTip";
+import "../styles/plants.css";
 import "../styles/careTips.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -156,14 +157,44 @@ export default function CareTips() {
   const { wishlistIds, wishlistBusyId, toggleWishlist } = useWishlist({ apiBaseUrl: API });
   const { cartBusyId, addToCart } = useAddToCart(API);
 
-  // Fetch real care products from database plants table
+  // Fetch real care products from database plants table kept by admin
   useEffect(() => {
     fetch(`${API}/api/plants?per_page=100`)
       .then((res) => res.json())
       .then((data) => {
         const backendItems = data.data?.data ?? data.data ?? [];
         if (Array.isArray(backendItems) && backendItems.length > 0) {
-          const mapped: AccessoryItem[] = backendItems.map((p: any) => ({
+          // Filter to specifically care products, soils, fertilizers, seeds, tools, watering & decor
+          const careItems = backendItems.filter((p: any) => {
+            const cat = (p.category || "").toLowerCase();
+            const name = (p.name || "").toLowerCase();
+            return (
+              cat.includes("care") ||
+              cat.includes("soil") ||
+              cat.includes("media") ||
+              cat.includes("fertiliz") ||
+              cat.includes("seed") ||
+              cat.includes("tool") ||
+              cat.includes("water") ||
+              cat.includes("decor") ||
+              cat.includes("pot") ||
+              cat.includes("planter") ||
+              name.includes("neem") ||
+              name.includes("soil") ||
+              name.includes("fertiliz") ||
+              name.includes("seed") ||
+              name.includes("spray") ||
+              name.includes("prun") ||
+              name.includes("trowel") ||
+              name.includes("can") ||
+              name.includes("pot") ||
+              name.includes("planter") ||
+              name.includes("pole") ||
+              name.includes("pebble")
+            );
+          });
+
+          const mapped: AccessoryItem[] = careItems.map((p: any) => ({
             id: p.id,
             name: p.name,
             price: Number(p.price) || 0,
@@ -398,23 +429,55 @@ export default function CareTips() {
         {activeTab === "products" && (
           <section className="ct-products-section" style={{ marginTop: "1rem" }}>
             {/* Action Bar matching Plants & Accessories */}
-            <div className="ugaoo-action-bar-container">
-              <div className="ugaoo-action-bar">
+            <div className="ugaoo-action-bar-container" style={{ maxWidth: "1400px", margin: "0 auto", padding: "1.25rem 1.5rem 0.5rem", width: "100%" }}>
+              <div className="ugaoo-action-bar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "1rem", borderBottom: "1px solid #e5ebe6", gap: "1rem" }}>
                 <button
                   type="button"
                   className="ugaoo-filter-btn"
                   onClick={() => setIsFilterDrawerOpen(true)}
                   aria-label="Open plant care filters"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.55rem",
+                    background: "#1b4332",
+                    color: "#ffffff",
+                    padding: "0.6rem 1.4rem",
+                    borderRadius: "9999px",
+                    border: "none",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontSize: "0.88rem",
+                    letterSpacing: "0.06em",
+                    boxShadow: "0 2px 6px rgba(27, 67, 50, 0.2)",
+                  }}
                 >
-                  <SlidersHorizontal size={17} className="ugaoo-filter-icon" />
+                  <SlidersHorizontal size={17} style={{ color: "#ffffff" }} />
                   <span className="ugaoo-filter-text">FILTER</span>
                   {activeProductFilterCount > 0 && (
-                    <span className="ugaoo-filter-badge">{activeProductFilterCount}</span>
+                    <span
+                      className="ugaoo-filter-badge"
+                      style={{
+                        background: "#facc15",
+                        color: "#1e293b",
+                        fontSize: "0.72rem",
+                        fontWeight: 800,
+                        minWidth: "20px",
+                        height: "20px",
+                        borderRadius: "999px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "0 5px",
+                      }}
+                    >
+                      {activeProductFilterCount}
+                    </span>
                   )}
                 </button>
 
-                <div className="ugaoo-action-right">
-                  <span className="ugaoo-count-label">
+                <div className="ugaoo-action-right" style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+                  <span className="ugaoo-count-label" style={{ fontSize: "0.95rem", fontWeight: 600, color: "#475569" }}>
                     {filteredProducts.length} care product{filteredProducts.length === 1 ? "" : "s"}
                   </span>
                   <UgaooSortDropdown value={productSortBy} onChange={setProductSortBy} />
@@ -515,7 +578,17 @@ export default function CareTips() {
                   </button>
                 </div>
               ) : (
-                <div className="plants-grid">
+                <div
+                  className="plants-grid"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))",
+                    gap: "1.5rem",
+                    maxWidth: "1400px",
+                    width: "100%",
+                    margin: "1.5rem auto 0",
+                  }}
+                >
                   {paginatedProducts.map((item, index) => (
                     <ProductCard
                       key={item.id}

@@ -227,13 +227,13 @@ class AdminPageContentController extends Controller
                 'categories' => [
                     ['id' => 'plants', 'label' => 'Plants', 'path' => '/plants', 'image' => 'plants', 'is_active' => true],
                     ['id' => 'pots', 'label' => 'Pots & Planters', 'path' => '/pots', 'image' => 'pots', 'is_active' => true],
-                    ['id' => 'best_sellers', 'label' => 'Best Sellers', 'path' => '/best-sellers', 'image' => 'plants', 'is_active' => true],
-                    ['id' => 'popular', 'label' => 'Popular Items', 'path' => '/popular-items', 'image' => 'pots', 'is_active' => true],
                     ['id' => 'soil', 'label' => 'Soil & Media', 'path' => '/pots?category=soil', 'image' => 'soil', 'is_active' => true],
                     ['id' => 'fertiliser', 'label' => 'Fertilisers', 'path' => '/pots?category=fertilizer', 'image' => 'fertiliser', 'is_active' => true],
+                    ['id' => 'seeds', 'label' => 'Seeds', 'path' => '/pots?category=seeds', 'image' => 'seeds', 'is_active' => true],
                     ['id' => 'tools', 'label' => 'Garden Tools', 'path' => '/pots?category=tools', 'image' => 'tools', 'is_active' => true],
                     ['id' => 'watering', 'label' => 'Watering', 'path' => '/pots?category=watering', 'image' => 'watering', 'is_active' => true],
-                    ['id' => 'care', 'label' => 'Plant Care', 'path' => '/care-tips', 'image' => 'care', 'is_active' => true],
+                    ['id' => 'care', 'label' => 'Care Tips', 'path' => '/care-tips', 'image' => 'care', 'is_active' => true],
+                    ['id' => 'decor', 'label' => 'Gardening Decor', 'path' => '/pots?category=decor', 'image' => 'decor', 'is_active' => true],
                 ],
             ],
             'site_branding' => [

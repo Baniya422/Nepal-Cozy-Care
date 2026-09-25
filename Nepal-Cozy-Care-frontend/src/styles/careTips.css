@@ -2117,3 +2117,140 @@
 .ct-library-controls { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
 .ct-library-controls label { display: flex; align-items: center; gap: .5rem; }
 .ct-library-controls select { padding: .6rem; border: 1px solid #d5ded6; border-radius: 8px; background: white; color: #173b2c; }
+
+/* Care Tips Products Section & Grid Alignment */
+.care-tips-page .ugaoo-action-bar-container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 2rem 0.5rem;
+}
+
+.care-tips-page .ugaoo-action-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding-bottom: 1rem !important;
+  border-bottom: 1px solid #e5ebe6 !important;
+  gap: 1rem !important;
+}
+
+.care-tips-page .ugaoo-filter-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0.5rem 0.75rem 0.5rem 0 !important;
+  color: #1b4332 !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.care-tips-page .ugaoo-filter-btn:hover {
+  opacity: 0.85;
+}
+
+.care-tips-page .ugaoo-filter-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #2d6a4f !important;
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  border-radius: 999px !important;
+  padding: 0 5px !important;
+}
+
+.care-tips-page .ugaoo-action-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+}
+
+.care-tips-page .ugaoo-count-label {
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+}
+
+.care-tips-page .ugaoo-plants-main {
+  max-width: 1400px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 1.5rem 2rem 4rem !important;
+}
+
+.care-tips-page .plants-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+}
+
+@media (max-width: 1200px) {
+  .care-tips-page .plants-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .care-tips-page .plants-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.85rem !important;
+  }
+}
+
+.care-tips-page .plants-card {
+  background-color: #ffffff !important;
+  border-radius: 16px !important;
+  border: 1px solid #eef2f6 !important;
+  overflow: hidden !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.care-tips-page .plants-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1) !important;
+}
+
+.care-tips-page .plants-card-image-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  height: 250px !important;
+  overflow: hidden !important;
+  background-color: #f8fafc !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+@media (max-width: 768px) {
+  .care-tips-page .plants-card-image-wrapper {
+    height: 180px !important;
+  }
+}
+
+.care-tips-page .plants-card-image {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  transition: transform 0.4s ease !important;
+}
+
+.care-tips-page .plants-card:hover .plants-card-image {
+  transform: scale(1.05) !important;
+}
+

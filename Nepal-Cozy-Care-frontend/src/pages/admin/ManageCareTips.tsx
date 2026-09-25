@@ -7,18 +7,24 @@ import {
   Trash2,
   X,
   Upload,
-  BarChart3,
   FileText,
   Clock3,
   Sparkles,
   ExternalLink,
   ShoppingBag,
+  BarChart3,
+  Package,
+  Layers,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import "../../components/admin/admin.css";
 import "../../styles/adminCareTips.css";
 import { handleImageError, resolveImageUrl } from "../../utils/imageUrl";
+
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
 interface CareTip {
   id: number;
   title: string;
@@ -32,6 +38,7 @@ interface CareTip {
   image: string | null;
   plant_ids?: number[];
 }
+
 interface CareTipFormData {
   title: string;
   excerpt: string;
@@ -42,6 +49,7 @@ interface CareTipFormData {
   image: string;
   plant_ids: number[];
 }
+
 const emptyForm: CareTipFormData = {
   title: "",
   excerpt: "",
@@ -52,8 +60,47 @@ const emptyForm: CareTipFormData = {
   image: "",
   plant_ids: [],
 };
+
+export interface CareProductItem {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  is_active: boolean;
+  image: string | null;
+  description?: string | null;
+  views?: number;
+  total_sold?: number;
+}
+
+interface CareProductFormData {
+  name: string;
+  category: string;
+  price: string;
+  stock: string;
+  description: string;
+  image: string;
+  is_active: boolean;
+}
+
+const emptyProductForm: CareProductFormData = {
+  name: "",
+  category: "Plant Care",
+  price: "",
+  stock: "25",
+  description: "",
+  image: "",
+  is_active: true,
+};
+
 const FALLBACK_IMAGE = "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp";
+
 export default function ManageCareTips() {
+  // Navigation between Care Guides & Care Products
+  const [activeSection, setActiveSection] = useState<"guides" | "products">("guides");
+
+  // ================= GUIDES STATE =================
   const [careTips, setCareTips] = useState<CareTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,45 +118,39 @@ export default function ManageCareTips() {
   const [availableProducts, setAvailableProducts] = useState<Array<{ id: number; name: string; category?: string; price: number; image?: string }>>([]);
   const [productSearch, setProductSearch] = useState("");
 
-  useEffect(() => {
-    fetch(`${API}/api/plants?per_page=100`)
-      .then((res) => res.json())
-      .then((data) => {
-        const list = data.data?.data ?? data.data ?? [];
-        if (Array.isArray(list)) {
-          setAvailableProducts(
-            list.map((p: any) => ({
-              id: p.id,
-              name: p.name,
-              category: p.category,
-              price: Number(p.price) || 0,
-              image: p.image,
-            }))
-          );
-        }
-      })
-      .catch((err) => console.error("Failed to load products for care tips:", err));
-  }, []);
+  // ================= CARE PRODUCTS STATE =================
+  const [careProducts, setCareProducts] = useState<CareProductItem[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productFilterCategory, setProductFilterCategory] = useState("");
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<CareProductItem | null>(null);
+  const [productFormData, setProductFormData] = useState<CareProductFormData>(emptyProductForm);
+  const [productSelectedImage, setProductSelectedImage] = useState<File | null>(null);
+  const [productImagePreview, setProductImagePreview] = useState<string | null>(null);
+  const [productSaving, setProductSaving] = useState(false);
+  const [productBusyId, setProductBusyId] = useState<number | null>(null);
+  const [productError, setProductError] = useState<string | null>(null);
+
+  const getToken = () => localStorage.getItem("token");
+
   useEffect(() => {
     void fetchCareTips();
+    void fetchCareProducts();
   }, []);
+
   useEffect(() => () => {
     if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
-  }, [imagePreview]);
-  const getToken = () => localStorage.getItem("token");
+    if (productImagePreview?.startsWith("blob:")) URL.revokeObjectURL(productImagePreview);
+  }, [imagePreview, productImagePreview]);
+
   const getPreviewText = (excerpt: string, content: string, maxLength = 155) => {
-    if (excerpt.trim()) {
-      return excerpt;
-    }
-    const plainContent = content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-    return plainContent.length > maxLength ? `${plainContent.slice(0, maxLength)}...` : plainContent;
+    if (excerpt.trim()) return excerpt;
+    const plain = content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    return plain.length > maxLength ? `${plain.slice(0, maxLength)}...` : plain;
   };
-  const getReadTime = (content: string, excerpt = "") => {
-    const wordCount = `${excerpt} ${content.replace(/<[^>]+>/g, " ")}`
-      .split(/\s+/)
-      .filter(Boolean).length;
-    return Math.max(1, Math.ceil(wordCount / 180));
-  };
+
+  // ================= FETCH GUIDES =================
   const fetchCareTips = async () => {
     setLoading(true);
     setPageError("");
@@ -130,21 +171,21 @@ export default function ManageCareTips() {
         lastPage = Number(data.data?.pagination?.last_page) || 1;
         page++;
       } while (page <= lastPage);
-      {
-        const transformedTips: CareTip[] = tipsData.map((tip: any) => ({
-          id: tip.id,
-          title: tip.title,
-          excerpt: tip.excerpt || "",
-          content: tip.content || "",
-          category: tip.category || "watering",
-          difficulty: tip.difficulty || "beginner",
-          created_date: tip.created_at,
-          views_count: tip.views_count || 0,
-          status: tip.is_published ? "published" : "draft",
-          image: tip.image,
-        }));
-        setCareTips(transformedTips);
-      }
+
+      const transformedTips: CareTip[] = tipsData.map((tip: any) => ({
+        id: tip.id,
+        title: tip.title,
+        excerpt: tip.excerpt || "",
+        content: tip.content || "",
+        category: tip.category || "watering",
+        difficulty: tip.difficulty || "beginner",
+        created_date: tip.created_at,
+        views_count: tip.views_count || 0,
+        status: tip.is_published ? "published" : "draft",
+        image: tip.image,
+        plant_ids: Array.isArray(tip.plant_ids) ? tip.plant_ids : [],
+      }));
+      setCareTips(transformedTips);
     } catch (error) {
       console.error("Error fetching care tips:", error);
       setPageError("Failed to load care tips. Please try again.");
@@ -152,6 +193,54 @@ export default function ManageCareTips() {
       setLoading(false);
     }
   };
+
+  // ================= FETCH CARE PRODUCTS =================
+  const fetchCareProducts = async () => {
+    setLoadingProducts(true);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API}/api/admin/plants?per_page=100`, {
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const allPlants = data.data?.plants ?? data.data?.data ?? data.plants ?? [];
+        
+        // Filter specifically for Care Products, soils, fertilizers, pest control, tools, seeds, decor
+        const careItems: CareProductItem[] = allPlants.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          category: item.category || "Plant Care",
+          price: Number(item.price) || 0,
+          stock: Number(item.stock) ?? 0,
+          is_active: Boolean(item.is_active),
+          image: item.image || null,
+          description: item.description || "",
+          views: item.views || 0,
+          total_sold: item.total_sold || 0,
+        }));
+
+        setCareProducts(careItems);
+
+        // Also update availableProducts list for linking to guides
+        setAvailableProducts(
+          careItems.map((p) => ({
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            price: p.price,
+            image: p.image || undefined,
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to load care products:", err);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  // ================= GUIDE ACTIONS =================
   const closeEditor = (force = false) => {
     if (saving && !force) return;
     setShowModal(false);
@@ -161,7 +250,35 @@ export default function ManageCareTips() {
     setImagePreview(null);
     setSubmitError(null);
   };
-  const handleSubmit = async (event: React.FormEvent) => {
+
+  const handleAddNewGuide = () => {
+    setEditingTip(null);
+    setFormData(emptyForm);
+    setSelectedImage(null);
+    setImagePreview(null);
+    setSubmitError(null);
+    setShowModal(true);
+  };
+
+  const handleEditGuide = (tip: CareTip) => {
+    setEditingTip(tip);
+    setFormData({
+      title: tip.title,
+      excerpt: tip.excerpt || "",
+      content: tip.content || "",
+      category: (tip.category as CareTipFormData["category"]) || "watering",
+      difficulty: (tip.difficulty as CareTipFormData["difficulty"]) || "beginner",
+      status: tip.status,
+      image: tip.image || "",
+      plant_ids: Array.isArray(tip.plant_ids) ? tip.plant_ids : [],
+    });
+    setSelectedImage(null);
+    setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : null);
+    setSubmitError(null);
+    setShowModal(true);
+  };
+
+  const handleGuideSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (saving) return;
     setSubmitError(null);
@@ -179,23 +296,15 @@ export default function ManageCareTips() {
         formDataImage.append("directory", "care-tips");
         const uploadRes = await fetch(`${API}/api/upload`, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
           body: formDataImage,
         });
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
           imagePath = uploadData.data?.path || uploadData.path;
-          if (!imagePath) throw new Error("Image upload returned no saved image. Please try again.");
         } else {
           const errData = await uploadRes.json().catch(() => ({}));
-          const errMsg =
-            errData.message ||
-            (errData.errors ? Object.values(errData.errors).flat().join(" ") : null) ||
-            `Image upload failed (${uploadRes.status}). Guide was not saved.`;
-          throw new Error(errMsg);
+          throw new Error(errData.message || `Image upload failed (${uploadRes.status})`);
         }
       }
       const url = editingTip ? `${API}/api/admin/care-tips/${editingTip.id}` : `${API}/api/admin/care-tips`;
@@ -208,14 +317,11 @@ export default function ManageCareTips() {
         difficulty: formData.difficulty,
         is_published: formData.status === "published",
         image: imagePath || null,
+        plant_ids: formData.plant_ids,
       };
       const res = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Accept: "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(requestBody),
       });
       if (res.ok) {
@@ -223,81 +329,195 @@ export default function ManageCareTips() {
         await fetchCareTips();
       } else {
         const error = await res.json().catch(() => ({}));
-        const errMsg =
-          (error.errors ? Object.values(error.errors).flat().join(" ") : null) ||
-          error.message ||
-          `Failed to save care tip (${res.status})`;
-        setSubmitError(errMsg);
+        throw new Error(error.message || `Failed to save care tip (${res.status})`);
       }
     } catch (error) {
       console.error("Error saving care tip:", error);
-      setSubmitError(error instanceof Error ? error.message : "Failed to save care tip. Please try again.");
+      setSubmitError(error instanceof Error ? error.message : "Failed to save care tip.");
     } finally {
       setSaving(false);
     }
   };
-  const changeTip = async (tip: CareTip, action: "delete" | "toggle") => {
+
+  const changeTipStatus = async (tip: CareTip, action: "delete" | "toggle") => {
     if (busyId !== null) return;
     if (action === "delete" && !confirm("Are you sure you want to delete this care tip?")) return;
     setBusyId(tip.id);
-    setPageError("");
     try {
       const res = await fetch(`${API}/api/admin/care-tips/${tip.id}`, {
         method: action === "delete" ? "DELETE" : "PUT",
         headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
         ...(action === "toggle" ? { body: JSON.stringify({ is_published: tip.status !== "published" }) } : {}),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const errMsg =
-          (data.errors ? Object.values(data.errors).flat().join(" ") : null) ||
-          data.message ||
-          `Could not update the guide (${res.status}).`;
-        throw new Error(errMsg);
-      }
+      if (!res.ok) throw new Error("Could not update the guide.");
       await fetchCareTips();
     } catch (error) {
-      setPageError(error instanceof Error ? error.message : "Could not update the guide. Please try again.");
-    } finally { setBusyId(null); }
-  };
-  const handleEdit = (tip: CareTip) => {
-    setEditingTip(tip);
-    setFormData({
-      title: tip.title,
-      excerpt: tip.excerpt || "",
-      content: tip.content || "",
-      category: (tip.category as CareTipFormData["category"]) || "watering",
-      difficulty: (tip.difficulty as CareTipFormData["difficulty"]) || "beginner",
-      status: tip.status,
-      image: tip.image || "",
-      plant_ids: Array.isArray(tip.plant_ids) ? tip.plant_ids : [],
-    });
-    setSelectedImage(null);
-    setImagePreview(tip.image ? resolveImageUrl(tip.image, FALLBACK_IMAGE) : null);
-    setSubmitError(null);
-    setShowModal(true);
-  };
-  const handleAddNew = () => {
-    setEditingTip(null);
-    setFormData(emptyForm);
-    setSelectedImage(null);
-    setImagePreview(null);
-    setSubmitError(null);
-    setShowModal(true);
-  };
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) {
-        setSubmitError("Choose an image smaller than 8 MB.");
-        event.target.value = "";
-        return;
-      }
-      setSubmitError(null);
-      setSelectedImage(file);
-      setImagePreview(URL.createObjectURL(file));
+      alert(error instanceof Error ? error.message : "Could not update the guide.");
+    } finally {
+      setBusyId(null);
     }
   };
+
+  // ================= CARE PRODUCTS ACTIONS =================
+  const closeProductModal = () => {
+    if (productSaving) return;
+    setShowProductModal(false);
+    setEditingProduct(null);
+    setProductFormData(emptyProductForm);
+    setProductSelectedImage(null);
+    setProductImagePreview(null);
+    setProductError(null);
+  };
+
+  const handleAddNewCareProduct = () => {
+    setEditingProduct(null);
+    setProductFormData(emptyProductForm);
+    setProductSelectedImage(null);
+    setProductImagePreview(null);
+    setProductError(null);
+    setShowProductModal(true);
+  };
+
+  const handleEditCareProduct = (prod: CareProductItem) => {
+    setEditingProduct(prod);
+    setProductFormData({
+      name: prod.name,
+      category: prod.category || "Plant Care",
+      price: String(prod.price),
+      stock: String(prod.stock),
+      description: prod.description || "",
+      image: prod.image || "",
+      is_active: prod.is_active,
+    });
+    setProductSelectedImage(null);
+    setProductImagePreview(prod.image ? resolveImageUrl(prod.image, FALLBACK_IMAGE) : null);
+    setProductError(null);
+    setShowProductModal(true);
+  };
+
+  const handleCareProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (productSaving) return;
+    setProductError(null);
+
+    if (!productFormData.name.trim()) {
+      setProductError("Product name is required.");
+      return;
+    }
+    const priceNum = parseFloat(productFormData.price);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      setProductError("Enter a valid price greater than 0.");
+      return;
+    }
+
+    setProductSaving(true);
+    const token = getToken();
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", productFormData.name.trim());
+      formDataToSend.append("category", productFormData.category);
+      formDataToSend.append("price", String(priceNum));
+      formDataToSend.append("stock", String(parseInt(productFormData.stock) || 0));
+      formDataToSend.append("description", productFormData.description.trim());
+      formDataToSend.append("is_active", productFormData.is_active ? "1" : "0");
+
+      if (productSelectedImage) {
+        formDataToSend.append("image", productSelectedImage);
+      } else if (productFormData.image) {
+        formDataToSend.append("image", productFormData.image);
+      }
+
+      const url = editingProduct
+        ? `${API}/api/plants/${editingProduct.id}`
+        : `${API}/api/plants`;
+
+      if (editingProduct) {
+        formDataToSend.append("_method", "PUT");
+      }
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataToSend,
+      });
+
+      if (res.ok) {
+        closeProductModal();
+        await fetchCareProducts();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to save care product.");
+      }
+    } catch (err) {
+      setProductError(err instanceof Error ? err.message : "Error saving product.");
+    } finally {
+      setProductSaving(false);
+    }
+  };
+
+  const handleToggleProductActive = async (prod: CareProductItem) => {
+    if (productBusyId !== null) return;
+    setProductBusyId(prod.id);
+    try {
+      const res = await fetch(`${API}/api/plants/${prod.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ is_active: !prod.is_active }),
+      });
+      if (!res.ok) throw new Error("Failed to update status.");
+      await fetchCareProducts();
+    } catch (err) {
+      alert("Could not update product status.");
+    } finally {
+      setProductBusyId(null);
+    }
+  };
+
+  const handleDeleteCareProduct = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this care product?")) return;
+    try {
+      const res = await fetch(`${API}/api/plants/${id}`, {
+        method: "DELETE",
+        headers: { Accept: "application/json", Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete product.");
+      await fetchCareProducts();
+    } catch (err) {
+      alert("Could not delete product.");
+    }
+  };
+
+  // ================= FILTERED LISTS =================
+  const filteredTips = careTips
+    .filter((tip) => !statusFilter || tip.status === statusFilter)
+    .filter(
+      (tip) =>
+        tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tip.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tip.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+  const filteredCareProducts = careProducts.filter((prod) => {
+    if (productFilterCategory && !prod.category.toLowerCase().includes(productFilterCategory.toLowerCase())) {
+      return false;
+    }
+    if (productSearchQuery && !prod.name.toLowerCase().includes(productSearchQuery.toLowerCase())) {
+      return false;
+    }
+    return true;
+  });
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+
   const getCategoryLabel = (category: string) => {
     const labels: Record<string, string> = {
       watering: "Watering",
@@ -309,340 +529,462 @@ export default function ManageCareTips() {
     };
     return labels[category] || category;
   };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "beginner":
-        return "admin-status-active";
-      case "intermediate":
-        return "admin-status-pending";
-      case "advanced":
-        return "admin-status-inactive";
-      default:
-        return "";
+      case "beginner": return "admin-status-active";
+      case "intermediate": return "admin-status-pending";
+      case "advanced": return "admin-status-inactive";
+      default: return "";
     }
   };
-  const filteredTips = careTips.filter((tip) => !statusFilter || tip.status === statusFilter).filter(
-    (tip) =>
-      tip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tip.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tip.difficulty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tip.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  const publishedCount = careTips.filter((tip) => tip.status === "published").length;
-  const draftCount = careTips.length - publishedCount;
+
+  const activeProductsCount = careProducts.filter((p) => p.is_active).length;
+  const lowStockCount = careProducts.filter((p) => p.stock < 10).length;
+  const publishedGuidesCount = careTips.filter((t) => t.status === "published").length;
   const totalViews = careTips.reduce((sum, tip) => sum + tip.views_count, 0);
-  const topTip =
-    careTips.reduce<CareTip | null>(
-      (bestTip, currentTip) =>
-        !bestTip || currentTip.views_count > bestTip.views_count ? currentTip : bestTip,
-      null
-    ) || null;
-  const excerptLength = formData.excerpt.trim().length;
-  const liveReadTime = getReadTime(formData.content, formData.excerpt);
-  const livePreviewText = getPreviewText(formData.excerpt, formData.content, 200);
+
   return (
     <AdminLayout>
       <div className="admin-page admin-care-tips-page">
-        <section className="admin-care-tips-hero">
+        {/* ================= HERO HEADER & SECTION SWITCHER ================= */}
+        <section className="admin-care-tips-hero" style={{ paddingBottom: "1rem" }}>
           <div className="admin-care-tips-hero-copy">
-            <span className="admin-care-tips-kicker">Care Tip Studio</span>
-            <h2>Design better plant guides for your users.</h2>
+            <span className="admin-care-tips-kicker">Care Tips Studio</span>
+            <h2>Plant Care Guidance & Products Management</h2>
             <p>
-              Create care tips that look polished on the public site, read clearly on mobile,
-              and help your My Garden and seasonal reminder features feel more premium.
+              Manage both educational botanical guides and purchasable care products (soils, fertilizers, neem sprays, tools) displayed on the public Care Tips page.
             </p>
           </div>
           <div className="admin-care-tips-hero-side">
-            {topTip ? (
-              <div className="admin-care-tips-top-tip">
-                <span>Top performing guide</span>
-                <strong>{topTip.title}</strong>
-                <p>{topTip.views_count.toLocaleString()} total views</p>
-              </div>
-            ) : null}
-            <button className="admin-btn admin-btn-primary" onClick={handleAddNew}>
-              <Plus size={18} />
-              Create New Tip
-            </button>
+            {activeSection === "guides" ? (
+              <button className="admin-btn admin-btn-primary" onClick={handleAddNewGuide}>
+                <Plus size={18} />
+                Create New Guide
+              </button>
+            ) : (
+              <button className="admin-btn admin-btn-primary" onClick={handleAddNewCareProduct}>
+                <Plus size={18} />
+                Add Care Product
+              </button>
+            )}
           </div>
         </section>
-        <section className="admin-care-tips-stats">
-          <article className="admin-care-tips-stat-card">
-            <div className="admin-care-tips-stat-icon emerald">
-              <FileText size={20} />
-            </div>
-            <div>
-              <span>Total Guides</span>
-              <strong>{careTips.length}</strong>
-            </div>
-          </article>
-          <article className="admin-care-tips-stat-card">
-            <div className="admin-care-tips-stat-icon blue">
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <span>Published</span>
-              <strong>{publishedCount}</strong>
-            </div>
-          </article>
-          <article className="admin-care-tips-stat-card">
-            <div className="admin-care-tips-stat-icon amber">
-              <Clock3 size={20} />
-            </div>
-            <div>
-              <span>Drafts</span>
-              <strong>{draftCount}</strong>
-            </div>
-          </article>
-          <article className="admin-care-tips-stat-card">
-            <div className="admin-care-tips-stat-icon slate">
-              <BarChart3 size={20} />
-            </div>
-            <div>
-              <span>Total Views</span>
-              <strong>{totalViews.toLocaleString()}</strong>
-            </div>
-          </article>
-        </section>
-        <div className="admin-filters admin-care-tips-filters">
-          <div className="admin-search admin-care-tips-search">
-            <Search size={18} />
-            <input
-              type="text"
-              placeholder="Search title, excerpt, category, or difficulty..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-            />
-          </div>
-          <p className="admin-care-tips-filter-note">
-            Content studio tip: write short summaries first, then expand the full guidance.
-          </p>
+
+        {/* Studio Section Tabs */}
+        <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1.5rem" }}>
+          <button
+            type="button"
+            onClick={() => setActiveSection("guides")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.65rem 1.4rem",
+              borderRadius: "8px",
+              border: activeSection === "guides" ? "2px solid #0d4e3a" : "1px solid #cbd5e1",
+              background: activeSection === "guides" ? "#ecfdf5" : "#ffffff",
+              color: activeSection === "guides" ? "#065f46" : "#475569",
+              fontWeight: 700,
+              fontSize: "0.92rem",
+              cursor: "pointer",
+            }}
+          >
+            <FileText size={17} />
+            Care Guides Library ({careTips.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSection("products")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.65rem 1.4rem",
+              borderRadius: "8px",
+              border: activeSection === "products" ? "2px solid #0d4e3a" : "1px solid #cbd5e1",
+              background: activeSection === "products" ? "#ecfdf5" : "#ffffff",
+              color: activeSection === "products" ? "#065f46" : "#475569",
+              fontWeight: 700,
+              fontSize: "0.92rem",
+              cursor: "pointer",
+            }}
+          >
+            <ShoppingBag size={17} />
+            Care Products Catalog ({careProducts.length})
+          </button>
         </div>
-        {pageError && <div role="alert" className="admin-care-tip-error">{pageError}
-          <button type="button" className="admin-btn" onClick={() => void fetchCareTips()}>Retry loading</button>
-        </div>}
-        <label>Status filter <select aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="">All guides</option><option value="published">Published</option><option value="draft">Drafts</option>
-        </select></label>
-        <div className="admin-table-container admin-care-tips-table-wrap">
-          {loading ? (
-            <div className="admin-loading">Loading care tips...</div>
-          ) : (
-            <table className="admin-table admin-table-striped">
-              <thead>
-                <tr>
-                  <th>Guide</th>
-                  <th>Difficulty</th>
-                  <th>Created</th>
-                  <th>Views</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTips.map((tip) => (
-                  <tr key={tip.id}>
-                    <td>
-                      <div className="admin-care-tip-cell">
-                        <div className="admin-care-tip-thumb">
-                          <img
-                            src={resolveImageUrl(tip.image, FALLBACK_IMAGE)}
-                            alt={tip.title}
-                            onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
-                            loading="lazy"
-                          />
-                        </div>
-                        <div className="admin-care-tip-copy">
-                          <div className="admin-care-tip-copy-top">
-                            <strong>{tip.title}</strong>
-                            <span className="admin-care-tip-category-pill">
-                              {getCategoryLabel(tip.category)}
-                            </span>
+
+        {/* =========================================================================
+            SECTION 1: CARE GUIDES STUDIO
+           ========================================================================= */}
+        {activeSection === "guides" && (
+          <>
+            <section className="admin-care-tips-stats">
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon emerald"><FileText size={20} /></div>
+                <div>
+                  <span>Total Guides</span>
+                  <strong>{careTips.length}</strong>
+                </div>
+              </article>
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon blue"><Sparkles size={20} /></div>
+                <div>
+                  <span>Published Guides</span>
+                  <strong>{publishedGuidesCount}</strong>
+                </div>
+              </article>
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon purple"><Clock3 size={20} /></div>
+                <div>
+                  <span>Drafts</span>
+                  <strong>{careTips.length - publishedGuidesCount}</strong>
+                </div>
+              </article>
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon amber"><BarChart3 size={20} /></div>
+                <div>
+                  <span>Total Views</span>
+                  <strong>{totalViews.toLocaleString()}</strong>
+                </div>
+              </article>
+            </section>
+
+            <div className="admin-filters admin-care-tips-filters">
+              <div className="admin-search admin-care-tips-search">
+                <Search size={18} />
+                <input
+                  type="text"
+                  placeholder="Search title, excerpt, category, or difficulty..."
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                />
+              </div>
+              <label>
+                Status filter{" "}
+                <select aria-label="Filter by status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                  <option value="">All guides</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Drafts</option>
+                </select>
+              </label>
+            </div>
+
+            {pageError && <div role="alert" className="admin-care-tip-error">{pageError}</div>}
+            <div className="admin-table-container admin-care-tips-table-wrap">
+              {loading ? (
+                <div className="admin-loading">Loading care tips...</div>
+              ) : (
+                <table className="admin-table admin-table-striped">
+                  <thead>
+                    <tr>
+                      <th>Guide</th>
+                      <th>Difficulty</th>
+                      <th>Linked Products</th>
+                      <th>Created</th>
+                      <th>Views</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTips.map((tip) => (
+                      <tr key={tip.id}>
+                        <td>
+                          <div className="admin-care-tip-cell">
+                            <div className="admin-care-tip-thumb">
+                              <img
+                                src={resolveImageUrl(tip.image, FALLBACK_IMAGE)}
+                                alt={tip.title}
+                                onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
+                                loading="lazy"
+                              />
+                            </div>
+                            <div className="admin-care-tip-copy">
+                              <div className="admin-care-tip-copy-top">
+                                <strong>{tip.title}</strong>
+                                <span className="admin-care-tip-category-pill">
+                                  {getCategoryLabel(tip.category)}
+                                </span>
+                              </div>
+                              <p>{getPreviewText(tip.excerpt, tip.content)}</p>
+                            </div>
                           </div>
-                          <p>{getPreviewText(tip.excerpt, tip.content)}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`admin-status-badge ${getDifficultyColor(tip.difficulty)}`}>
-                        {tip.difficulty.charAt(0).toUpperCase() + tip.difficulty.slice(1)}
-                      </span>
-                    </td>
-                    <td>{formatDate(tip.created_date)}</td>
-                    <td>{tip.views_count.toLocaleString()}</td>
-                    <td>
-                      <span
-                        className={`admin-status-badge ${
-                          tip.status === "published" ? "admin-status-active" : "admin-status-pending"
-                        }`}
-                      >
-                        {tip.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="admin-actions">
-                        <button
-                          className="admin-action-btn admin-action-view"
-                          title="Preview"
-                          onClick={() => setPreviewTip(tip)}
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button
-                          className="admin-action-btn admin-action-edit"
-                          title="Edit"
-                          onClick={() => handleEdit(tip)}
-                        >
-                          <Edit size={16} />
-                        </button>
-                        {(
-                          <button
-                            className="admin-care-tip-publish-btn"
-                            title={tip.status === "published" ? "Unpublish" : "Publish"}
-                            disabled={busyId !== null}
-                            onClick={() => void changeTip(tip, "toggle")}
+                        </td>
+                        <td>
+                          <span className={`admin-status-badge ${getDifficultyColor(tip.difficulty)}`}>
+                            {tip.difficulty.charAt(0).toUpperCase() + tip.difficulty.slice(1)}
+                          </span>
+                        </td>
+                        <td>
+                          {tip.plant_ids && tip.plant_ids.length > 0 ? (
+                            <span
+                              className="admin-care-tip-category-pill"
+                              style={{
+                                background: "#ecfdf5",
+                                color: "#065f46",
+                                border: "1px solid #a7f3d0",
+                                fontWeight: 600,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.3rem",
+                                fontSize: "0.78rem",
+                                padding: "0.2rem 0.5rem",
+                              }}
+                              title={
+                                availableProducts
+                                  .filter((p) => tip.plant_ids?.includes(p.id))
+                                  .map((p) => p.name)
+                                  .join(", ") || `${tip.plant_ids.length} products`
+                              }
+                            >
+                              <ShoppingBag size={12} />
+                              {tip.plant_ids.length} linked
+                            </span>
+                          ) : (
+                            <span style={{ color: "#94a3b8", fontSize: "0.82rem" }}>None</span>
+                          )}
+                        </td>
+                        <td>{formatDate(tip.created_date)}</td>
+                        <td>{tip.views_count.toLocaleString()}</td>
+                        <td>
+                          <span
+                            className={`admin-status-badge ${
+                              tip.status === "published" ? "admin-status-active" : "admin-status-pending"
+                            }`}
                           >
-                            {tip.status === "published" ? "Unpublish" : "Publish"}
-                          </button>
-                        )}
-                        <button
-                          className="admin-action-btn admin-action-delete"
-                          title="Delete"
-                          disabled={busyId !== null}
-                          onClick={() => void changeTip(tip, "delete")}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          {!loading && !pageError && filteredTips.length === 0 && (
-            <div className="admin-empty-state">
-              <p>No care tips found. Create your first care tip!</p>
+                            {tip.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="admin-actions">
+                            <button
+                              className="admin-action-btn admin-action-view"
+                              title="Preview"
+                              onClick={() => setPreviewTip(tip)}
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <button
+                              className="admin-action-btn admin-action-edit"
+                              title="Edit"
+                              onClick={() => handleEditGuide(tip)}
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="admin-care-tip-publish-btn"
+                              title={tip.status === "published" ? "Unpublish" : "Publish"}
+                              disabled={busyId !== null}
+                              onClick={() => void changeTipStatus(tip, "toggle")}
+                            >
+                              {tip.status === "published" ? "Unpublish" : "Publish"}
+                            </button>
+                            <button
+                              className="admin-action-btn admin-action-delete"
+                              title="Delete"
+                              disabled={busyId !== null}
+                              onClick={() => void changeTipStatus(tip, "delete")}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {!loading && filteredTips.length === 0 && (
+                <div className="admin-empty-state">
+                  <p>No care tips found. Create your first care tip!</p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        {previewTip && (
-          <div className="admin-modal-overlay" onClick={() => setPreviewTip(null)}>
-            <div
-              className="admin-modal admin-care-tip-preview-modal"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="admin-modal-header">
-                <h3>Care Tip Preview</h3>
-                <button className="admin-modal-close" onClick={() => setPreviewTip(null)}>
-                  <X size={20} />
-                </button>
-              </div>
-              <div className="admin-care-tip-preview">
-                <div className="admin-care-tip-preview-hero">
-                  <div className="admin-care-tip-preview-media">
-                    <img
-                      src={resolveImageUrl(previewTip.image, FALLBACK_IMAGE)}
-                      alt={previewTip.title}
-                      onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
-                    />
-                  </div>
-                  <div className="admin-care-tip-preview-copy">
-                    <div className="admin-care-tip-preview-badges">
-                      <span className="admin-care-tip-category-pill">
-                        {getCategoryLabel(previewTip.category)}
-                      </span>
-                      <span
-                        className={`admin-status-badge ${getDifficultyColor(previewTip.difficulty)}`}
-                      >
-                        {previewTip.difficulty}
-                      </span>
-                    </div>
-                    <h4>{previewTip.title}</h4>
-                    <p>{getPreviewText(previewTip.excerpt, previewTip.content, 220)}</p>
-                    <div className="admin-care-tip-preview-meta">
-                      <span>{previewTip.views_count.toLocaleString()} views</span>
-                      <span>{getReadTime(previewTip.content, previewTip.excerpt)} min read</span>
-                      <span>{previewTip.status}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="admin-care-tip-preview-section">
-                  <h5>Brief Summary</h5>
-                  <p>{previewTip.excerpt || "No separate summary added yet."}</p>
-                </div>
-                <div className="admin-care-tip-preview-section">
-                  <h5>Full Content</h5>
-                  <div className="admin-care-tip-preview-text">{previewTip.content}</div>
-                </div>
-              </div>
-              <div className="admin-modal-footer">
-                {previewTip.status === "published" ? (
-                  <a
-                    className="admin-btn admin-btn-secondary"
-                    href={`/care-tips/${previewTip.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <ExternalLink size={16} />
-                    Open Public Page
-                  </a>
-                ) : (
-                  <span className="admin-care-tip-draft-note">
-                    Draft preview only. Publish to open on the public site.
-                  </span>
-                )}
-                <button
-                  type="button"
-                  className="admin-btn admin-btn-primary"
-                  onClick={() => {
-                    setPreviewTip(null);
-                    handleEdit(previewTip);
-                  }}
-                >
-                  <Edit size={16} />
-                  Edit Tip
-                </button>
-              </div>
-            </div>
-          </div>
+          </>
         )}
+
+        {/* =========================================================================
+            SECTION 2: CARE PRODUCTS CATALOG STUDIO (Admin keeps products)
+           ========================================================================= */}
+        {activeSection === "products" && (
+          <>
+            <section className="admin-care-tips-stats">
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon emerald"><Package size={20} /></div>
+                <div>
+                  <span>Total Care Products</span>
+                  <strong>{careProducts.length}</strong>
+                </div>
+              </article>
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon blue"><CheckCircle2 size={20} /></div>
+                <div>
+                  <span>Active On Public Site</span>
+                  <strong>{activeProductsCount}</strong>
+                </div>
+              </article>
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon amber"><AlertCircle size={20} /></div>
+                <div>
+                  <span>Low Stock (&lt;10)</span>
+                  <strong>{lowStockCount}</strong>
+                </div>
+              </article>
+              <article className="admin-care-tips-stat-card">
+                <div className="admin-care-tips-stat-icon purple"><Layers size={20} /></div>
+                <div>
+                  <span>Care Categories</span>
+                  <strong>7 types</strong>
+                </div>
+              </article>
+            </section>
+
+            <div className="admin-filters admin-care-tips-filters">
+              <div className="admin-search admin-care-tips-search">
+                <Search size={18} />
+                <input
+                  type="text"
+                  placeholder="Search care product by name or description..."
+                  value={productSearchQuery}
+                  onChange={(e) => setProductSearchQuery(e.target.value)}
+                />
+              </div>
+              <label>
+                Category{" "}
+                <select
+                  aria-label="Filter by category"
+                  value={productFilterCategory}
+                  onChange={(e) => setProductFilterCategory(e.target.value)}
+                >
+                  <option value="">All Care Categories</option>
+                  <option value="Plant Care">Plant Care & Sprays</option>
+                  <option value="Soil">Soil & Media</option>
+                  <option value="Fertilizer">Fertilizers & Food</option>
+                  <option value="Seed">Seeds & Microgreens</option>
+                  <option value="Tool">Garden Tools</option>
+                  <option value="Water">Watering Supplies</option>
+                  <option value="Decor">Gardening Decor</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="admin-table-container admin-care-tips-table-wrap">
+              {loadingProducts ? (
+                <div className="admin-loading">Loading care products...</div>
+              ) : (
+                <table className="admin-table admin-table-striped">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Stock</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredCareProducts.map((prod) => (
+                      <tr key={prod.id}>
+                        <td>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                            <div style={{ width: "48px", height: "48px", borderRadius: "8px", overflow: "hidden", border: "1px solid #e2e8f0", flexShrink: 0 }}>
+                              <img
+                                src={resolveImageUrl(prod.image, FALLBACK_IMAGE)}
+                                alt={prod.name}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
+                              />
+                            </div>
+                            <div>
+                              <strong style={{ display: "block", color: "#1e293b", fontSize: "0.9rem" }}>{prod.name}</strong>
+                              <span style={{ fontSize: "0.78rem", color: "#64748b" }}>ID #{prod.id}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span
+                            style={{
+                              display: "inline-block",
+                              padding: "0.2rem 0.6rem",
+                              borderRadius: "6px",
+                              fontSize: "0.78rem",
+                              fontWeight: 600,
+                              background: "#f1f5f9",
+                              color: "#334155",
+                            }}
+                          >
+                            {prod.category}
+                          </span>
+                        </td>
+                        <td>
+                          <strong style={{ color: "#0d4e3a" }}>Rs. {prod.price}</strong>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 600, color: prod.stock <= 5 ? "#dc2626" : "#1e293b" }}>
+                            {prod.stock} in stock
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`admin-status-badge ${prod.is_active ? "admin-status-active" : "admin-status-inactive"}`}>
+                            {prod.is_active ? "Active" : "Hidden"}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="admin-actions">
+                            <button
+                              className="admin-action-btn admin-action-edit"
+                              title="Edit Care Product"
+                              onClick={() => handleEditCareProduct(prod)}
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              className="admin-care-tip-publish-btn"
+                              title={prod.is_active ? "Hide from Care Tips" : "Show on Care Tips"}
+                              disabled={productBusyId !== null}
+                              onClick={() => void handleToggleProductActive(prod)}
+                            >
+                              {prod.is_active ? "Hide" : "Show"}
+                            </button>
+                            <button
+                              className="admin-action-btn admin-action-delete"
+                              title="Delete Product"
+                              onClick={() => void handleDeleteCareProduct(prod.id)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {!loadingProducts && filteredCareProducts.length === 0 && (
+                <div className="admin-empty-state">
+                  <p>No care products found. Click "Add Care Product" to add your first product!</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* =========================================================================
+            MODAL 1: CREATE / EDIT CARE GUIDE
+           ========================================================================= */}
         {showModal && (
           <div className="admin-modal-overlay" onClick={() => closeEditor()}>
-            <div
-              className="admin-modal admin-modal-large admin-care-tip-editor-modal"
-              onClick={(event) => event.stopPropagation()}
-            >
+            <div className="admin-modal admin-modal-large admin-care-tip-editor-modal" onClick={(e) => e.stopPropagation()}>
               <div className="admin-modal-header">
                 <h3>{editingTip ? "Edit Care Tip" : "Create New Care Tip"}</h3>
-                <button className="admin-modal-close" onClick={() => closeEditor()}>
-                  <X size={20} />
-                </button>
+                <button className="admin-modal-close" onClick={() => closeEditor()}><X size={20} /></button>
               </div>
               {submitError && <div role="alert" className="admin-care-tip-error">{submitError}</div>}
-              <form onSubmit={handleSubmit} className="admin-form">
-                <div className="admin-care-tip-editor-stats">
-                  <div className="admin-care-tip-editor-chip">
-                    <FileText size={16} />
-                    {excerptLength}/500 summary chars
-                  </div>
-                  <div className="admin-care-tip-editor-chip">
-                    <Clock3 size={16} />
-                    {liveReadTime} min read
-                  </div>
-                  <div className="admin-care-tip-editor-chip">
-                    <Sparkles size={16} />
-                    {formData.status === "published"
-                      ? "Will appear publicly after save"
-                      : "Draft mode"}
-                  </div>
-                </div>
+              <form onSubmit={handleGuideSubmit} className="admin-form">
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
                     <label htmlFor="care-tip-title">Care Tip Title *</label>
@@ -651,9 +993,7 @@ export default function ManageCareTips() {
                       maxLength={255}
                       id="care-tip-title"
                       value={formData.title}
-                      onChange={(event) =>
-                        setFormData((current) => ({ ...current, title: event.target.value }))
-                      }
+                      onChange={(e) => setFormData((cur) => ({ ...cur, title: e.target.value }))}
                       required
                       placeholder="e.g., How to Water Your Cactus"
                     />
@@ -663,12 +1003,7 @@ export default function ManageCareTips() {
                     <select
                       id="care-tip-category"
                       value={formData.category}
-                      onChange={(event) =>
-                        setFormData((current) => ({
-                          ...current,
-                          category: event.target.value as CareTipFormData["category"],
-                        }))
-                      }
+                      onChange={(e) => setFormData((cur) => ({ ...cur, category: e.target.value as CareTipFormData["category"] }))}
                       required
                     >
                       <option value="watering">Watering</option>
@@ -684,12 +1019,7 @@ export default function ManageCareTips() {
                     <select
                       id="care-tip-difficulty"
                       value={formData.difficulty}
-                      onChange={(event) =>
-                        setFormData((current) => ({
-                          ...current,
-                          difficulty: event.target.value as CareTipFormData["difficulty"],
-                        }))
-                      }
+                      onChange={(e) => setFormData((cur) => ({ ...cur, difficulty: e.target.value as CareTipFormData["difficulty"] }))}
                       required
                     >
                       <option value="beginner">Beginner</option>
@@ -702,44 +1032,39 @@ export default function ManageCareTips() {
                     <select
                       id="care-tip-status"
                       value={formData.status}
-                      onChange={(event) =>
-                        setFormData((current) => ({
-                          ...current,
-                          status: event.target.value as "published" | "draft",
-                        }))
-                      }
+                      onChange={(e) => setFormData((cur) => ({ ...cur, status: e.target.value as "published" | "draft" }))}
                     >
                       <option value="draft">Draft</option>
                       <option value="published">Published</option>
                     </select>
                   </div>
                 </div>
+
                 <div className="admin-form-group">
                   <label htmlFor="care-tip-excerpt">Excerpt (Brief Summary)</label>
                   <textarea
                     id="care-tip-excerpt"
-                      value={formData.excerpt}
-                    onChange={(event) =>
-                      setFormData((current) => ({ ...current, excerpt: event.target.value }))
-                    }
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData((cur) => ({ ...cur, excerpt: e.target.value }))}
                     rows={3}
                     placeholder="Summarize the care tip in 1-2 clear sentences."
                   />
                 </div>
+
                 <div className="admin-form-group">
                   <label htmlFor="care-tip-content">Content *</label>
                   <textarea
                     id="care-tip-content"
-                      value={formData.content}
-                    onChange={(event) =>
-                      setFormData((current) => ({ ...current, content: event.target.value }))
-                    }
-                    rows={10}
+                    value={formData.content}
+                    onChange={(e) => setFormData((cur) => ({ ...cur, content: e.target.value }))}
+                    rows={8}
                     required
-                    placeholder="Write the full guide here. Use short paragraphs and line breaks for easier reading."
+                    placeholder="Write the full guide here."
                   />
                 </div>
-                                <div className="admin-form-group">
+
+                {/* Linked Products Section */}
+                <div className="admin-form-group">
                   <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
                       <ShoppingBag size={16} style={{ color: "#059669" }} />
@@ -750,7 +1075,6 @@ export default function ManageCareTips() {
                     </span>
                   </label>
 
-                  {/* Selected Linked Products List */}
                   {formData.plant_ids.length > 0 && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem", background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
                       {formData.plant_ids.map((id) => {
@@ -768,38 +1092,14 @@ export default function ManageCareTips() {
                               padding: "0.25rem 0.65rem 0.25rem 0.4rem",
                               fontSize: "0.82rem",
                               color: "#1e293b",
-                              fontWeight: 500,
-                              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
                             }}
                           >
-                            {prod?.image && (
-                              <img
-                                src={resolveImageUrl(prod.image, FALLBACK_IMAGE)}
-                                alt=""
-                                style={{ width: "20px", height: "20px", borderRadius: "50%", objectFit: "cover" }}
-                                onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
-                              />
-                            )}
                             <span>{prod?.name || `Product #${id}`}</span>
                             {prod?.price ? <span style={{ color: "#059669", fontWeight: 600 }}>Rs. {prod.price}</span> : null}
                             <button
                               type="button"
-                              onClick={() => {
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  plant_ids: prev.plant_ids.filter((item) => item !== id),
-                                }));
-                              }}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#94a3b8",
-                                cursor: "pointer",
-                                padding: 0,
-                                display: "inline-flex",
-                                alignItems: "center",
-                              }}
-                              title="Remove linked product"
+                              onClick={() => setFormData((prev) => ({ ...prev, plant_ids: prev.plant_ids.filter((item) => item !== id) }))}
+                              style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", padding: 0 }}
                             >
                               <X size={13} />
                             </button>
@@ -809,272 +1109,284 @@ export default function ManageCareTips() {
                     </div>
                   )}
 
-                  {/* Search and Add Products Dropdown */}
-                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                    <div style={{ position: "relative", flex: 1 }}>
-                      <input
-                        type="text"
-                        placeholder="Search products by name or category to link (e.g., Neem, Soil, Fertilizer, Pruner)..."
-                        value={productSearch}
-                        onChange={(e) => setProductSearch(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "0.55rem 0.75rem",
-                          borderRadius: "8px",
-                          border: "1px solid #cbd5e1",
-                          fontSize: "0.85rem",
-                        }}
-                      />
-                    </div>
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search products by name to link..."
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    style={{ width: "100%", padding: "0.55rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+                  />
 
                   {productSearch.trim().length > 0 && (
-                    <div
-                      style={{
-                        maxHeight: "180px",
-                        overflowY: "auto",
-                        background: "#ffffff",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "8px",
-                        marginTop: "0.35rem",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
+                    <div style={{ maxHeight: "150px", overflowY: "auto", background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", marginTop: "0.35rem" }}>
                       {availableProducts
-                        .filter(
-                          (p) =>
-                            !formData.plant_ids.includes(p.id) &&
-                            (p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-                              (p.category && p.category.toLowerCase().includes(productSearch.toLowerCase())))
-                        )
-                        .slice(0, 8)
+                        .filter((p) => !formData.plant_ids.includes(p.id) && p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                        .slice(0, 6)
                         .map((prod) => (
                           <div
                             key={prod.id}
                             onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                plant_ids: [...prev.plant_ids, prod.id],
-                              }));
+                              setFormData((prev) => ({ ...prev, plant_ids: [...prev.plant_ids, prod.id] }));
                               setProductSearch("");
                             }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              padding: "0.5rem 0.75rem",
-                              cursor: "pointer",
-                              borderBottom: "1px solid #f1f5f9",
-                              fontSize: "0.84rem",
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                            style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0.75rem", cursor: "pointer", borderBottom: "1px solid #f1f5f9" }}
                           >
-                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                              <img
-                                src={resolveImageUrl(prod.image, FALLBACK_IMAGE)}
-                                alt=""
-                                style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "cover" }}
-                                onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
-                              />
-                              <div>
-                                <span style={{ fontWeight: 600, color: "#1e293b" }}>{prod.name}</span>
-                                {prod.category && (
-                                  <span style={{ color: "#64748b", marginLeft: "0.5rem", fontSize: "0.75rem" }}>
-                                    ({prod.category})
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                              <span style={{ color: "#059669", fontWeight: 600 }}>Rs. {prod.price}</span>
-                              <span style={{ fontSize: "0.75rem", color: "#2563eb", fontWeight: 600 }}>+ Add</span>
-                            </div>
+                            <span>{prod.name}</span>
+                            <span style={{ color: "#059669", fontWeight: 600 }}>+ Add (Rs. {prod.price})</span>
                           </div>
                         ))}
                     </div>
                   )}
-
-                  {/* Smart category suggestion chips */}
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <small style={{ color: "#64748b", fontSize: "0.76rem" }}>
-                      Quick Suggestions for this guide:
-                    </small>
-                    <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
-                      {availableProducts
-                        .filter((p) => !formData.plant_ids.includes(p.id))
-                        .filter((p) => {
-                          const cat = formData.category;
-                          const name = p.name.toLowerCase();
-                          const prodCat = (p.category || "").toLowerCase();
-                          if (cat === "watering") return name.includes("water") || name.includes("spray") || prodCat.includes("tool");
-                          if (cat === "fertilizing") return name.includes("fertiliz") || name.includes("seaweed") || name.includes("stick");
-                          if (cat === "pest_control") return name.includes("neem") || name.includes("trap") || name.includes("spray");
-                          if (cat === "indoor" || cat === "outdoor") return name.includes("soil") || name.includes("pot") || name.includes("pole") || name.includes("seed");
-                          return true;
-                        })
-                        .slice(0, 5)
-                        .map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                plant_ids: [...prev.plant_ids, p.id],
-                              }));
-                            }}
-                            style={{
-                              background: "#f1f5f9",
-                              border: "1px dashed #cbd5e1",
-                              borderRadius: "6px",
-                              padding: "0.2rem 0.5rem",
-                              fontSize: "0.75rem",
-                              color: "#334155",
-                              cursor: "pointer",
-                            }}
-                          >
-                            + {p.name}
-                          </button>
-                        ))}
-                    </div>
-                  </div>
                 </div>
 
-<div className="admin-form-group">
+                <div className="admin-form-group">
                   <label>Featured Image</label>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", background: "#f8fafc", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                      <div style={{ width: "90px", height: "70px", borderRadius: "8px", overflow: "hidden", border: "1px solid #cbd5e1", flexShrink: 0 }}>
-                        <img
-                          src={imagePreview || formData.image || FALLBACK_IMAGE}
-                          alt="Preview"
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
-                        />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <input
-                          type="text"
-                          value={formData.image}
-                          onChange={(e) => {
-                            setFormData((prev) => ({ ...prev, image: e.target.value }));
-                            setImagePreview(e.target.value);
-                            setSelectedImage(null);
-                          }}
-                          placeholder="Paste image URL (https://... or /images/...)"
-                          style={{ width: "100%", padding: "0.55rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.88rem", marginBottom: "0.5rem" }}
-                        />
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                          <label
-                            className="admin-btn admin-btn-secondary"
-                            style={{ padding: "0.45rem 0.8rem", fontSize: "0.82rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
-                          >
-                            <Upload size={14} />
-                            <span>{selectedImage ? `Selected: ${selectedImage.name}` : "Upload Computer File"}</span>
-                            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
-                          </label>
-                          {selectedImage && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedImage(null);
-                                setImagePreview(formData.image ? resolveImageUrl(formData.image, FALLBACK_IMAGE) : null);
-                              }}
-                              style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-                            >
-                              <X size={13} /> Remove file
-                            </button>
-                          )}
-                          {!selectedImage && formData.image && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setFormData((prev) => ({ ...prev, image: "" }));
-                                setImagePreview(null);
-                              }}
-                              style={{ background: "none", border: "none", color: "#dc2626", fontSize: "0.8rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-                            >
-                              <X size={13} /> Clear image
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <small style={{ color: "#64748b", fontWeight: 600, display: "block", marginBottom: "0.35rem" }}>Quick Botanical Presets:</small>
-                      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-                        {[
-                          { label: "Lush Soil", path: "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp" },
-                          { label: "Monstera Leaf", path: "/images/blog-leaf-macro.jpg" },
-                          { label: "Snake Plant", path: "/images/snake.jpg" },
-                          { label: "Winter Garden", path: "/images/winter-garden.png" },
-                          { label: "Indoor Care", path: "/images/about-plants.jpg" },
-                        ].map((preset) => (
-                          <button
-                            key={preset.path}
-                            type="button"
-                            onClick={() => {
-                              setFormData((prev) => ({ ...prev, image: preset.path }));
-                              setImagePreview(preset.path);
-                              setSelectedImage(null);
-                            }}
-                            style={{
-                              padding: "0.3rem 0.6rem",
-                              borderRadius: "6px",
-                              border: formData.image === preset.path ? "1px solid #10b981" : "1px solid #e2e8f0",
-                              background: formData.image === preset.path ? "#ecfdf5" : "#ffffff",
-                              color: formData.image === preset.path ? "#065f46" : "#475569",
-                              fontSize: "0.78rem",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            }}
-                          >
-                            {preset.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <input
+                    type="text"
+                    value={formData.image}
+                    onChange={(e) => {
+                      setFormData((prev) => ({ ...prev, image: e.target.value }));
+                      setImagePreview(e.target.value);
+                    }}
+                    placeholder="Image URL or upload below"
+                    style={{ width: "100%", padding: "0.55rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.88rem", marginBottom: "0.5rem" }}
+                  />
+                  <label className="admin-btn admin-btn-secondary" style={{ padding: "0.45rem 0.8rem", fontSize: "0.82rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+                    <Upload size={14} />
+                    <span>Upload Image File</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setSelectedImage(file);
+                          setImagePreview(URL.createObjectURL(file));
+                        }
+                      }}
+                      style={{ display: "none" }}
+                    />
+                  </label>
                 </div>
-                <section className="admin-care-tip-live-preview">
-                  <div className="admin-care-tip-live-preview-head">
-                    <Sparkles size={16} />
-                    Reader Preview
-                  </div>
-                  <div className="admin-care-tip-live-card">
-                    <div className="admin-care-tip-live-media">
-                      <img
-                        src={imagePreview || FALLBACK_IMAGE}
-                        alt="Care tip preview"
-                        onError={(event) => handleImageError(event, FALLBACK_IMAGE)}
-                      />
-                    </div>
-                    <div className="admin-care-tip-live-copy">
-                      <span className="admin-care-tip-category-pill">
-                        {getCategoryLabel(formData.category)}
-                      </span>
-                      <strong>{formData.title || "Your care tip title will appear here"}</strong>
-                      <p>
-                        {livePreviewText ||
-                          "Add a brief summary or start writing the main guide to preview the reader-facing card."}
-                      </p>
-                    </div>
-                  </div>
-                </section>
+
                 <div className="admin-modal-footer">
-                  <button
-                    type="button"
-                    className="admin-btn admin-btn-secondary"
-                    onClick={() => closeEditor()}
-                  >
-                    Cancel
-                  </button>
+                  <button type="button" className="admin-btn admin-btn-secondary" onClick={() => closeEditor()}>Cancel</button>
                   <button type="submit" disabled={saving} className="admin-btn admin-btn-primary">
                     {saving ? "Saving..." : editingTip ? "Update Care Tip" : "Create Care Tip"}
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            MODAL 2: ADD / EDIT CARE PRODUCT
+           ========================================================================= */}
+        {showProductModal && (
+          <div className="admin-modal-overlay" onClick={closeProductModal}>
+            <div className="admin-modal admin-modal-large" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h3>{editingProduct ? "Edit Care Product" : "Add New Care Product"}</h3>
+                <button className="admin-modal-close" onClick={closeProductModal}><X size={20} /></button>
+              </div>
+
+              {productError && <div role="alert" className="admin-care-tip-error">{productError}</div>}
+
+              <form onSubmit={handleCareProductSubmit} className="admin-form">
+                <div className="admin-form-grid">
+                  <div className="admin-form-group">
+                    <label>Product Name *</label>
+                    <input
+                      type="text"
+                      value={productFormData.name}
+                      onChange={(e) => setProductFormData((prev) => ({ ...prev, name: e.target.value }))}
+                      required
+                      placeholder="e.g., Organic Cold-Pressed Neem Oil Spray (500ml)"
+                    />
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label>Category *</label>
+                    <select
+                      value={productFormData.category}
+                      onChange={(e) => setProductFormData((prev) => ({ ...prev, category: e.target.value }))}
+                      required
+                    >
+                      <option value="Plant Care">Plant Care & Sprays</option>
+                      <option value="Soil & Media">Soil & Media</option>
+                      <option value="Fertilizers">Fertilizers & Food</option>
+                      <option value="Seeds">Seeds & Microgreens</option>
+                      <option value="Garden Tools">Garden Tools & Shears</option>
+                      <option value="Watering">Watering Supplies</option>
+                      <option value="Gardening Decor">Gardening Decor & Poles</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label>Price (Rs.) *</label>
+                    <input
+                      type="number"
+                      step="any"
+                      min="0"
+                      value={productFormData.price}
+                      onChange={(e) => setProductFormData((prev) => ({ ...prev, price: e.target.value }))}
+                      required
+                      placeholder="e.g., 520"
+                    />
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label>Stock Quantity *</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={productFormData.stock}
+                      onChange={(e) => setProductFormData((prev) => ({ ...prev, stock: e.target.value }))}
+                      required
+                      placeholder="e.g., 50"
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Description & Care Benefits</label>
+                  <textarea
+                    rows={3}
+                    value={productFormData.description}
+                    onChange={(e) => setProductFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    placeholder="Describe how this product protects or nourishes plants..."
+                  />
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Product Image</label>
+                  <div style={{ display: "flex", gap: "1rem", alignItems: "center", background: "#f8fafc", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ width: "64px", height: "64px", borderRadius: "8px", overflow: "hidden", border: "1px solid #cbd5e1", flexShrink: 0 }}>
+                      <img
+                        src={productImagePreview || productFormData.image || FALLBACK_IMAGE}
+                        alt=""
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        onError={(e) => handleImageError(e, FALLBACK_IMAGE)}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="text"
+                        value={productFormData.image}
+                        onChange={(e) => {
+                          setProductFormData((prev) => ({ ...prev, image: e.target.value }));
+                          setProductImagePreview(e.target.value);
+                        }}
+                        placeholder="Image URL (/images/neem.webp or https://...)"
+                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.85rem", marginBottom: "0.4rem" }}
+                      />
+                      <label className="admin-btn admin-btn-secondary" style={{ padding: "0.35rem 0.75rem", fontSize: "0.8rem", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+                        <Upload size={13} />
+                        <span>Upload File</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setProductSelectedImage(file);
+                              setProductImagePreview(URL.createObjectURL(file));
+                            }
+                          }}
+                          style={{ display: "none" }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Quick Preset Buttons */}
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <small style={{ color: "#64748b", fontWeight: 600, display: "block", marginBottom: "0.25rem" }}>Quick Presets:</small>
+                    <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+                      {[
+                        { label: "Neem Spray", path: "/images/neem.webp" },
+                        { label: "Fertilizer Sticks", path: "/images/sticks.webp" },
+                        { label: "Seaweed Liquid", path: "/images/seaweed.webp" },
+                        { label: "Glass Sprayer", path: "/images/sprayer.webp" },
+                        { label: "Garden Trowel", path: "/images/sovel.webp" },
+                        { label: "Watering Can", path: "/images/can.jpg" },
+                        { label: "Soil Mix", path: "/images/best-soil-for-indoor-plants-1000x667-62c2fde2d71ae_n.webp" },
+                        { label: "Seeds", path: "/images/categories/seeds.webp" },
+                        { label: "Decor / Pole", path: "/images/categories/decor.webp" },
+                      ].map((preset) => (
+                        <button
+                          key={preset.path}
+                          type="button"
+                          onClick={() => {
+                            setProductFormData((prev) => ({ ...prev, image: preset.path }));
+                            setProductImagePreview(preset.path);
+                          }}
+                          style={{
+                            padding: "0.25rem 0.5rem",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            background: "#ffffff",
+                            fontSize: "0.75rem",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-form-group">
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={productFormData.is_active}
+                      onChange={(e) => setProductFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
+                    />
+                    <span>Active and visible in public Care Tips catalog</span>
+                  </label>
+                </div>
+
+                <div className="admin-modal-footer">
+                  <button type="button" className="admin-btn admin-btn-secondary" onClick={closeProductModal}>Cancel</button>
+                  <button type="submit" disabled={productSaving} className="admin-btn admin-btn-primary">
+                    {productSaving ? "Saving..." : editingProduct ? "Update Product" : "Add Care Product"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            MODAL 3: PREVIEW CARE GUIDE
+           ========================================================================= */}
+        {previewTip && (
+          <div className="admin-modal-overlay" onClick={() => setPreviewTip(null)}>
+            <div className="admin-modal admin-care-tip-preview-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h3>Care Tip Preview</h3>
+                <button className="admin-modal-close" onClick={() => setPreviewTip(null)}><X size={20} /></button>
+              </div>
+              <div className="admin-care-tip-preview">
+                <h4>{previewTip.title}</h4>
+                <div style={{ display: "flex", gap: "0.5rem", margin: "0.5rem 0" }}>
+                  <span className="admin-care-tip-category-pill">{getCategoryLabel(previewTip.category)}</span>
+                  <span className={`admin-status-badge ${getDifficultyColor(previewTip.difficulty)}`}>{previewTip.difficulty}</span>
+                </div>
+                <p style={{ color: "#64748b", margin: "0.75rem 0" }}>{previewTip.excerpt}</p>
+                <div style={{ marginTop: "1rem", whiteSpace: "pre-line", color: "#334155" }}>{previewTip.content}</div>
+              </div>
+              <div className="admin-modal-footer">
+                <a className="admin-btn admin-btn-secondary" href={`/care-tips/${previewTip.id}`} target="_blank" rel="noreferrer">
+                  <ExternalLink size={16} /> Open Public Page
+                </a>
+                <button type="button" className="admin-btn admin-btn-primary" onClick={() => { setPreviewTip(null); handleEditGuide(previewTip); }}>
+                  <Edit size={16} /> Edit Guide
+                </button>
+              </div>
             </div>
           </div>
         )}

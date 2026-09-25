@@ -38,6 +38,15 @@ export const resolveCategoryBubbleImage = (img: string): string => {
   return `/images/categories/${img}.webp`;
 };
 
+const sanitizeBubbles = (list: CategoryBubbleItem[]): CategoryBubbleItem[] => {
+  return list.map((c) => {
+    if (c.id === "care" || c.path?.includes("care-tips") || c.label.toLowerCase() === "plant care") {
+      return { ...c, label: "Care Tips", path: "/care-tips" };
+    }
+    return c;
+  });
+};
+
 export default function CategoryBubbles() {
   const location = useLocation();
   const [categories, setCategories] = useState<CategoryBubbleItem[]>(() => {
@@ -46,7 +55,7 @@ export default function CategoryBubbles() {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          return sanitizeBubbles(parsed);
         }
       }
     } catch {
@@ -63,8 +72,9 @@ export default function CategoryBubbles() {
         const payload = json?.data?.payload;
         const cats = payload?.categories;
         if (Array.isArray(cats) && cats.length > 0) {
-          setCategories(cats);
-          localStorage.setItem("cozycare_cache_category_bubbles", JSON.stringify(cats));
+          const sanitized = sanitizeBubbles(cats);
+          setCategories(sanitized);
+          localStorage.setItem("cozycare_cache_category_bubbles", JSON.stringify(sanitized));
         }
         if (payload?.title || payload?.subtitle) {
           localStorage.setItem(
