@@ -47,18 +47,27 @@ export function mapBlogFromApi(blog: BlogApi): CuratedBlog {
   };
 }
 
-const PUBLIC_BLOG_CACHE_TTL = 5 * 60 * 1000;
-const publicCacheKey = (url: string) => `cozy:public-blogs:v1:${url}`;
+const PUBLIC_BLOG_CACHE_TTL = 15 * 60 * 1000;
+const publicCacheKey = (url: string) => `cozy:public-blogs:v2:${url}`;
 
 export function readCachedBlogs(url: string): BlogApi[] {
   try {
-    const cached = JSON.parse(sessionStorage.getItem(publicCacheKey(url)) || "null");
-    if (cached && Date.now() - cached.savedAt < PUBLIC_BLOG_CACHE_TTL &&
-        Array.isArray(cached.blogs) && cached.blogs.every((blog: BlogApi) =>
-          blog && typeof blog.id === "number" && typeof blog.title === "string")) {
+    const raw = localStorage.getItem(publicCacheKey(url)) || sessionStorage.getItem(publicCacheKey(url));
+    const cached = JSON.parse(raw || "null");
+    if (
+      cached &&
+      Date.now() - cached.savedAt < PUBLIC_BLOG_CACHE_TTL &&
+      Array.isArray(cached.blogs) &&
+      cached.blogs.length > 0 &&
+      cached.blogs.every(
+        (blog: BlogApi) => blog && typeof blog.id === "number" && typeof blog.title === "string"
+      )
+    ) {
       return cached.blogs;
     }
-  } catch { /* Storage may be unavailable. */ }
+  } catch {
+    /* Storage may be unavailable. */
+  }
   return [];
 }
 
@@ -68,8 +77,12 @@ export async function fetchPublicBlogs(
 ): Promise<BlogApi[]> {
   const blogs = await fetchAllBlogs(url, undefined, onProgress);
   try {
-    sessionStorage.setItem(publicCacheKey(url), JSON.stringify({ savedAt: Date.now(), blogs }));
-  } catch { /* A full or disabled cache must not prevent rendering. */ }
+    const payload = JSON.stringify({ savedAt: Date.now(), blogs });
+    localStorage.setItem(publicCacheKey(url), payload);
+    sessionStorage.setItem(publicCacheKey(url), payload);
+  } catch {
+    /* A full or disabled cache must not prevent rendering. */
+  }
   return blogs;
 }
 

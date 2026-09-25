@@ -206,8 +206,11 @@ export default function Blogs() {
   const navigate = useNavigate();
   useReveal();
 
-  const [blogs, setBlogs] = useState<CuratedBlog[]>(() => readCachedBlogs(`${API}/api/blogs`).map(mapBlogFromApi));
-  const [loading, setLoading] = useState(true);
+  const [blogs, setBlogs] = useState<CuratedBlog[]>(() => {
+    const cached = readCachedBlogs(`${API}/api/blogs`);
+    return cached.length > 0 ? cached.map(mapBlogFromApi) : [];
+  });
+  const [loading, setLoading] = useState(() => blogs.length === 0);
   const [loadError, setLoadError] = useState("");
 
   const [cat,   setCat]                 = useState("All");
@@ -236,10 +239,13 @@ export default function Blogs() {
     const fetchApiBlogs = async () => {
       try {
         await fetchPublicBlogs(`${API}/api/blogs`, (apiList) => {
-          if (isMounted) setBlogs(apiList.map(mapBlogFromApi));
+          if (isMounted) {
+            setBlogs(apiList.map(mapBlogFromApi));
+            setLoading(false);
+          }
         });
       } catch {
-        if (isMounted) setLoadError("We couldn't load the journal. Please refresh to try again.");
+        if (isMounted && blogs.length === 0) setLoadError("We couldn't load the journal. Please refresh to try again.");
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -490,7 +496,46 @@ export default function Blogs() {
             3. ASYMMETRIC EDITORIAL GRID
         ───────────────────────────────────────────────────────────────── */}
         <section className="bj-grid-section">
-          {rest.length === 0 ? (
+          {loading && rest.length === 0 ? (
+            <div className="bj-grid-skeleton-wrap" aria-busy="true" aria-label="Loading articles">
+              <div className="bj-top-split-row">
+                <div className="bj-wide-card bj-skeleton-card">
+                  <div className="bj-skeleton-img-box" />
+                  <div className="bj-wide-card-body">
+                    <div className="bj-skeleton-shimmer-line bj-pill-line" />
+                    <div className="bj-skeleton-shimmer-line bj-title-line" />
+                    <div className="bj-skeleton-shimmer-line bj-excerpt-line" />
+                    <div className="bj-skeleton-shimmer-line bj-meta-line" />
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                  {[1, 2].map((k) => (
+                    <div key={k} className="bj-small-card bj-skeleton-card">
+                      <div className="bj-skeleton-img-box bj-small-img-box" />
+                      <div className="bj-small-card-body" style={{ flex: 1 }}>
+                        <div className="bj-skeleton-shimmer-line bj-pill-line" />
+                        <div className="bj-skeleton-shimmer-line bj-title-line" />
+                        <div className="bj-skeleton-shimmer-line bj-meta-line" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bj-articles-grid" style={{ marginTop: 28 }}>
+                {[1, 2, 3].map((k) => (
+                  <div key={k} className="bj-standard-card bj-skeleton-card">
+                    <div className="bj-skeleton-img-box bj-standard-img-box" />
+                    <div className="bj-standard-card-body">
+                      <div className="bj-skeleton-shimmer-line bj-pill-line" />
+                      <div className="bj-skeleton-shimmer-line bj-title-line" />
+                      <div className="bj-skeleton-shimmer-line bj-excerpt-line" />
+                      <div className="bj-skeleton-shimmer-line bj-meta-line" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : rest.length === 0 ? (
             <div className="bj-empty">
               <div className="bj-empty-icon">🌱</div>
               <div className="bj-empty-title">No articles found</div>

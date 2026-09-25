@@ -583,3 +583,56 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ── Skeleton Loading ── */
+.bj-grid-skeleton-wrap {
+  width: 100%;
+}
+.bj-skeleton-card {
+  pointer-events: none;
+  cursor: default !important;
+}
+.bj-skeleton-img-box {
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(90deg, #f0ede8 25%, #e6e0d6 50%, #f0ede8 75%);
+  background-size: 200% 100%;
+  animation: bjShimmer 1.8s infinite;
+  border-radius: 12px 12px 0 0;
+}
+.bj-skeleton-img-box.bj-small-img-box {
+  width: 160px;
+  height: 100%;
+  min-height: 120px;
+  border-radius: 12px 0 0 12px;
+}
+.bj-skeleton-img-box.bj-standard-img-box {
+  height: 220px;
+}
+.bj-skeleton-shimmer-line {
+  background: linear-gradient(90deg, #f0ede8 25%, #e5e0d7 50%, #f0ede8 75%);
+  background-size: 200% 100%;
+  animation: bjShimmer 1.8s infinite;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.bj-skeleton-shimmer-line.bj-pill-line {
+  width: 90px;
+  height: 14px;
+}
+.bj-skeleton-shimmer-line.bj-title-line {
+  width: 85%;
+  height: 24px;
+  margin-bottom: 16px;
+}
+.bj-skeleton-shimmer-line.bj-excerpt-line {
+  width: 95%;
+  height: 14px;
+  margin-bottom: 8px;
+}
+.bj-skeleton-shimmer-line.bj-meta-line {
+  width: 50%;
+  height: 14px;
+  margin-top: 16px;
+}
+

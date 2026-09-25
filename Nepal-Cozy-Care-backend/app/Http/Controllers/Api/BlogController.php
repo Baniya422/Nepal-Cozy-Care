@@ -7,10 +7,32 @@ use App\Http\Requests\StoreBlogRequest;
 use App\Http\Requests\UpdateBlogRequest;
 use App\Models\Blog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
+    private const LIST_COLUMNS = [
+        'id', 'user_id', 'title', 'slug', 'excerpt', 'image',
+        'author', 'author_role', 'author_bio', 'author_image',
+        'read_time', 'tags', 'tips', 'takeaways', 'category',
+        'meta_title', 'meta_description', 'views', 'is_published',
+        'published_at', 'created_at', 'is_top_trend', 'is_top_story'
+    ];
+
+    private function clearBlogCache(): void
+    {
+        try {
+            if (! Cache::has('blog_cache_version')) {
+                Cache::forever('blog_cache_version', 1);
+            } else {
+                Cache::increment('blog_cache_version');
+            }
+        } catch (\Throwable) {
+            // Non-blocking fallback
+        }
+    }
+
     public function adminIndex(Request $request)
     {
         $query = Blog::query()
@@ -40,22 +62,35 @@ class BlogController extends Controller
 
     public function index(Request $request)
     {
-        $query = Blog::query()
-            ->where('is_published', true)
-            ->orderByDesc('published_at')
-            ->orderByDesc('created_at');
-        if ($search = $request->query('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%'.$search.'%')
-                    ->orWhere('content', 'like', '%'.$search.'%');
-            });
-        }
-        $perPage = (int) $request->query('per_page', 10);
-        $paginator = $query->paginate($perPage);
+        $perPage = min(100, max(1, (int) $request->query('per_page', 10)));
+        $page = max(1, (int) $request->query('page', 1));
+        $search = trim((string) $request->query('search', ''));
+        $category = trim((string) $request->query('category', ''));
 
-        return response()->json([
-            'message' => null,
-            'data' => [
+        $version = (int) Cache::get('blog_cache_version', 1);
+        $cacheKey = "public_blogs_v{$version}_p{$page}_l{$perPage}_" . md5($category . '_' . $search);
+
+        $payload = Cache::remember($cacheKey, 300, function () use ($search, $category, $perPage) {
+            $query = Blog::query()
+                ->select(self::LIST_COLUMNS)
+                ->where('is_published', true)
+                ->orderByDesc('published_at')
+                ->orderByDesc('created_at');
+
+            if ($search !== '') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', '%'.$search.'%')
+                        ->orWhere('excerpt', 'like', '%'.$search.'%');
+                });
+            }
+
+            if ($category !== '' && strtolower($category) !== 'all') {
+                $query->where('category', $category);
+            }
+
+            $paginator = $query->paginate($perPage);
+
+            return [
                 'blogs' => $paginator->items(),
                 'pagination' => [
                     'current_page' => $paginator->currentPage(),
@@ -63,8 +98,13 @@ class BlogController extends Controller
                     'total' => $paginator->total(),
                     'last_page' => $paginator->lastPage(),
                 ],
-            ],
-        ])->header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+            ];
+        });
+
+        return response()->json([
+            'message' => null,
+            'data' => $payload,
+        ])->header('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
     }
 
     public function show(int $id)
@@ -153,6 +193,7 @@ class BlogController extends Controller
             'is_published' => $isPublished,
             'published_at' => $isPublished ? now() : null,
         ]);
+        $this->clearBlogCache();
 
         return response()->json([
             'message' => 'Blog article created',
@@ -190,6 +231,7 @@ class BlogController extends Controller
             }
         }
         $blog->update($validated);
+        $this->clearBlogCache();
 
         return response()->json([
             'message' => 'Blog article updated',
@@ -203,6 +245,7 @@ class BlogController extends Controller
     {
         $blog = Blog::findOrFail($id);
         $blog->delete();
+        $this->clearBlogCache();
 
         return response()->json([
             'message' => 'Blog article deleted',
