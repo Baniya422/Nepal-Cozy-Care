@@ -349,27 +349,6 @@ export default function Storefront({ content }: { content: HomepageContent }) {
 
   return (
     <div className="cozy-storefront">
-      {/* Top Announcement Bar (Smooth Right-to-Left Marquee Ticker) */}
-      {shop.announcement && (
-        <Link
-          className="sf-announcement-bar"
-          to={safePath(shop.announcement_path)}
-          title="Click to explore offers"
-        >
-          <div className="sf-announcement-track">
-            {[0, 1, 2, 3].map((idx) => (
-              <div key={idx} className="sf-announcement-item">
-                <span className="sf-announcement-pulse" />
-                <Leaf size={14} className="sf-announcement-leaf" />
-                <span>{shop.announcement}</span>
-                <span className="sf-announcement-dot" />
-                <ArrowRight size={13} className="sf-announcement-arrow" />
-              </div>
-            ))}
-          </div>
-        </Link>
-      )}
-
       {/* Hero Section */}
       <section className="sf-hero">
         <div className="sf-hero-copy">

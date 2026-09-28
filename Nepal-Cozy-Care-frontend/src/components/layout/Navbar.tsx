@@ -5,6 +5,7 @@ import { useSiteBranding } from "../../context/BrandingContext";
 // import { useFeatureFlags } from "../../context/FeatureFlagsContext"; // preserved for later
 import "./navbar.css";
 import "./nav-dropdown.css";
+import AnnouncementTicker from "./AnnouncementTicker";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
@@ -272,6 +273,7 @@ export default function Navbar() {
 
   return (
     <header className="site-header">
+      <AnnouncementTicker />
       <div className="site-header__bar">
         <Link to="/" className="site-brand" aria-label={`${branding.site_name} home`}>
           {branding.logo_url ? (
