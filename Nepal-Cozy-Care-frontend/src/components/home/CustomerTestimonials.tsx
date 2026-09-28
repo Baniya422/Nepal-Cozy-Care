@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Star, ShieldCheck, Heart, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ShieldCheck, Heart, Quote } from "lucide-react";
 import type { TestimonialsContent } from "../../features/homepage/storefront";
 
 interface CustomerTestimonialsProps {

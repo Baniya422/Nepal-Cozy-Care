@@ -10,7 +10,6 @@ import {
   AlertCircle,
   Eye,
   Calendar,
-  BookOpen,
 } from "lucide-react";
 import SellerLayout from "../../components/seller/SellerLayout";
 import "../../components/seller/seller.css";

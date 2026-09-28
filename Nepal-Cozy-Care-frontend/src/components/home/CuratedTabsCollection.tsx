@@ -67,7 +67,7 @@ interface CuratedTabsCollectionProps {
 
 export default function CuratedTabsCollection({ content }: CuratedTabsCollectionProps) {
   const tabs = content?.tabs && content.tabs.length > 0 ? content.tabs : [
-    { id: "best_sellers", label: "🌟 Best Sellers", badge: "Top Rated" },
+    { id: "best_sellers", label: "Best Sellers", badge: "Top Rated" },
     { id: "air_purifying", label: "🍃 Air Purifying", badge: "NASA Tested" },
     { id: "low_light", label: "☀️ Low Maintenance", badge: "Beginner" },
     { id: "ceramic_pots", label: "🪴 Designer Pots", badge: "Handmade" },
@@ -75,7 +75,6 @@ export default function CuratedTabsCollection({ content }: CuratedTabsCollection
 
   const [activeTab, setActiveTab] = useState<string>(tabs[0]?.id || "best_sellers");
   const [items, setItems] = useState<HomepageFallbackPlant[]>(bestSellersFallbackPlants);
-  const [loading, setLoading] = useState(false);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -105,7 +104,6 @@ export default function CuratedTabsCollection({ content }: CuratedTabsCollection
     // Attempt live fetch if available
     const controller = new AbortController();
     const fetchTabProducts = async () => {
-      setLoading(true);
       try {
         const res = await fetch(endpoint, { signal: controller.signal });
         if (res.ok) {
@@ -117,8 +115,6 @@ export default function CuratedTabsCollection({ content }: CuratedTabsCollection
         }
       } catch {
         // Fallback remains active
-      } finally {
-        setLoading(false);
       }
     };
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, ChevronRight, ChevronDown, ArrowLeft, ArrowRight } from "lucide-react";
+import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, ChevronRight, ArrowLeft, ArrowRight } from "lucide-react";
 import { useSiteBranding } from "../../context/BrandingContext";
 // import { useFeatureFlags } from "../../context/FeatureFlagsContext"; // preserved for later
 import "./navbar.css";
@@ -149,8 +149,6 @@ export default function Navbar() {
 
   // Mobile sub-section state (drilldown to plants, accessories, or care_tips)
   const [mobileSubSection, setMobileSubSection] = useState<"main" | "plants" | "accessories" | "care_tips">("main");
-  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
-  const [mobileLocationExpanded, setMobileLocationExpanded] = useState(false);
 
   const closeMobileMenu = () => {
     setMenuOpen(false);

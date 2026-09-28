@@ -1,9 +1,8 @@
 import { useId, useState, type ComponentType } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, ArrowUp, Plus, Trash2, Eye, MapPin, Star, ShieldCheck } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Trash2, Eye, MapPin } from 'lucide-react';
 import type { HomepageContent } from '../../features/homepage/content';
 import {
-  sectionKeys,
   type HomeTile,
   type StorefrontContent,
   type HotspotItem,
