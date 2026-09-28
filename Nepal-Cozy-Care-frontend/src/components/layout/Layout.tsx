@@ -7,18 +7,31 @@ interface LayoutProps {
   children?: React.ReactNode;
 }
 
-const LayoutContext = createContext(false);
+declare global {
+  interface Window {
+    __COZYCARE_LAYOUT_CONTEXT__?: React.Context<boolean>;
+  }
+}
+
+const LayoutContext: React.Context<boolean> =
+  (typeof window !== "undefined" && window.__COZYCARE_LAYOUT_CONTEXT__) ||
+  createContext(false);
+
+if (typeof window !== "undefined") {
+  window.__COZYCARE_LAYOUT_CONTEXT__ = LayoutContext;
+}
 
 export default function Layout({ children }: LayoutProps) {
   // Older pages still use <Layout> locally. When they are rendered inside the
   // route-level layout, return only their content so the persistent navbar and
   // footer are not duplicated.
-  if (useContext(LayoutContext)) {
+  const isInsideLayout = useContext(LayoutContext);
+  if (isInsideLayout) {
     return <>{children}</>;
   }
 
   return (
-    <LayoutContext.Provider value>
+    <LayoutContext.Provider value={true}>
       <div className="site-layout">
         <Navbar />
         <main className="site-main">

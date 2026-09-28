@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Layout from "../components/layout/Layout";
 import Hero from "../components/about/Hero";
 import Stats from "../components/about/Stats";
 import Story from "../components/about/Story";
@@ -63,59 +62,51 @@ export default function About() {
   }, []);
   if (loading) {
     return (
-      <Layout>
-        <div className="about-page">
-          <section className="about-hero">
-            <div className="about-hero-overlay"></div>
-            <div className="about-hero-content">
-              <h1 className="about-hero-title">Loading About Content...</h1>
-            </div>
-          </section>
-        </div>
-      </Layout>
+      <div className="about-page">
+        <section className="about-hero">
+          <div className="about-hero-overlay"></div>
+          <div className="about-hero-content">
+            <h1 className="about-hero-title">Loading About Content...</h1>
+          </div>
+        </section>
+      </div>
     );
   }
   if (error) {
     return (
-      <Layout>
-        <div className="about-page">
-          <section className="about-hero">
-            <div className="about-hero-overlay"></div>
-            <div className="about-hero-content">
-              <h1 className="about-hero-title">Template unavailable</h1>
-              <p className="about-hero-subtitle">{error}</p>
-            </div>
-          </section>
-        </div>
-      </Layout>
+      <div className="about-page">
+        <section className="about-hero">
+          <div className="about-hero-overlay"></div>
+          <div className="about-hero-content">
+            <h1 className="about-hero-title">Template unavailable</h1>
+            <p className="about-hero-subtitle">{error}</p>
+          </div>
+        </section>
+      </div>
     );
   }
   if (!aboutPageTemplate.hero.title) {
     return (
-      <Layout>
-        <div className="about-page">
-          <section className="about-hero">
-            <div className="about-hero-overlay"></div>
-            <div className="about-hero-content">
-              <h1 className="about-hero-title">No content available</h1>
-            </div>
-          </section>
-        </div>
-      </Layout>
+      <div className="about-page">
+        <section className="about-hero">
+          <div className="about-hero-overlay"></div>
+          <div className="about-hero-content">
+            <h1 className="about-hero-title">No content available</h1>
+          </div>
+        </section>
+      </div>
     );
   }
   return (
-    <Layout>
-      <div className="about-page">
-        <Hero />
-        <Stats />
-        <Story />
-        <Mission />
-        <Values />
-        <WhyChooseUs />
-        <Team />
-        <CTA />
-      </div>
-    </Layout>
+    <div className="about-page">
+      <Hero />
+      <Stats />
+      <Story />
+      <Mission />
+      <Values />
+      <WhyChooseUs />
+      <Team />
+      <CTA />
+    </div>
   );
 }

@@ -54,8 +54,8 @@ export default function AnnouncementTicker() {
     window.addEventListener("cozycare:homepage-updated", handleUpdate);
     window.addEventListener("storage", handleUpdate);
 
-    // If cache not present or first visit, fetch from API once
-    if (!localStorage.getItem("cozycare_cache_homepage_content")) {
+    // If cache not present or first visit, fetch from API once (skipped during tests)
+    if (import.meta.env.MODE !== "test" && !localStorage.getItem("cozycare_cache_homepage_content")) {
       fetch(`${API}/api/homepage/content`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {

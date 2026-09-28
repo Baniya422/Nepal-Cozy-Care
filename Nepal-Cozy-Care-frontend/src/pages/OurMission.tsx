@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Layout from "../components/layout/Layout";
 import { Link } from "react-router-dom";
 import {
   applyOurMissionTemplate,
@@ -82,31 +81,27 @@ export default function OurMission() {
   }, []);
   if (loading) {
     return (
-      <Layout>
-        <div className="mission-page">
-          <section className="mission-hero">
-            <div className="mission-hero-copy">
-              <p className="mission-eyebrow">Loading...</p>
-              <h1>Loading mission content</h1>
-            </div>
-          </section>
-        </div>
-      </Layout>
+      <div className="mission-page">
+        <section className="mission-hero">
+          <div className="mission-hero-copy">
+            <p className="mission-eyebrow">Loading...</p>
+            <h1>Loading mission content</h1>
+          </div>
+        </section>
+      </div>
     );
   }
   if (error) {
     return (
-      <Layout>
-        <div className="mission-page">
-          <section className="mission-story-section">
-            <div className="mission-story-card">
-              <p className="mission-section-kicker">Mission Page</p>
-              <h2>Template unavailable</h2>
-              <p>{error}</p>
-            </div>
-          </section>
-        </div>
-      </Layout>
+      <div className="mission-page">
+        <section className="mission-story-section">
+          <div className="mission-story-card">
+            <p className="mission-section-kicker">Mission Page</p>
+            <h2>Template unavailable</h2>
+            <p>{error}</p>
+          </div>
+        </section>
+      </div>
     );
   }
   const hero = ourMissionTemplate.hero;
@@ -116,8 +111,7 @@ export default function OurMission() {
   const vision = ourMissionTemplate.vision;
   const impact = ourMissionTemplate.impact;
   return (
-    <Layout>
-      <div className="mission-page">
+    <div className="mission-page">
         <section className="mission-hero">
           <div className="mission-hero-copy">
             <p className="mission-eyebrow">{hero.eyebrow}</p>
@@ -220,6 +214,5 @@ export default function OurMission() {
           </div>
         </section>
       </div>
-    </Layout>
   );
 }
