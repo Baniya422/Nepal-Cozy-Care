@@ -12,7 +12,6 @@ import {
   Upload,
   CheckCircle,
   Archive,
-  Sparkles,
   Info,
   X,
   RefreshCw,
@@ -417,8 +416,8 @@ export default function ManageDecorations() {
         <div className="admin-dec-ai-card">
           <div className="ai-card-content">
             <div className="ai-card-kicker">
-              <Sparkles size={14} />
-              <span>AI Image-to-3D Generation Status</span>
+              <Layers size={14} />
+              <span>3D Generation Architecture Status</span>
             </div>
             <h3>Automated 3D Generation Architecture</h3>
             <p>

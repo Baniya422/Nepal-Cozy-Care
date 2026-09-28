@@ -289,3 +289,115 @@
   font-weight: 600;
   margin: 0;
 }
+
+/* Size the shared card by its available space, including narrow desktop grids.
+   Scope these rules to avoid legacy home styles clipping catalog content. */
+.product-card.catalog-product-card {
+  container-type: inline-size;
+  min-width: 0;
+  width: 100%;
+}
+
+.product-card.catalog-product-card .product-name {
+  padding-right: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@container (max-width: 320px) {
+  .product-card.catalog-product-card .product-info {
+    padding: 12px;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .product-card.catalog-product-card .product-name {
+    display: block;
+    -webkit-line-clamp: unset;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .product-card.catalog-product-card .product-subtitle {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .product-card.catalog-product-card .product-bottom-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: auto;
+  }
+
+  .product-card.catalog-product-card .product-price-box {
+    flex-wrap: wrap;
+    column-gap: 8px;
+  }
+
+  .product-card.catalog-product-card .product-price,
+  .product-card.catalog-product-card .product-compare-price {
+    white-space: nowrap;
+  }
+
+  .product-card.catalog-product-card .product-actions-group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    gap: 6px;
+  }
+
+  .product-card.catalog-product-card .view-product-btn {
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 4px;
+    font-size: 0.75rem;
+    white-space: normal;
+    line-height: 1.3;
+    border-radius: 12px;
+  }
+
+  .product-card.catalog-product-card .quick-cart-btn {
+    width: 40px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .product-card.catalog-product-card .product-image-wrapper {
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .product-card.catalog-product-card .product-badge-bestseller,
+  .product-card.catalog-product-card .product-badge-discount {
+    left: 8px;
+    right: auto;
+    max-width: calc(100% - 58px);
+    font-size: 0.6rem;
+    padding: 4px 6px;
+    overflow-wrap: anywhere;
+  }
+
+  .product-card.catalog-product-card .product-badge-bestseller {
+    top: 8px;
+  }
+
+  .product-card.catalog-product-card .product-badge-discount {
+    top: auto;
+    bottom: 42px;
+  }
+
+  .product-card.catalog-product-card .wishlist-btn {
+    top: 8px;
+    right: 8px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .product-card.catalog-product-card .product-rating-pill {
+    bottom: 8px;
+    left: 8px;
+  }
+}

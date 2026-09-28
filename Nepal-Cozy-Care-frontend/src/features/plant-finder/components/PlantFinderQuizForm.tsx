@@ -6,7 +6,7 @@ import {
   Droplets,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
+  Leaf,
   RotateCcw,
   Check,
 } from "lucide-react";
@@ -94,7 +94,7 @@ export default function PlantFinderQuizForm({
     <div className="plantfinder-quiz-content pf-stepper-shell">
       <div className="pf-quiz-header">
         <div className="pf-kicker-pill">
-          <Sparkles size={14} />
+          <Leaf size={14} />
           <span>Interactive Plant Matchmaker</span>
         </div>
         <h1 className="plantfinder-title">Find Your Perfect Green Match</h1>
@@ -297,7 +297,7 @@ export default function PlantFinderQuizForm({
               </button>
             ) : (
               <button type="submit" className="pf-btn-submit">
-                <Sparkles size={16} />
+                <Leaf size={16} />
                 Meet Your Perfect Matches
               </button>
             )}

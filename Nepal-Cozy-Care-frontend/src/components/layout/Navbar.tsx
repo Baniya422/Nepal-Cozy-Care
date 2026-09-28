@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, ChevronRight, ChevronDown } from "lucide-react";
+import { Leaf, LogOut, Menu, Search, ShoppingCart, User, X, ChevronRight, ChevronDown, ArrowLeft, ArrowRight } from "lucide-react";
 import { useSiteBranding } from "../../context/BrandingContext";
 // import { useFeatureFlags } from "../../context/FeatureFlagsContext"; // preserved for later
 import "./navbar.css";
@@ -147,9 +147,15 @@ export default function Navbar() {
     },
   });
 
-  // Mobile accordion state
+  // Mobile sub-section state (drilldown to plants, accessories, or care_tips)
+  const [mobileSubSection, setMobileSubSection] = useState<"main" | "plants" | "accessories" | "care_tips">("main");
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [mobileLocationExpanded, setMobileLocationExpanded] = useState(false);
+
+  const closeMobileMenu = () => {
+    setMenuOpen(false);
+    setMobileSubSection("main");
+  };
 
   const isSuperAdmin = currentUser?.role === "super_admin" || currentUser?.role === "admin";
   const visibleNavItems = navItems.filter((item) => item.to !== "/shops");
@@ -318,7 +324,12 @@ export default function Navbar() {
           <button
             type="button"
             className="site-menu-toggle"
-            onClick={() => setMenuOpen((current) => !current)}
+            onClick={() =>
+              setMenuOpen((current) => {
+                if (current) setMobileSubSection("main");
+                return !current;
+              })
+            }
             aria-expanded={menuOpen}
             aria-controls="site-navigation-panel"
             aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
@@ -331,192 +342,265 @@ export default function Navbar() {
           id="site-navigation-panel"
           className={`site-header__panel${menuOpen ? " is-open" : ""}`}
         >
-          <nav className="site-nav" aria-label="Primary navigation"
-            onClickCapture={(event) => {
-              if ((event.target as HTMLElement).closest("a")) {
-                closeDropdown();
-                setMobileExpanded(null);
-                setMobileLocationExpanded(false);
-              }
-            }}>
-            {visibleNavItems.map((item) => {
-              // Plants dropdown with Shop by Location sub-menu (Images 1 & 2)
-              if (item.hasDropdown === "plants") {
-                const isExpanded = mobileExpanded === "plants";
-                return (
-                  <div key={item.to} {...dropdownEvents(item.hasDropdown)} className={`site-nav__item--dropdown ${desktopDropdown === item.hasDropdown ? "is-desktop-open" : ""}`}>
-                    <div className="site-nav__link-row">
-                      <NavLink
-                        to={item.to}
-                        onClick={() => setMenuOpen(false)}
-                        className={({ isActive }) =>
-                          `site-nav__link${isActive ? " is-active" : ""}`
-                        }
+          {/* Mobile subview for Plants */}
+          {mobileSubSection === "plants" ? (
+            <div className="mobile-nav-subview">
+              <div className="mobile-nav-subview__header">
+                <button
+                  type="button"
+                  className="mobile-nav-back-btn"
+                  onClick={() => setMobileSubSection("main")}
+                >
+                  <ArrowLeft size={16} />
+                  <span>Main Menu</span>
+                </button>
+                <h3 className="mobile-nav-subview__title">Plants & Greenery</h3>
+              </div>
+
+              <Link
+                to="/plants"
+                className="mobile-nav-view-all-pill"
+                onClick={closeMobileMenu}
+              >
+                <span>View All Plants</span>
+                <ArrowRight size={15} />
+              </Link>
+
+              <div className="mobile-nav-group-label">By Variety</div>
+              <div className="mobile-nav-subview__list">
+                {activePlantsItems.map((sub) => (
+                  <Link
+                    key={sub.id}
+                    to={sub.path}
+                    className="mobile-nav-subview__item"
+                    onClick={closeMobileMenu}
+                  >
+                    <span>{sub.label}</span>
+                    <ChevronRight size={16} />
+                  </Link>
+                ))}
+              </div>
+
+              {activeLocationItems.length > 0 && (
+                <>
+                  <div className="mobile-nav-group-label" style={{ marginTop: "1.25rem" }}>
+                    Shop by Space / Room
+                  </div>
+                  <div className="mobile-nav-subview__list">
+                    {activeLocationItems.map((loc) => (
+                      <Link
+                        key={loc.id}
+                        to={loc.path}
+                        className="mobile-nav-subview__item"
+                        onClick={closeMobileMenu}
                       >
-                        {item.label}
-                      </NavLink>
+                        <span>{loc.label}</span>
+                        <ChevronRight size={16} />
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : mobileSubSection === "accessories" ? (
+            <div className="mobile-nav-subview">
+              <div className="mobile-nav-subview__header">
+                <button
+                  type="button"
+                  className="mobile-nav-back-btn"
+                  onClick={() => setMobileSubSection("main")}
+                >
+                  <ArrowLeft size={16} />
+                  <span>Main Menu</span>
+                </button>
+                <h3 className="mobile-nav-subview__title">Pots & Accessories</h3>
+              </div>
+
+              <Link
+                to="/pots"
+                className="mobile-nav-view-all-pill"
+                onClick={closeMobileMenu}
+              >
+                <span>View All Accessories</span>
+                <ArrowRight size={15} />
+              </Link>
+
+              <div className="mobile-nav-group-label">Categories</div>
+              <div className="mobile-nav-subview__list">
+                {activeAccessoriesItems.map((sub) => (
+                  <Link
+                    key={sub.id}
+                    to={sub.path}
+                    className="mobile-nav-subview__item"
+                    onClick={closeMobileMenu}
+                  >
+                    <span>{sub.label}</span>
+                    <ChevronRight size={16} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : mobileSubSection === "care_tips" ? (
+            <div className="mobile-nav-subview">
+              <div className="mobile-nav-subview__header">
+                <button
+                  type="button"
+                  className="mobile-nav-back-btn"
+                  onClick={() => setMobileSubSection("main")}
+                >
+                  <ArrowLeft size={16} />
+                  <span>Main Menu</span>
+                </button>
+                <h3 className="mobile-nav-subview__title">Care Tips & Doctor Green</h3>
+              </div>
+
+              <Link
+                to="/care-tips"
+                className="mobile-nav-view-all-pill"
+                onClick={closeMobileMenu}
+              >
+                <span>Explore All Care Tips</span>
+                <ArrowRight size={15} />
+              </Link>
+
+              <div className="mobile-nav-group-label">Care Guides & Services</div>
+              <div className="mobile-nav-subview__list">
+                {activeCareTipsItems.map((sub) => (
+                  <Link
+                    key={sub.id}
+                    to={sub.path}
+                    className="mobile-nav-subview__item"
+                    onClick={closeMobileMenu}
+                  >
+                    <span>{sub.label}</span>
+                    <ChevronRight size={16} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <nav className="site-nav" aria-label="Primary navigation">
+              {visibleNavItems.map((item) => {
+                // Plants, Accessories, Care Tips
+                if (item.hasDropdown) {
+                  return (
+                    <div
+                      key={item.to}
+                      {...dropdownEvents(item.hasDropdown)}
+                      className={`site-nav__item--dropdown ${
+                        desktopDropdown === item.hasDropdown ? "is-desktop-open" : ""
+                      }`}
+                    >
+                      {/* Mobile Row Button: Fully clickable row that opens the options section */}
                       <button
                         type="button"
-                        className="nav-mobile-toggle-btn lg:hidden"
+                        className="mobile-nav-row-btn lg:hidden"
                         onClick={() =>
-                          setMobileExpanded((curr) => (curr === "plants" ? null : "plants"))
+                          setMobileSubSection(item.hasDropdown as "plants" | "accessories" | "care_tips")
                         }
-                        aria-label="Toggle Plants categories"
                       >
-                        <ChevronDown size={16} />
+                        <span className="mobile-nav-row-label">{item.label}</span>
+                        <ChevronRight size={17} className="mobile-nav-row-arrow" />
                       </button>
-                    </div>
 
-                    <div className={`nav-dropdown-menu ${isExpanded ? "is-mobile-open" : ""}`}>
-                      {activePlantsItems.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          to={sub.path}
-                          className="nav-dropdown-item"
-                          onClick={() => handleDropdownNavigate(sub.path)}
+                      {/* Desktop Link + Hover Dropdown */}
+                      <div className="site-nav__desktop-link-row">
+                        <NavLink
+                          to={item.to}
+                          className={({ isActive }) =>
+                            `site-nav__link${isActive ? " is-active" : ""}`
+                          }
                         >
-                          {sub.label}
-                        </Link>
-                      ))}
+                          {item.label}
+                        </NavLink>
+                      </div>
 
-                      {/* Shop by Location with flyout sub-menu (Image 2) */}
-                      {activeLocationItems.length > 0 && (
-                        <div className="nav-dropdown-item nav-dropdown-item--has-sub">
-                          <div
-                            className="nav-dropdown-link"
-                            onClick={() => setMobileLocationExpanded((curr) => !curr)}
-                            role="button"
-                            tabIndex={0}
-                          >
-                            <span>Shop by Location</span>
-                            <ChevronRight size={14} className="nav-sub-arrow" />
-                          </div>
+                      {/* Desktop Dropdown Menus */}
+                      {item.hasDropdown === "plants" && (
+                        <div className="nav-dropdown-menu nav-dropdown-menu--desktop">
+                          {activePlantsItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              className="nav-dropdown-item"
+                              onClick={() => handleDropdownNavigate(sub.path)}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                          {activeLocationItems.length > 0 && (
+                            <div className="nav-dropdown-item nav-dropdown-item--has-sub">
+                              <div className="nav-dropdown-link">
+                                <span>Shop by Location</span>
+                                <ChevronRight size={14} className="nav-sub-arrow" />
+                              </div>
+                              <div className="nav-sub-menu">
+                                {activeLocationItems.map((loc) => (
+                                  <Link
+                                    key={loc.id}
+                                    to={loc.path}
+                                    className="nav-sub-item"
+                                    onClick={() => handleDropdownNavigate(loc.path)}
+                                  >
+                                    {loc.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
-                          <div
-                            className={`nav-sub-menu ${
-                              mobileLocationExpanded ? "is-mobile-open" : ""
-                            }`}
-                          >
-                            {activeLocationItems.map((loc) => (
-                              <Link
-                                key={loc.id}
-                                to={loc.path}
-                                className="nav-sub-item"
-                                onClick={() => handleDropdownNavigate(loc.path)}
-                              >
-                                {loc.label}
-                              </Link>
-                            ))}
-                          </div>
+                      {item.hasDropdown === "accessories" && (
+                        <div className="nav-dropdown-menu nav-dropdown-menu--desktop">
+                          {activeAccessoriesItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              className="nav-dropdown-item"
+                              onClick={() => handleDropdownNavigate(sub.path)}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+
+                      {item.hasDropdown === "care_tips" && (
+                        <div className="nav-dropdown-menu nav-dropdown-menu--desktop">
+                          {activeCareTipsItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              className="nav-dropdown-item"
+                              onClick={() => handleDropdownNavigate(sub.path)}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
                         </div>
                       )}
                     </div>
-                  </div>
-                );
-              }
+                  );
+                }
 
-              // Care Tips dropdown (Image 3)
-              if (item.hasDropdown === "care_tips") {
-                const isExpanded = mobileExpanded === "care_tips";
+                // Standard Link
                 return (
-                  <div key={item.to} {...dropdownEvents(item.hasDropdown)} className={`site-nav__item--dropdown ${desktopDropdown === item.hasDropdown ? "is-desktop-open" : ""}`}>
-                    <div className="site-nav__link-row">
-                      <NavLink
-                        to={item.to}
-                        onClick={() => setMenuOpen(false)}
-                        className={({ isActive }) =>
-                          `site-nav__link${isActive ? " is-active" : ""}`
-                        }
-                      >
-                        {item.label}
-                      </NavLink>
-                      <button
-                        type="button"
-                        className="nav-mobile-toggle-btn lg:hidden"
-                        onClick={() =>
-                          setMobileExpanded((curr) => (curr === "care_tips" ? null : "care_tips"))
-                        }
-                        aria-label="Toggle Care Tips options"
-                      >
-                        <ChevronDown size={16} />
-                      </button>
-                    </div>
-
-                    <div className={`nav-dropdown-menu ${isExpanded ? "is-mobile-open" : ""}`}>
-                      {activeCareTipsItems.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          to={sub.path}
-                          className="nav-dropdown-item"
-                          onClick={() => handleDropdownNavigate(sub.path)}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.to === "/"}
+                    onClick={closeMobileMenu}
+                    className={({ isActive }) =>
+                      `site-nav__link${isActive ? " is-active" : ""}`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
                 );
-              }
-
-              // Accessories dropdown (user request: "in asserories too")
-              if (item.hasDropdown === "accessories") {
-                const isExpanded = mobileExpanded === "accessories";
-                return (
-                  <div key={item.to} {...dropdownEvents(item.hasDropdown)} className={`site-nav__item--dropdown ${desktopDropdown === item.hasDropdown ? "is-desktop-open" : ""}`}>
-                    <div className="site-nav__link-row">
-                      <NavLink
-                        to={item.to}
-                        onClick={() => setMenuOpen(false)}
-                        className={({ isActive }) =>
-                          `site-nav__link${isActive ? " is-active" : ""}`
-                        }
-                      >
-                        {item.label}
-                      </NavLink>
-                      <button
-                        type="button"
-                        className="nav-mobile-toggle-btn lg:hidden"
-                        onClick={() =>
-                          setMobileExpanded((curr) => (curr === "accessories" ? null : "accessories"))
-                        }
-                        aria-label="Toggle Accessories options"
-                      >
-                        <ChevronDown size={16} />
-                      </button>
-                    </div>
-
-                    <div className={`nav-dropdown-menu ${isExpanded ? "is-mobile-open" : ""}`}>
-                      {activeAccessoriesItems.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          to={sub.path}
-                          className="nav-dropdown-item"
-                          onClick={() => handleDropdownNavigate(sub.path)}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-
-              // Standard Link
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.to === "/"}
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `site-nav__link${isActive ? " is-active" : ""}`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              );
-            })}
-          </nav>
+              })}
+            </nav>
+          )}
 
           <div className="site-header__actions">
             <button

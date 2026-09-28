@@ -1,3 +1,6 @@
+import { defaultStorefront, normalizeStorefront, type StorefrontContent } from './storefront';
+export * from './storefront';
+
 export type CtaContent = {
   label: string;
   path: string;
@@ -30,6 +33,7 @@ export type InfoSectionContent = {
 };
 
 export type HomepageContent = {
+  storefront: StorefrontContent;
   hero: {
     background_image: string;
     badge: string;
@@ -73,6 +77,7 @@ export type HomepageContent = {
 };
 
 export const defaultHomepageContent: HomepageContent = {
+  storefront: defaultStorefront,
   hero: {
     background_image: "/images/HomeBackground.png",
     badge: "Fresh From Our Greenhouse",
@@ -142,6 +147,10 @@ export function resolveHomepageImage(path: string, apiBaseUrl: string): string {
   if (!path) return "";
   if (/^(https?:|data:|blob:)/i.test(path) || path.startsWith("/")) return path;
   return `${apiBaseUrl}/storage/${path}`;
+}
+
+export function normalizeHomepageContent(value: Partial<HomepageContent>): HomepageContent {
+  return { ...defaultHomepageContent, ...value, storefront: normalizeStorefront(value.storefront) };
 }
 
 export type HomepageFallbackPlant = {

@@ -5,7 +5,6 @@ import {
   Clock,
   Activity,
   ArrowLeft,
-  Sparkles,
   Bot,
   Send,
   Calendar,
@@ -168,8 +167,8 @@ export default function PlantHealthAIResults({
           <div className="ai-diagnosis-card-top">
             <div className="ai-diagnosis-header-left">
               <div className="ai-engine-chip">
-                <Sparkles size={16} />
-                <span>CozyCare Bio-Neural ML Engine • Clinical Case Report</span>
+                <Activity size={16} />
+                <span>CozyCare Botanical Diagnostics • Clinical Case Report</span>
               </div>
               <h1 className="ai-condition-title">{diagnosis.conditionTitle}</h1>
               <div className="ai-taxonomy-row">

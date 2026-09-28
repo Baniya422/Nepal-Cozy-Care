@@ -19,7 +19,7 @@ import {
 import type { PlantHealthTemplatePayload } from "../features/plant-health/types";
 import { getProgressValue } from "../features/plant-health/utils";
 import { diagnosePlantWithAI, type AIDiagnosisResult } from "../features/plant-health/aiEngine";
-import { Sparkles, Camera, ClipboardList, Cpu, Loader2 } from "lucide-react";
+import { Stethoscope, Camera, ClipboardList, Cpu, Loader2 } from "lucide-react";
 import "../styles/plantHealthChecker.css";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -235,8 +235,8 @@ export default function PlantHealthChecker() {
                 <div className="plant-health-container">
                   <div className="ai-checker-intro-strip">
                     <div className="ai-intro-badge">
-                      <Sparkles size={16} />
-                      <span>AI-Powered Medical Diagnosis</span>
+                      <Stethoscope size={16} />
+                      <span>Doctor Green Botanical Diagnosis</span>
                     </div>
                     <p>
                       Answer the environmental questions below and select all observed symptoms. Our AI model will detect the underlying condition, calculate confidence, and generate a customized prescription.

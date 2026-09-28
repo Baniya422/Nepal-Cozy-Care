@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import {
-  Sparkles,
+  Stethoscope,
   Camera,
   Upload,
   RefreshCw,
@@ -199,7 +199,7 @@ export default function AIPlantHealthScanner() {
                   handleQuickDemo(0);
                 }}
               >
-                <Sparkles size={16} />
+                <Activity size={16} />
                 Try Interactive Demo
               </button>
             </div>
@@ -356,8 +356,8 @@ export default function AIPlantHealthScanner() {
 
                     <div className="ai-remedy-box">
                       <div className="ai-remedy-head">
-                        <Sparkles size={18} />
-                        <strong>Immediate AI Prescription:</strong>
+                        <Stethoscope size={18} />
+                        <strong>Botanical Care Prescription:</strong>
                       </div>
                       <p>{scanResult.immediateRemedy}</p>
                     </div>

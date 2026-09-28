@@ -9,7 +9,6 @@ import {
   TrendingUp,
   Leaf,
   Upload,
-  Sparkles,
   MapPin,
   Building2,
   Image as ImageIcon,
@@ -173,7 +172,7 @@ export default function BecomeASeller() {
       <section className="seller-hero">
         <div className="seller-hero-inner">
           <div className="seller-hero-badge">
-            <Sparkles size={14} />
+            <Leaf size={14} />
             Partner Marketplace Program
           </div>
           <h1 className="seller-hero-title">

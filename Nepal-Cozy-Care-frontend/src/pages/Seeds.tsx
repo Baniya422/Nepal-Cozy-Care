@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SlidersHorizontal, X, Sparkles, Sprout, Sun, Droplets } from "lucide-react";
+import { SlidersHorizontal, X, ShieldCheck, Sprout, Sun, Droplets } from "lucide-react";
 import CategoryBubbles from "../components/plants/CategoryBubbles";
 import UgaooSortDropdown, {
   type UgaooSortOption,
@@ -272,7 +272,7 @@ export default function Seeds() {
           </p>
           <div className="seeds-hero-badges">
             <span className="seeds-hero-badge">
-              <Sparkles size={15} /> 90%+ Germination Rate Guarantee
+              <ShieldCheck size={15} /> 90%+ Germination Rate Guarantee
             </span>
             <span className="seeds-hero-badge">
               <Sun size={15} /> 100% Chemical-Free & Non-GMO

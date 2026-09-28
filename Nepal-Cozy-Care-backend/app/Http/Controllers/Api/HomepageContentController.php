@@ -167,6 +167,10 @@ class HomepageContentController extends Controller
             'payload.about.description' => $longText,
             'payload.about.button_label' => $shortText,
             'payload.about.button_path' => $path,
+            'payload.storefront' => ['sometimes', 'array'],
+            'payload.shop_the_look' => ['sometimes', 'array'],
+            'payload.why_us' => ['sometimes', 'array'],
+            'payload.testimonials' => ['sometimes', 'array'],
         ];
     }
 }

@@ -1,4 +1,4 @@
-import { Sparkles, Plus, Trash2 } from "lucide-react";
+import { Compass, Plus, Trash2 } from "lucide-react";
 import {
   EditorCard,
   FormInput,
@@ -40,7 +40,7 @@ export default function ManagePlantFinderAdmin() {
     <PageEditorShell
       title="Plant Finder Tool Configuration"
       subtitle="Configure lifestyle quiz questions, lighting conditions, care experience levels, and filtering exclusions."
-      icon={Sparkles}
+      icon={Compass}
       pageUrl="/plant-finder"
       saving={saving}
       loading={loading}

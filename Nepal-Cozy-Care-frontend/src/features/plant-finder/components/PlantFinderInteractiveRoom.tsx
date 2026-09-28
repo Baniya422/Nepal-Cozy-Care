@@ -7,7 +7,7 @@ import Furniture from '../../../components/room/Furniture'
 import RoomEnvironment from '../../../components/room/RoomEnvironment'
 import { defaultTemplateDimensions } from '../../room-designer/roomTransferState'
 import type { ActiveField, PlantFinderSelections } from '../types'
-import { Sparkles, Sun, Info, Eye } from 'lucide-react'
+import { Sun, Info, Eye } from 'lucide-react'
 
 interface PlantFinderInteractiveRoomProps {
   selections: PlantFinderSelections
@@ -254,7 +254,7 @@ export default function PlantFinderInteractiveRoom({
         {/* Ambient Badge Overlay */}
         <div className="pf-room-overlay-tags">
           <div className="pf-overlay-badge primary">
-            <Sparkles size={12} />
+            <Eye size={12} />
             <span>{roomName} Preview</span>
           </div>
           <div className="pf-overlay-badge light">

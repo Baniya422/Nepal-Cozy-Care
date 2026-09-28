@@ -8,7 +8,7 @@ import {
   Search,
   ArrowRight,
   Package,
-  Sparkles,
+  Sprout,
 } from "lucide-react";
 import type { Shop } from "../../types/shop";
 import { DEFAULT_PLANT_IMAGE, handleImageError, resolveImageUrl } from "../../utils/imageUrl";
@@ -252,7 +252,7 @@ export default function ShopsDirectory() {
         <div className="shops-partner-banner">
           <div className="shops-partner-content">
             <span className="shops-partner-tag">
-              <Sparkles size={12} />
+              <Sprout size={12} />
               Nursery Owners & Plant Growers
             </span>
             <h3 className="shops-partner-title">Sell Your Plants on Nepal Cozy Care</h3>

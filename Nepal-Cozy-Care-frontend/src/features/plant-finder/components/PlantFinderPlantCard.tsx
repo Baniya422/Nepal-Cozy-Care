@@ -1,4 +1,4 @@
-import { Sparkles, Sun, ShieldCheck, ArrowRight } from "lucide-react";
+import { Leaf, Sun, ShieldCheck, ArrowRight } from "lucide-react";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE } from "../../../utils/imageUrl";
 import type { Plant } from "../types";
 
@@ -40,8 +40,8 @@ export default function PlantFinderPlantCard({
           loading="lazy"
         />
         <div className="pf-card-overlay-badge">
-          <Sparkles size={13} className="pf-badge-sparkle" />
-          <span>{plant.aiMatchScore ? `${plant.aiMatchScore}% AI Match` : "Recommended Match"}</span>
+          <Leaf size={13} className="pf-badge-sparkle" />
+          <span>{plant.aiMatchScore ? `${plant.aiMatchScore}% Match` : "Recommended Match"}</span>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export default function PlantFinderPlantCard({
 
         {plant.aiMatchReason && (
           <p className="pf-card-ai-reason">
-            <Sparkles size={12} className="pf-reason-sparkle" />
+            <Leaf size={12} className="pf-reason-sparkle" />
             <span>{plant.aiMatchReason}</span>
           </p>
         )}

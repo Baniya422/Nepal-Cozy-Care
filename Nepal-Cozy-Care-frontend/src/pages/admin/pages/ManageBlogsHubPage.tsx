@@ -1,4 +1,4 @@
-import { BookOpen, Sparkles } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import {
   EditorCard,
   FormInput,
@@ -117,7 +117,7 @@ export default function ManageBlogsHubPage() {
                   marginBottom: "0.75rem",
                 }}
               >
-                <Sparkles size={12} /> {hero.kicker || "Nepal Cozy Care Botanical Journal"}
+                <BookOpen size={12} /> {hero.kicker || "Nepal Cozy Care Botanical Journal"}
               </span>
 
               <h2 style={{ fontSize: "1.75rem", fontWeight: 800, margin: "0 0 0.5rem", color: "#ffffff", lineHeight: 1.25 }}>

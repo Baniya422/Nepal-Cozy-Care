@@ -1,9 +1,11 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ExternalLink, Save, Upload, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
+import StorefrontEditor from "../../components/admin/StorefrontEditor";
 import AdminLayout from "../../components/admin/AdminLayout";
 import {
   defaultHomepageContent,
+  normalizeHomepageContent,
   resolveHomepageImage,
   type CtaContent,
   type HomepageContent,
@@ -122,7 +124,7 @@ export default function ManageHomepage() {
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.message || "Could not load homepage content.");
-        if (data.data?.payload) setContent(data.data.payload as HomepageContent);
+        if (data.data?.payload) setContent(normalizeHomepageContent(data.data.payload));
       } catch (error) {
         setNotice({ type: "error", text: error instanceof Error ? error.message : "Could not load homepage content." });
       } finally {
@@ -147,7 +149,9 @@ export default function ManageHomepage() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || "Could not save homepage content.");
-      setContent(data.data.payload as HomepageContent);
+      setContent(normalizeHomepageContent(data.data.payload));
+      localStorage.setItem("cozycare_cache_homepage_content", JSON.stringify(data.data.payload));
+      window.dispatchEvent(new Event("cozycare:homepage-updated"));
       setNotice({ type: "success", text: data.message || "Homepage content saved." });
     } catch (error) {
       setNotice({ type: "error", text: error instanceof Error ? error.message : "Could not save homepage content." });
@@ -178,6 +182,7 @@ export default function ManageHomepage() {
     setContent((current) => ({ ...current, [key]: { ...current[key], [field]: value } }));
 
   const HOMEPAGE_SECTIONS = [
+    { id: "sec-storefront", label: "Storefront Designer" },
     { id: "sec-hero", label: "Hero Banner" },
     { id: "sec-features", label: "Features" },
     { id: "sec-smart-tools", label: "Smart Tools" },
@@ -339,6 +344,7 @@ export default function ManageHomepage() {
 
         {loading ? <div className="admin-loading">Loading homepage content...</div> : (
           <div className="admin-editor-stack">
+            <StorefrontEditor content={content} onChange={setContent} ImageField={ImageField} />
             <SectionCard id="sec-hero" title="Hero" description="The first section visitors see.">
               <ImageField label="Background image" value={content.hero.background_image} onChange={(value) => setContent((current) => ({ ...current, hero: { ...current.hero, background_image: value } }))} />
               <div className="admin-form-grid">

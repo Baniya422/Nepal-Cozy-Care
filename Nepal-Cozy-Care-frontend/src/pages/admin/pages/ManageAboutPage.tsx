@@ -381,7 +381,7 @@ export default function ManageAboutPage() {
                   onChange={(val) => handleArrayItemChange(["why_choose_us", "items"], index, "title", val)}
                 />
                 <FormInput
-                  label="Icon (e.g. ShieldCheck, Sparkles, Truck, Sun)"
+                  label="Icon (e.g. ShieldCheck, Leaf, Truck, Sun)"
                   value={item.icon}
                   onChange={(val) => handleArrayItemChange(["why_choose_us", "items"], index, "icon", val)}
                 />

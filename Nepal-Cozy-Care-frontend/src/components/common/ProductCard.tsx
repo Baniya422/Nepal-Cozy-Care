@@ -134,7 +134,7 @@ export default function ProductCard({
       : "Low-maintenance, air-purifying indoor plant");
 
   return (
-    <article className="product-card">
+    <article className="product-card catalog-product-card">
       <div className="product-image-wrapper">
         {/* Top-Left Badge (BESTSELLER / TRENDING / FEATURED) */}
         {resolvedBadge ? (

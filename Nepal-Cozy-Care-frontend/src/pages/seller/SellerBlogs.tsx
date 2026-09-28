@@ -10,7 +10,7 @@ import {
   AlertCircle,
   Eye,
   Calendar,
-  Sparkles,
+  BookOpen,
 } from "lucide-react";
 import SellerLayout from "../../components/seller/SellerLayout";
 import "../../components/seller/seller.css";
@@ -198,7 +198,7 @@ export default function SellerBlogs() {
                 Nursery Blogs & Articles
               </h2>
               <span className="seller-badge seller-badge-approved">
-                <Sparkles size={12} />
+                <BookOpen size={12} />
                 <span>Knowledge Hub</span>
               </span>
             </div>

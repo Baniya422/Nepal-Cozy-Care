@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Sun, Home, Compass, Droplets, Box, Image as ImageIcon } from "lucide-react";
+import { Leaf, Sun, Home, Compass, Droplets, Box, Image as ImageIcon } from "lucide-react";
 import { getCurrentPreview } from "../utils";
 import type { ActiveField, PlantFinderSelections } from "../types";
 import PlantFinderInteractiveRoom from "./PlantFinderInteractiveRoom";
@@ -45,7 +45,7 @@ export default function PlantFinderPreview({
         <div className="pf-preview-header">
           <div className="pf-preview-top-row">
             <div className="pf-preview-kicker">
-              <Sparkles size={14} />
+              <Leaf size={14} />
               <span>{currentPreview.eyebrow || "Space Visualization"}</span>
             </div>
             

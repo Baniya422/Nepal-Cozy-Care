@@ -9,7 +9,7 @@ import {
   Upload,
   FileText,
   Clock3,
-  Sparkles,
+  BookOpen,
   ExternalLink,
   ShoppingBag,
   BarChart3,
@@ -630,7 +630,7 @@ export default function ManageCareTips() {
                 </div>
               </article>
               <article className="admin-care-tips-stat-card">
-                <div className="admin-care-tips-stat-icon blue"><Sparkles size={20} /></div>
+                <div className="admin-care-tips-stat-icon blue"><BookOpen size={20} /></div>
                 <div>
                   <span>Published Guides</span>
                   <strong>{publishedGuidesCount}</strong>

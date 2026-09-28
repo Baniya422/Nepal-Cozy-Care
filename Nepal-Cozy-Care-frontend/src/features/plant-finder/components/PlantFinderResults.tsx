@@ -1,4 +1,4 @@
-import { Sparkles, ArrowDown, RotateCcw, Box, ArrowRight } from "lucide-react";
+import { Leaf, ArrowDown, RotateCcw, Box, ArrowRight } from "lucide-react";
 import PlantFinderPlantCard from "./PlantFinderPlantCard";
 import type { Plant } from "../types";
 
@@ -26,8 +26,8 @@ export default function PlantFinderResults({
       <section className="plantfinder-results">
         <div className="pf-results-header">
           <div className="pf-results-badge">
-            <Sparkles size={16} />
-            <span>AI Matchmaker Recommendations</span>
+            <Leaf size={16} />
+            <span>Curated Matchmaker Recommendations</span>
           </div>
           <h2 className="plantfinder-results-title">
             Your Perfect Botanical Matches

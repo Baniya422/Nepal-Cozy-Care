@@ -1,4 +1,4 @@
-import { ScanSearch, Sparkles } from "lucide-react";
+import { ScanSearch, Stethoscope } from "lucide-react";
 export default function PlantHealthHero() {
   return (
     <section className="plant-health-hero">
@@ -7,7 +7,7 @@ export default function PlantHealthHero() {
           <div className="plant-health-hero-copy">
             <span className="plant-health-hero-eyebrow">Smart Plant Diagnosis</span>
             <div className="plant-health-hero-icon">
-              <Sparkles size={42} />
+              <Stethoscope size={42} />
             </div>
             <h1 className="plant-health-hero-title">Plant Health Checker</h1>
             <p className="plant-health-hero-subtitle">

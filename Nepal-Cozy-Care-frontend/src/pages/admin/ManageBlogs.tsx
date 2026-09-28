@@ -10,7 +10,8 @@ import {
   Save,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
+  Sliders,
+  Sprout,
   ExternalLink,
   Globe,
   FileText,
@@ -522,7 +523,7 @@ export default function ManageBlogs() {
                     color: "#2d5016", textDecoration: "none", fontFamily: "'Outfit',sans-serif", fontSize: 13, fontWeight: 600,
                   }}
                 >
-                  <Sparkles size={14} /> Customize Hero
+                  <Sliders size={14} /> Customize Hero
                 </a>
 
                 <button
@@ -1065,7 +1066,7 @@ export default function ManageBlogs() {
                         fontWeight: 700,
                       }}
                     >
-                      <Sparkles size={16} color="#1b4e54" />
+                      <Sprout size={16} color="#1b4e54" />
                       {seeding ? "Importing Guides..." : "🌿 Import 6 Curated Care Guides"}
                     </button>
                     <button

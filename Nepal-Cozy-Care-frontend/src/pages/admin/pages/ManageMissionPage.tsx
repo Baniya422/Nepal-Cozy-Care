@@ -1,4 +1,4 @@
-import { Sparkles, Plus, Trash2 } from "lucide-react";
+import { Award, Plus, Trash2 } from "lucide-react";
 import {
   EditorCard,
   FormInput,
@@ -49,7 +49,7 @@ export default function ManageMissionPage() {
     <PageEditorShell
       title="Our Mission Page Editor"
       subtitle="Update the core purpose statement, four pillars of care, roadmap, and sustainability goals."
-      icon={Sparkles}
+      icon={Award}
       pageUrl="/mission"
       saving={saving}
       loading={loading}

@@ -14,7 +14,7 @@ import {
   Sliders,
   Trash2,
   Undo2,
-  Sparkles,
+  Leaf,
   Info,
   Layers,
   Sprout,
@@ -1082,7 +1082,7 @@ export default function RoomDesigner() {
         <div className="transfer-dialog-backdrop">
           <div className="transfer-dialog-card">
             <div className="transfer-dialog-kicker">
-              <Sparkles size={16} />
+              <Leaf size={16} />
               <span>Plant Finder Recommendations Ready</span>
             </div>
             <h2>Apply Your {pendingTransfer.roomName || 'Custom'} Space?</h2>

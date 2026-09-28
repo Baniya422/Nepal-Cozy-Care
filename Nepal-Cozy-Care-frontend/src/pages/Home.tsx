@@ -1,17 +1,9 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/layout/Layout";
-import Hero from "../components/home/Hero";
-import Features from "../components/home/Features";
-import SmartCareTools from "../components/home/SmartCareTools";
-import SeasonalCarePreview from "../components/home/SeasonalCarePreview";
-import PopularItems from "../components/home/PopularItems";
-import ShopPlants from "../components/home/ShopPlants";
-import BestSellers from "../components/home/BestSellers";
-import OurGarden from "../components/home/OurGarden";
-import OurGoal from "../components/home/OurGoal";
-import AboutUs from "../components/home/AboutUs";
+import Storefront from "../components/home/Storefront";
 import {
   defaultHomepageContent,
+  normalizeHomepageContent,
   type HomepageContent,
 } from "../features/homepage/content";
 import SEO from "../components/common/SEO";
@@ -23,7 +15,7 @@ export default function Home() {
       const cached = localStorage.getItem("cozycare_cache_homepage_content");
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && typeof parsed === "object") return parsed;
+        if (parsed && typeof parsed === "object") return normalizeHomepageContent(parsed);
       }
     } catch {
       // ignore
@@ -40,7 +32,7 @@ export default function Home() {
         const response = await fetch(`${API}/api/homepage/content`, { signal: controller.signal });
         const data = await response.json().catch(() => ({}));
         if (response.ok && data.data?.payload) {
-          setContent(data.data.payload as HomepageContent);
+          setContent(normalizeHomepageContent(data.data.payload));
           try {
             localStorage.setItem("cozycare_cache_homepage_content", JSON.stringify(data.data.payload));
           } catch {
@@ -70,16 +62,7 @@ export default function Home() {
         description="Discover healthy indoor plants, designer ceramic pots, smart plant health checker, and watering guides with fast doorstep delivery across Nepal."
         canonicalPath="/"
       />
-      <Hero content={content.hero} />
-      <Features items={content.features} />
-      <SmartCareTools content={content.smart_tools} />
-      <SeasonalCarePreview content={content.seasonal} />
-      <PopularItems content={content.product_sections.popular} />
-      <ShopPlants content={content.product_sections.shop} />
-      <BestSellers content={content.product_sections.best_sellers} />
-      <OurGarden content={content.garden} />
-      <OurGoal content={content.mission} />
-      <AboutUs content={content.about} />
+      <Storefront content={content} />
     </Layout>
   );
 }
