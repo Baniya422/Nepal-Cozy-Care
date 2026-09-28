@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Check, Star, ShoppingBag, Eye, ArrowRight, Leaf } from "lucide-react";
+import { Plus, Check, Star, ShoppingBag, Eye, ArrowRight, Leaf, X } from "lucide-react";
 import type { ShopTheLookContent, HotspotItem } from "../../features/homepage/storefront";
 import { resolveHomepageImage } from "../../features/homepage/content";
 import { useAddToCart } from "../../hooks/useAddToCart";
@@ -48,8 +48,8 @@ export default function ShopTheLook({ content }: ShopTheLookProps) {
     },
   ];
 
-  const [activeHotspotId, setActiveHotspotId] = useState<number>(hotspots[0]?.id || 1);
-  const activeItem = hotspots.find((h) => h.id === activeHotspotId) || hotspots[0];
+  const [activeHotspotId, setActiveHotspotId] = useState<number | null>(hotspots[0]?.id || 1);
+  const activeItem = activeHotspotId ? (hotspots.find((h) => h.id === activeHotspotId) || null) : null;
   const { cartBusyId, addToCart } = useAddToCart(API);
   const [addedItem, setAddedItem] = useState<number | null>(null);
 
@@ -95,7 +95,7 @@ export default function ShopTheLook({ content }: ShopTheLookProps) {
                   key={spot.id}
                   className={`sf-hotspot-pin ${isActive ? "active" : ""}`}
                   style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
-                  onClick={() => setActiveHotspotId(spot.id)}
+                  onClick={() => setActiveHotspotId((prev) => (prev === spot.id ? null : spot.id))}
                   onMouseEnter={() => setActiveHotspotId(spot.id)}
                   role="button"
                   tabIndex={0}
@@ -109,15 +109,26 @@ export default function ShopTheLook({ content }: ShopTheLookProps) {
               );
             })}
 
-            {/* Floating Popover on Image (Desktop) */}
+            {/* Floating Popover on Image (Active on both Desktop & Mobile) */}
             {activeItem && (
               <div
-                className="sf-hotspot-popover desktop-only"
+                className="sf-hotspot-popover"
                 style={{
-                  left: `min(calc(${activeItem.x}% + 28px), calc(100% - 280px))`,
-                  top: `min(calc(${activeItem.y}% - 40px), calc(100% - 180px))`,
+                  left: `clamp(10px, calc(${activeItem.x}% + 18px), calc(100% - 270px))`,
+                  top: `clamp(10px, calc(${activeItem.y}% - 35px), calc(100% - 150px))`,
                 }}
               >
+                <button
+                  type="button"
+                  className="sf-popover-close-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveHotspotId(null);
+                  }}
+                  aria-label="Close product card"
+                >
+                  <X size={12} />
+                </button>
                 <div className="sf-popover-thumb">
                   <img
                     src={resolveHomepageImage(activeItem.image, API)}
