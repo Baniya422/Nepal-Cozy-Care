@@ -31,7 +31,7 @@
   box-sizing: border-box;
 }
 
-.cozy-storefront a {
+.cozy-storefront a:not(.sf-button):not(.view-product-btn):not(.sf-hero-quiz-btn):not(.sf-doctor-btn):not(.sf-view-all-pill):not(.sf-categories-link) {
   text-decoration: none;
   color: inherit;
 }
@@ -248,46 +248,118 @@
   margin-bottom: 34px;
 }
 
-.sf-button {
+.sf-button,
+a.sf-button,
+.cozy-storefront .sf-button,
+.cozy-storefront a.sf-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   padding: 14px 28px;
   background: var(--sf-green);
-  color: #ffffff;
+  color: #ffffff !important;
   border-radius: 8px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 650;
   min-height: 50px;
   box-shadow: 0 4px 14px rgba(12, 74, 52, 0.2);
   transition: all 0.25s ease;
+  text-decoration: none !important;
 }
 
-.sf-button:hover {
+.sf-button *,
+a.sf-button *,
+.cozy-storefront .sf-button *,
+.cozy-storefront a.sf-button * {
+  color: #ffffff !important;
+}
+
+.sf-button svg,
+a.sf-button svg,
+.cozy-storefront .sf-button svg,
+.cozy-storefront a.sf-button svg {
+  color: #ffffff !important;
+  stroke: currentColor;
+}
+
+.sf-button:hover,
+a.sf-button:hover,
+.cozy-storefront .sf-button:hover,
+.cozy-storefront a.sf-button:hover {
   background: var(--sf-green-hover);
+  color: #ffffff !important;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(12, 74, 52, 0.28);
+  text-decoration: none !important;
 }
 
-.sf-hero-quiz-btn {
+.sf-button:hover *,
+a.sf-button:hover *,
+.cozy-storefront .sf-button:hover *,
+.cozy-storefront a.sf-button:hover * {
+  color: #ffffff !important;
+}
+
+.sf-button:visited,
+a.sf-button:visited,
+.sf-button:active,
+a.sf-button:active,
+.sf-button:focus,
+a.sf-button:focus {
+  color: #ffffff !important;
+}
+
+/* Ensure product card buttons inside storefront are also always visible */
+.cozy-storefront .view-product-btn,
+.cozy-storefront a.view-product-btn {
+  background-color: #0d4e3a !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+.cozy-storefront .view-product-btn *,
+.cozy-storefront a.view-product-btn * {
+  color: #ffffff !important;
+}
+
+.cozy-storefront .view-product-btn:hover,
+.cozy-storefront a.view-product-btn:hover {
+  background-color: #083b2c !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+.sf-hero-quiz-btn,
+a.sf-hero-quiz-btn,
+.cozy-storefront a.sf-hero-quiz-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 13px 22px;
   background: #ffffff;
-  color: var(--sf-green);
+  color: var(--sf-green) !important;
   border: 1.5px solid var(--sf-border);
   border-radius: 8px;
   font-size: 13.5px;
   font-weight: 650;
   min-height: 50px;
   transition: all 0.25s ease;
+  text-decoration: none !important;
 }
 
-.sf-hero-quiz-btn:hover {
+.sf-hero-quiz-btn *,
+a.sf-hero-quiz-btn *,
+.cozy-storefront a.sf-hero-quiz-btn * {
+  color: var(--sf-green) !important;
+}
+
+.sf-hero-quiz-btn:hover,
+a.sf-hero-quiz-btn:hover,
+.cozy-storefront a.sf-hero-quiz-btn:hover {
   border-color: var(--sf-green);
   background: #fbfbf9;
+  color: var(--sf-green) !important;
   transform: translateY(-2px);
 }
 
@@ -599,8 +671,12 @@
 
 .sf-tab-btn.active {
   background: var(--sf-green);
-  color: #ffffff;
+  color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(12, 74, 52, 0.2);
+}
+
+.sf-tab-btn.active * {
+  color: #ffffff !important;
 }
 
 .sf-tab-badge {
@@ -652,9 +728,15 @@
   transition: all 0.2s ease;
 }
 
-.sf-view-all-pill:hover {
+.sf-view-all-pill:hover,
+.cozy-storefront a.sf-view-all-pill:hover {
   background: var(--sf-green);
-  color: #ffffff;
+  color: #ffffff !important;
+}
+
+.sf-view-all-pill:hover *,
+.cozy-storefront a.sf-view-all-pill:hover * {
+  color: #ffffff !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -877,9 +959,15 @@
   color: var(--sf-green);
 }
 
-.sf-popover-btn.buy {
+.sf-popover-btn.buy,
+.cozy-storefront .sf-popover-btn.buy {
   background: var(--sf-green);
-  color: #ffffff;
+  color: #ffffff !important;
+}
+
+.sf-popover-btn.buy *,
+.cozy-storefront .sf-popover-btn.buy * {
+  color: #ffffff !important;
 }
 
 /* Sidebar List */
@@ -996,19 +1084,25 @@
   color: var(--sf-green);
 }
 
-.sf-look-add-btn {
+.sf-look-add-btn,
+.cozy-storefront .sf-look-add-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 5px 12px;
   border-radius: 6px;
   background: var(--sf-green);
-  color: #ffffff;
+  color: #ffffff !important;
   font-size: 11.5px;
   font-weight: 700;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.sf-look-add-btn *,
+.cozy-storefront .sf-look-add-btn * {
+  color: #ffffff !important;
 }
 
 .sf-look-add-btn:hover {
@@ -1363,24 +1457,46 @@
   transition: all 0.2s ease;
 }
 
-.sf-doctor-btn.whatsapp {
+.sf-doctor-btn.whatsapp,
+a.sf-doctor-btn.whatsapp,
+.cozy-storefront a.sf-doctor-btn.whatsapp {
   background: #25d366;
-  color: #042f1a;
+  color: #042f1a !important;
 }
 
-.sf-doctor-btn.whatsapp:hover {
+.sf-doctor-btn.whatsapp *,
+a.sf-doctor-btn.whatsapp *,
+.cozy-storefront a.sf-doctor-btn.whatsapp * {
+  color: #042f1a !important;
+}
+
+.sf-doctor-btn.whatsapp:hover,
+a.sf-doctor-btn.whatsapp:hover,
+.cozy-storefront a.sf-doctor-btn.whatsapp:hover {
   background: #1eb857;
+  color: #042f1a !important;
   transform: translateY(-2px);
 }
 
-.sf-doctor-btn.scanner {
+.sf-doctor-btn.scanner,
+a.sf-doctor-btn.scanner,
+.cozy-storefront a.sf-doctor-btn.scanner {
   background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  color: #ffffff !important;
   border: 1.5px solid rgba(255, 255, 255, 0.3);
 }
 
-.sf-doctor-btn.scanner:hover {
+.sf-doctor-btn.scanner *,
+a.sf-doctor-btn.scanner *,
+.cozy-storefront a.sf-doctor-btn.scanner * {
+  color: #ffffff !important;
+}
+
+.sf-doctor-btn.scanner:hover,
+a.sf-doctor-btn.scanner:hover,
+.cozy-storefront a.sf-doctor-btn.scanner:hover {
   background: rgba(255, 255, 255, 0.25);
+  color: #ffffff !important;
   transform: translateY(-2px);
 }
 
@@ -1465,12 +1581,14 @@
   color: var(--sf-text);
 }
 
-.sf-newsletter-submit {
+.sf-newsletter-submit,
+button.sf-newsletter-submit,
+.cozy-storefront .sf-newsletter-submit {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   background: var(--sf-green);
-  color: #ffffff;
+  color: #ffffff !important;
   border: none;
   border-radius: 8px;
   padding: 12px 22px;
@@ -1479,6 +1597,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.sf-newsletter-submit *,
+.cozy-storefront .sf-newsletter-submit * {
+  color: #ffffff !important;
 }
 
 .sf-newsletter-submit:hover {
