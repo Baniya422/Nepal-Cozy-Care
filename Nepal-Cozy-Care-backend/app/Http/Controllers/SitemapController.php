@@ -13,22 +13,22 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $settings = AdminSetting::current();
-        $isMarketplaceEnabled = $settings->vendor_marketplace_enabled;
 
         // Determine base URL: AdminSetting site_production_url > first FRONTEND_URL > APP_URL
         $baseUrl = $settings->site_production_url;
         if (! $baseUrl) {
-            $frontendUrls = explode(',', (string) env('FRONTEND_URL', ''));
+            $frontendUrls = explode(',', (string) config('app.frontend_url', ''));
             $baseUrl = trim($frontendUrls[0] ?? '');
         }
         if (! $baseUrl) {
             $baseUrl = rtrim((string) config('app.url', 'https://nepal-cozy-care.onrender.com'), '/');
         }
-        $baseUrl = rtrim($baseUrl, '/');
+        $baseUrl = htmlspecialchars(rtrim($baseUrl, '/'), ENT_XML1 | ENT_QUOTES, 'UTF-8');
 
         $staticPages = [
             ['loc' => '/', 'changefreq' => 'daily', 'priority' => '1.0'],
             ['loc' => '/plants', 'changefreq' => 'daily', 'priority' => '0.9'],
+            ['loc' => '/seeds', 'changefreq' => 'weekly', 'priority' => '0.8'],
             ['loc' => '/pots', 'changefreq' => 'weekly', 'priority' => '0.8'],
             ['loc' => '/popular-items', 'changefreq' => 'weekly', 'priority' => '0.8'],
             ['loc' => '/best-sellers', 'changefreq' => 'weekly', 'priority' => '0.8'],

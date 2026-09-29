@@ -24,14 +24,15 @@ class SendTestEmailCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(\App\Services\MailSettingsService $settings): int
     {
         $recipient = (string) $this->argument('email');
-        if (! config('mail.from.address')) {
-            $this->error('MAIL_FROM_ADDRESS is not configured.');
+        if (! $settings->apply()) {
+            $this->error(implode(' ', $settings->configurationIssues()));
 
             return self::FAILURE;
         }
+        Mail::purge('smtp');
         try {
             Mail::raw(
                 "Nepal Cozy Care SMTP test successful.\n\nIf you received this email, Gmail SMTP is working.",

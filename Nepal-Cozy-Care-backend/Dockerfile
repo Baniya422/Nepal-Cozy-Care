@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     git \
     curl \
+    supervisor \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,6 +25,7 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     pgsql \
     pdo_mysql \
     bcmath \
+    pcntl \
     gd \
     zip \
     opcache
@@ -33,6 +35,7 @@ RUN a2enmod rewrite headers
 
 # Copy custom Apache configuration
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/supervisord.conf /etc/supervisor/conf.d/nepal-cozy-care.conf
 
 # Configure PHP for production
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \

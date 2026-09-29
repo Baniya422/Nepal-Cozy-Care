@@ -319,6 +319,8 @@ class AuthController extends Controller
         string $previewMessage
     ): array {
         try {
+            app(\App\Services\MailSettingsService::class)->apply();
+            \Illuminate\Support\Facades\Mail::purge('smtp');
             $user->notify($notification);
 
             return [

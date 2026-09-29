@@ -49,4 +49,4 @@ if [ "${APP_ENV}" = "production" ]; then
 fi
 
 echo "Starting Apache on 0.0.0.0:${PORT}..."
-exec apache2-foreground
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/nepal-cozy-care.conf

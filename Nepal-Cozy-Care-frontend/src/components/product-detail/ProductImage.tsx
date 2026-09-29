@@ -10,7 +10,7 @@ export default function ProductImage({ image, name, saved, busy, onWishlist }: P
   return <div className="product-image-section">
     <div className="main-image-wrapper">
       <span className="pd-image-badge"><Leaf size={14} /> A little more green</span>
-      <img src={src} alt={name} className="main-image" onError={e => handleImageError(e, DEFAULT_PLANT_IMAGE)} />
+      <img src={src} alt={name} className="main-image" width={800} height={896} fetchPriority="high" decoding="async" onError={e => handleImageError(e, DEFAULT_PLANT_IMAGE)} />
       <button className="wishlist-btn" aria-label={saved ? "Remove from wishlist" : "Save to wishlist"} aria-pressed={saved} disabled={busy} onClick={onWishlist}><Heart size={20} fill={saved ? "currentColor" : "none"} /></button>
       <button className="pd-zoom" onClick={() => dialog.current?.showModal()}><Maximize2 size={16} /> View larger</button>
     </div>

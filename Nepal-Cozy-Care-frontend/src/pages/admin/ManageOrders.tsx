@@ -67,6 +67,8 @@ type Order = {
   courier_name?: string | null;
   notification_email_sent_at?: string | null;
   notification_email_error?: string | null;
+  customer_notification_email_sent_at?: string | null;
+  customer_notification_email_error?: string | null;
   order_items: OrderItem[];
 };
 const normalizeStatus = (status: string): OrderStatus => {
@@ -134,6 +136,8 @@ const transformOrder = (order: any): Order => ({
   courier_name: order?.courier_name ?? null,
   notification_email_sent_at: order?.notification_email_sent_at ?? null,
   notification_email_error: order?.notification_email_error ?? null,
+  customer_notification_email_sent_at: order?.customer_notification_email_sent_at ?? null,
+  customer_notification_email_error: order?.customer_notification_email_error ?? null,
   order_items: Array.isArray(order?.items)
     ? order.items.map((item: any) => ({
         id: Number(item?.id ?? 0),
@@ -638,11 +642,19 @@ export default function ManageOrders() {
                       <strong>Total:</strong> {formatPrice(selectedOrder.total)}
                     </p>
                     <p>
-                      <strong>Email alert:</strong>{" "}
+                      <strong>Admin email:</strong>{" "}
                       {selectedOrder.notification_email_sent_at
                         ? "Sent"
                         : selectedOrder.notification_email_error
                           ? `Failed - ${selectedOrder.notification_email_error}`
+                          : "Pending"}
+                    </p>
+                    <p>
+                      <strong>Customer email:</strong>{" "}
+                      {selectedOrder.customer_notification_email_sent_at
+                        ? "Sent"
+                        : selectedOrder.customer_notification_email_error
+                          ? `Failed - ${selectedOrder.customer_notification_email_error}`
                           : "Pending"}
                     </p>
                     <p>

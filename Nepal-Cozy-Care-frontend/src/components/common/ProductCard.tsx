@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Heart, Star, ShoppingBag, Store, ShieldCheck } from "lucide-react";
 import { resolveImageUrl, handleImageError, DEFAULT_PLANT_IMAGE, DEFAULT_POT_IMAGE } from "../../utils/imageUrl";
 import { useFeatureFlags } from "../../context/FeatureFlagsContext";
@@ -57,7 +57,6 @@ export default function ProductCard({
   showSoldCount = false,
   defaultFallbackImage,
 }: ProductCardProps) {
-  const navigate = useNavigate();
   const { vendor_marketplace_enabled } = useFeatureFlags();
 
   // Hooks for standalone usage if callbacks aren't supplied
@@ -130,8 +129,8 @@ export default function ProductCard({
         ? product.description.slice(0, 52) + "..."
         : product.description
       : product.category
-      ? `${product.category} - fresh nursery quality`
-      : "Low-maintenance, air-purifying indoor plant");
+      ? product.category
+      : "View product details and availability");
 
   return (
     <article className="product-card catalog-product-card">
@@ -162,6 +161,7 @@ export default function ProductCard({
         </button>
 
         {/* Product Image */}
+        <Link to={`/plants/${product.id}`} aria-label={`View ${product.name}`}>
         <img
           src={resolveImageUrl(product.image, fallbackImage)}
           alt={product.name}
@@ -169,8 +169,10 @@ export default function ProductCard({
           loading={index < 4 ? "eager" : "lazy"}
           decoding="async"
           onError={(e) => handleImageError(e, fallbackImage)}
-          onClick={() => navigate(`/plants/${product.id}`)}
+          width={500}
+          height={500}
         />
+        </Link>
 
         {/* Bottom-Left Rating Pill */}
         <div className="product-rating-pill">
@@ -186,10 +188,10 @@ export default function ProductCard({
           <h3
             className="product-name"
             title={product.name}
-            onClick={() => navigate(`/plants/${product.id}`)}
           >
-            {product.name}
+            <Link to={`/plants/${product.id}`}>{product.name}</Link>
           </h3>
+          {typeof product.stock === "number" && <p className="product-availability">{product.stock > 0 ? "In stock" : "Out of stock"}</p>}
           <p className="product-subtitle" title={subtitle}>
             {subtitle}
           </p>
@@ -226,13 +228,9 @@ export default function ProductCard({
           </div>
 
           <div className="product-actions-group">
-            <button
-              type="button"
-              className="view-product-btn"
-              onClick={() => navigate(`/plants/${product.id}`)}
-            >
-              View Product
-            </button>
+            <Link className="view-product-btn" to={`/plants/${product.id}`} aria-label={`View ${product.name}`}>
+              View product
+            </Link>
             <button
               type="button"
               className="quick-cart-btn"

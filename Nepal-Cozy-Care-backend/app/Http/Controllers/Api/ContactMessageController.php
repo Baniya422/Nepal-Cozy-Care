@@ -37,8 +37,8 @@ class ContactMessageController extends Controller
         }
 
         if ($configurationIssues === []) {
-            // The SMTP connection happens after the JSON response has reached the browser.
-            SendContactNotificationEmail::dispatch($message->id)->afterResponse();
+            // Persist delivery work so SMTP cannot occupy a web request or lose retries.
+            SendContactNotificationEmail::dispatch($message->id);
         } else {
             $emailDelivery = 'not_configured';
             $message->update([

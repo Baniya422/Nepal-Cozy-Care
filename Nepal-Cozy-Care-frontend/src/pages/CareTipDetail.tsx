@@ -12,6 +12,7 @@ import {
   Sprout,
   ArrowRight,
 } from "lucide-react";
+import SEO from "../components/common/SEO";
 import Layout from "../components/layout/Layout";
 import type { CareTip, CareTipDetailResponse } from "../types/careTip";
 import { resolveImageUrl, handleImageError, DEFAULT_CARE_TIP_IMAGE } from "../utils/imageUrl";
@@ -215,6 +216,7 @@ export default function CareTipDetail() {
   });
   return (
     <Layout>
+      <SEO title={tip.title} description={leadText.slice(0, 160)} canonicalPath={`/care-tips/${tip.id}`} image={tip.image || undefined} type="article" />
       <div className="care-tip-detail-page">
         <div className="care-tips-container">
           <button

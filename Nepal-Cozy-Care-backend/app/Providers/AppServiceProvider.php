@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\MailSettingsService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -15,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Put startup-time app configuration here when the project needs it.
      */
-    public function boot(MailSettingsService $mailSettings): void
+    public function boot(): void
     {
         if (class_exists(\Illuminate\Foundation\Console\ServeCommand::class)) {
             \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables = array_merge(
@@ -38,12 +37,6 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->app->environment('production')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
-        }
-
-        try {
-            $mailSettings->apply();
-        } catch (\Throwable) {
-            // Keep the application and migrations available if settings cannot be read yet.
         }
     }
 }

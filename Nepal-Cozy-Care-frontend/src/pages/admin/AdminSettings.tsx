@@ -163,13 +163,15 @@ export default function AdminSettingsPage() {
     setBusy("password");
     setNotice(null);
     try {
-      const response = await fetch(`${API}/api/admin/password`, {
+      const response = await fetch(`${API}/api/me/password`, {
         method: "PUT",
         headers: authHeaders(),
         body: JSON.stringify(passwords),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(apiError(data, "Could not update password."));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setPasswords({ current_password: "", password: "", password_confirmation: "" });
       setNotice({ type: "success", text: data.message || "Password updated." });
     } catch (error) {
@@ -227,8 +229,8 @@ export default function AdminSettingsPage() {
         mail_from_name: mail.mail_from_name,
         contact_recipient: mail.contact_recipient,
       };
-      if (mailPassword.trim()) {
-        payload.mail_password = mailPassword.trim();
+      if (mailPassword) {
+        payload.mail_password = mailPassword;
       }
       const response = await fetch(`${API}/api/admin/settings/mail`, {
         method: "PUT",
@@ -245,6 +247,19 @@ export default function AdminSettingsPage() {
     } finally {
       setBusy("");
     }
+  };
+
+  const retryFailedMail = async () => {
+    setBusy("retry");
+    setNotice(null);
+    try {
+      const response = await fetch(`${API}/api/admin/settings/mail/retry`, { method: "POST", headers: authHeaders() });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(apiError(data, "Could not retry failed notifications."));
+      setNotice({ type: "success", text: data.message });
+    } catch (error) {
+      setNotice({ type: "error", text: error instanceof Error ? error.message : "Could not retry notifications." });
+    } finally { setBusy(""); }
   };
 
   const sendTest = async () => {
@@ -572,8 +587,8 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div className="admin-form-group">
-                  <label>Admin login email</label>
-                  <input
+                  <label htmlFor="admin-login-email">Admin login email</label>
+                  <input id="admin-login-email"
                     type="email"
                     value={account.email}
                     onChange={(event) => setAccount((current) => ({ ...current, email: event.target.value }))}
@@ -597,8 +612,8 @@ export default function AdminSettingsPage() {
               </div>
               <form onSubmit={changePassword}>
                 <div className="admin-form-group">
-                  <label>Current password</label>
-                  <input
+                  <label htmlFor="admin-current-password">Current password</label>
+                  <input id="admin-current-password"
                     type="password"
                     autoComplete="current-password"
                     value={passwords.current_password}
@@ -610,8 +625,8 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="admin-form-grid">
                   <div className="admin-form-group">
-                    <label>New password</label>
-                    <input
+                    <label htmlFor="admin-new-password">New password</label>
+                    <input id="admin-new-password"
                       type="password"
                       minLength={6}
                       autoComplete="new-password"
@@ -623,8 +638,8 @@ export default function AdminSettingsPage() {
                     />
                   </div>
                   <div className="admin-form-group">
-                    <label>Confirm new password</label>
-                    <input
+                    <label htmlFor="admin-confirm-password">Confirm new password</label>
+                    <input id="admin-confirm-password"
                       type="password"
                       minLength={6}
                       autoComplete="new-password"
@@ -651,9 +666,11 @@ export default function AdminSettingsPage() {
                 <Mail size={21} />
                 <div>
                   <h3>SMTP Email Settings</h3>
-                  <p>Send every new contact request and order alert to the recipient below.</p>
+                  <p>Send contact requests and order alerts to the admin, plus order confirmations to customers.</p>
                 </div>
               </div>
+              <p className="admin-smtp-help">For Gmail, enable Google 2-Step Verification and use a Google App Password, not your account login password. Save changes before sending a test. Changing your admin login email does not change the SMTP sender or notification recipient.</p>
+              <p className="admin-smtp-help">Hosting note: Render Free blocks Gmail SMTP ports 465 and 587. Gmail SMTP requires hosting that permits these connections. Render Free can also be slow to wake after inactivity.</p>
               <form onSubmit={saveMail}>
                 <label className="admin-toggle-row">
                   <input
@@ -691,6 +708,29 @@ export default function AdminSettingsPage() {
                     />
                   </div>
                   <div className="admin-form-group">
+                    <label htmlFor="smtp-username">SMTP username / Gmail address</label>
+                    <input id="smtp-username" autoComplete="off"
+                      value={mail.mail_username || ""}
+                      onChange={(event) => setMail((current) => ({ ...current, mail_username: event.target.value }))}
+                      placeholder="your-address@gmail.com" />
+                  </div>
+                  <div className="admin-form-group">
+                    <label htmlFor="smtp-password">SMTP password / Google App Password</label>
+                    <input id="smtp-password" type="password" autoComplete="new-password"
+                      value={mailPassword} onChange={(event) => setMailPassword(event.target.value)}
+                      placeholder={mail.mail_password_configured ? "Saved password — leave blank to keep it" : "Enter your SMTP password"} />
+                    <small>{mail.mail_password_configured ? "A password is saved securely. Enter a new one to replace it." : "No SMTP password has been saved."}</small>
+                  </div>
+                  <div className="admin-form-group">
+                    <label htmlFor="smtp-encryption">Encryption</label>
+                    <select id="smtp-encryption" value={mail.mail_encryption}
+                      onChange={(event) => setMail((current) => ({ ...current, mail_encryption: event.target.value as MailSettings["mail_encryption"] }))}>
+                      <option value="tls">STARTTLS (Gmail: port 587)</option>
+                      <option value="ssl">SSL/TLS (Gmail: port 465)</option>
+                      <option value="none">None</option>
+                    </select>
+                  </div>
+                  <div className="admin-form-group">
                     <label>From email</label>
                     <input
                       type="email"
@@ -723,7 +763,7 @@ export default function AdminSettingsPage() {
                     />
                   </div>
                 </div>
-                <button className="admin-btn admin-btn-primary" disabled={busy === "mail"}>
+                <button className="admin-btn admin-btn-primary" disabled={Boolean(busy)}>
                   <Settings size={16} /> {busy === "mail" ? "Saving..." : "Save SMTP settings"}
                 </button>
               </form>
@@ -732,8 +772,11 @@ export default function AdminSettingsPage() {
                   <label>Test recipient email</label>
                   <input type="email" value={testRecipient} onChange={(event) => setTestRecipient(event.target.value)} placeholder="Email address for test" />
                 </div>
-                <button type="button" className="admin-btn admin-btn-secondary" onClick={() => void sendTest()} disabled={busy === "test" || !mail.is_configured}>
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={() => void sendTest()} disabled={Boolean(busy) || !mail.is_configured}>
                   <Send size={16} /> {busy === "test" ? "Sending..." : "Send test email"}
+                </button>
+                <button type="button" className="admin-btn admin-btn-secondary" onClick={() => void retryFailedMail()} disabled={Boolean(busy) || !mail.is_configured}>
+                  {busy === "retry" ? "Scheduling..." : "Retry failed notifications"}
                 </button>
               </div>
             </section>

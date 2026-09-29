@@ -17,19 +17,34 @@ class AdminController extends Controller
     /**
      * Get dashboard statistics
      */
+    public function dashboard(Request $request)
+    {
+        return response()->json(['data' => [
+            'stats' => $this->dashboardStats($request)->getData(true)['data'],
+            'recent_orders' => $this->recentOrders($request)->getData(true)['data'],
+            'top_products' => $this->topProducts($request)->getData(true)['data'],
+        ]]);
+    }
+
     public function dashboardStats(Request $request)
     {
-        $totalPlants = Plant::count();
-        $totalOrders = Order::count();
-        $totalUsers = User::count();
-        $totalSales = Order::where('status', '!=', 'cancelled')->sum('total');
         $lastMonth = now()->subMonth();
-        $plantsLastMonth = Plant::where('created_at', '<', $lastMonth)->count();
-        $ordersLastMonth = Order::where('created_at', '<', $lastMonth)->count();
-        $usersLastMonth = User::where('created_at', '<', $lastMonth)->count();
-        $salesLastMonth = Order::where('created_at', '<', $lastMonth)
-            ->where('status', '!=', 'cancelled')
-            ->sum('total');
+        $plants = Plant::query()->selectRaw('COUNT(*) AS total, SUM(CASE WHEN created_at < ? THEN 1 ELSE 0 END) AS previous', [$lastMonth])->first();
+        $users = User::query()->selectRaw('COUNT(*) AS total, SUM(CASE WHEN created_at < ? THEN 1 ELSE 0 END) AS previous', [$lastMonth])->first();
+        $orders = Order::query()->selectRaw(
+            "COUNT(*) AS total, SUM(CASE WHEN created_at < ? THEN 1 ELSE 0 END) AS previous,
+            SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END) AS sales,
+            SUM(CASE WHEN status != 'cancelled' AND created_at < ? THEN total ELSE 0 END) AS previous_sales",
+            [$lastMonth, $lastMonth]
+        )->first();
+        $totalPlants = (int) $plants->total;
+        $totalUsers = (int) $users->total;
+        $totalOrders = (int) $orders->total;
+        $totalSales = (float) $orders->sales;
+        $plantsLastMonth = (int) $plants->previous;
+        $usersLastMonth = (int) $users->previous;
+        $ordersLastMonth = (int) $orders->previous;
+        $salesLastMonth = (float) $orders->previous_sales;
         $plantsChange = $plantsLastMonth > 0
             ? round((($totalPlants - $plantsLastMonth) / $plantsLastMonth) * 100, 1)
             : 0;

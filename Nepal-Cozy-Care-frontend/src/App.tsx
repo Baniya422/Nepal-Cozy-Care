@@ -7,6 +7,7 @@ import Layout from './components/layout/Layout'
 import SellerLayout from './components/seller/SellerLayout'
 import VendorRouteGuard from './components/common/VendorRouteGuard'
 import ScrollToTop from './components/common/ScrollToTop'
+import RouteSEO from './components/common/RouteSEO'
 
 const Register = lazy(() => import('./pages/Register'))
 const Login = lazy(() => import('./pages/Login'))
@@ -93,6 +94,7 @@ function App() {
   return (
     <>
       <ScrollToTop />
+      <RouteSEO />
       <Suspense fallback={<RouteLoading />}>
         <Routes>
       <Route path="/register" element={<Register />} />

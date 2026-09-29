@@ -83,6 +83,7 @@ export default function AdminDashboard() {
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [topProducts,  setTopProducts]  = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // ── CSS keyframe injection ─────────────────────────────────────────────────
   useEffect(() => {
@@ -106,29 +107,22 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("token");
       const h = { Authorization: `Bearer ${token}` };
 
-      const [sRes, oRes, pRes] = await Promise.all([
-        fetch(`${API}/api/admin/dashboard/stats`,        { headers: h }),
-        fetch(`${API}/api/admin/dashboard/recent-orders`,{ headers: h }),
-        fetch(`${API}/api/admin/dashboard/top-products`, { headers: h }),
-      ]);
-
-      if (sRes.ok) {
-        const { data } = await sRes.json();
-        setStats({
-          totalPlants: data.total_plants,   totalOrders: data.total_orders,
-          totalUsers:  data.total_users,    totalSales:  data.total_sales,
-          plantsChange: data.changes.plants, ordersChange: data.changes.orders,
-          usersChange:  data.changes.users,  salesChange:  data.changes.sales,
-        });
-      }
-      if (oRes.ok) { const d = await oRes.json(); setRecentOrders(d.data || []); }
-      if (pRes.ok) {
-        const d = await pRes.json();
-        setTopProducts((d.data || []).map((p: any) => ({
-          id: p.id, name: p.name, sales: p.total_sales, revenue: parseFloat(p.total_revenue),
-        })));
-      }
-    } catch (err) { console.error("Dashboard error:", err); }
+      setError("");
+      const response = await fetch(`${API}/api/admin/dashboard`, { headers: h });
+      if (!response.ok) throw new Error("Could not load the dashboard. Please try again.");
+      const { data: dashboard } = await response.json();
+      const data = dashboard.stats;
+      setStats({
+        totalPlants: data.total_plants, totalOrders: data.total_orders,
+        totalUsers: data.total_users, totalSales: data.total_sales,
+        plantsChange: data.changes.plants, ordersChange: data.changes.orders,
+        usersChange: data.changes.users, salesChange: data.changes.sales,
+      });
+      setRecentOrders(dashboard.recent_orders || []);
+      setTopProducts((dashboard.top_products || []).map((p: any) => ({
+        id: p.id, name: p.name, sales: p.total_sales, revenue: parseFloat(p.total_revenue),
+      })));
+    } catch (err) { setError(err instanceof Error ? err.message : "Could not load the dashboard."); }
     finally { setLoading(false); }
   };
 
@@ -149,6 +143,7 @@ export default function AdminDashboard() {
           background: "#ede8e0", minHeight: "100vh", padding: "clamp(28px,4vw,44px)",
         }}
       >
+        {error && <div role="alert" className="admin-notice admin-notice-error">{error} <button type="button" onClick={() => void fetchDashboardData()}>Retry</button></div>}
         {/* ── Welcome header ────────────────────────────────────────────── */}
         <div style={{ marginBottom: 32 }}>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: ".16em", color: "#c4622d", textTransform: "uppercase", marginBottom: 8 }}>

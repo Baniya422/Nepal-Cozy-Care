@@ -27,6 +27,8 @@ class MailSettingsService
         config([
             'mail.default' => 'smtp',
             'mail.mailers.smtp.transport' => 'smtp',
+            // A deployment MAIL_URL must not override credentials saved by the admin.
+            'mail.mailers.smtp.url' => null,
             'mail.mailers.smtp.scheme' => $encryption === 'ssl' ? 'smtps' : 'smtp',
             'mail.mailers.smtp.host' => $settings->mail_host,
             'mail.mailers.smtp.port' => $settings->mail_port,

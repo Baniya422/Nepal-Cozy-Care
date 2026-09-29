@@ -196,8 +196,8 @@ export default function Pots() {
   return (
     <Layout>
       <SEO
-        title="Pots & Accessories - Ceramic Pots, Soils & Tools | Nepal Cozy Care"
-        description="Shop designer ceramic pots, terracotta planters, organic potting soils, and precision gardening tools in Nepal with doorstep delivery."
+        title="Buy Plant Pots & Gardening Accessories in Nepal"
+        description="Shop plant pots, planters, potting soil and gardening tools in Nepal. Compare product sizes, prices and availability before you order."
         canonicalPath="/pots"
       />
 

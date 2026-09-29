@@ -401,3 +401,12 @@
     left: 8px;
   }
 }
+
+/* Keep product names and purchase facts readable across collection pages. */
+.product-card .product-name a { color: inherit; text-decoration: none; }
+.product-card .product-name a:hover { text-decoration: underline; text-underline-offset: .15em; }
+.product-card.catalog-product-card .product-name { font-size: 1.0625rem; line-height: 1.4; font-weight: 600; }
+.product-card.catalog-product-card .product-subtitle { font-size: .875rem; line-height: 1.5; }
+.product-card .product-availability { font-size: .8125rem; line-height: 1.5; color: #31543b; }
+.product-card.catalog-product-card .product-price { font-size: 1.125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.product-card.catalog-product-card .view-product-btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: .8125rem; }

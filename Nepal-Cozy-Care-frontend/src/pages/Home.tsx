@@ -7,6 +7,7 @@ import {
   type HomepageContent,
 } from "../features/homepage/content";
 import SEO from "../components/common/SEO";
+import { absoluteSiteUrl, SITE_NAME } from "../utils/siteUrl";
 import "../components/home/home.css";
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 export default function Home() {
@@ -58,9 +59,10 @@ export default function Home() {
   return (
     <Layout>
       <SEO
-        title="Nepal Cozy Care - Premium Indoor Plants & Plant Care in Nepal"
-        description="Discover healthy indoor plants, designer ceramic pots, smart plant health checker, and watering guides with fast doorstep delivery across Nepal."
+        title="Buy Plants Online in Nepal"
+        description="Buy indoor plants, pots and garden seeds online in Nepal. Compare prices and care needs, check availability, and find delivery information before you order."
         canonicalPath="/"
+        structuredData={{ "@context": "https://schema.org", "@type": "Organization", "@id": `${absoluteSiteUrl("/")}#organization`, name: SITE_NAME, url: absoluteSiteUrl("/") }}
       />
       <Storefront content={content} />
     </Layout>

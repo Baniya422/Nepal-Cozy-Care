@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { SITE_NAME, absoluteSiteUrl } from "../../utils/siteUrl";
+import { resolveImageUrl } from "../../utils/imageUrl";
 
 interface SEOProps {
   title?: string;
@@ -7,77 +9,58 @@ interface SEOProps {
   image?: string;
   type?: "website" | "article" | "product";
   noindex?: boolean;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
 }
+const DEFAULT_TITLE = "Buy Plants Online in Nepal";
+const DEFAULT_DESCRIPTION = "Shop indoor plants, pots and garden seeds in Nepal. Compare prices, availability and plant care needs before you order.";
 
-const DEFAULT_TITLE = "Nepal Cozy Care - Premium Indoor Plants & Plant Care in Nepal";
-const DEFAULT_DESCRIPTION =
-  "Discover premium indoor plants, pots, tools, and expert plant health care guides across Nepal. Fast delivery and healthy plants guaranteed.";
-const DEFAULT_IMAGE = "/logo.png";
-
-export default function SEO({
-  title,
-  description = DEFAULT_DESCRIPTION,
-  canonicalPath = "",
-  image = DEFAULT_IMAGE,
-  type = "website",
-  noindex = false,
-}: SEOProps) {
+export default function SEO({ title = DEFAULT_TITLE, description = DEFAULT_DESCRIPTION, canonicalPath,
+  image, type = "website", noindex = false, structuredData }: SEOProps) {
+  const schema = structuredData ? JSON.stringify(structuredData).replace(/</g, "\\u003c") : "";
   useEffect(() => {
-    // 1. Update Title
-    const formattedTitle = title
-      ? `${title} | Nepal Cozy Care`
-      : DEFAULT_TITLE;
+    const cleanTitle = title.replace(/\s*[|–-]\s*Nepal Cozy Care\s*$/i, "");
+    const formattedTitle = `${cleanTitle} | ${SITE_NAME}`;
     document.title = formattedTitle;
-
-    // Helper to set or create meta tag
-    const setMetaTag = (attribute: "name" | "property", value: string, content: string) => {
-      let element = document.querySelector(`meta[${attribute}="${value}"]`) as HTMLMetaElement | null;
-      if (!element) {
-        element = document.createElement("meta");
-        element.setAttribute(attribute, value);
-        document.head.appendChild(element);
-      }
-      element.setAttribute("content", content);
+    const elements: Element[] = [];
+    const meta = (attribute: "name" | "property", key: string, content: string) => {
+      const element = document.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`) || document.createElement("meta");
+      element.setAttribute(attribute, key);
+      element.content = content;
+      document.head.appendChild(element);
+      elements.push(element);
     };
-
-    // 2. Meta description
-    setMetaTag("name", "description", description);
-
-    // 3. Robots
-    if (noindex) {
-      setMetaTag("name", "robots", "noindex, nofollow");
-    } else {
-      setMetaTag("name", "robots", "index, follow, max-image-preview:large");
+    const canonical = absoluteSiteUrl(canonicalPath ?? window.location.pathname);
+    const link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]') || document.createElement("link");
+    link.rel = "canonical";
+    link.href = canonical;
+    document.head.appendChild(link);
+    elements.push(link);
+    meta("name", "description", description);
+    meta("name", "robots", noindex ? "noindex, follow" : "index, follow, max-image-preview:large");
+    meta("property", "og:title", formattedTitle);
+    meta("property", "og:description", description);
+    meta("property", "og:url", canonical);
+    meta("property", "og:type", type === "product" ? "website" : type);
+    meta("property", "og:site_name", SITE_NAME);
+    meta("name", "twitter:card", image ? "summary_large_image" : "summary");
+    meta("name", "twitter:title", formattedTitle);
+    meta("name", "twitter:description", description);
+    if (image) {
+      const resolved = absoluteSiteUrl(resolveImageUrl(image));
+      meta("property", "og:image", resolved);
+      meta("name", "twitter:image", resolved);
     }
-
-    // 4. Canonical link
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://nepal-cozy-care.onrender.com";
-    const fullCanonicalUrl = `${origin}${canonicalPath ? (canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`) : window.location.pathname}`;
-
-    let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!canonicalLink) {
-      canonicalLink = document.createElement("link");
-      canonicalLink.setAttribute("rel", "canonical");
-      document.head.appendChild(canonicalLink);
+    if (schema) {
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.textContent = schema;
+      document.head.appendChild(script);
+      elements.push(script);
     }
-    canonicalLink.setAttribute("href", fullCanonicalUrl);
-
-    // 5. Open Graph
-    setMetaTag("property", "og:title", formattedTitle);
-    setMetaTag("property", "og:description", description);
-    setMetaTag("property", "og:url", fullCanonicalUrl);
-    setMetaTag("property", "og:type", type);
-    const resolvedImage = image.startsWith("http") ? image : `${origin}${image.startsWith("/") ? image : `/${image}`}`;
-    setMetaTag("property", "og:image", resolvedImage);
-    setMetaTag("property", "og:site_name", "Nepal Cozy Care");
-
-    // 6. Twitter Card
-    setMetaTag("name", "twitter:card", "summary_large_image");
-    setMetaTag("name", "twitter:title", formattedTitle);
-    setMetaTag("name", "twitter:description", description);
-    setMetaTag("name", "twitter:image", resolvedImage);
-
-  }, [title, description, canonicalPath, image, type, noindex]);
-
+    return () => {
+      elements.forEach(element => element.remove());
+      document.title = `${DEFAULT_TITLE} | ${SITE_NAME}`;
+    };
+  }, [title, description, canonicalPath, image, type, noindex, schema]);
   return null;
 }

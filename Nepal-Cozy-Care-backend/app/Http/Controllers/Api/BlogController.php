@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class BlogController extends Controller
 {
     private const LIST_COLUMNS = [
-        'id', 'user_id', 'title', 'slug', 'excerpt', 'image',
+        'id', 'user_id', 'title', 'slug', 'excerpt', 'content', 'image',
         'author', 'author_role', 'author_bio', 'author_image',
         'read_time', 'tags', 'tips', 'takeaways', 'category',
         'meta_title', 'meta_description', 'views', 'is_published',

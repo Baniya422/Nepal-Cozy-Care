@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Mail\OrderPlacedAdmin;
+use App\Mail\OrderPlacedCustomer;
 use App\Models\Order;
 use App\Services\MailSettingsService;
 use Illuminate\Bus\Queueable;
@@ -18,12 +19,26 @@ class SendOrderNotificationEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public int $orderId) {}
+    public int $tries = 3;
+
+    public int $timeout = 45;
+
+    public function backoff(): array
+    {
+        return [30, 120, 300];
+    }
+
+    public function __construct(public int $orderId, public bool $customer = false) {}
+
+    private function statusPrefix(): string
+    {
+        return $this->customer ? 'customer_notification_email' : 'notification_email';
+    }
 
     public function handle(MailSettingsService $mailSettings): void
     {
         $order = Order::with(['items.plant', 'user'])->find($this->orderId);
-        if (! $order) {
+        if (! $order || $order->{$this->statusPrefix().'_sent_at'}) {
             return;
         }
 
@@ -40,15 +55,23 @@ class SendOrderNotificationEmail implements ShouldQueue
             }
 
             Mail::purge('smtp');
-            Mail::to($mailSettings->notificationRecipient($settings))
-                ->send(new OrderPlacedAdmin($order));
+            $recipient = $this->customer ? $order->user?->email : $mailSettings->notificationRecipient($settings);
+            if (! filled($recipient)) {
+                throw new \RuntimeException('The customer email address is missing.');
+            }
+            Mail::to($recipient)->send($this->customer
+                ? new OrderPlacedCustomer($order)
+                : new OrderPlacedAdmin($order));
 
             $order->update([
-                'notification_email_sent_at' => now(),
-                'notification_email_error' => null,
+                $this->statusPrefix().'_sent_at' => now(),
+                $this->statusPrefix().'_error' => null,
             ]);
         } catch (\Throwable $exception) {
             $this->recordFailure($order, $exception->getMessage());
+            if ($this->job && $this->job->getConnectionName() !== 'sync') {
+                throw $exception;
+            }
         }
     }
 
@@ -56,8 +79,8 @@ class SendOrderNotificationEmail implements ShouldQueue
     {
         $error = Str::limit($error ?: 'Email delivery failed for an unknown reason.', 2000);
         $order->update([
-            'notification_email_sent_at' => null,
-            'notification_email_error' => $error,
+            $this->statusPrefix().'_sent_at' => null,
+            $this->statusPrefix().'_error' => $error,
         ]);
 
         Log::log($configurationIssue ? 'warning' : 'error', 'New order notification email failed.', [

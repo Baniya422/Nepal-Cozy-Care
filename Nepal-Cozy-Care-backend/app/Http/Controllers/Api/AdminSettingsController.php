@@ -12,6 +12,28 @@ use Illuminate\Validation\ValidationException;
 
 class AdminSettingsController extends Controller
 {
+    public function retryFailedMail(MailSettingsService $mailSettings): JsonResponse
+    {
+        if (! $mailSettings->isConfigured()) {
+            throw ValidationException::withMessages(['mail' => $mailSettings->configurationIssues()]);
+        }
+
+        $count = 0;
+        foreach (\App\Models\ContactMessage::whereNull('email_sent_at')->whereNotNull('email_error')->limit(100)->pluck('id') as $id) {
+            \App\Jobs\SendContactNotificationEmail::dispatch($id);
+            $count++;
+        }
+        foreach ([false, true] as $customer) {
+            $prefix = $customer ? 'customer_notification_email' : 'notification_email';
+            foreach (\App\Models\Order::whereNull($prefix.'_sent_at')->whereNotNull($prefix.'_error')->limit(100)->pluck('id') as $id) {
+                \App\Jobs\SendOrderNotificationEmail::dispatch($id, $customer);
+                $count++;
+            }
+        }
+
+        return response()->json(['message' => $count.' failed email notifications scheduled for retry.']);
+    }
+
     public function show(Request $request, MailSettingsService $mailSettings)
     {
         $settings = $this->settings();
@@ -142,6 +164,9 @@ class AdminSettingsController extends Controller
         $password = $validated['mail_password'] ?? null;
         unset($validated['mail_password'], $validated['clear_mail_password']);
 
+        if ($password && in_array(strtolower($validated['mail_host'] ?? ''), ['smtp.gmail.com', 'smtp.googlemail.com'], true)) {
+            $password = preg_replace('/\s+/', '', $password);
+        }
         $candidate = $settings->replicate();
         $candidate->fill($validated);
         if ($password !== null && $password !== '') {

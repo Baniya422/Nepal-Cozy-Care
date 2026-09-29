@@ -151,6 +151,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::put('/admin/settings/launch', [AdminSettingsController::class, 'updateLaunch']);
     Route::put('/admin/settings/mail', [AdminSettingsController::class, 'updateMail']);
     Route::post('/admin/settings/mail/test', [AdminSettingsController::class, 'testMail']);
+    Route::post('/admin/settings/mail/retry', [AdminSettingsController::class, 'retryFailedMail'])->middleware('throttle:2,1');
 
     // Admin Promo Codes
     Route::get('/admin/promo-codes', [PromoCodeController::class, 'adminIndex']);
@@ -177,6 +178,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/admin/orders/{orderId}/expenses/{expenseId}', [SupplierController::class, 'deleteOrderExpense']);
     Route::put('/orders/{id}/payment-status', [OrderController::class, 'updatePaymentStatus']);
 
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/admin/dashboard/stats', [AdminController::class, 'dashboardStats']);
     Route::get('/admin/dashboard/recent-orders', [AdminController::class, 'recentOrders']);
     Route::get('/admin/dashboard/top-products', [AdminController::class, 'topProducts']);

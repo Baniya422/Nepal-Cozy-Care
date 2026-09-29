@@ -253,8 +253,8 @@ export default function Seeds() {
   return (
     <div className="seeds-page">
       <SEO
-        title="Garden Seeds - Non-GMO Flower, Vegetable & Herb Seeds | Nepal Cozy Care"
-        description="Shop certified non-GMO heirloom vegetable seeds, fragrant flower varieties, kitchen herb packets, and microgreen kits curated for Nepal's climate."
+        title="Buy Vegetable, Flower & Herb Seeds in Nepal"
+        description="Shop vegetable, flower and herb seeds in Nepal. Compare seed varieties, packet details, prices and availability."
       />
 
       {/* Category Bubbles Navigation */}
@@ -264,21 +264,21 @@ export default function Seeds() {
       <section className="seeds-hero">
         <div className="seeds-hero-card">
           <span className="seeds-hero-kicker">
-            <Sprout size={16} /> Certified Non-GMO Seeds
+            <Sprout size={16} /> Garden seeds
           </span>
-          <h1 className="seeds-hero-title">Pure Garden Seeds & Germination Kits</h1>
+          <h1 className="seeds-hero-title">Vegetable, Flower & Herb Seeds</h1>
           <p className="seeds-hero-desc">
-            Cultivate your own organic kitchen produce, cheerful flowering balconies, and aromatic culinary herbs with high-germination seeds adapted for Nepal&apos;s climate.
+            Choose seeds for your garden, balcony or kitchen herbs. Check each packet for sowing instructions and growing conditions.
           </p>
           <div className="seeds-hero-badges">
             <span className="seeds-hero-badge">
-              <ShieldCheck size={15} /> 90%+ Germination Rate Guarantee
+              <ShieldCheck size={15} /> Compare seed varieties
             </span>
             <span className="seeds-hero-badge">
-              <Sun size={15} /> 100% Chemical-Free & Non-GMO
+              <Sun size={15} /> Check growing conditions
             </span>
             <span className="seeds-hero-badge">
-              <Droplets size={15} /> Sowing & Scent Calendar Included
+              <Droplets size={15} /> Follow packet instructions
             </span>
           </div>
         </div>
@@ -481,34 +481,34 @@ export default function Seeds() {
       <section className="seeds-guide-section">
         <div className="seeds-guide-card">
           <div className="seeds-guide-head">
-            <h3>4 Golden Steps to 95% Germination</h3>
-            <p>Follow our simple botanical protocol for strong, resilient seedlings every time.</p>
+            <h2>How to get started with seeds</h2>
+            <p>Use the instructions on your seed packet; requirements vary by variety.</p>
           </div>
           <div className="seeds-steps-grid">
             <div className="seeds-step-card">
               <span className="seeds-step-number">1</span>
-              <h4>Soil & Media Prep</h4>
+              <h3>Soil & Media Prep</h3>
               <p>
                 Use a lightweight, well-draining seedling mix (70% Cocopeat + 30% Vermicompost). Avoid heavy clay garden soils that compact tiny roots.
               </p>
             </div>
             <div className="seeds-step-card">
               <span className="seeds-step-number">2</span>
-              <h4>Sowing Depth</h4>
+              <h3>Sowing Depth</h3>
               <p>
                 A golden rule is to sow seeds at a depth roughly double their size. Tiny flower and herb seeds should only be lightly pressed into moist surface soil.
               </p>
             </div>
             <div className="seeds-step-card">
               <span className="seeds-step-number">3</span>
-              <h4>Moisture & Mist</h4>
+              <h3>Moisture & Mist</h3>
               <p>
                 Never pour heavy water over delicate seeds. Use a fine mist sprayer to keep the top layer evenly moist until initial green sprouts appear.
               </p>
             </div>
             <div className="seeds-step-card">
               <span className="seeds-step-number">4</span>
-              <h4>Sunlight & Transplant</h4>
+              <h3>Sunlight & Transplant</h3>
               <p>
                 Once sprouts emerge, move them into bright morning sun. Transplant into permanent pots or garden beds once 3-4 true leaves have fully developed.
               </p>

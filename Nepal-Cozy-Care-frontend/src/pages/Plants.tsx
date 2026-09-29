@@ -86,8 +86,8 @@ export default function Plants() {
       if (cached) return JSON.parse(cached);
     } catch {}
     return {
-      title: "Plants",
-      subtitle: "Transform your living spaces with hand-nurtured houseplants and outdoor flora",
+      title: "Plants for Your Home",
+      subtitle: "Compare plant prices, sizes and care needs. Choose a plant for the light and space you have.",
     };
   });
 
@@ -486,7 +486,7 @@ export default function Plants() {
     <Layout>
       <SEO
         title="Buy Indoor & Outdoor Plants Online in Nepal"
-        description="Shop hand-nurtured indoor plants, succulents, low light plants, and air purifiers in Kathmandu, Pokhara, and across Nepal."
+        description="Buy indoor and outdoor plants online in Nepal. Compare prices, sizes, light requirements and watering needs, and check current availability."
         canonicalPath="/plants"
       />
       <div className="plants-page ugaoo-plants-page">

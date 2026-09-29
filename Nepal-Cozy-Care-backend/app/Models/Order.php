@@ -42,6 +42,8 @@ class Order extends Model
         'location_confirmed_at',
         'notification_email_sent_at',
         'notification_email_error',
+        'customer_notification_email_sent_at',
+        'customer_notification_email_error',
         'cod_collected_amount',
         'cod_collected_at',
         'cod_collected_by',
@@ -68,6 +70,7 @@ class Order extends Model
         'contacted_at' => 'datetime',
         'location_confirmed_at' => 'datetime',
         'notification_email_sent_at' => 'datetime',
+        'customer_notification_email_sent_at' => 'datetime',
         'cod_collected_at' => 'datetime',
     ];
 

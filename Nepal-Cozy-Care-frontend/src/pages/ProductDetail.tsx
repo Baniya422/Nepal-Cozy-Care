@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Breadcrumb from '../components/product-detail/Breadcrumb';
 import ProductImage from '../components/product-detail/ProductImage';
@@ -7,6 +7,7 @@ import ProductInfo from '../components/product-detail/ProductInfo';
 import InfoSections from '../components/product-detail/InfoSections';
 import WhyChooseUs from '../components/product-detail/WhyChooseUs';
 import SEO from '../components/common/SEO';
+import { productDescription, productStructuredData } from '../utils/productSeo';
 import '../styles/productDetail.css';
 import { useWishlist } from '../hooks/useWishlist';
 const API = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -127,6 +128,7 @@ export function ProductDetail() {
   if (loading) {
     return (
       <Layout>
+        <SEO title={loading ? "Plant & Product Details" : loadError ? "Product Temporarily Unavailable" : "Product Not Found"} noindex={!loading && !loadError} />
         <div className="product-page">
           <div className="product-container">
             <div className="product-skeleton">
@@ -141,14 +143,13 @@ export function ProductDetail() {
   if (!plant) {
     return (
       <Layout>
+        <SEO title={loading ? "Plant & Product Details" : loadError ? "Product Temporarily Unavailable" : "Product Not Found"} noindex={!loading && !loadError} />
         <div className="product-page">
           <div className="product-container">
             <div className="product-not-found">
-              <h2>{loadError ? "We could not load this plant" : "Product not found"}</h2>
+              <h1>{loadError ? "We could not load this product" : "Product not found"}</h1>
               {loadError && <button className="btn-primary" onClick={() => setRetry(value => value + 1)}>Try again</button>}
-              <button onClick={() => navigate('/plants')} className="btn-primary">
-                Browse Plants
-              </button>
+              <Link to="/plants" className="btn-primary">Browse plants</Link>
             </div>
           </div>
         </div>
@@ -158,21 +159,22 @@ export function ProductDetail() {
   return (
     <Layout>
       <SEO
-        title={plant.meta_title || plant.name}
-        description={plant.meta_description || plant.description?.slice(0, 160) || `Buy healthy ${plant.name} online in Nepal from Cozy Care.`}
+        title={plant.meta_title || `Buy ${plant.name} Online in Nepal`}
+        description={plant.meta_description || `Buy ${plant.name} online in Nepal. ${productDescription(plant)}`.slice(0, 160)}
         canonicalPath={`/plants/${plant.id}`}
         image={plant.image || undefined}
         type="product"
+        structuredData={productStructuredData(plant)}
       />
       <div className="product-page">
         <div className="product-container">
-          <Breadcrumb productName={plant.name} />
+          <Breadcrumb productName={plant.name} category={plant.category} />
           <div className="product-main">
             <ProductImage key={plant.id} image={plant.image} name={plant.name} saved={wishlistIds.includes(plant.id)} busy={wishlistBusyId === plant.id} onWishlist={() => void toggleWishlist(plant.id)} />
             <ProductInfo
               stock={plant.stock}
               scientificName={plant.scientific_name}
-              description={plant.description}
+              description={productDescription(plant)}
               category={plant.category}
               light={plant.light}
               water={plant.water}

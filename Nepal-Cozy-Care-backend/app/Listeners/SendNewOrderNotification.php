@@ -10,6 +10,7 @@ class SendNewOrderNotification
     public function handle(OrderCreated $event): void
     {
         // Checkout should not wait for the external SMTP server.
-        SendOrderNotificationEmail::dispatch($event->order->id)->afterResponse();
+        SendOrderNotificationEmail::dispatch($event->order->id);
+        SendOrderNotificationEmail::dispatch($event->order->id, true);
     }
 }
